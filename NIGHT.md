@@ -10,9 +10,11 @@ The prompt names the night branch (`night/<date>`) and the worker branch
 ## Team
 - **lead** — Claude Code (`--engine claude`), main checkout. Plans, does the hard
   and cross-cutting work, reviews and merges the worker's commits.
-- **worker** (optional) — Gemini via Antigravity CLI (`--engine agy`) in its own
-  git worktree `../genesis-worker`, or a teammate's own account on their machine.
-  Separate usage quota, so it keeps going while the lead waits out a limit.
+- **worker** (optional) — Antigravity CLI (`--engine agy`, Google AI Pro quota)
+  in its own git worktree `../genesis-worker`, or a teammate's own account.
+  Model: Claude Opus 4.6 (Thinking); on its usage limit the script switches to
+  Gemini 3.8 Flash (High). Separate quota, so it keeps going while the lead
+  waits out a limit. It is weaker than the lead: give it well-specified tasks.
 
 ## Files (all tracked in git)
 - `night/SPEC.md` — the task spec. Source of truth. Never edit it.

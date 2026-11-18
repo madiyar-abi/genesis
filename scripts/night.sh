@@ -9,7 +9,8 @@ UNTIL=07:00
 ENGINE=claude
 WITH_WORKER=0
 BRANCH="night/$(date +%F)"
-usage() { echo "usage: $0 [--role lead|worker] [--engine claude|agy] [--until HH:MM] [--branch night/YYYY-MM-DD] [--with-worker]"; exit 2; }
+MODELS=""
+usage() { echo "usage: $0 [--role lead|worker] [--engine claude|agy] [--until HH:MM] [--branch night/YYYY-MM-DD] [--model "A,B"] [--with-worker]"; exit 2; }
 while [ $# -gt 0 ]; do
   case "$1" in
     --role)        ROLE="$2"; shift 2 ;;
@@ -17,10 +18,16 @@ while [ $# -gt 0 ]; do
     --engine)      ENGINE="$2"; shift 2 ;;
     --with-worker) WITH_WORKER=1; shift ;;
     --branch)      BRANCH="$2"; shift 2 ;;
+    --model)       MODELS="$2"; shift 2 ;;   # comma list: next one is used on a usage limit
     *) usage ;;
   esac
 done
 case "$ENGINE" in claude|agy) ;; *) usage ;; esac
+# agy default: strongest model first, fallback with its own quota second.
+[ "$ENGINE" = agy ] && [ -z "$MODELS" ] && MODELS="Claude Opus 4.6 (Thinking),Gemini 3.8 Flash (High)"
+model_idx=1
+model_count() { [ -z "$MODELS" ] && echo 0 || echo "$MODELS" | awk -F, '{print NF}'; }
+current_model() { echo "$MODELS" | cut -d, -f"$model_idx"; }
 
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"              # overridable for testing
 AGY_BIN="${AGY_BIN:-$HOME/.gemini/bin/agy}"     # full path: nohup shells may lack PATH
@@ -62,14 +69,16 @@ start_run() {
   if [ "$ENGINE" = claude ]; then
     if [ -n "$sid" ]; then set -- --resume "$sid"
     else sid=$(uuidgen | tr 'A-Z' 'a-z'); echo "$sid" > "$SESSION_FILE"; set -- --session-id "$sid"; fi
+    [ -n "$MODELS" ] && set -- "$@" --model "$(current_model)"
     "$CLAUDE_BIN" -p "$prompt" "$@" --dangerously-skip-permissions --output-format json > "$out" 2>&1 &
   else
     # agy: no fixed ids; resume by conversation id, saved from each run's JSON.
     if [ -n "$sid" ]; then set -- --conversation "$sid"; else set --; fi
+    [ -n "$MODELS" ] && set -- "$@" --model "$(current_model)"
     "$AGY_BIN" -p "$prompt" "$@" --dangerously-skip-permissions --output-format json > "$out" 2>&1 &
   fi
   pid=$!
-  log "run $i (${sid:-new session})"
+  log "run $i (${sid:-new session})${MODELS:+ model: $(current_model)}"
 }
 
 log "started, branch $BRANCH, deadline $DEADLINE_HUMAN"
@@ -97,7 +106,11 @@ while [ "$(now)" -lt "$DEADLINE" ]; do
   fi
 
   if [ "$failed" -eq 1 ] && grep -qiE 'usage limit|hit your limit|limit reached|rate.?limit|429|overloaded|quota|resource.?exhausted|resets' "$out"; then
-    log "usage limit (rc=$rc) — sleeping ${LIMIT_SLEEP}s"; nap "$LIMIT_SLEEP"
+    if [ "$model_idx" -lt "$(model_count)" ]; then
+      model_idx=$((model_idx + 1)); log "usage limit — switching to model: $(current_model)"; nap "$NEXT_SLEEP"
+    else
+      model_idx=1; log "usage limit on all models (rc=$rc) — sleeping ${LIMIT_SLEEP}s"; nap "$LIMIT_SLEEP"
+    fi
   elif [ "$failed" -eq 1 ]; then
     if grep -qiE 'no conversation found|session.*not found' "$out"; then
       log "session lost — starting a fresh one"; rm -f "$SESSION_FILE"

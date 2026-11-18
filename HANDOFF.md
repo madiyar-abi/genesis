@@ -16,7 +16,8 @@ it goes into `night/SPEC.md` and the overnight run starts from there.
 - Overnight autonomous run: `NIGHT.md` (protocol) + `scripts/night.sh`
   (watchdog: retries hourly on usage limits, stops at 07:00) — PR #1.
 - Team for the night: lead = Claude Code, worker = Gemini via Antigravity CLI
-  (`agy`, own quota, own worktree `../genesis-worker`). Tested end-to-end.
+  (`agy`: Opus 4.6 → Gemini Flash fallback, own quota, own worktree
+  `../genesis-worker`). Tested end-to-end.
 
 ## In progress
 - PR #1 `chore/night-mode` → `main` (open, needs merge).
