@@ -4,7 +4,7 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Last updated:** 2026-11-18 · by: Claude (setup) · branch: `chore/night-mode`
+**Last updated:** 2026-11-18 · by: Claude (setup) · branch: `main`
 
 ## Deadline & submission
 **Final deadline: 2026-11-22** (time of day: TBD — check the hackathon page).
@@ -32,13 +32,13 @@ it goes into `night/SPEC.md` and the overnight run starts from there.
 - Repo connected to https://github.com/madiyar-abi/genesis, `.gitignore` for
   personal/editor files, `README.md`, `CLAUDE.md` (agent rules).
 - Overnight autonomous run: `NIGHT.md` (protocol) + `scripts/night.sh`
-  (watchdog: retries hourly on usage limits, stops at 07:00) — PR #1.
+  (watchdog: retries hourly on usage limits, stops at 07:00) — merged via PR #1.
 - Team for the night: lead = Claude Code, worker = Gemini via Antigravity CLI
   (`agy`: Opus 4.6 → Gemini Flash fallback, own quota, own worktree
   `../genesis-worker`). Tested end-to-end.
 
 ## In progress
-- PR #1 `chore/night-mode` → `main` (open, needs merge).
+- Nothing — waiting for the case (spec) at ~00:00 on 2026-11-19.
 
 ## Left to do
 - Full task list with acceptance checks: `night/TASKS.md` (created when the spec arrives).
