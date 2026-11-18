@@ -36,3 +36,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# --- Night-run watchdog logs (local only) ---
+.night-logs/
