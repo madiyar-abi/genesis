@@ -44,7 +44,7 @@ CLAUDE_BIN="${CLAUDE_BIN:-claude}"              # overridable for testing
 AGY_BIN="${AGY_BIN:-$HOME/.gemini/bin/agy}"     # full path: nohup shells may lack PATH
 LIMIT_SLEEP="${LIMIT_SLEEP:-3600}"              # wait after a usage limit
 ERROR_SLEEP="${ERROR_SLEEP:-300}"               # wait after other errors
-IDLE_SLEEP="${IDLE_SLEEP:-600}"                 # worker with nothing to do
+IDLE_SLEEP="${IDLE_SLEEP:-300}"                 # worker with nothing to do
 NEXT_SLEEP="${NEXT_SLEEP:-15}"                  # pause between normal runs
 AGY_TURN_TIMEOUT="${AGY_TURN_TIMEOUT:-7200s}"   # agy turn cap (e.g. stuck waiting for a login)
 
@@ -99,6 +99,9 @@ i=0
 while [ "$(now)" -lt "$DEADLINE" ]; do
   [ -e night/DONE ] && { log "night/DONE found — finished"; break; }
   [ -e night/STOP ] && { log "night/STOP found — stopping"; break; }
+  # The lead may have finished in another worktree: check the pushed branch too.
+  git fetch -q origin 2>/dev/null
+  git cat-file -e "origin/$BRANCH:night/DONE" 2>/dev/null && { log "night/DONE on origin/$BRANCH — finished"; break; }
   i=$((i + 1))
   out=".night-logs/$ROLE-$ENGINE-run-$i.json"
 
