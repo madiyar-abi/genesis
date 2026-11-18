@@ -7,26 +7,31 @@
 **Last updated:** 2026-11-18 · by: Claude (setup) · branch: `main`
 
 ## Deadline & submission
-**Final deadline: 2026-11-22** (time of day: TBD — check the hackathon page).
-Case arrives ~00:00 on 2026-11-19 → 3 days to build.
+Genesis Hackathon, online stage. **Cases are published on the hackathon site on
+2026-11-19 at 12:00.** **Final deadline: 2026-11-22, 22:00.**
+Results: 7 teams per case (14 finalists) go to the offline final in Astana,
+planned for 2026-11-28/29 (exact dates and venue TBA).
 
-Submission form (`submit.exe`, opens together with the case): project name +
-link to **one Google Drive folder** containing everything. Any teammate can
-submit; the link can be changed until the deadline.
+Submit via the personal account on the hackathon site: a link to **one Google
+Docs document** with three links in it — GitHub repo, demo video, presentation.
+Every material must be viewable by anyone with the link. (The earlier
+`submit.exe` form asked for a Google Drive folder; the organizers' latest
+message says a Google Doc — follow the latest, re-check the form before submitting.)
 
 - [ ] Working end-to-end demo flow
 - [ ] `README.md`: what it is, how to run — the jury opens the repo
-- [ ] GitHub repo reachable by the jury — **it's private now**: make it public
+- [ ] GitHub repo viewable by the jury — **it's private now**: make it public
       (or otherwise give access) before submitting
-- [ ] Demo video — script: `docs/DEMO.md` (written by the night agent)
+- [ ] Demo video: short demo + explanation of the solution — script: `docs/DEMO.md`
 - [ ] Presentation — outline: `docs/PITCH.md` (written by the night agent)
-- [ ] Drive folder with: demo video + GitHub link (file or text) + presentation,
-      sharing set to **"Anyone with the link"** (otherwise the jury can't open it)
-- [ ] Form submitted: project name + Drive folder link
+- [ ] Google Doc with the 3 links (repo, video, presentation); the Doc and all
+      three materials shared as **"Anyone with the link — Viewer"**
+- [ ] Doc link submitted in the personal account on the site
 
 ## Status
-Setup is done, no product code yet. Waiting for the task spec (track) —
-it goes into `night/SPEC.md` and the overnight run starts from there.
+Setup is done, no product code yet. Waiting for the case — published on the
+hackathon site on 2026-11-19 at 12:00; it goes into `night/SPEC.md` and the
+agent run starts from there.
 
 ## Done
 - Repo connected to https://github.com/madiyar-abi/genesis, `.gitignore` for
@@ -38,7 +43,7 @@ it goes into `night/SPEC.md` and the overnight run starts from there.
   Plus accounts), each in its own worktree and branch. Rehearsed end-to-end.
 
 ## In progress
-- Nothing — waiting for the case (spec) at ~00:00 on 2026-11-19.
+- Nothing — waiting for the case (2026-11-19, 12:00).
 
 ## Left to do
 - Full task list with acceptance checks: `night/TASKS.md` (created when the spec arrives).
