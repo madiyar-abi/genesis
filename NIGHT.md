@@ -77,8 +77,8 @@ Your name and branch are in the prompt (e.g. name `codex`, branch `night/<date>-
    LOG.md, commit, `git push -u origin <your branch>` after every task.
    Don't edit HANDOFF.md — the lead owns it. Never touch `main`.
 
-## Priorities (hackathon, final deadline 2026-11-22)
-Each night ends at 07:00, the whole project has 3 days. Order tasks so that a
+## Priorities (hackathon, final deadline 2026-11-22 22:00)
+A run ends at its `--until` time (default 07:00); the whole project has ~3.5 days. Order tasks so that a
 working end-to-end demo exists as early as possible and stays working after
 every merge; features and polish come after. Keep README run steps true.
 
