@@ -59,8 +59,8 @@ The prompt names the night branch (`night/<date>`) and the worker branch
    lead's branch itself — it is open in another worktree.
    Before each task: `git fetch && git merge origin/<night branch>`.
 2. Take only unchecked `(worker)` tasks from `night/TASKS.md`, one at a time.
-   If there are none (or TASKS.md doesn't exist yet), reply with exactly `IDLE`
-   and stop — the script retries in 10 min.
+   If there are none (or TASKS.md doesn't exist yet), stop and make `IDLE` the
+   last line of your reply — the script then retries in 10 min.
 3. Touch only the files listed for your task. Test, mark `[x]`, append to
    LOG.md, commit, `git push -u origin <worker branch>` after every task.
    Don't edit HANDOFF.md — the lead owns it. Never touch `main`.
@@ -77,6 +77,9 @@ every merge; features and polish come after. Keep README run steps true.
 - Stay inside this repo. No secrets in files. No destructive git (reset --hard
   on shared branches, force-push, branch deletion).
 - Stuck on one task > 3 attempts → log why, mark it `[!]`, move to the next.
+- Merge conflicts in `night/TASKS.md` / `night/LOG.md` are expected (both roles
+  edit them): keep both sides — every task line, `[x]` beats `[ ]`, all log
+  entries in time order. Never resolve by dropping the other side.
 
 ## How to launch (done by the human or by Claude when the spec arrives)
 ```bash

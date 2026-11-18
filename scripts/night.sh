@@ -130,7 +130,7 @@ while [ "$(now)" -lt "$DEADLINE" ]; do
       log "session lost — starting a fresh one"; rm -f "$SESSION_FILE"
     fi
     log "error rc=$rc (see $out) — sleeping ${ERROR_SLEEP}s"; nap "$ERROR_SLEEP"
-  elif grep -qE '"(result|response)": *"IDLE' "$out"; then
+  elif grep -qE '("|\\n)[*_` ]*IDLE[*_`. ]*(\\n)*"' "$out"; then   # IDLE as the reply's last line
     log "idle — sleeping ${IDLE_SLEEP}s"; nap "$IDLE_SLEEP"
   else
     nap "$NEXT_SLEEP"
