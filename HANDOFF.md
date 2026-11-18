@@ -6,6 +6,24 @@
 
 **Last updated:** 2026-11-18 · by: Claude (setup) · branch: `chore/night-mode`
 
+## Deadline & submission
+**Final deadline: 2026-11-22** (time of day: TBD — check the hackathon page).
+Case arrives ~00:00 on 2026-11-19 → 3 days to build.
+
+Submission form (`submit.exe`, opens together with the case): project name +
+link to **one Google Drive folder** containing everything. Any teammate can
+submit; the link can be changed until the deadline.
+
+- [ ] Working end-to-end demo flow
+- [ ] `README.md`: what it is, how to run — the jury opens the repo
+- [ ] GitHub repo reachable by the jury — **it's private now**: make it public
+      (or otherwise give access) before submitting
+- [ ] Demo video
+- [ ] Presentation
+- [ ] Drive folder with: demo video + GitHub link (file or text) + presentation,
+      sharing set to **"Anyone with the link"** (otherwise the jury can't open it)
+- [ ] Form submitted: project name + Drive folder link
+
 ## Status
 Setup is done, no product code yet. Waiting for the task spec (track) —
 it goes into `night/SPEC.md` and the overnight run starts from there.

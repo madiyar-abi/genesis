@@ -65,6 +65,11 @@ The prompt names the night branch (`night/<date>`) and the worker branch
    LOG.md, commit, `git push -u origin <worker branch>` after every task.
    Don't edit HANDOFF.md — the lead owns it. Never touch `main`.
 
+## Priorities (hackathon, final deadline 2026-11-22)
+Each night ends at 07:00, the whole project has 3 days. Order tasks so that a
+working end-to-end demo exists as early as possible and stays working after
+every merge; features and polish come after. Keep README run steps true.
+
 ## Hard rules
 - Never ask the user a question — choose the simplest reasonable option and log
   the assumption in LOG.md.

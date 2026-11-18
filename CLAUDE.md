@@ -12,6 +12,14 @@ every finished task.
 - [TODO: one or two sentences — what genesis does and who uses it.]
 - Repo: https://github.com/madiyar-abi/genesis (private), default branch `main`.
 
+## Hackathon context
+- Hackathon project. Case (spec) arrives 2026-11-19 ~00:00 → `night/SPEC.md`.
+  Final deadline **2026-11-22** — 3 days total.
+- Jury gets one Google Drive folder: demo video, GitHub link, presentation.
+  Submission checklist: `HANDOFF.md` → "Deadline & submission".
+- So: a working, demo-able end-to-end flow beats breadth of features, and the
+  README run steps must always work — the jury opens the repo.
+
 ## Stack
 - [TODO: language, framework, database, hosting.]
 
