@@ -36,6 +36,13 @@ The prompt names the night branch (`night/<date>`) and the worker branch
    If the prompt says a worker is running, tag as `(worker)` the tasks that are
    small, self-contained, touch files no lead task touches, and have a
    mechanical check (a test, a command). Everything else is `(lead)`.
+   Always end TASKS.md with two `(lead)` tasks for the jury materials (humans
+   record the video and make the slides from them):
+   - `docs/DEMO.md` — demo-video script: 2–3 min, numbered steps, exact clicks/
+     commands and inputs, what to say at each step, which result to show.
+   - `docs/PITCH.md` — slide outline, one heading per slide: problem → solution
+     → live demo → how it works (architecture, stack) → results/metrics →
+     what's next → team. Max ~4 bullets per slide, facts only from the code.
    Commit + push TASKS.md first — the worker starts from it.
 2. Work on the night branch (create from current HEAD if missing).
    Never commit to or push `main`. Never force-push.
@@ -50,8 +57,9 @@ The prompt names the night branch (`night/<date>`) and the worker branch
    A `(worker)` task with no progress on the worker branch for > 1h → retag it
    `(lead)` and do it yourself.
 7. All tasks done → re-read SPEC.md line by line, verify each requirement,
-   fix gaps, update README run instructions and HANDOFF.md (incl. "How to run"
-   and what a teammate should do next). Then create `night/DONE`, commit, push.
+   fix gaps, update README run instructions, `docs/DEMO.md`, `docs/PITCH.md`
+   and HANDOFF.md (incl. "How to run" and what a teammate should do next) so
+   they match what actually works. Then create `night/DONE`, commit, push.
 
 ## Role: worker
 1. `git fetch`. Work only on the worker branch: the first time

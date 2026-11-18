@@ -18,8 +18,8 @@ submit; the link can be changed until the deadline.
 - [ ] `README.md`: what it is, how to run — the jury opens the repo
 - [ ] GitHub repo reachable by the jury — **it's private now**: make it public
       (or otherwise give access) before submitting
-- [ ] Demo video
-- [ ] Presentation
+- [ ] Demo video — script: `docs/DEMO.md` (written by the night agent)
+- [ ] Presentation — outline: `docs/PITCH.md` (written by the night agent)
 - [ ] Drive folder with: demo video + GitHub link (file or text) + presentation,
       sharing set to **"Anyone with the link"** (otherwise the jury can't open it)
 - [ ] Form submitted: project name + Drive folder link
