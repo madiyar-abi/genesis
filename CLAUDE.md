@@ -40,6 +40,10 @@
 ## Gotchas
 - [TODO: anything the agent keeps getting wrong or can't infer from the code.]
 
+## Overnight / autonomous runs
+- Unattended runs follow `NIGHT.md` (launched by `scripts/night.sh`). If the
+  prompt says "night run" or `night/SPEC.md` exists and is not DONE, read it first.
+
 ## When stuck
 State the plan and the single least-certain assumption before writing more
 than a few lines.
