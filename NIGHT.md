@@ -13,8 +13,10 @@ The prompt names the night branch (`night/<date>`) and the worker branch
 - **worker** (optional) — Antigravity CLI (`--engine agy`, Google AI Pro quota)
   in its own git worktree `../genesis-worker`, or a teammate's own account.
   Model: Claude Opus 4.6 (Thinking); on its usage limit the script switches to
-  Gemini 3.8 Flash (High). Separate quota, so it keeps going while the lead
-  waits out a limit. It is weaker than the lead: give it well-specified tasks.
+  Gemini 3.8 Flash (High), then to the same models on a second Google account
+  (`--accounts`, its login lives in `~/.agy-acc2`). Separate quota, so it keeps
+  going while the lead waits out a limit. Weaker than the lead: give it
+  well-specified tasks.
 
 ## Files (all tracked in git)
 - `night/SPEC.md` — the task spec. Source of truth. Never edit it.
@@ -81,7 +83,8 @@ mkdir -p .night-logs && nohup scripts/night.sh --role lead --branch $B --with-wo
 # 3. worker (Gemini) in its own worktree
 git worktree add --detach ../genesis-worker origin/$B && mkdir -p ../genesis-worker/.night-logs
 nohup ../genesis-worker/scripts/night.sh --role worker --engine agy --branch $B \
-  --until 07:00 > ../genesis-worker/.night-logs/worker.out 2>&1 &
+  --accounts "default,$HOME/.agy-acc2" --until 07:00 > ../genesis-worker/.night-logs/worker.out 2>&1 &
+# second Google account, one-time login:  HOME=$HOME/.agy-acc2 ~/.gemini/bin/agy
 # watch:  tail -f .night-logs/lead.out ../genesis-worker/.night-logs/worker.out
 # stop:   touch night/STOP ../genesis-worker/night/STOP
 ```

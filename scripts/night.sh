@@ -10,7 +10,8 @@ ENGINE=claude
 WITH_WORKER=0
 BRANCH="night/$(date +%F)"
 MODELS=""
-usage() { echo "usage: $0 [--role lead|worker] [--engine claude|agy] [--until HH:MM] [--branch night/YYYY-MM-DD] [--model "A,B"] [--with-worker]"; exit 2; }
+ACCOUNTS="default"
+usage() { echo "usage: $0 [--role lead|worker] [--engine claude|agy] [--until HH:MM] [--branch night/YYYY-MM-DD] [--model "A,B"] [--accounts "default,DIR"] [--with-worker]"; exit 2; }
 while [ $# -gt 0 ]; do
   case "$1" in
     --role)        ROLE="$2"; shift 2 ;;
@@ -18,16 +19,26 @@ while [ $# -gt 0 ]; do
     --engine)      ENGINE="$2"; shift 2 ;;
     --with-worker) WITH_WORKER=1; shift ;;
     --branch)      BRANCH="$2"; shift 2 ;;
-    --model)       MODELS="$2"; shift 2 ;;   # comma list: next one is used on a usage limit
+    --model)       MODELS="$2"; shift 2 ;;    # comma list: next one is used on a usage limit
+    --accounts)    ACCOUNTS="$2"; shift 2 ;;  # agy only: "default" or a HOME dir per Google account
     *) usage ;;
   esac
 done
 case "$ENGINE" in claude|agy) ;; *) usage ;; esac
 # agy default: strongest model first, fallback with its own quota second.
 [ "$ENGINE" = agy ] && [ -z "$MODELS" ] && MODELS="Claude Opus 4.6 (Thinking),Gemini 3.8 Flash (High)"
-model_idx=1
-model_count() { [ -z "$MODELS" ] && echo 0 || echo "$MODELS" | awk -F, '{print NF}'; }
-current_model() { echo "$MODELS" | cut -d, -f"$model_idx"; }
+[ "$ENGINE" = claude ] && ACCOUNTS="default"
+# Slots = every account x every model, tried in order; on a usage limit move to
+# the next slot, after the last one sleep LIMIT_SLEEP and start over.
+slot=1
+count() { echo "$1" | awk -F, '{print NF}'; }
+nth() { echo "$1" | cut -d, -f"$2"; }
+n_models() { if [ -z "$MODELS" ]; then echo 1; else count "$MODELS"; fi; }
+slot_count() { echo $(( $(count "$ACCOUNTS") * $(n_models) )); }
+acc_idx() { echo $(( (slot - 1) / $(n_models) + 1 )); }
+current_model() { [ -n "$MODELS" ] && nth "$MODELS" $(( (slot - 1) % $(n_models) + 1 )); }
+current_home() { local a; a=$(nth "$ACCOUNTS" "$(acc_idx)"); [ "$a" = default ] || echo "$a"; }
+run_agy() { local h; h=$(current_home); if [ -n "$h" ]; then HOME="$h" "$AGY_BIN" "$@"; else "$AGY_BIN" "$@"; fi; }
 
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"              # overridable for testing
 AGY_BIN="${AGY_BIN:-$HOME/.gemini/bin/agy}"     # full path: nohup shells may lack PATH
@@ -35,6 +46,7 @@ LIMIT_SLEEP="${LIMIT_SLEEP:-3600}"              # wait after a usage limit
 ERROR_SLEEP="${ERROR_SLEEP:-300}"               # wait after other errors
 IDLE_SLEEP="${IDLE_SLEEP:-600}"                 # worker with nothing to do
 NEXT_SLEEP="${NEXT_SLEEP:-15}"                  # pause between normal runs
+AGY_TURN_TIMEOUT="${AGY_TURN_TIMEOUT:-7200s}"   # agy turn cap (e.g. stuck waiting for a login)
 
 cd "$(dirname "$0")/.." || exit 1
 mkdir -p .night-logs night
@@ -55,7 +67,6 @@ nap() {
   while [ "$(now)" -lt "$end" ] && [ ! -e night/DONE ] && [ ! -e night/STOP ]; do sleep "${NAP_POLL:-20}"; done
 }
 
-SESSION_FILE=".night-logs/session-$ROLE-$ENGINE"
 TEAM_NOTE=""
 [ "$ROLE" = lead ] && [ "$WITH_WORKER" -eq 1 ] && TEAM_NOTE=" A worker (Gemini via agy) is running in parallel: tag small self-contained tasks (worker) as NIGHT.md describes."
 FIRST_PROMPT="Read CLAUDE.md, HANDOFF.md and NIGHT.md, then follow NIGHT.md exactly as role=$ROLE. Night branch: $BRANCH (worker branch: $BRANCH-worker). The deadline is $DEADLINE_HUMAN. Work autonomously, use subagents if you have them, commit and push after every finished task.$TEAM_NOTE"
@@ -63,6 +74,7 @@ NEXT_PROMPT="Continue the night run per NIGHT.md as role=$ROLE (night branch $BR
 
 # Runs one turn in the background, sets $pid. Output (JSON) goes to $out.
 start_run() {
+  SESSION_FILE=".night-logs/session-$ROLE-$ENGINE-acc$(acc_idx)"   # conversations are per account
   local sid=""
   [ -s "$SESSION_FILE" ] && sid=$(cat "$SESSION_FILE")
   local prompt="$FIRST_PROMPT"; [ -n "$sid" ] && prompt="$NEXT_PROMPT"
@@ -75,10 +87,11 @@ start_run() {
     # agy: no fixed ids; resume by conversation id, saved from each run's JSON.
     if [ -n "$sid" ]; then set -- --conversation "$sid"; else set --; fi
     [ -n "$MODELS" ] && set -- "$@" --model "$(current_model)"
-    "$AGY_BIN" -p "$prompt" "$@" --dangerously-skip-permissions --output-format json > "$out" 2>&1 &
+    run_agy -p "$prompt" "$@" --dangerously-skip-permissions --output-format json \
+      --print-timeout "$AGY_TURN_TIMEOUT" < /dev/null > "$out" 2>&1 &
   fi
   pid=$!
-  log "run $i (${sid:-new session})${MODELS:+ model: $(current_model)}"
+  log "run $i (${sid:-new session})${MODELS:+ model: $(current_model)}$([ "$(count "$ACCOUNTS")" -gt 1 ] && echo " account: $(nth "$ACCOUNTS" "$(acc_idx)")")"
 }
 
 log "started, branch $BRANCH, deadline $DEADLINE_HUMAN"
@@ -90,11 +103,12 @@ while [ "$(now)" -lt "$DEADLINE" ]; do
   out=".night-logs/$ROLE-$ENGINE-run-$i.json"
 
   start_run
-  # Hard stop at the deadline.
-  ( sleep $(( DEADLINE - $(now) )); kill -TERM "$pid" 2>/dev/null ) &
-  killer=$!
+  # Wait for the run; hard stop at the deadline.
+  while kill -0 "$pid" 2>/dev/null; do
+    [ "$(now)" -ge "$DEADLINE" ] && { log "deadline — stopping the run"; kill -TERM "$pid" 2>/dev/null; }
+    sleep "${RUN_POLL:-5}"
+  done
   wait "$pid"; rc=$?
-  kill "$killer" 2>/dev/null; wait "$killer" 2>/dev/null
 
   failed=0
   if [ "$ENGINE" = claude ]; then
@@ -105,11 +119,11 @@ while [ "$(now)" -lt "$DEADLINE" ]; do
     { [ "$rc" -ne 0 ] || ! grep -q '"status": *"SUCCESS"' "$out"; } && failed=1
   fi
 
-  if [ "$failed" -eq 1 ] && grep -qiE 'usage limit|hit your limit|limit reached|rate.?limit|429|overloaded|quota|resource.?exhausted|resets' "$out"; then
-    if [ "$model_idx" -lt "$(model_count)" ]; then
-      model_idx=$((model_idx + 1)); log "usage limit — switching to model: $(current_model)"; nap "$NEXT_SLEEP"
+  if [ "$failed" -eq 1 ] && grep -qiE 'usage limit|hit your limit|limit reached|rate.?limit|429|overloaded|quota|resource.?exhausted|resets|authentication required' "$out"; then
+    if [ "$slot" -lt "$(slot_count)" ]; then
+      slot=$((slot + 1)); log "usage limit — switching to: ${MODELS:+$(current_model) }(account $(nth "$ACCOUNTS" "$(acc_idx)"))"; nap "$NEXT_SLEEP"
     else
-      model_idx=1; log "usage limit on all models (rc=$rc) — sleeping ${LIMIT_SLEEP}s"; nap "$LIMIT_SLEEP"
+      slot=1; log "usage limit on every model/account (rc=$rc) — sleeping ${LIMIT_SLEEP}s"; nap "$LIMIT_SLEEP"
     fi
   elif [ "$failed" -eq 1 ]; then
     if grep -qiE 'no conversation found|session.*not found' "$out"; then
