@@ -32,9 +32,11 @@ every stop, usage-limit pause or crash until `night/DONE` exists or the deadline
 7. All tasks done → re-read SPEC.md line by line, verify each requirement,
    fix gaps, update README run instructions. Then create `night/DONE`, commit, push.
 
-## Role: worker (second account on its own machine)
-1. `git fetch`; check out `night/<date>`; work on `night/<date>-worker`
-   (branched from it). Re-merge `origin/night/<date>` before each task.
+## Role: worker (second account, separate worktree or machine)
+1. `git fetch`; work on `night/<date>-worker`, created from `origin/night/<date>`
+   (`git checkout -B night/<date>-worker origin/night/<date>` the first time).
+   Never check out the lead's branch itself — it may be open in another worktree.
+   Re-merge `origin/night/<date>` before each task.
 2. Take only unchecked `(worker)` tasks from `night/TASKS.md`. If there are
    none, reply with exactly `IDLE` and stop — the script retries in 10 min.
 3. Same rules: test, mark `[x]`, log to LOG.md, commit, push your branch after
@@ -52,8 +54,11 @@ every stop, usage-limit pause or crash until `night/DONE` exists or the deadline
 ```bash
 # 1. put the spec into night/SPEC.md, commit it
 # 2. start detached, survives closing the terminal; Mac must stay on the charger, lid open
-nohup scripts/night.sh --role lead --until 07:00 > .night-logs/lead.out 2>&1 &
-# worker on a second machine/account:
-nohup scripts/night.sh --role worker --until 07:00 > .night-logs/worker.out 2>&1 &
+mkdir -p .night-logs && nohup scripts/night.sh --role lead --until 07:00 > .night-logs/lead.out 2>&1 &
+# worker = second account on the same Mac: own config dir + own worktree
+#   one-time: CLAUDE_CONFIG_DIR=~/.claude-acc2 claude auth login
+#             git worktree add --detach ../genesis-worker
+cd ../genesis-worker && git fetch && git checkout --detach origin/night/<date> && mkdir -p .night-logs
+CLAUDE_CONFIG_DIR=~/.claude-acc2 nohup scripts/night.sh --role worker --until 07:00 > .night-logs/worker.out 2>&1 &
 # watch:   tail -f .night-logs/lead.out      stop:   touch night/STOP
 ```
