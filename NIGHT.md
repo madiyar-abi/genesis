@@ -22,7 +22,8 @@ The prompt names the night branch (`night/<date>`) and the worker branch
 - `night/SPEC.md` — the task spec. Source of truth. Never edit it.
 - `night/TASKS.md` — task list: `- [ ] T1 (lead) <task> — files: <paths> — accept: <check>`.
   Mark `[x]` only after the check passed. Owner is `lead` or `worker`.
-- `night/LOG.md` — append-only: timestamp, who (lead/worker), what you did,
+- `night/LOG.md` — append-only: timestamp (from `date '+%F %H:%M'`, never
+  estimated), who (lead/worker), what you did,
   what's next, every assumption you made instead of asking.
 - `HANDOFF.md` (repo root) — human-readable state for the next person: Status,
   Done, In progress, Left to do, Decisions, How to run, Last updated. Must be
