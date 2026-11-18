@@ -11,6 +11,9 @@ every stop, usage-limit pause or crash until `night/DONE` exists or the deadline
   Mark `[x]` only after the check passed. Owner is `lead` or `worker`.
 - `night/LOG.md` — append-only: timestamp, what you did, what's next, every
   assumption you made instead of asking.
+- `HANDOFF.md` (repo root) — human-readable state for the next person: Status,
+  Done, In progress, Left to do, Decisions, How to run, Last updated. Must be
+  true at any moment — the run can be killed at the deadline mid-task.
 - `night/DONE` — create only when every acceptance criterion in SPEC.md is met
   and verified. Creating it ends the night run.
 
@@ -26,13 +29,14 @@ every stop, usage-limit pause or crash until `night/DONE` exists or the deadline
    parallel (max 3 at once — they share the usage limit), then review each
    result yourself before marking it done.
 4. Test-first where the code is testable. Run the tests/build before every commit.
-5. After each finished task: update TASKS.md + LOG.md, commit, `git push`.
+5. After each finished task: update TASKS.md + LOG.md + HANDOFF.md, commit, `git push`.
 6. Every ~30 min: `git fetch` and merge `origin/night/<date>-worker` if it exists;
    resolve conflicts, re-run tests, push.
 7. All tasks done → re-read SPEC.md line by line, verify each requirement,
-   fix gaps, update README run instructions. Then create `night/DONE`, commit, push.
+   fix gaps, update README run instructions and HANDOFF.md (incl. "How to run"
+   and what a teammate should do next). Then create `night/DONE`, commit, push.
 
-## Role: worker (second account, separate worktree or machine)
+## Role: worker (optional: a teammate's own Claude account on their machine)
 1. `git fetch`; work on `night/<date>-worker`, created from `origin/night/<date>`
    (`git checkout -B night/<date>-worker origin/night/<date>` the first time).
    Never check out the lead's branch itself — it may be open in another worktree.
@@ -55,10 +59,8 @@ every stop, usage-limit pause or crash until `night/DONE` exists or the deadline
 # 1. put the spec into night/SPEC.md, commit it
 # 2. start detached, survives closing the terminal; Mac must stay on the charger, lid open
 mkdir -p .night-logs && nohup scripts/night.sh --role lead --until 07:00 > .night-logs/lead.out 2>&1 &
-# worker = second account on the same Mac: own config dir + own worktree
-#   one-time: CLAUDE_CONFIG_DIR=~/.claude-acc2 claude auth login
-#             git worktree add --detach ../genesis-worker
-cd ../genesis-worker && git fetch && git checkout --detach origin/night/<date> && mkdir -p .night-logs
-CLAUDE_CONFIG_DIR=~/.claude-acc2 nohup scripts/night.sh --role worker --until 07:00 > .night-logs/worker.out 2>&1 &
+# optional worker, on a teammate's machine with their own login:
+git fetch && git checkout --detach origin/night/<date> && mkdir -p .night-logs
+nohup scripts/night.sh --role worker --until 07:00 > .night-logs/worker.out 2>&1 &
 # watch:   tail -f .night-logs/lead.out      stop:   touch night/STOP
 ```

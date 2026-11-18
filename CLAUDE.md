@@ -5,6 +5,9 @@
 > Add a line the moment the agent makes a mistake a rule could have prevented.
 > Global behavior rules live in `~/.claude/CLAUDE.md`; don't repeat them here.
 
+**Start here:** read `HANDOFF.md` (current state, what's left). Update it after
+every finished task.
+
 ## What this is
 - [TODO: one or two sentences — what genesis does and who uses it.]
 - Repo: https://github.com/madiyar-abi/genesis (private), default branch `main`.
