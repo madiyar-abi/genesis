@@ -33,9 +33,9 @@ it goes into `night/SPEC.md` and the overnight run starts from there.
   personal/editor files, `README.md`, `CLAUDE.md` (agent rules).
 - Overnight autonomous run: `NIGHT.md` (protocol) + `scripts/night.sh`
   (watchdog: retries hourly on usage limits, stops at 07:00) — merged via PR #1.
-- Team for the night: lead = Claude Code, worker = Gemini via Antigravity CLI
-  (`agy`: Opus 4.6 → Gemini Flash fallback, own quota, own worktree
-  `../genesis-worker`). Tested end-to-end.
+- Team for the night: lead = Claude Code; workers = `gemini` (Antigravity CLI,
+  3 Google accounts, Opus 4.6 → Gemini Flash) and `codex` (Codex CLI, 2 ChatGPT
+  Plus accounts), each in its own worktree and branch. Rehearsed end-to-end.
 
 ## In progress
 - Nothing — waiting for the case (spec) at ~00:00 on 2026-11-19.

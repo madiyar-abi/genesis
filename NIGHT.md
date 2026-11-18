@@ -4,26 +4,27 @@ Protocol for unattended agent runs started by `scripts/night.sh`.
 Nobody is awake to answer questions. You are re-prompted with "continue" after
 every stop, usage-limit pause or crash until `night/DONE` exists or the deadline
 (default 07:00) passes — so keep all state in files, not only in your context.
-The prompt names the night branch (`night/<date>`) and the worker branch
-(`night/<date>-worker`); use exactly those names.
+The prompt names the night branch (`night/<date>`) and, for a worker, its name
+and branch (`night/<date>-<name>`); use exactly those names.
 
 ## Team
 - **lead** — Claude Code (`--engine claude`), main checkout. Plans, does the hard
-  and cross-cutting work, reviews and merges the worker's commits.
-- **worker** (optional) — Antigravity CLI (`--engine agy`, Google AI Pro quota)
-  in its own git worktree `../genesis-worker`, or a teammate's own account.
-  Model: Claude Opus 4.6 (Thinking); on its usage limit the script switches to
-  Gemini 3.8 Flash (High), then to the same models on a second Google account
-  (`--accounts`, its login lives in `~/.agy-acc2`). Separate quota, so it keeps
-  going while the lead waits out a limit. Weaker than the lead: give it
-  well-specified tasks.
+  and cross-cutting work, reviews and merges the workers' commits.
+- Workers (optional, each in its own git worktree, own quota — they keep going
+  while the lead waits out a limit; weaker than the lead: give them
+  well-specified tasks):
+  - **gemini** — Antigravity CLI (`--engine agy`), 3 Google accounts
+    (`~/.agy-acc2`, `~/.agy-acc3`). Opus 4.6 (Thinking) → Gemini 3.8 Flash (High)
+    on each account in turn. Worktree `../genesis-gemini`.
+  - **codex** — Codex CLI (`--engine codex`), 2 ChatGPT Plus accounts
+    (`~/.codex-acc1`, `~/.codex-acc2`). Worktree `../genesis-codex`.
 
 ## Files (all tracked in git)
 - `night/SPEC.md` — the task spec. Source of truth. Never edit it.
 - `night/TASKS.md` — task list: `- [ ] T1 (lead) <task> — files: <paths> — accept: <check>`.
-  Mark `[x]` only after the check passed. Owner is `lead` or `worker`.
+  Mark `[x]` only after the check passed. Owner is `lead` or a worker name.
 - `night/LOG.md` — append-only: timestamp (from `date '+%F %H:%M'`, never
-  estimated), who (lead/worker), what you did,
+  estimated), who (lead or worker name), what you did,
   what's next, every assumption you made instead of asking.
 - `HANDOFF.md` (repo root) — human-readable state for the next person: Status,
   Done, In progress, Left to do, Decisions, How to run, Last updated. Must be
@@ -34,9 +35,10 @@ The prompt names the night branch (`night/<date>`) and the worker branch
 ## Role: lead
 1. First run: read `night/SPEC.md`. Write `night/TASKS.md`: small tasks (≤ ~1h
    each), each with the files it touches and a concrete acceptance check.
-   If the prompt says a worker is running, tag as `(worker)` the tasks that are
-   small, self-contained, touch files no lead task touches, and have a
-   mechanical check (a test, a command). Everything else is `(lead)`.
+   If the prompt lists running workers, tag with a worker's name (e.g.
+   `(gemini)`, `(codex)`) the tasks that are small, self-contained, touch files
+   no other owner's task touches, and have a mechanical check (a test, a
+   command). Give each worker its own area of files. Everything else is `(lead)`.
    Always end TASKS.md with two `(lead)` tasks for the jury materials (humans
    record the video and make the slides from them):
    - `docs/DEMO.md` — demo-video script: 2–3 min, numbered steps, exact clicks/
@@ -44,7 +46,7 @@ The prompt names the night branch (`night/<date>`) and the worker branch
    - `docs/PITCH.md` — slide outline, one heading per slide: problem → solution
      → live demo → how it works (architecture, stack) → results/metrics →
      what's next → team. Max ~4 bullets per slide, facts only from the code.
-   Commit + push TASKS.md first — the worker starts from it.
+   Commit + push TASKS.md first — the workers start from it.
 2. Work on the night branch (create from current HEAD if missing).
    Never commit to or push `main`. Never force-push.
 3. Execute with subagents (superpowers `subagent-driven-development` /
@@ -53,25 +55,26 @@ The prompt names the night branch (`night/<date>`) and the worker branch
    result yourself before marking it done.
 4. Test-first where the code is testable. Run the tests/build before every commit.
 5. After each finished task: update TASKS.md + LOG.md + HANDOFF.md, commit, `git push`.
-6. Every ~30 min: `git fetch`, merge `origin/<worker branch>` if it exists,
-   review the worker's diff, re-run tests, fix or revert what's broken, push.
-   A `(worker)` task with no progress on the worker branch for > 1h → retag it
-   `(lead)` and do it yourself.
+6. Every ~30 min: `git fetch`, merge each `origin/<night branch>-<worker name>`
+   that exists, review the worker's diff, re-run tests, fix or revert what's
+   broken, push. A worker task with no progress on its branch for > 1h → retag
+   it `(lead)` and do it yourself.
 7. All tasks done → re-read SPEC.md line by line, verify each requirement,
    fix gaps, update README run instructions, `docs/DEMO.md`, `docs/PITCH.md`
    and HANDOFF.md (incl. "How to run" and what a teammate should do next) so
    they match what actually works. Then create `night/DONE`, commit, push.
 
 ## Role: worker
-1. `git fetch`. Work only on the worker branch: the first time
-   `git checkout -B <worker branch> origin/<night branch>`. Never check out the
-   lead's branch itself — it is open in another worktree.
+Your name and branch are in the prompt (e.g. name `codex`, branch `night/<date>-codex`).
+1. `git fetch`. Work only on your branch: the first time
+   `git checkout -B <your branch> origin/<night branch>`. Never check out the
+   lead's or another worker's branch — they are open in other worktrees.
    Before each task: `git fetch && git merge origin/<night branch>`.
-2. Take only unchecked `(worker)` tasks from `night/TASKS.md`, one at a time.
+2. Take only unchecked tasks tagged with your name, one at a time.
    If there are none (or TASKS.md doesn't exist yet), stop and make `IDLE` the
-   last line of your reply — the script then retries in 10 min.
+   last line of your reply — the script then retries in 5 min.
 3. Touch only the files listed for your task. Test, mark `[x]`, append to
-   LOG.md, commit, `git push -u origin <worker branch>` after every task.
+   LOG.md, commit, `git push -u origin <your branch>` after every task.
    Don't edit HANDOFF.md — the lead owns it. Never touch `main`.
 
 ## Priorities (hackathon, final deadline 2026-11-22)
@@ -86,8 +89,8 @@ every merge; features and polish come after. Keep README run steps true.
 - Stay inside this repo. No secrets in files. No destructive git (reset --hard
   on shared branches, force-push, branch deletion).
 - Stuck on one task > 3 attempts → log why, mark it `[!]`, move to the next.
-- Merge conflicts in `night/TASKS.md` / `night/LOG.md` are expected (both roles
-  edit them): keep both sides — every task line, `[x]` beats `[ ]`, all log
+- Merge conflicts in `night/TASKS.md` / `night/LOG.md` are expected (everyone
+  edits them): keep both sides — every task line, `[x]` beats `[ ]`, all log
   entries in time order. Never resolve by dropping the other side.
 
 ## How to launch (done by the human or by Claude when the spec arrives)
@@ -95,13 +98,15 @@ every merge; features and polish come after. Keep README run steps true.
 # 1. put the spec into night/SPEC.md, commit it on the night branch, push
 B=night/$(date +%F)
 # 2. lead — detached, survives closing the terminal; Mac on the charger, lid open
-mkdir -p .night-logs && nohup scripts/night.sh --role lead --branch $B --with-worker \
+mkdir -p .night-logs && nohup scripts/night.sh --role lead --branch $B --workers "gemini,codex" \
   --until 07:00 > .night-logs/lead.out 2>&1 &
-# 3. worker (Gemini) in its own worktree
-git worktree add --detach ../genesis-worker origin/$B && mkdir -p ../genesis-worker/.night-logs
-nohup ../genesis-worker/scripts/night.sh --role worker --engine agy --branch $B \
-  --accounts "default,$HOME/.agy-acc2" --until 07:00 > ../genesis-worker/.night-logs/worker.out 2>&1 &
-# second Google account, one-time login:  HOME=$HOME/.agy-acc2 ~/.gemini/bin/agy
-# watch:  tail -f .night-logs/lead.out ../genesis-worker/.night-logs/worker.out
-# stop:   touch night/STOP ../genesis-worker/night/STOP
+# 3. workers, each in its own worktree
+for w in gemini codex; do git worktree add --detach ../genesis-$w origin/$B && mkdir -p ../genesis-$w/.night-logs; done
+nohup ../genesis-gemini/scripts/night.sh --role worker --name gemini --engine agy --branch $B \
+  --accounts "default,$HOME/.agy-acc2,$HOME/.agy-acc3" --until 07:00 > ../genesis-gemini/.night-logs/worker.out 2>&1 &
+nohup ../genesis-codex/scripts/night.sh --role worker --name codex --engine codex --branch $B \
+  --accounts "$HOME/.codex-acc1,$HOME/.codex-acc2" --until 07:00 > ../genesis-codex/.night-logs/worker.out 2>&1 &
+# logins (one-time): agy: HOME=$HOME/.agy-accN ~/.gemini/bin/agy · codex: CODEX_HOME=$HOME/.codex-accN codex login --device-auth
+# watch:  tail -f .night-logs/lead.out ../genesis-*/.night-logs/worker.out
+# stop:   touch night/STOP ../genesis-*/night/STOP
 ```
