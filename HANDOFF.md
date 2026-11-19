@@ -43,6 +43,8 @@ and verifies the actions recorded in the seven published training trajectories.
 
 - T3. Reviewed the hard split across both policies. Default reconciliation missed five duplicates and returned 22 unmatched false positives. The hard rules matched all 46 issues. Both averaged 43.2 actions.
 
+- T4. Verified split-wide mean action counts against the official metrics. The timing audit identified an outdated whole-suite runtime and an unsupported per-episode upper bound. The updated timing table uses the benchmark’s actual first-company workload.
+
 ## Round 10 complete · 20 November 2026
 
 All eleven tasks passed on `night/2026-11-20-r10`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 366 tests passed, along with 20 default and 20 hard paired checks.

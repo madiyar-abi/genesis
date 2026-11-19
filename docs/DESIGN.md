@@ -286,17 +286,16 @@ the level is solvable from the records, not that a learning agent finds those ru
 Stress test of `reconcile_hard` (`auditenv.fuzz --stress reconcile_hard --seeds 0-299 --hard`, 1 200 hard
 episodes): 0 imperfect, max 57 steps, no truncation.
 
-**Timing** (`uv run python scripts/bench.py`, median of 3, Python 3.11.14, Apple-silicon Mac, one core):
+**Timing.** On an Apple-silicon Mac running Python 3.11.14, `uv run python scripts/bench.py` reported the median of three runs for each workload. Policy timings use the first company in each split.
 
 | operation | workload | time |
 |---|---|---|
-| `generate()` default | 100 seeds | 0.28 s (2.8 ms / episode) |
-| `generate()` hard | 100 seeds | 0.98 s (9.8 ms / episode) |
-| `auditenv.verify` | 300 episodes | 1.69 s (5.6 ms / episode) |
-| one full episode, any baseline | dev / hard | 3–5 ms / 9–12 ms |
-| `auditenv.check` (everything) | — | ≈ 24 s |
+| `generate()` default | 100 seeds | 0.249 s (2.49 ms / episode) |
+| `generate()` hard | 100 seeds | 0.867 s (8.67 ms / episode) |
+| `auditenv.verify` | 300 episodes | 1.652 s (5.51 ms / episode) |
+| one full episode, any baseline | dev / hard | 2.53–4.19 ms / 6.78–9.55 ms |
 
-An episode costs milliseconds against the 60 s limit, so the limit only binds the agent's own thinking time.
+The measured scripted policies finished both sampled companies within the 60 s episode limit.
 
 **Step-budget margin** (same stress runs, 300 seeds per row, steps used of the 100-step budget):
 
@@ -348,10 +347,11 @@ to explore.
 - Expense journals carry no ids (the schema has no journal id); checks group them by timestamp.
 - Default duplicates are exact copies; hard mode re-types the text, but changed amounts or quantities
   (a "near-duplicate" that is really a different sale) are not modelled.
-- Wall-clock truncation (60 s) is the only non-deterministic transition; it never triggers for the
-  baselines (≤ 0.012 s per episode).
-- Step cost vs F1 granularity: with 12 issues, skipping one finding at 0 steps (0.913) beats the full
-  answer after 60 steps (0.880); with ≤ 10 issues the full answer always wins.
+- The 60 s wall-clock limit can make a replay truncate under load. The scripted baselines completed
+  the published dev and hard runs within the limit.
+- With eight issues and no false positives, submitting seven matches immediately earns 0.867.
+  A complete answer after 60 inspections earns 0.880. At nine issues the order reverses: eight
+  immediate matches earn 0.882. With twelve issues, eleven immediate matches earn 0.913.
 - A policy-aware rule script solves the default distribution (F1 1.0); the same script gets F1 0.752 in
   hard mode, and only after adding the two hard rules (`reconcile_hard`) is it perfect again. Every level
   a script can solve is still learnable for an agent that must discover the rules within 100 tool calls;
