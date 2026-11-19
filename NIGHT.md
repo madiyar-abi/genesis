@@ -19,8 +19,10 @@ and branch (`night/<date>-<name>`); use exactly those names.
   while the lead waits out a limit; weaker than the lead: give them
   well-specified tasks):
   - **gemini** — Antigravity CLI (`--engine agy`), 3 Google accounts
-    (`~/.agy-acc2`, `~/.agy-acc3`). Opus 4.6 (Thinking) → Gemini 3.8 Flash (High)
-    on each account in turn. Worktree `../genesis-gemini`.
+    (`~/.agy-acc2`, `~/.agy-acc3`), `Gemini 3.8 Flash (High)`. Antigravity has two
+    separate weekly pools per account: Gemini models and Claude/GPT models (Opus
+    4.6 burns the small Claude/GPT pool in minutes) — so run gemini on Flash.
+    Worktree `../genesis-gemini`.
   - **codex** — Codex CLI (`--engine codex`), 2 ChatGPT Plus accounts
     (`~/.codex-acc1`, `~/.codex-acc2`), `gpt-6.2-astra` → `gpt-6.2-sol`.
     Worktree `../genesis-codex`. Don't run it while Codex is in the lead
@@ -115,7 +117,8 @@ mkdir -p .night-logs && nohup scripts/night.sh --role lead --branch $B --workers
 # 3. worker for grunt work, in its own worktree
 git worktree add --detach ../genesis-gemini origin/$B && mkdir -p ../genesis-gemini/.night-logs
 nohup ../genesis-gemini/scripts/night.sh --role worker --name gemini --engine agy --branch $B \
-  --accounts "default,$HOME/.agy-acc2,$HOME/.agy-acc3" --until 07:00 > ../genesis-gemini/.night-logs/worker.out 2>&1 &
+  --model "Gemini 3.8 Flash (High)" --accounts "default,$HOME/.agy-acc2,$HOME/.agy-acc3" --until 07:00 \
+  > ../genesis-gemini/.night-logs/worker.out 2>&1 &
 # optional (only if Codex is NOT in the lead slots): codex worker in ../genesis-codex
 #   ../genesis-codex/scripts/night.sh --role worker --name codex --engine codex --branch $B \
 #     --model "gpt-6.2-astra,gpt-6.2-sol" --accounts "$C1,$C2" --until 07:00

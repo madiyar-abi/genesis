@@ -68,7 +68,11 @@ cur_acc()    { local a; a=$(slot_field "$slot" 2); echo "${a:-default}"; }
 cur_home()   { local a; a=$(cur_acc); [ "$a" = default ] || echo "$a"; }
 cur_model()  { slot_field "$slot" 3; }
 # Conversations belong to (engine, account); switching models keeps the conversation.
-session_file() { echo ".night-logs/session-$NAME-$(cur_engine)-$(cur_acc | tr -c 'A-Za-z0-9\n' '_')"; }
+# agy ignores --model when resuming a conversation, so it gets one conversation per model.
+session_file() {
+  local k; k="$(cur_engine)-$(cur_acc)"; [ "$(cur_engine)" = agy ] && k="$k-$(cur_model)"
+  echo ".night-logs/session-$NAME-$(echo "$k" | tr -c 'A-Za-z0-9\n-' '_')"
+}
 
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"                       # overridable for testing
 AGY_BIN="${AGY_BIN:-$HOME/.gemini/bin/agy}"              # full paths: nohup shells may lack PATH
