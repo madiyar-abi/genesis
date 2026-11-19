@@ -65,3 +65,8 @@
 - run.py: --config now reads the per-episode format `{episodes:[{seed, config}]}` (T16 spec updated accordingly).
 - Assumption: check uses a built-in fallback dev list until configs/dev.json exists.
 - Next: T19–T22 docs; merge gemini T12/T16 and codex T23 when pushed.
+## 2026-11-19 13:55 — gemini
+- T12 done: auditenv/policies/reconcile.py (reconcile_findings, Reconcile policy) + tests/test_reconcile.py (all pass).
+- Reconcile baseline: pages ledger, invoices, payments, fx (max 50 rows/page); fetches line_items for duplicate candidates via get_document; rule-based detection for duplicate_invoice, period_cutoff, fx_error, payment_allocation.
+- Results on dev seeds 2000–2009: Mean F1 = 1.000, 0 error steps (0.00%), ~22 steps/episode.
+- Next: T16 episode export (after T9).
