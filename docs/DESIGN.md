@@ -135,13 +135,41 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 
 `uv run python -m auditenv.check` (dev split; P/R/F1 micro-averaged; return, steps, time = means):
 
-RESULTS_TABLE
+| policy | P | R | F1 | return | steps | time s | exp. return* |
+|---|---|---|---|---|---|---|---|
+| random explorer (seeded) | 0.000 | 0.000 | 0.000 | −0.614 | 31.0 | 0.004 | −0.614 |
+| naive reconciliation | 0.199 | 0.900 | 0.325 | −0.460 | 16.7 | 0.004 | −0.045 |
+| reconciliation (policy-aware) | 1.000 | 1.000 | 1.000 | 0.958 | 22.1 | 0.004 | 0.958 |
+| flag-everything attack | 0.000 | 0.000 | 0.000 | −1.000 | 3.9 | 0.003 | −1.000 |
+| oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.003 | 1.000 |
+
+Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30 truth issues).
+P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode.
+\*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
+expected amount, FP by the claimed amount; reported separately, the shared reward is unchanged.
+Other gates in the same run: 175 unit tests pass; verifier 200/200 episodes valid (600/600 with
+`auditenv.verify --seeds 0-199`); 20/20 paired checks; out-of-process run leaks nothing.
 
 Reconcile stress test: 1 200 episodes (300 seeds × default / clean / 12-issue / 12-issue with
 110 invoices): **0 imperfect episodes**, max 32 steps, no truncation — every truth issue can be
 found from the records within the budget.
 
-FAILURE_ANALYSIS
+**Measured failure analysis** (`uv run python -m auditenv.analyze --policy <p> --config configs/dev.json`):
+
+| | duplicate | allocation | fx | cutoff | I1 | I2 | FP |
+|---|---|---|---|---|---|---|---|
+| naive reconciliation, recall | 7/7 | 6/8 | 7/8 | 7/7 | 0/2 | 2/2 | 109 |
+| reconciliation, recall | 7/7 | 8/8 | 8/8 | 7/7 | 2/2 | 2/2 | 0 |
+
+Where the naive rules fail (109 FPs: 34 allocation, 30 duplicate, 24 fx, 21 cutoff; 16 of them
+on the 2 clean companies):
+- *allocation*: every 2900 credit is flagged → overpayments and refunds become false accusations;
+  in I1 the truth amount is the AR shortfall, not the 2900 credit → wrong amount (I1 recall 0/2);
+- *duplicate*: same entity + amount ignores line items → weekly retainers are flagged;
+- *fx / cutoff*: the date written in the timestamp is used instead of the company-timezone date →
+  midnight documents get the wrong rate or the wrong period.
+The random explorer finds nothing (0 TP) and is punished on dirty books (−1) while scoring on
+clean books only when it happens to submit no findings. Flag-everything scores −1 on every episode.
 
 ## 10. Honest limitations
 

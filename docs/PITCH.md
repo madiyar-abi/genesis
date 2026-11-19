@@ -30,8 +30,8 @@ Numbers come from `uv run python -m auditenv.check` / `auditenv.analyze` on the 
 - Clean companies plus legitimate look-alikes: split/partial payments, refunds, unidentified receipts,
   weekly retainers with equal amounts, documents near midnight in other timezones.
 - Ids, id formats, order, amounts, 6 currencies (incl. 0-decimal JPY) and 8 timezones vary per episode.
-- Naive reconciliation scores micro-F1 0.195 (0% recall on the interacting payment case);
-  policy-aware reconciliation scores 1.0 → solvable from the evidence, but not by shortcuts.
+- Naive reconciliation: micro-F1 0.325, 109 false positives (16 on clean books), 0/2 on the interacting
+  payment case; policy-aware reconciliation: F1 1.0 → solvable from the evidence, not by shortcuts.
 
 ## 5. How it works
 - `generator` (history → ledger → inject → render) · `env` (tools, limits, modes) ·
@@ -42,10 +42,10 @@ Numbers come from `uv run python -m auditenv.check` / `auditenv.analyze` on the 
   declared ones, recomputed from public records.
 
 ## 6. Results
-- Checks: 168 unit tests; verifier 600/600 episodes valid; 20/20 paired checks (replay exact;
+- Checks: 175 unit tests; verifier 600/600 episodes valid; 20/20 paired checks (replay exact;
   relabel + permute keeps the oracle reward).
-- Dev split (micro P/R/F1, mean return): oracle 1.0/1.0/1.0, 1.000 · reconcile 1.0/1.0/1.0, 0.956 ·
-  naive 0.12/0.52/0.20, −0.696 · random 0/0/0, −0.614 · flag-all 0/0/0, −1.000.
+- Dev split (micro P/R/F1, mean return): oracle 1.0/1.0/1.0, 1.000 · reconcile 1.0/1.0/1.0, 0.958 ·
+  naive 0.20/0.90/0.33, −0.460 · random 0/0/0, −0.614 · flag-all 0/0/0, −1.000.
 - Reconcile stress test: 1 200 episodes, 0 imperfect, ≤ 32 steps → every error is findable in budget.
 - 12 attack tests from the case (silence, false accusations, duplicates, flag-all, step cost, guessed
   ids, bad evidence, wrong currency, resubmit, malformed input, timeout, tolerance) all pass.
