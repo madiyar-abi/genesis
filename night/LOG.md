@@ -28,3 +28,7 @@
 ## 2026-11-19 21:00 gemini
 - P1 done: scripts/golden.py generates 80 canonical hashes across seeds 0–19 × 4 configs, writes tests/golden_hashes.json, and supports --check to exit 1 on drift. tests/test_golden.py recomputes all 80 hashes in 0.4s and asserts equality with actionable guidance on intentional drift. scripts/golden.py --check exits 0.
 - Next: E2 timing benchmark (scripts/bench.py, tests/test_bench.py).
+
+## 2026-11-19 21:04 gemini
+- E2 done: scripts/bench.py measures wall time (perf_counter, median of 3) for generate() (0.24s default / 0.85s hard for 100 seeds), verify (1.45s for 300 eps), and full episodes per policy on dev and hard. Prints Python version, platform, and formatted markdown table; supports --json for metrics export. tests/test_bench.py smoke tests function API and CLI smoke test in 2.7s.
+- Next: Check TASKS.md for remaining gemini tasks.

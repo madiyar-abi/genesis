@@ -54,7 +54,7 @@ Workers: touch ONLY the files listed for your task.
   docs/DESIGN.md (+ inject/verify if changed) — accept: verify 0 problems, decision in DESIGN
 
 ## Block 3 — measured design / engineering
-- [ ] E2 (gemini) Timing benchmark: new `scripts/bench.py` measures wall time (time.perf_counter, median of 3) of
+- [x] E2 (gemini) Timing benchmark: new `scripts/bench.py` measures wall time (time.perf_counter, median of 3) of
   (a) `generate()` for seeds 0–99 default and hard, (b) one full episode per policy (`auditenv.run` APIs) on
   `configs/dev.json` and `configs/eval_hard.json`, (c) `auditenv.verify` over seeds 0–99; prints a markdown table
   and with `--json PATH` writes the numbers; prints Python version and `platform.platform()`. Do NOT edit docs — the
