@@ -90,3 +90,10 @@
 - T25 done: amount-weighted experimental terminal reward. Five targeted tests and full suite passed.
 - Assumptions: use the shared invalid-submission penalty and reward rounding. A zero weighted denominator receives F1=1 only when truth and findings are both empty.
 - Next: no open codex tasks.
+
+## 2026-11-19 13:59 — lead
+- Merged codex T24 (schemas/*.json + test) and T25 (experimental.py). Experimental materiality-weighted reward now computed grader-side in env._finish (grader log + check column "exp_ret"); shared reward untouched, never shown to policies.
+- Generator config validation: n_invoices ∈ [10,100] (documents stay ≤ 200; 120+ could exceed), error counts non-negative ints, unknown types rejected.
+- Reconcile stress test: 1200 episodes (300 seeds × 4 configs) → 0 imperfect, max 32 steps → truth always findable from records.
+- Docs: README (T20 draft), DESIGN.md draft (T19; results placeholders until T16/T26).
+- Next: DEMO.md, PITCH.md drafts; merge T16/T26.

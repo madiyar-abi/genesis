@@ -68,15 +68,14 @@ def run_verifier(n_seeds: int) -> bool:
 
 def available_policies() -> list[str]:
     import importlib.util
-    return [n for n in ("random", "reconcile", "flag_all", "oracle")
+    return [n for n in ("random", "naive_reconcile", "reconcile", "flag_all", "oracle")
             if importlib.util.find_spec(POLICIES[n][0]) is not None]
 
 
 def run_baselines(episodes) -> tuple[bool, dict]:
     env = AuditEnv()
     table = {}
-    print(f"\n{'policy':<10} {'P':>6} {'R':>6} {'F1':>6} {'return':>8} {'steps':>6} {'time_s':>7}   (dev split, "
-          f"{len(episodes)} episodes; P/R/F1 micro-averaged, return/steps/time = means)")
+    print(f"\n{'policy':<16} {'P':>6} {'R':>6} {'F1':>6} {'return':>8} {'steps':>6} {'time_s':>7} {'exp_ret*':>9}")
     for name in available_policies():
         rows = []
         for seed, cfg in episodes:
@@ -84,14 +83,16 @@ def run_baselines(episodes) -> tuple[bool, dict]:
             traj = run_episode(env, None, seed, {**(cfg or {}), "mode": "train"},
                                policy_factory=lambda e, s=seed: make_policy(name, e, s))
             res = env.result
-            rows.append((res["tp"], res["fp"], res["fn"], res["reward"], traj[-1]["step"], time.monotonic() - t0))
+            rows.append((res["tp"], res["fp"], res["fn"], res["reward"], traj[-1]["step"], time.monotonic() - t0,
+                         res["experimental_reward"]))
         tp, fp, fn = (sum(r[i] for r in rows) for i in range(3))
         p, r, f1 = prf1(tp, fp, fn)
-        ret, steps, secs = (sum(row[i] for row in rows) / len(rows) for i in (3, 4, 5))
+        ret, steps, secs, exp = (sum(row[i] for row in rows) / len(rows) for i in (3, 4, 5, 6))
         table[name] = {"precision": p, "recall": r, "f1": f1, "return": ret, "steps": steps, "time_s": secs,
-                       "tp": tp, "fp": fp, "fn": fn}
-        print(f"{name:<10} {p:6.3f} {r:6.3f} {f1:6.3f} {ret:8.3f} {steps:6.1f} {secs:7.3f}")
-    print()
+                       "tp": tp, "fp": fp, "fn": fn, "experimental_return": exp}
+        print(f"{name:<16} {p:6.3f} {r:6.3f} {f1:6.3f} {ret:8.3f} {steps:6.1f} {secs:7.3f} {exp:9.3f}")
+    print(f"(dev split, {len(episodes)} episodes; P/R/F1 micro-averaged; return/steps/time means; "
+          "*exp_ret = experimental materiality-weighted reward, reported separately)\n")
     ok = _gate("oracle reaches the maximum reward", table["oracle"]["return"] == 1.0)
     ok &= _gate("flag-all attack is penalised", table["flag_all"]["return"] < 0,
                 f"mean return {table['flag_all']['return']:.3f}")

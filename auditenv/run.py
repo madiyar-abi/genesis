@@ -17,6 +17,7 @@ POLICIES = {  # name -> (module, class); the oracle is built grader-side from tr
     "random": ("auditenv.policies.random_explorer", "RandomExplorer"),
     "flag_all": ("auditenv.policies.flag_all", "FlagAll"),
     "reconcile": ("auditenv.policies.reconcile", "Reconcile"),
+    "naive_reconcile": ("auditenv.policies.naive_reconcile", "NaiveReconcile"),
     "oracle": ("auditenv.policies.oracle", "Oracle"),
 }
 

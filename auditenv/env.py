@@ -7,6 +7,7 @@ import time
 
 from . import calculator
 from .generator import generate
+from .experimental import experimental_reward
 from .matcher import grade, public_summary
 
 TABLES = {"ledger": "row_id", "invoices": "invoice_id", "payments": "payment_id", "fx": "fx_id"}
@@ -119,6 +120,9 @@ class AuditEnv:
     # ------------------------------------------------------------------ internals
     def _finish(self, submission, inspection_steps: int, how: str) -> dict:
         res = grade(self._ep["truth"], submission, self.episode_id, inspection_steps)
+        # experimental materiality-weighted reward: grader-side only, reported next to the shared one
+        res["experimental_reward"] = experimental_reward(
+            res, self._ep["truth"], submission["findings"] if res["valid"] else [])
         self.result = res
         self.grader_log.append({"episode_id": self.episode_id, "end": how, "steps": self._steps,
                                 "elapsed_s": round(time.monotonic() - self._start, 4), **res})
