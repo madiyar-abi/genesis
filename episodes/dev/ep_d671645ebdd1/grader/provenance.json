@@ -1,0 +1,264 @@
+{
+  "company": {
+    "bank_offset": "+03:00",
+    "base_currency": "KZT",
+    "entities": 18,
+    "foreign_currencies": [
+      "EUR",
+      "JPY"
+    ],
+    "timezone": "+00:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 0,
+      "payment_allocation": 0,
+      "period_cutoff": 1
+    },
+    "interacting": {
+      "I1": 1,
+      "I2": 0
+    },
+    "n_invoices": null
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 484553498,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000332",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 218992539,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5425",
+              "invoice_id": "INV-589644",
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000333",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 267706984,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000331",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 2146025,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000334",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 484553498,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000332",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 489348888,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5425",
+              "invoice_id": "INV-589644",
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000333",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 4795390,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000334",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            }
+          ],
+          "journal": "pay:PAY-827484"
+        }
+      ],
+      "description": "payment PAY-827484 allocated partially to INV-589644; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "I1",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 486321738,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000332",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 218992539,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5425",
+              "invoice_id": "INV-589644",
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000333",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 267706984,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000331",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 377785,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000334",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 484553498,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000332",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 218992539,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5425",
+              "invoice_id": "INV-589644",
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000333",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 267706984,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000331",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 2146025,
+              "entity_id": "C-5425",
+              "invoice_id": null,
+              "payment_id": "PAY-827484",
+              "row_id": "GL-000334",
+              "timestamp": "2026-03-31T20:38:00+00:00"
+            }
+          ],
+          "journal": "pay:PAY-827484"
+        }
+      ],
+      "description": "payment PAY-827484 cash converted with the 2026-04-01 rate instead of 2026-03-31",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "I1",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 638435000,
+              "entity_id": "C-9183",
+              "invoice_id": "INV-142472",
+              "payment_id": null,
+              "row_id": "GL-000311",
+              "timestamp": "2026-03-29T22:58:00+00:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 638435000,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-9183",
+              "invoice_id": "INV-142472",
+              "payment_id": null,
+              "row_id": "GL-000310",
+              "timestamp": "2026-03-29T22:58:00+00:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-142472"
+        }
+      ],
+      "description": "invoice INV-142472 issued 2026-04-04 (outside the period) booked on 2026-03-29",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "period_cutoff"
+    }
+  ],
+  "seed": 2002
+}

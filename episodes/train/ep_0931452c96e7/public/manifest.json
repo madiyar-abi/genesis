@@ -1,0 +1,22 @@
+{
+  "amount_exponents": {
+    "GBP": 2,
+    "JPY": 0,
+    "USD": 2
+  },
+  "base_currency": "GBP",
+  "counts": {
+    "documents": 54,
+    "fx": 212,
+    "invoices": 38,
+    "ledger": 341,
+    "payments": 16
+  },
+  "episode_id": "ep_0931452c96e7",
+  "generator_version": "1.0.0",
+  "period_end": "2026-03-31",
+  "period_start": "2026-03-01",
+  "rounding": "ROUND_HALF_UP",
+  "schema_version": "1.0",
+  "timezone": "+05:30"
+}

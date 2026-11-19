@@ -1,0 +1,326 @@
+{
+  "company": {
+    "bank_offset": "-05:00",
+    "base_currency": "KZT",
+    "entities": 17,
+    "foreign_currencies": [
+      "GBP",
+      "JPY",
+      "USD"
+    ],
+    "timezone": "+09:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 2,
+      "fx_error": 3,
+      "payment_allocation": 0,
+      "period_cutoff": 1
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 75
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 1014261100,
+              "entity_id": "C-6356",
+              "invoice_id": "SI-2026-415853",
+              "payment_id": null,
+              "row_id": "R4302",
+              "timestamp": "2026-02-26T18:07:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1014261100,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-6356",
+              "invoice_id": "SI-2026-415853",
+              "payment_id": null,
+              "row_id": "R4303",
+              "timestamp": "2026-02-26T18:07:00+09:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:SI-2026-415853"
+        }
+      ],
+      "description": "invoice SI-2026-415853 issued 2026-03-03 (outside the period) booked on 2026-02-26",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 1082751300,
+              "entity_id": "C-4126",
+              "invoice_id": "SI-2026-046188",
+              "payment_id": null,
+              "row_id": "R4051",
+              "timestamp": "2026-02-06T13:18:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1082751300,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-4126",
+              "invoice_id": "SI-2026-046188",
+              "payment_id": null,
+              "row_id": "R4052",
+              "timestamp": "2026-02-06T13:18:00+09:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:SI-2026-046188"
+        }
+      ],
+      "description": "invoice SI-2026-190605 entered a second time as SI-2026-046188 and booked again",
+      "documents_added": [
+        "DOC0446797"
+      ],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 43152600,
+              "entity_id": "C-2671",
+              "invoice_id": "SI-2026-906284",
+              "payment_id": null,
+              "row_id": "R4001",
+              "timestamp": "2026-02-03T09:23:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 43152600,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-2671",
+              "invoice_id": "SI-2026-906284",
+              "payment_id": null,
+              "row_id": "R4002",
+              "timestamp": "2026-02-03T09:23:00+09:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:SI-2026-906284"
+        }
+      ],
+      "description": "invoice SI-2026-565544 entered a second time as SI-2026-906284 and booked again",
+      "documents_added": [
+        "DOC0866523"
+      ],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 198786357,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-755890",
+              "payment_id": null,
+              "row_id": "R4049",
+              "timestamp": "2026-02-05T23:59:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 198786357,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-755890",
+              "payment_id": null,
+              "row_id": "R4050",
+              "timestamp": "2026-02-05T23:59:00+09:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 197561351,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-755890",
+              "payment_id": null,
+              "row_id": "R4049",
+              "timestamp": "2026-02-05T23:59:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 197561351,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-755890",
+              "payment_id": null,
+              "row_id": "R4050",
+              "timestamp": "2026-02-05T23:59:00+09:00"
+            }
+          ],
+          "journal": "inv:SI-2026-755890"
+        }
+      ],
+      "description": "invoice SI-2026-755890 converted with the 2026-02-08 rate instead of 2026-02-05",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 324041406,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-064433",
+              "payment_id": null,
+              "row_id": "R4095",
+              "timestamp": "2026-02-11T00:27:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 324041406,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-064433",
+              "payment_id": null,
+              "row_id": "R4096",
+              "timestamp": "2026-02-11T00:27:00+09:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 325608322,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-064433",
+              "payment_id": null,
+              "row_id": "R4095",
+              "timestamp": "2026-02-11T00:27:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 325608322,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-064433",
+              "payment_id": null,
+              "row_id": "R4096",
+              "timestamp": "2026-02-11T00:27:00+09:00"
+            }
+          ],
+          "journal": "inv:SI-2026-064433"
+        }
+      ],
+      "description": "invoice SI-2026-064433 converted with the 2026-02-10 rate instead of 2026-02-11",
+      "documents_added": [],
+      "issue_id": "ISS-5",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 51662571,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-931954",
+              "payment_id": null,
+              "row_id": "R4042",
+              "timestamp": "2026-02-05T11:33:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 51662571,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-931954",
+              "payment_id": null,
+              "row_id": "R4041",
+              "timestamp": "2026-02-05T11:33:00+09:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 51742259,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-931954",
+              "payment_id": null,
+              "row_id": "R4042",
+              "timestamp": "2026-02-05T11:33:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 51742259,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5731",
+              "invoice_id": "SI-2026-931954",
+              "payment_id": null,
+              "row_id": "R4041",
+              "timestamp": "2026-02-05T11:33:00+09:00"
+            }
+          ],
+          "journal": "inv:SI-2026-931954"
+        }
+      ],
+      "description": "invoice SI-2026-931954 converted with the 2026-02-04 rate instead of 2026-02-05",
+      "documents_added": [],
+      "issue_id": "ISS-6",
+      "scenario": "single",
+      "type": "fx_error"
+    }
+  ],
+  "seed": 1008
+}

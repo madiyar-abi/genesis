@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import hmac
 import json
+import os
 import random
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
@@ -22,6 +24,7 @@ SCHEMA_VERSION = "1.0"
 ISSUE_TYPES = ("duplicate_invoice", "payment_allocation", "fx_error", "period_cutoff")
 SCENARIOS = ("I1", "I2")
 MAX_ISSUES = 12
+DIFFICULTIES = ("default", "hard")
 
 USD_VALUE = {"USD": 1.0, "EUR": 1.08, "GBP": 1.27, "CHF": 1.12, "JPY": 0.0067, "KZT": 0.0021}
 BASES = ("USD", "EUR", "GBP", "KZT")
@@ -47,18 +50,47 @@ INVOICE_FIELDS = ("doc_id", "invoice_id", "entity_id", "issued_at", "due_at", "c
                   "total_minor", "line_items")
 PAYMENT_FIELDS = ("doc_id", "payment_id", "timestamp", "currency", "amount_minor", "invoice_refs")
 FX_FIELDS = ("fx_id", "date", "source_currency", "target_currency", "rate")
-# Config keys that change the generated company (others only change env behaviour).
-GEN_KEYS = ("errors", "interacting", "n_invoices", "distractors")
 
 
 def canonical(obj) -> str:
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
+def secret() -> str:
+    """Grader-only key. Unset (public train/dev) -> episodes are reproducible by anyone. For hidden
+    runs set AUDITENV_SECRET in the grader process only: without it the seed cannot be recovered
+    from episode_id and episodes cannot be regenerated, even with this open-source generator."""
+    return os.environ.get("AUDITENV_SECRET", "")
+
+
+def gen_config(config: dict) -> dict:
+    """Normalise the generation-relevant config (equal meaning -> equal company)."""
+    explicit = "errors" in config or "interacting" in config
+    given_e, given_i = config.get("errors") or {}, config.get("interacting") or {}
+    for key, val in list(given_e.items()) + list(given_i.items()):
+        if key not in ISSUE_TYPES + SCENARIOS or isinstance(val, bool) or not isinstance(val, int) or val < 0:
+            raise ValueError(f"bad error config entry {key!r}: {val!r}")
+    n = config.get("n_invoices")
+    if n is not None and (isinstance(n, bool) or not isinstance(n, int) or not 10 <= n <= 100):
+        raise ValueError("n_invoices must be an int in [10, 100] (keeps documents <= 200)")
+    difficulty = config.get("difficulty", "default")
+    if difficulty not in DIFFICULTIES:
+        raise ValueError(f"difficulty must be one of {DIFFICULTIES}")
+    gen = {
+        "errors": {t: given_e.get(t, 0) for t in ISSUE_TYPES} if explicit else None,
+        "interacting": {k: given_i.get(k, 0) for k in SCENARIOS} if explicit else None,
+        "n_invoices": n,
+        "distractors": bool(config.get("distractors", True)),
+    }
+    if difficulty != "default":  # absent for default: default episodes stay byte-identical
+        gen["difficulty"] = difficulty
+    return gen
+
+
 def episode_id_for(seed: int, config: dict) -> str:
-    gen = {k: config.get(k) for k in GEN_KEYS + ("transform_seed",)}
-    digest = hashlib.sha256(f"{GENERATOR_VERSION}|{seed}|{canonical(gen)}".encode()).hexdigest()
-    return "ep_" + digest[:12]
+    msg = f"{GENERATOR_VERSION}|{seed}|{canonical(gen_config(config))}|{config.get('transform_seed')}"
+    key = (secret() or "auditenv-public").encode()
+    return "ep_" + hmac.new(key, msg.encode(), hashlib.sha256).hexdigest()[:12]
 
 
 def _month_end(d: date) -> date:
@@ -72,8 +104,9 @@ class State:
     def __init__(self, seed: int, config: dict):
         self.seed = seed
         self.config = config
-        gen = {k: config.get(k) for k in GEN_KEYS}
-        self.rng = random.Random(f"auditenv|{GENERATOR_VERSION}|{seed}|{canonical(gen)}")
+        self.gen = gen_config(config)
+        self.hard = self.gen.get("difficulty") == "hard"
+        self.rng = random.Random(f"auditenv|{secret()}|{GENERATOR_VERSION}|{seed}|{canonical(self.gen)}")
         rng = self.rng
         self.base = rng.choice(BASES)
         pool = [c for c in USD_VALUE if c != self.base]
@@ -171,7 +204,7 @@ class State:
                     offset_min: int | None = None, currency: str | None = None) -> dict:
         rng = self.rng
         if hour is None:
-            hour = rng.choice((0, 23)) if rng.random() < 0.08 else rng.randint(8, 19)
+            hour = rng.choice((0, 23)) if rng.random() < 0.08 else rng.randint(8, 22)
         instant = self.at(d, hour, rng.randrange(60))
         off = ent["offset"] if offset_min is None else offset_min
         local = instant.astimezone(parse_offset(offset_str(off)))
@@ -190,7 +223,7 @@ class State:
                     hour: int | None = None, offset_min: int | None = None) -> dict:
         rng = self.rng
         if hour is None:
-            hour = rng.choice((0, 23)) if rng.random() < 0.08 else rng.randint(9, 17)
+            hour = rng.choice((0, 23)) if rng.random() < 0.08 else rng.randint(8, 22)
         instant = self.at(d, hour, rng.randrange(60))
         off = self.bank_offset if offset_min is None else offset_min
         pay = {
@@ -277,10 +310,10 @@ class State:
 
 # ---------------------------------------------------------------- history
 def build_history(st: State) -> None:
-    rng, cfg = st.rng, st.config
-    distractors = cfg.get("distractors", True)
+    rng = st.rng
+    distractors = st.gen["distractors"]
     st.entities = [st.new_entity() for _ in range(rng.randint(8, 18))]
-    n_inv = cfg.get("n_invoices") or rng.randint(30, 60)
+    n_inv = st.gen["n_invoices"] or rng.randint(30, 60)
     for _ in range(n_inv):
         u = rng.random()
         if u < 0.2:
@@ -312,9 +345,18 @@ def build_history(st: State) -> None:
 
     for inv in list(st.invoices):
         if st.in_period(inv["_cdate"]):
-            st.book_invoice(inv)
+            lag = rng.randint(1, 3) if rng.random() < 0.3 else 0  # legitimate posting lag inside the period
+            if lag and inv["_cdate"] + timedelta(days=lag) <= st.pe:
+                st.book_invoice(inv, dt=st.at(inv["_cdate"] + timedelta(days=lag), rng.randint(8, 22),
+                                              rng.randrange(60)))
+            else:
+                st.book_invoice(inv)
 
     _build_payments(st, distractors)
+    if st.hard:
+        _build_reissues(st)
+    while len(st.invoices) + len(st.payments) < 22:  # keep >= 20 documents after any injection
+        st.book_invoice(st.new_invoice(rng.choice(st.entities), st.ps + timedelta(days=rng.randrange(st.ndays))))
     _build_expenses(st)
 
 
@@ -372,6 +414,35 @@ def _build_payments(st: State, distractors: bool) -> None:
         st.book_payment(st.new_payment(d, cur, amt, refs, ent))
 
 
+def _build_reissues(st: State) -> None:
+    """Hard mode: legitimate cancel-and-reissue. An unpaid invoice is reversed by a credit note
+    (Dr 4000 / Cr 1200, same invoice_id) and re-issued with identical line items under a new
+    number. It looks exactly like a duplicate unless the reversal in the ledger is checked."""
+    rng = st.rng
+    paid = {ref["invoice_id"] for p in st.payments for ref in p["invoice_refs"] or []}
+    def booked_at(inv):  # the AR row can lag the issue date (posting lag)
+        return next(r["_dt"] for r in st.journals["inv:" + inv["invoice_id"]] if r["account"] == "1200")
+
+    cands = [i for i in st.invoices if st.in_period(i["_cdate"]) and ("inv:" + i["invoice_id"]) in st.journals
+             and i["invoice_id"] not in paid and st.cdate(booked_at(i)) + timedelta(days=4) <= st.pe]
+    rng.shuffle(cands)
+    for orig in cands[: rng.randint(2, 3)]:
+        at = booked_at(orig).astimezone(st.tz)
+        d = at.date() + timedelta(days=rng.randint(0, 3))
+        if d == at.date() and at.hour >= 21:
+            d += timedelta(days=1)
+        hour = rng.randint(max(at.hour + 2, 9), 22) if d == at.date() else rng.randint(9, 22)
+        new = st.new_invoice(next(e for e in st.entities if e["id"] == orig["entity_id"]), d, hour=hour,
+                             items=copy.deepcopy(orig["line_items"]), currency=orig["currency"])
+        jid = "inv:" + orig["invoice_id"]
+        amt = next(r["debit_minor"] for r in st.journals[jid] if r["account"] == "1200")
+        dt = new["_dt"] - timedelta(minutes=rng.randint(1, 50))
+        e, i = orig["entity_id"], orig["invoice_id"]
+        st.journals[jid] += [st.row(dt, "4000", amt, e, i), st.row(dt, "1200", -amt, e, i)]
+        st.book_invoice(new)
+        st.touched.update({orig["invoice_id"], new["invoice_id"]})
+
+
 def _build_expenses(st: State) -> None:
     rng = st.rng
     scale = 10 ** EXPONENT[st.base] / USD_VALUE[st.base]
@@ -385,7 +456,7 @@ def _build_expenses(st: State) -> None:
     add(st.ps, "6100", rng.uniform(3000, 12000))
     add(st.ps + timedelta(days=14), "6200", rng.uniform(20000, 80000))
     add(st.pe, "6200", rng.uniform(20000, 80000))
-    target = rng.randint(230, 420)
+    target = rng.randint(900, 1400) if st.hard else rng.randint(230, 420)
     while len(st.ledger_rows()) < target:
         account = rng.choice(("6300", "6300", "6400", "6400", "6400"))
         usd = rng.uniform(20, 900) if account == "6300" else rng.uniform(1, 60)
@@ -394,14 +465,9 @@ def _build_expenses(st: State) -> None:
 
 # ---------------------------------------------------------------- render
 def _plan(st: State) -> tuple[dict, dict]:
-    cfg, rng = st.config, st.rng
-    if "errors" in cfg or "interacting" in cfg:  # explicit plan; missing entries = 0
-        given_e, given_i = cfg.get("errors") or {}, cfg.get("interacting") or {}
-        for key, val in list(given_e.items()) + list(given_i.items()):
-            if key not in ISSUE_TYPES + SCENARIOS or isinstance(val, bool) or not isinstance(val, int) or val < 0:
-                raise ValueError(f"bad error config entry {key!r}: {val!r}")
-        errors = {t: given_e.get(t, 0) for t in ISSUE_TYPES}
-        inter = {s: given_i.get(s, 0) for s in SCENARIOS}
+    rng = st.rng
+    if st.gen["errors"] is not None:
+        errors, inter = dict(st.gen["errors"]), dict(st.gen["interacting"])
     else:
         errors = {t: rng.choice((0, 0, 1, 1, 2)) for t in ISSUE_TYPES}
         inter = {s: int(rng.random() < 0.3) for s in SCENARIOS}
@@ -432,7 +498,7 @@ def render(st: State, episode_id: str) -> dict:
 
     def ev_id(e):
         kind, val = e
-        return val if kind == "doc" else key_to_id[val]
+        return key_to_id[val] if kind == "row" else val  # "doc" -> doc_id, "fx" -> fx_id
 
     issues = []
     for iss in st.issues:
@@ -471,7 +537,7 @@ def render(st: State, episode_id: str) -> dict:
         "truth": {"episode_id": episode_id, "issues": issues},
         "provenance": {
             "generator_version": GENERATOR_VERSION, "seed": st.seed,
-            "config": {k: st.config.get(k) for k in GEN_KEYS if k in st.config},
+            "config": st.gen,
             "company": {"base_currency": st.base, "foreign_currencies": st.foreign, "timezone": st.tz_str,
                         "bank_offset": offset_str(st.bank_offset), "entities": len(st.entities)},
             "injections": injections,
@@ -498,6 +564,9 @@ def policy_for(st: State) -> dict:
                        "rate; remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; "
                        "difference to 7900; negative amount = refund (Dr 2900 / Cr 1000)",
             "expense": "Dr 6xxx / Cr 1000",
+            **({"credit_note": "a cancelled invoice is reversed in full: Dr 4000 / Cr 1200 with the same "
+                               "invoice_id and no payment_id; a re-issued replacement is booked as a new invoice"}
+               if st.hard else {}),
         },
         "findings": {
             "amount": "misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the "
@@ -508,7 +577,11 @@ def policy_for(st: State) -> dict:
                              "payment_allocation": "[invoice_id, payment_id]",
                              "fx_error": "[invoice_id] or [payment_id]",
                              "period_cutoff": "[invoice_id]"},
-            "evidence": "doc_id / row_id values; must include at least one full acceptable evidence set",
+            "evidence": "doc_id / row_id / fx_id values; must include at least one full acceptable evidence set: "
+                        "duplicate_invoice: both invoice docs + the later copy's AR (or revenue) row; "
+                        "payment_allocation: payment doc + invoice doc + the AR credit row of that invoice in the "
+                        "payment (or, if nothing was allocated to it, the 2900 row) + the invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row "
+                        "+ the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row",
         },
     }
 
@@ -525,20 +598,24 @@ TASK_TEXT = (
 )
 
 
+TASK_HARD = (
+    " Hard mode: the ledger is larger; a duplicate copy may have its line items re-typed (other order, "
+    "case and punctuation of the descriptions) but the same products, quantities and prices; an invoice "
+    "cancelled by a full credit note and re-issued with the same line items is legitimate."
+)
+
+
 def generate(seed: int, config: dict | None = None) -> dict:
     """Generate one episode: public tables + grader-only truth and provenance."""
     from . import inject  # local import: inject uses State
 
     config = dict(config or {})
-    n = config.get("n_invoices")
-    if n is not None and (isinstance(n, bool) or not isinstance(n, int) or not 10 <= n <= 100):
-        raise ValueError("n_invoices must be an int in [10, 100] (keeps documents <= 200)")
     st = State(int(seed), config)
     build_history(st)
     errors, inter = _plan(st)
     inject.apply(st, errors, inter)
     episode = render(st, episode_id_for(int(seed), config))
-    episode["task"] = TASK_TEXT
+    episode["task"] = TASK_TEXT + (TASK_HARD if st.hard else "")
     if config.get("transform_seed") is not None:
         from .transform import transform
         episode = transform(episode, int(config["transform_seed"]))

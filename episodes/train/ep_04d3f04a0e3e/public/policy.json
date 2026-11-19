@@ -1,0 +1,43 @@
+{
+  "base_currency": "KZT",
+  "findings": {
+    "affected_ids": {
+      "duplicate_invoice": "[original_invoice_id, duplicate_invoice_id]",
+      "fx_error": "[invoice_id] or [payment_id]",
+      "payment_allocation": "[invoice_id, payment_id]",
+      "period_cutoff": "[invoice_id]"
+    },
+    "amount": "misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the AR debit of the later-issued copy; fx_error: abs(posted - correct); period_cutoff: the AR debit posted; payment_allocation: expected AR credit for the ref - AR credit posted",
+    "evidence": "doc_id / row_id / fx_id values; must include at least one full acceptable evidence set: duplicate_invoice: both invoice docs + the later copy's AR (or revenue) row; payment_allocation: payment doc + invoice doc + the AR credit row of that invoice in the payment (or, if nothing was allocated to it, the 2900 row) + the invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row + the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row",
+    "tolerance": "abs(claimed - expected) <= max(1, expected // 1000)"
+  },
+  "fx": {
+    "conversion": "base_minor = round_half_up(amount_minor / 10^exp_src * rate * 10^exp_base)",
+    "direction": "rate = units of target_currency per 1 unit of source_currency (major units)",
+    "rate_date": "transaction date in the company timezone (invoice: issued_at; payment: timestamp)"
+  },
+  "ledger": {
+    "accounts": {
+      "1000": "Cash",
+      "1200": "Accounts receivable",
+      "2900": "Unapplied cash",
+      "4000": "Revenue",
+      "6100": "Rent",
+      "6200": "Payroll",
+      "6300": "Software",
+      "6400": "Bank fees",
+      "7900": "FX gain/loss"
+    },
+    "currency": "every ledger row is in base_currency",
+    "expense": "Dr 6xxx / Cr 1000",
+    "invoice": "Dr 1200 / Cr 4000 at the invoice issue-date rate, only for invoices issued in the period",
+    "payment": "Dr 1000 at the payment-date rate; Cr 1200 per invoice_ref at that invoice's issue-date rate; remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; difference to 7900; negative amount = refund (Dr 2900 / Cr 1000)"
+  },
+  "period": {
+    "end": "2026-11-30",
+    "rule": "a record belongs to the period iff its timestamp converted to the company timezone has a date in [start, end] (inclusive)",
+    "start": "2026-11-01"
+  },
+  "rounding": "ROUND_HALF_UP to integer minor units",
+  "timezone": "+09:00"
+}

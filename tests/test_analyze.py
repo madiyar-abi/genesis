@@ -35,7 +35,7 @@ class AnalyzeTests(unittest.TestCase):
         self.assertEqual(report["fp_total"], 0)
         self.assertEqual(report["fp_by_reason"], {})
         self.assertEqual(report["mean"], {
-            "precision": 0.5, "recall": 0.5, "f1": 1.0, "return": 1.0, "steps": 1,
+            "precision": 1.0, "recall": 1.0, "f1": 1.0, "return": 1.0, "steps": 1,
         })
 
     def test_flag_all_counts_false_positive_reasons_and_missed_issues(self):

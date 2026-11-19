@@ -1,0 +1,351 @@
+{
+  "company": {
+    "bank_offset": "+03:00",
+    "base_currency": "KZT",
+    "entities": 17,
+    "foreign_currencies": [
+      "CHF",
+      "GBP"
+    ],
+    "timezone": "+01:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 2,
+      "payment_allocation": 2,
+      "period_cutoff": 1
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 65
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 1031778666,
+              "entity_id": "C-8623",
+              "invoice_id": "INV-291775",
+              "payment_id": null,
+              "row_id": "GL-000633",
+              "timestamp": "2026-03-31T21:10:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1031778666,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-8623",
+              "invoice_id": "INV-291775",
+              "payment_id": null,
+              "row_id": "GL-000632",
+              "timestamp": "2026-03-31T21:10:00+01:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-291775"
+        }
+      ],
+      "description": "invoice INV-291775 issued 2026-04-04 (outside the period) booked on 2026-03-31",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 103544452,
+              "entity_id": "C-0624",
+              "invoice_id": "INV-155461",
+              "payment_id": null,
+              "row_id": "GL-000544",
+              "timestamp": "2026-03-24T16:48:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 103544452,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-0624",
+              "invoice_id": "INV-155461",
+              "payment_id": null,
+              "row_id": "GL-000543",
+              "timestamp": "2026-03-24T16:48:00+01:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 104190475,
+              "entity_id": "C-0624",
+              "invoice_id": "INV-155461",
+              "payment_id": null,
+              "row_id": "GL-000544",
+              "timestamp": "2026-03-24T16:48:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 104190475,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-0624",
+              "invoice_id": "INV-155461",
+              "payment_id": null,
+              "row_id": "GL-000543",
+              "timestamp": "2026-03-24T16:48:00+01:00"
+            }
+          ],
+          "journal": "inv:INV-155461"
+        }
+      ],
+      "description": "invoice INV-155461 converted with the 2026-03-26 rate instead of 2026-03-21",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 225592731,
+              "entity_id": "C-0335",
+              "invoice_id": "INV-782395",
+              "payment_id": null,
+              "row_id": "GL-000577",
+              "timestamp": "2026-03-27T11:54:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 225592731,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-0335",
+              "invoice_id": "INV-782395",
+              "payment_id": null,
+              "row_id": "GL-000578",
+              "timestamp": "2026-03-27T11:54:00+01:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 224235239,
+              "entity_id": "C-0335",
+              "invoice_id": "INV-782395",
+              "payment_id": null,
+              "row_id": "GL-000577",
+              "timestamp": "2026-03-27T11:54:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 224235239,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-0335",
+              "invoice_id": "INV-782395",
+              "payment_id": null,
+              "row_id": "GL-000578",
+              "timestamp": "2026-03-27T11:54:00+01:00"
+            }
+          ],
+          "journal": "inv:INV-782395"
+        }
+      ],
+      "description": "invoice INV-782395 converted with the 2026-03-24 rate instead of 2026-03-27",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 500617900,
+              "entity_id": "C-0931",
+              "invoice_id": null,
+              "payment_id": "RCPT0978245",
+              "row_id": "GL-000428",
+              "timestamp": "2026-03-12T16:11:00+01:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 256999544,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-0931",
+              "invoice_id": "INV-198981",
+              "payment_id": "RCPT0978245",
+              "row_id": "GL-000429",
+              "timestamp": "2026-03-12T16:11:00+01:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 246433406,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-0931",
+              "invoice_id": null,
+              "payment_id": "RCPT0978245",
+              "row_id": "GL-000430",
+              "timestamp": "2026-03-12T16:11:00+01:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 2815050,
+              "entity_id": "C-0931",
+              "invoice_id": null,
+              "payment_id": "RCPT0978245",
+              "row_id": "GL-000427",
+              "timestamp": "2026-03-12T16:11:00+01:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 500617900,
+              "entity_id": "C-0931",
+              "invoice_id": null,
+              "payment_id": "RCPT0978245",
+              "row_id": "GL-000428",
+              "timestamp": "2026-03-12T16:11:00+01:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 506162156,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-0931",
+              "invoice_id": "INV-198981",
+              "payment_id": "RCPT0978245",
+              "row_id": "GL-000429",
+              "timestamp": "2026-03-12T16:11:00+01:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 5544256,
+              "entity_id": "C-0931",
+              "invoice_id": null,
+              "payment_id": "RCPT0978245",
+              "row_id": "GL-000427",
+              "timestamp": "2026-03-12T16:11:00+01:00"
+            }
+          ],
+          "journal": "pay:RCPT0978245"
+        }
+      ],
+      "description": "payment RCPT0978245 allocated partially to INV-198981; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 126463200,
+              "entity_id": "C-8123",
+              "invoice_id": null,
+              "payment_id": "RCPT0963841",
+              "row_id": "GL-000553",
+              "timestamp": "2026-03-25T16:07:00+01:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 89123913,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-8123",
+              "invoice_id": "INV-488937",
+              "payment_id": "RCPT0963841",
+              "row_id": "GL-000551",
+              "timestamp": "2026-03-25T16:07:00+01:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 37339287,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-8123",
+              "invoice_id": null,
+              "payment_id": "RCPT0963841",
+              "row_id": "GL-000552",
+              "timestamp": "2026-03-25T16:07:00+01:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 126463200,
+              "entity_id": "C-8123",
+              "invoice_id": null,
+              "payment_id": "RCPT0963841",
+              "row_id": "GL-000553",
+              "timestamp": "2026-03-25T16:07:00+01:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 126463200,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-8123",
+              "invoice_id": "INV-488937",
+              "payment_id": "RCPT0963841",
+              "row_id": "GL-000551",
+              "timestamp": "2026-03-25T16:07:00+01:00"
+            }
+          ],
+          "journal": "pay:RCPT0963841"
+        }
+      ],
+      "description": "payment RCPT0963841 allocated partially to INV-488937; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-5",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 2009
+}

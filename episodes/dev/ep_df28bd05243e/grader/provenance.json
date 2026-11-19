@@ -1,0 +1,258 @@
+{
+  "company": {
+    "bank_offset": "-05:00",
+    "base_currency": "KZT",
+    "entities": 13,
+    "foreign_currencies": [
+      "CHF",
+      "EUR",
+      "JPY"
+    ],
+    "timezone": "+05:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 0,
+      "payment_allocation": 2,
+      "period_cutoff": 2
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 70
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 360401300,
+              "entity_id": "CUST80177",
+              "invoice_id": "F0101155",
+              "payment_id": null,
+              "row_id": "GL-004656",
+              "timestamp": "2025-04-03T10:00:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 360401300,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST80177",
+              "invoice_id": "F0101155",
+              "payment_id": null,
+              "row_id": "GL-004655",
+              "timestamp": "2025-04-03T10:00:00+05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:F0101155"
+        }
+      ],
+      "description": "invoice F0101155 issued 2025-03-23 (outside the period) booked on 2025-04-03",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 558298700,
+              "entity_id": "CUST34012",
+              "invoice_id": "F0184118",
+              "payment_id": null,
+              "row_id": "GL-004649",
+              "timestamp": "2025-04-01T21:10:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 558298700,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST34012",
+              "invoice_id": "F0184118",
+              "payment_id": null,
+              "row_id": "GL-004650",
+              "timestamp": "2025-04-01T21:10:00+05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:F0184118"
+        }
+      ],
+      "description": "invoice F0184118 issued 2025-03-23 (outside the period) booked on 2025-04-01",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 227210437,
+              "entity_id": "CUST32241",
+              "invoice_id": null,
+              "payment_id": "RCPT0386503",
+              "row_id": "GL-004819",
+              "timestamp": "2025-04-15T21:46:00+05:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 227210437,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST32241",
+              "invoice_id": null,
+              "payment_id": "RCPT0386503",
+              "row_id": "GL-004820",
+              "timestamp": "2025-04-15T21:46:00+05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 227210437,
+              "entity_id": "CUST32241",
+              "invoice_id": null,
+              "payment_id": "RCPT0386503",
+              "row_id": "GL-004819",
+              "timestamp": "2025-04-15T21:46:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 227210437,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST32241",
+              "invoice_id": "F0607880",
+              "payment_id": "RCPT0386503",
+              "row_id": "pre-130",
+              "timestamp": "2025-04-15T21:46:00+05:00"
+            }
+          ],
+          "journal": "pay:RCPT0386503"
+        }
+      ],
+      "description": "payment RCPT0386503 allocated nothing to F0607880; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 236984478,
+              "entity_id": "CUST93414",
+              "invoice_id": null,
+              "payment_id": "RCPT0064871",
+              "row_id": "GL-004848",
+              "timestamp": "2025-04-17T11:03:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 179117415,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST93414",
+              "invoice_id": "F0991018",
+              "payment_id": "RCPT0064871",
+              "row_id": "GL-004846",
+              "timestamp": "2025-04-17T11:03:00+05:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 53024176,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST93414",
+              "invoice_id": null,
+              "payment_id": "RCPT0064871",
+              "row_id": "GL-004847",
+              "timestamp": "2025-04-17T11:03:00+05:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 4842887,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST93414",
+              "invoice_id": null,
+              "payment_id": "RCPT0064871",
+              "row_id": "GL-004845",
+              "timestamp": "2025-04-17T11:03:00+05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 236984478,
+              "entity_id": "CUST93414",
+              "invoice_id": null,
+              "payment_id": "RCPT0064871",
+              "row_id": "GL-004848",
+              "timestamp": "2025-04-17T11:03:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 230745692,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST93414",
+              "invoice_id": "F0991018",
+              "payment_id": "RCPT0064871",
+              "row_id": "GL-004846",
+              "timestamp": "2025-04-17T11:03:00+05:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 6238786,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST93414",
+              "invoice_id": null,
+              "payment_id": "RCPT0064871",
+              "row_id": "GL-004845",
+              "timestamp": "2025-04-17T11:03:00+05:00"
+            }
+          ],
+          "journal": "pay:RCPT0064871"
+        }
+      ],
+      "description": "payment RCPT0064871 allocated partially to F0991018; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 2007
+}

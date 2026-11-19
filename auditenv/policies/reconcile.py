@@ -16,8 +16,17 @@ from decimal import Decimal
 from ..money import convert, local_date, parse_offset
 
 
-def reconcile_findings(manifest: dict, tables: dict) -> list[dict]:
+def _line_key(items: list[dict]) -> tuple:
+    """Lines compared without order, case or punctuation (re-typed copies in hard mode)."""
+    return tuple(sorted(("".join(ch for ch in li["description"].lower() if ch.isalnum()), li["quantity"],
+                         li["unit_price_minor"], li["amount_minor"]) for li in items))
+
+
+def reconcile_findings(manifest: dict, tables: dict, hard: bool = False) -> list[dict]:
     """Audit public records and return detected financial misstatements.
+
+    `hard=True` adds the hard-mode rules from the policy: line items match regardless of order,
+    case and punctuation, and an invoice reversed by a full credit note is not a duplicate.
 
     Detects:
     - `duplicate_invoice`: same entity, currency, identical line items booked twice.
@@ -57,6 +66,11 @@ def reconcile_findings(manifest: dict, tables: dict) -> list[dict]:
             ledger_by_pay[r["payment_id"]].append(r)
 
     findings: list[dict] = []
+    voided = set()
+    if hard:  # full credit note: Cr 1200 on the invoice without a payment
+        for iid, rows in ledger_by_inv.items():
+            if any(r["account"] == "1200" and r["credit_minor"] > 0 and not r.get("payment_id") for r in rows):
+                voided.add(iid)
 
     # ------------------------------------------------------------------
     # 1. duplicate_invoice
@@ -73,7 +87,7 @@ def reconcile_findings(manifest: dict, tables: dict) -> list[dict]:
             for j in range(i + 1, len(inv_list)):
                 inv1, inv2 = inv_list[i], inv_list[j]
                 id1, id2 = inv1["invoice_id"], inv2["invoice_id"]
-                if id1 in handled_dups or id2 in handled_dups:
+                if id1 in handled_dups or id2 in handled_dups or id1 in voided or id2 in voided:
                     continue
                 d1 = local_date(inv1["issued_at"], tz)
                 d2 = local_date(inv2["issued_at"], tz)
@@ -84,7 +98,7 @@ def reconcile_findings(manifest: dict, tables: dict) -> list[dict]:
                 items2 = inv2.get("line_items")
                 identical = False
                 if items1 is not None and items2 is not None:
-                    if items1 == items2:
+                    if items1 == items2 or (hard and _line_key(items1) == _line_key(items2)):
                         identical = True
                 elif inv1.get("total_minor") == inv2.get("total_minor"):
                     identical = True
@@ -147,7 +161,7 @@ def reconcile_findings(manifest: dict, tables: dict) -> list[dict]:
             correct_ar = to_base(inv["total_minor"], inv["currency"], d_inv)
             diff = abs(ar_row["debit_minor"] - correct_ar)
             if diff > 0:
-                ev = [inv["doc_id"], ar_row["row_id"]]
+                ev = [inv["doc_id"], ar_row["row_id"], f"{d_inv.isoformat()}:{inv['currency']}:{base}"]
                 if rev_row:
                     ev.append(rev_row["row_id"])
                 findings.append({
@@ -178,7 +192,8 @@ def reconcile_findings(manifest: dict, tables: dict) -> list[dict]:
                         "affected_ids": [pay_id],
                         "claimed_amount_minor": diff,
                         "currency": base,
-                        "evidence_ids": [pay["doc_id"], cash_row["row_id"]],
+                        "evidence_ids": [pay["doc_id"], cash_row["row_id"],
+                                         f"{d_pay.isoformat()}:{pay['currency']}:{base}"],
                         "explanation": "payment cash converted with wrong FX rate date",
                     })
 
@@ -205,7 +220,9 @@ def reconcile_findings(manifest: dict, tables: dict) -> list[dict]:
             diff = expected_credit - posted_credit
             if diff > 0:
                 unapp_rows = [r for r in ledger_by_pay[pay_id] if r["account"] == "2900"]
-                ev = [pay["doc_id"]]
+                ev = [pay["doc_id"], ref_inv["doc_id"]]
+                if pay["currency"] != base:
+                    ev.append(f"{d_inv.isoformat()}:{pay['currency']}:{base}")
                 if unapp_rows:
                     ev.append(unapp_rows[0]["row_id"])
                 for r in ar_credits:
@@ -226,6 +243,7 @@ class Reconcile:
     """Agent baseline policy: systematically reads all records, reconciles, and submits."""
 
     name = "reconcile"
+    hard = False
 
     def __init__(self, seed: int = 0):
         self.seed = seed
@@ -255,7 +273,7 @@ class Reconcile:
         remaining = observation.get("steps_remaining", 100)
         if remaining <= 1 and self.state != "done":
             self.state = "done"
-            f = reconcile_findings(self.manifest, self.tables)
+            f = reconcile_findings(self.manifest, self.tables, hard=self.hard)
             return {"type": "submit", "findings": {"episode_id": self.episode_id, "findings": f}}
 
         if self.state == "paging":
@@ -288,7 +306,7 @@ class Reconcile:
                             return {"type": "get_document", "doc_id": self.doc_queue.pop(0)}
                         else:
                             self.state = "done"
-                            f = reconcile_findings(self.manifest, self.tables)
+                            f = reconcile_findings(self.manifest, self.tables, hard=self.hard)
                             return {"type": "submit", "findings": {"episode_id": self.episode_id, "findings": f}}
 
         if self.state == "fetching_docs":
@@ -302,7 +320,14 @@ class Reconcile:
                 return {"type": "get_document", "doc_id": self.doc_queue.pop(0)}
             else:
                 self.state = "done"
-                f = reconcile_findings(self.manifest, self.tables)
+                f = reconcile_findings(self.manifest, self.tables, hard=self.hard)
                 return {"type": "submit", "findings": {"episode_id": self.episode_id, "findings": f}}
 
         return {"type": "submit", "findings": {"episode_id": self.episode_id, "findings": []}}
+
+
+class ReconcileHard(Reconcile):
+    """Reconcile plus the hard-mode policy rules (re-typed duplicates, credit notes)."""
+
+    name = "reconcile_hard"
+    hard = True

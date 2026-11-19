@@ -1,0 +1,255 @@
+{
+  "company": {
+    "bank_offset": "+01:00",
+    "base_currency": "KZT",
+    "entities": 8,
+    "foreign_currencies": [
+      "CHF",
+      "EUR",
+      "USD"
+    ],
+    "timezone": "+05:30"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 2,
+      "payment_allocation": 1,
+      "period_cutoff": 0
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 50
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 698834443,
+              "entity_id": "CUST43185",
+              "invoice_id": "F0926539",
+              "payment_id": null,
+              "row_id": "R944",
+              "timestamp": "2026-09-12T17:21:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 698834443,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST43185",
+              "invoice_id": "F0926539",
+              "payment_id": null,
+              "row_id": "R945",
+              "timestamp": "2026-09-12T17:21:00+05:30"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 692489272,
+              "entity_id": "CUST43185",
+              "invoice_id": "F0926539",
+              "payment_id": null,
+              "row_id": "R944",
+              "timestamp": "2026-09-12T17:21:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 692489272,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST43185",
+              "invoice_id": "F0926539",
+              "payment_id": null,
+              "row_id": "R945",
+              "timestamp": "2026-09-12T17:21:00+05:30"
+            }
+          ],
+          "journal": "inv:F0926539"
+        }
+      ],
+      "description": "invoice F0926539 converted with the 2026-09-09 rate instead of 2026-09-12",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 379240441,
+              "entity_id": "CUST92177",
+              "invoice_id": "F0425528",
+              "payment_id": null,
+              "row_id": "R1087",
+              "timestamp": "2026-09-29T11:30:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 379240441,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST92177",
+              "invoice_id": "F0425528",
+              "payment_id": null,
+              "row_id": "R1088",
+              "timestamp": "2026-09-29T11:30:00+05:30"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 379862366,
+              "entity_id": "CUST92177",
+              "invoice_id": "F0425528",
+              "payment_id": null,
+              "row_id": "R1087",
+              "timestamp": "2026-09-29T11:30:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 379862366,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST92177",
+              "invoice_id": "F0425528",
+              "payment_id": null,
+              "row_id": "R1088",
+              "timestamp": "2026-09-29T11:30:00+05:30"
+            }
+          ],
+          "journal": "inv:F0425528"
+        }
+      ],
+      "description": "invoice F0425528 converted with the 2026-09-26 rate instead of 2026-09-29",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 916532950,
+              "entity_id": "CUST43185",
+              "invoice_id": null,
+              "payment_id": "PAY-399993",
+              "row_id": "R946",
+              "timestamp": "2026-09-13T09:00:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 572200180,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST43185",
+              "invoice_id": "F0704395",
+              "payment_id": "PAY-399993",
+              "row_id": "R948",
+              "timestamp": "2026-09-13T09:00:00+05:30"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 348137339,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST43185",
+              "invoice_id": null,
+              "payment_id": "PAY-399993",
+              "row_id": "R947",
+              "timestamp": "2026-09-13T09:00:00+05:30"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 3804569,
+              "entity_id": "CUST43185",
+              "invoice_id": null,
+              "payment_id": "PAY-399993",
+              "row_id": "R949",
+              "timestamp": "2026-09-13T09:00:00+05:30"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 916532950,
+              "entity_id": "CUST43185",
+              "invoice_id": null,
+              "payment_id": "PAY-399993",
+              "row_id": "R946",
+              "timestamp": "2026-09-13T09:00:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 572200180,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST43185",
+              "invoice_id": "F0704395",
+              "payment_id": "PAY-399993",
+              "row_id": "R948",
+              "timestamp": "2026-09-13T09:00:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 350468305,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "CUST43185",
+              "invoice_id": "F0244914",
+              "payment_id": "PAY-399993",
+              "row_id": "pre-88",
+              "timestamp": "2026-09-13T09:00:00+05:30"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 6135535,
+              "entity_id": "CUST43185",
+              "invoice_id": null,
+              "payment_id": "PAY-399993",
+              "row_id": "R949",
+              "timestamp": "2026-09-13T09:00:00+05:30"
+            }
+          ],
+          "journal": "pay:PAY-399993"
+        }
+      ],
+      "description": "payment PAY-399993 allocated nothing to F0244914; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 2005
+}

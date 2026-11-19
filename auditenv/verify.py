@@ -16,6 +16,7 @@ reuse generator internals. For each episode it checks:
 from __future__ import annotations
 
 import copy
+import os
 from collections import defaultdict
 from datetime import date
 
@@ -64,11 +65,25 @@ class Books:
             if sum(r["debit_minor"] for r in rows) != sum(r["credit_minor"] for r in rows):
                 problems.append(f"unbalanced journal {jid}")
         # invoices: booking, period, FX
-        booked = {}
+        booked, self.voided = {}, set()
         for jid, rows in js.items():
             if jid.startswith("inv:"):
                 ar = [r for r in rows if r["account"] == "1200"]
                 rev = [r for r in rows if r["account"] == "4000"]
+                if len(ar) == 2 and len(rev) == 2:  # booking + full credit note (cancelled invoice)
+                    ar_dr = [r for r in ar if r["debit_minor"]]
+                    amounts = {r["debit_minor"] + r["credit_minor"] for r in ar + rev}
+                    reversal = [r for r in ar + rev if (r["account"] == "1200") == bool(r["credit_minor"])]
+                    if len(ar_dr) != 1 or len(amounts) != 1 or len(reversal) != 2 \
+                            or reversal[0]["timestamp"] != reversal[1]["timestamp"] \
+                            or datetime_key(reversal[0]["timestamp"]) < datetime_key(ar_dr[0]["timestamp"]):
+                        problems.append(f"malformed credit note in {jid}")
+                        continue
+                    if not self.in_period(reversal[0]["timestamp"]):
+                        problems.append(f"credit note {reversal[0]['row_id']} outside the period")
+                    self.voided.add(jid[4:])
+                    ar = ar_dr
+                    rev = [r for r in rev if r["credit_minor"]]
                 if len(ar) != 1 or len(rev) != 1 or ar[0]["debit_minor"] != rev[0]["credit_minor"]:
                     problems.append(f"malformed invoice journal {jid}")
                     continue
@@ -90,10 +105,13 @@ class Books:
                 problems.append(f"invoice {iid} total != line items")
             if self.in_period(inv["issued_at"]) and iid not in booked:
                 problems.append(f"in-period invoice {iid} not booked")
-        # duplicates: same entity, currency, identical line items -> later copy
+        # duplicates: same entity, currency, same line items (re-typed text allowed) -> later copy;
+        # an invoice cancelled by a full credit note is not a duplicate of its replacement
         seen = defaultdict(list)
         for inv in self.invoices.values():
-            key = (inv["entity_id"], inv["currency"], repr(inv["line_items"]))
+            if inv["invoice_id"] in self.voided:
+                continue
+            key = (inv["entity_id"], inv["currency"], line_key(inv["line_items"]))
             seen[key].append(inv)
         for group in seen.values():
             if len(group) < 2:
@@ -142,6 +160,12 @@ class Books:
         return issues, problems
 
 
+def line_key(items: list[dict]) -> tuple:
+    """Order-, case- and punctuation-insensitive identity of an invoice's lines."""
+    return tuple(sorted(("".join(ch for ch in li["description"].lower() if ch.isalnum()), li["quantity"],
+                         li["unit_price_minor"], li["amount_minor"]) for li in items))
+
+
 def datetime_key(ts: str):
     from .money import parse_ts
     return parse_ts(ts)
@@ -186,6 +210,55 @@ def revert(ep: dict) -> dict:
     return tables
 
 
+def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> list[str]:
+    """Recompute the declared amount from the evidence records alone (plus the manifest)."""
+    ev_rows = [rows[i] for i in s if i in rows]
+    ev_docs = [docs[i] for i in s if i in docs]
+    rates = {i: books.fx[tuple(i.split(":"))] for i in s if i.count(":") == 2 and tuple(i.split(":")) in books.fx}
+
+    def conv(amount, cur, ts):
+        if cur == books.base:
+            return amount
+        key = f"{books.cdate(ts).isoformat()}:{cur}:{books.base}"
+        if key not in rates:
+            raise KeyError(key)
+        return convert(amount, cur, books.base, rates[key])
+
+    typ, exp = iss["type"], iss["expected_amount_minor"]
+    try:
+        if typ == "duplicate_invoice":
+            a, b = sorted(ev_docs, key=lambda d: datetime_key(d["issued_at"]))
+            same = (a["entity_id"], a["currency"], line_key(a["line_items"])) == \
+                (b["entity_id"], b["currency"], line_key(b["line_items"]))
+            got = next(r["debit_minor"] + r["credit_minor"] for r in ev_rows if r["invoice_id"] == b["invoice_id"])
+            ok = same and got == exp
+        elif typ == "period_cutoff":
+            inv = next(d for d in ev_docs if "invoice_id" in d)
+            row = ev_rows[0]
+            ok = (not books.in_period(inv["issued_at"]) and books.in_period(row["timestamp"])
+                  and row["debit_minor"] + row["credit_minor"] == exp)
+        elif typ == "fx_error":
+            doc, row = ev_docs[0], ev_rows[0]
+            if "invoice_id" in doc:
+                correct = conv(doc["total_minor"], doc["currency"], doc["issued_at"])
+            else:
+                correct = conv(doc["amount_minor"], doc["currency"], doc["timestamp"])
+            ok = abs(row["debit_minor"] + row["credit_minor"] - correct) == exp
+        else:  # payment_allocation
+            pay = next(d for d in ev_docs if "payment_id" in d)
+            inv = next(d for d in ev_docs if "invoice_id" in d and "payment_id" not in d)
+            ref = next(r for r in pay["invoice_refs"] if r["invoice_id"] == inv["invoice_id"])
+            expected = conv(ref["amount_minor"], pay["currency"], inv["issued_at"])
+            row = ev_rows[0]
+            if row["account"] == "1200":
+                ok = expected - row["credit_minor"] == exp
+            else:  # 2900 row: nothing was allocated, the whole ref went to unapplied cash -> amount = expected
+                ok = row["account"] == "2900" and row["payment_id"] == pay["payment_id"] and exp == expected
+        return [] if ok else [f"evidence set {s} does not reproduce the amount"]
+    except (KeyError, StopIteration, ValueError, IndexError):
+        return [f"evidence set {s} is missing a record needed to reproduce the amount"]
+
+
 def verify_episode(ep: dict) -> list[str]:
     problems = _structure(ep)
     m, t = ep["manifest"], ep["tables"]
@@ -204,12 +277,13 @@ def verify_episode(ep: dict) -> list[str]:
     # evidence
     rows = {r["row_id"]: r for r in t["ledger"]}
     docs = {d["doc_id"]: d for d in t["invoices"] + t["payments"]}
+    fx_ids = {r["fx_id"] for r in t["fx"]}
     for iss in ep["truth"]["issues"]:
         aff = set(iss["affected_ids"])
         if not iss["evidence_sets"]:
             problems.append(f"{iss['issue_id']}: no evidence set")
         for s in iss["evidence_sets"]:
-            if not set(s) <= rows.keys() | docs.keys():
+            if not set(s) <= rows.keys() | docs.keys() | fx_ids:
                 problems.append(f"{iss['issue_id']}: evidence id not in public tables")
                 continue
             if len(s) > 10:
@@ -219,8 +293,9 @@ def verify_episode(ep: dict) -> list[str]:
             row_ok = any(i in rows and (rows[i]["invoice_id"] in aff or rows[i]["payment_id"] in aff) for i in s)
             if not (doc_ok or iss["type"] == "duplicate_invoice") or not (row_ok or iss["type"] == "duplicate_invoice"):
                 problems.append(f"{iss['issue_id']}: evidence set does not cover the affected records")
-            if iss["type"] == "duplicate_invoice" and not (sum(i in docs for i in s) == 2 or sum(i in rows for i in s) == 2):
-                problems.append(f"{iss['issue_id']}: duplicate evidence must show both copies")
+            if iss["type"] == "duplicate_invoice" and sum(i in docs for i in s) != 2:
+                problems.append(f"{iss['issue_id']}: duplicate evidence must show both documents")
+            problems += [f"{iss['issue_id']}: {p}" for p in _sufficient(Books(m, t), iss, s, rows, docs)]
     return problems
 
 
@@ -232,16 +307,36 @@ def main(argv=None) -> int:
 
     ap = argparse.ArgumentParser(description="verify generated episodes")
     ap.add_argument("--seeds", default="0-199")
+    ap.add_argument("--dir", default=None,
+                    help="verify every episode under this directory (e.g. episodes/dev)")
     args = ap.parse_args(argv)
-    bad = 0
+    bad = total = 0
+
+    if args.dir:
+        from .load import load_episode
+
+        for entry in sorted(os.listdir(args.dir)):
+            ep_path = os.path.join(args.dir, entry)
+            if not os.path.isdir(ep_path) or not os.path.isdir(os.path.join(ep_path, "public")):
+                continue
+            ep = load_episode(ep_path)
+            total += 1
+            probs = verify_episode(ep)
+            if probs:
+                bad += 1
+                print(f"{entry}: {probs[:3]}")
+        print(f"{total - bad}/{total} episodes valid; episodes with problems: {bad}")
+        return 1 if bad else 0
+
     for seed in parse_seeds(args.seeds):
         for cfg in (None, {"errors": {}}, {"errors": {"duplicate_invoice": 2, "payment_allocation": 2, "fx_error": 2,
                                                        "period_cutoff": 2}, "interacting": {"I1": 1, "I2": 1}}):
+            total += 1
             probs = verify_episode(generate(seed, cfg))
             if probs:
                 bad += 1
                 print(seed, cfg, probs[:3])
-    print("episodes with problems:", bad)
+    print(f"{total - bad}/{total} episodes valid; episodes with problems: {bad}")
     return 1 if bad else 0
 
 

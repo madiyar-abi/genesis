@@ -1,0 +1,16 @@
+{"amount_minor": 4249144, "currency": "JPY", "doc_id": "DOC0684035", "invoice_refs": [{"amount_minor": 4249144, "invoice_id": "INV-951221"}], "payment_id": "PAY-260341", "timestamp": "2026-03-02T03:39:00+00:00"}
+{"amount_minor": 1606435, "currency": "JPY", "doc_id": "DOC0195489", "invoice_refs": [{"amount_minor": 1606435, "invoice_id": "INV-192896"}], "payment_id": "PAY-216528", "timestamp": "2026-03-03T18:07:00+00:00"}
+{"amount_minor": 2217300, "currency": "GBP", "doc_id": "DOC0235440", "invoice_refs": [{"amount_minor": 2217300, "invoice_id": "INV-218385"}], "payment_id": "PAY-354311", "timestamp": "2026-03-07T09:30:00+00:00"}
+{"amount_minor": 1388400, "currency": "GBP", "doc_id": "DOC0092849", "invoice_refs": [{"amount_minor": 1388400, "invoice_id": "INV-646489"}], "payment_id": "PAY-810505", "timestamp": "2026-03-07T12:52:00+00:00"}
+{"amount_minor": 317651, "currency": "JPY", "doc_id": "DOC0647858", "invoice_refs": [{"amount_minor": 317651, "invoice_id": "INV-609938"}], "payment_id": "PAY-840546", "timestamp": "2026-03-10T09:02:00+00:00"}
+{"amount_minor": 192229, "currency": "GBP", "doc_id": "DOC0338798", "invoice_refs": [{"amount_minor": 184500, "invoice_id": "INV-140709"}], "payment_id": "PAY-900293", "timestamp": "2026-03-12T18:11:00+00:00"}
+{"amount_minor": 449831, "currency": "JPY", "doc_id": "DOC0676547", "invoice_refs": [{"amount_minor": 449831, "invoice_id": "INV-609938"}], "payment_id": "PAY-364740", "timestamp": "2026-03-14T15:04:00+00:00"}
+{"amount_minor": 2570791, "currency": "JPY", "doc_id": "DOC0466477", "invoice_refs": [{"amount_minor": 2570791, "invoice_id": "INV-822998"}], "payment_id": "PAY-018175", "timestamp": "2026-03-19T07:11:00+00:00"}
+{"amount_minor": -7729, "currency": "GBP", "doc_id": "DOC0376900", "invoice_refs": null, "payment_id": "PAY-238978", "timestamp": "2026-03-19T16:39:00+00:00"}
+{"amount_minor": 226900, "currency": "GBP", "doc_id": "DOC0710757", "invoice_refs": null, "payment_id": "PAY-692967", "timestamp": "2026-03-21T04:57:00+00:00"}
+{"amount_minor": 958968, "currency": "JPY", "doc_id": "DOC0870479", "invoice_refs": [{"amount_minor": 958968, "invoice_id": "INV-709159"}], "payment_id": "PAY-153165", "timestamp": "2026-03-21T07:19:00+00:00"}
+{"amount_minor": 142978, "currency": "JPY", "doc_id": "DOC0846658", "invoice_refs": [{"amount_minor": 142978, "invoice_id": "INV-931492"}], "payment_id": "PAY-452982", "timestamp": "2026-03-23T16:51:00+00:00"}
+{"amount_minor": 136141, "currency": "JPY", "doc_id": "DOC0711058", "invoice_refs": [{"amount_minor": 136141, "invoice_id": "INV-177598"}], "payment_id": "PAY-137885", "timestamp": "2026-03-24T05:26:00+00:00"}
+{"amount_minor": 1351600, "currency": "JPY", "doc_id": "DOC0876228", "invoice_refs": [{"amount_minor": 1351600, "invoice_id": "INV-709159"}], "payment_id": "PAY-904739", "timestamp": "2026-03-27T07:58:00+00:00"}
+{"amount_minor": 72191, "currency": "JPY", "doc_id": "DOC0465321", "invoice_refs": [{"amount_minor": 72191, "invoice_id": "INV-931492"}], "payment_id": "PAY-635287", "timestamp": "2026-03-28T15:00:00+00:00"}
+{"amount_minor": 930700, "currency": "GBP", "doc_id": "DOC0507441", "invoice_refs": [{"amount_minor": 930700, "invoice_id": "INV-576169"}], "payment_id": "PAY-743521", "timestamp": "2026-03-29T02:50:00+00:00"}

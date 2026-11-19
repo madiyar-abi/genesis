@@ -1,6 +1,6 @@
 """Error injectors (CONTRACT §3). Each one changes the correct history, records the
 before/after journals (provenance) and a truth issue with its evidence sets.
-Evidence references are ("doc", doc_id) or ("row", internal row key)."""
+Evidence references are ("doc", doc_id), ("row", internal row key) or ("fx", fx_id)."""
 
 from __future__ import annotations
 
@@ -34,6 +34,10 @@ def _booked(st, inv):
     return ("inv:" + inv["invoice_id"]) in st.journals
 
 
+def _fx(st, d: date, cur: str):
+    return ("fx", f"{d.isoformat()}:{cur}:{st.base}")
+
+
 def _free(st, *ids):
     return not any(i in st.touched for i in ids)
 
@@ -49,6 +53,21 @@ def _wrong_date(st, correct: date, local_ts: str, amount: int, cur: str) -> date
     return next((d for d in order if good(d)), None)
 
 
+def _retype(st, items: list[dict]) -> list[dict]:
+    """Hard mode: the same lines keyed in again by hand: other order, case and ref punctuation."""
+    items = [dict(i) for i in items]
+    st.rng.shuffle(items)
+    for i in items:
+        name, sep, ref = i["description"].rpartition(" (")
+        upper = st.rng.random() < 0.5
+        if not sep:  # no reference to re-type (e.g. retainer text): change the case only
+            i["description"] = i["description"].upper() if upper else i["description"].lower()
+            continue
+        ref = ref.rstrip(")").replace("-", st.rng.choice((" ", "", "/")))
+        i["description"] = f"{name.upper() if upper else name.lower()} - {ref}"
+    return items
+
+
 # ---------------------------------------------------------------- single errors
 def duplicate_invoice(st, scenario="single") -> bool:
     cands = [i for i in st.invoices if st.in_period(i["_cdate"]) and _booked(st, i) and _free(st, i["invoice_id"])
@@ -61,16 +80,17 @@ def duplicate_invoice(st, scenario="single") -> bool:
     if d == orig["_cdate"] and hour is None:
         d += timedelta(days=1)
     # the duplicate is always issued strictly after the original (truth amount = later copy)
-    dup = st.new_invoice(_entity(st, orig["entity_id"]), d, hour=hour,
-                         items=copy.deepcopy(orig["line_items"]), currency=orig["currency"])
+    items = copy.deepcopy(orig["line_items"])
+    if st.hard and st.rng.random() < 0.5:
+        items = _retype(st, items)
+    dup = st.new_invoice(_entity(st, orig["entity_id"]), d, hour=hour, items=items, currency=orig["currency"])
     jid = st.book_invoice(dup)
     st.touched.update({orig["invoice_id"], dup["invoice_id"]})
-    oj = "inv:" + orig["invoice_id"]
     ar = _row(st, jid, "1200")
     st.record({"type": "duplicate_invoice", "scenario": scenario,
                "affected_ids": [orig["invoice_id"], dup["invoice_id"]], "amount": ar["debit_minor"],
-               "evidence": [[("doc", orig["doc_id"]), ("doc", dup["doc_id"])],
-                            [("row", _row(st, oj, "1200")["_k"]), ("row", ar["_k"])]]},
+               "evidence": [[("doc", orig["doc_id"]), ("doc", dup["doc_id"]), ("row", ar["_k"])],
+                            [("doc", orig["doc_id"]), ("doc", dup["doc_id"]), ("row", _row(st, jid, "4000")["_k"])]]},
               [{"journal": jid, "before": None, "after": st.snapshot(jid)}], [dup["doc_id"]],
               f"invoice {orig['invoice_id']} entered a second time as {dup['invoice_id']} and booked again")
     return True
@@ -97,8 +117,8 @@ def fx_invoice(st, inv=None, rate_date=None, scenario="single") -> bool:
     st.touched.add(inv["invoice_id"])
     st.record({"type": "fx_error", "scenario": scenario, "affected_ids": [inv["invoice_id"]],
                "amount": abs(wrong - correct),
-               "evidence": [[("doc", inv["doc_id"]), ("row", ar["_k"])],
-                            [("doc", inv["doc_id"]), ("row", rev["_k"])]]},
+               "evidence": [[("doc", inv["doc_id"]), ("row", ar["_k"]), _fx(st, inv["_cdate"], inv["currency"])],
+                            [("doc", inv["doc_id"]), ("row", rev["_k"]), _fx(st, inv["_cdate"], inv["currency"])]]},
               [{"journal": jid, "before": before, "after": st.snapshot(jid)}], (),
               f"invoice {inv['invoice_id']} converted with the {rate_date} rate instead of {inv['_cdate']}")
     return True
@@ -114,7 +134,8 @@ def fx_payment(st, pay, rate_date, scenario="single") -> bool:
     st.rebalance(jid)
     st.touched.add(pay["payment_id"])
     st.record({"type": "fx_error", "scenario": scenario, "affected_ids": [pay["payment_id"]],
-               "amount": abs(wrong - correct), "evidence": [[("doc", pay["doc_id"]), ("row", cash["_k"])]]},
+               "amount": abs(wrong - correct),
+               "evidence": [[("doc", pay["doc_id"]), ("row", cash["_k"]), _fx(st, pay["_cdate"], pay["currency"])]]},
               [{"journal": jid, "before": before, "after": st.snapshot(jid)}], (),
               f"payment {pay['payment_id']} cash converted with the {rate_date} rate instead of {pay['_cdate']}")
     return True
@@ -163,9 +184,13 @@ def payment_allocation(st, pay=None, partial=None, scenario="single") -> bool:
         unapplied["credit_minor"] += add
     st.rebalance(jid)
     st.touched.update({pay["payment_id"], inv["invoice_id"]})
-    evidence = [[("doc", pay["doc_id"]), ("row", unapplied["_k"])]]
+    extra = [_fx(st, inv["_cdate"], cur)] if cur != st.base else []
+    # the set must reproduce the amount on its own: a partial allocation needs the AR credit actually
+    # posted; with nothing allocated the 2900 row shows where the money went (posted AR credit = 0)
     if partial:
-        evidence.append([("doc", pay["doc_id"]), ("row", ar["_k"])])
+        evidence = [[("doc", pay["doc_id"]), ("doc", inv["doc_id"]), ("row", ar["_k"])] + extra]
+    else:
+        evidence = [[("doc", pay["doc_id"]), ("doc", inv["doc_id"]), ("row", unapplied["_k"])] + extra]
     st.record({"type": "payment_allocation", "scenario": scenario,
                "affected_ids": [inv["invoice_id"], pay["payment_id"]], "amount": posted_before - new_credit,
                "evidence": evidence},
@@ -212,11 +237,10 @@ def scenario_i1(st) -> None:
     ent = _foreign_entity(st)
     inv = st.new_invoice(ent, st.ps + timedelta(days=rng.randrange(st.ndays - 3)))
     st.book_invoice(inv)
-    hour = rng.randint(20, 23)
-    need = 24 * 60 - hour * 60  # offset shift that moves the local date to the next day
-    offs = [m for m in range(-720, 841, 60) if m - st.tz_min >= need]
+    # ordinary bank offset and an ordinary evening hour: nothing about the document itself stands out;
+    # the clerk used the date written in the bank's timezone, or the next-day value date
     pay = st.new_payment(st.pe, inv["currency"], inv["total_minor"], [(inv, inv["total_minor"])], ent["id"],
-                         hour=hour, offset_min=offs[0] if offs else None)
+                         hour=rng.randint(18, 23))
     st.book_payment(pay)
     payment_allocation(st, pay=pay, partial=True, scenario="I1")
     cands = [datetime.fromisoformat(pay["timestamp"]).date(), st.pe + timedelta(days=1), st.pe + timedelta(days=2),
@@ -243,8 +267,8 @@ def scenario_i2(st) -> None:
     correct = st.conv(amt, cur, inv["_cdate"])
     st.record({"type": "fx_error", "scenario": "I2", "affected_ids": [inv["invoice_id"]],
                "amount": abs(ar["debit_minor"] - correct),
-               "evidence": [[("doc", inv["doc_id"]), ("row", ar["_k"])],
-                            [("doc", inv["doc_id"]), ("row", rev["_k"])]]},
+               "evidence": [[("doc", inv["doc_id"]), ("row", ar["_k"]), _fx(st, inv["_cdate"], cur)],
+                            [("doc", inv["doc_id"]), ("row", rev["_k"]), _fx(st, inv["_cdate"], cur)]]},
               [], (), f"invoice {inv['invoice_id']} converted with the {rate_date} rate instead of {inv['_cdate']}")
 
 
@@ -276,7 +300,7 @@ def _make_room(st, typ) -> None:
         inv = st.new_invoice(_foreign_entity(st), st.ps + timedelta(days=rng.randrange(st.ndays)))
         st.book_invoice(inv)
     elif typ == "duplicate_invoice":
-        inv = st.new_invoice(rng.choice(st.entities), st.ps + timedelta(days=rng.randrange(st.ndays - 3)))
+        inv = st.new_invoice(rng.choice(st.entities), st.ps + timedelta(days=rng.randrange(st.ndays - 4)))
         st.book_invoice(inv)
     elif typ == "payment_allocation":
         ent = rng.choice(st.entities)

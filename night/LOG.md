@@ -125,3 +125,75 @@
 ## 2026-11-19 14:02 — lead
 - Merged gemini T16: configs/{train,dev,eval_example}.json (config_version 1.0), auditenv/export.py, episodes/{train,dev} (10+10, 1.8 MB). Check uses configs/dev.json now: reconcile F1 1.000 / return 0.958; naive F1 0.325; random −0.614; flag-all −1.000; oracle 1.000.
 - T27 done: trajectories/train_{reconcile,random,naive_reconcile}.jsonl (train split, mode train, 3.6 MB) + tests/test_trajectory_files.py.
+
+## 2026-11-19 14:09 — gemini
+- T28 done: auditenv/load.py (load_episode: inverse of export — CSV empty cell → None, debit_minor/credit_minor → int, rate stays string), auditenv/verify.py main() updated with --dir option.
+- tests/test_load.py: 6 tests — roundtrip for dev and train (loaded == generate minus task key), verify_episode on all loaded episodes, --dir CLI exits 0.
+- All 181 tests pass. `uv run python -m auditenv.verify --dir episodes/dev` exits 0.
+- Next: no open gemini tasks remaining.
+## 2026-11-19 14:05 — codex
+- T29 blocked: added the seeded 40-episode step contract fuzz test. The test exercised more than 3,000 actions in 0.121 s, then reported these uncaught input-validation errors.
+- Episode 0, step 17: {"type":"get_record","table":{"a":{"b":1}},"id":{"a":{"b":1}}} raises TypeError (unhashable dict). Episode 0, step 22: {"type":"get_record","table":[],"id":[]} raises TypeError (unhashable list).
+- Episode 6, step 54: {"type":"list_records","table":"ledger","cursor":"ledger:²","limit":200} raises ValueError because the digit test accepts a character that integer parsing rejects.
+- Assumptions: use train and eval in alternation, keeping random submits near the end so the run reaches its action minimum. As assigned, the lead owns fixes in env.py. Re-run `uv run python -m unittest tests.test_fuzz` after those fixes.
+
+## 2026-11-19 14:14 — lead
+- Merged gemini T28 (load.py, verify --dir, roundtrip tests) and codex T29 (fuzz test; it found the env crash below).
+- Jury-style review subagent: 10 confirmed defects, all fixed:
+  1 BLOCKER seed recoverable from sha256 episode_id → HMAC id + AUDITENV_SECRET keys generator RNG (grader-only);
+  2 non-string table crashed step & allowed >100 steps → isinstance checks, catch-all bounded error, ascii cursor digits;
+  3 I1 payment had a unique UTC offset (P=1.0 shortcut) → uses the bank offset, ordinary hours widened to 8–22;
+  4 evidence not self-sufficient → fx_id + invoice doc added; verifier now recomputes amounts from each evidence set alone;
+  5 cutoff timestamp-mismatch shortcut (P=1.0) → legit posting lag 1–3 days (P now 0.09);
+  6 duplicate telltale hour (P=1.0) → ordinary hour range (P 0.02);
+  7 _make_room off-by-one crash; 8 <20 documents in tiny configs → top-up to 22; 9 server: skipped hidden episodes ungraded → abandon() grades them;
+  10 equivalent configs gave different companies → gen_config normalisation.
+- Re-exported episodes/, regenerated trajectories/. Reconcile stress 1200 episodes still 0 imperfect (max 30 steps). New dev numbers in DESIGN/PITCH.
+- tests/test_hardening.py (5 regression tests). 187 tests, check ALL PASSED.
+- Assumption: I2 double-reporting (cutoff + fx on one booking) kept as designed (documented interacting scenario).
+
+## 2026-11-19 15:10 — hinabaina + Claude (jury-review, phase 1)
+- Branch `hinabaina/jury-review` from `hinabaina/hard-mode` (hard mode approved by the user, included in the review).
+- Full read of auditenv/ + live probe of the jury checks (bad actions, leaks, limits, truncation, time limit, eval mode,
+  determinism, evidence reachable via tools on 30 seeds): no contract/isolation defect found.
+- Data finding: partial payment_allocation accepted an evidence set {payment doc, invoice doc, 2900 row, fx} that cannot
+  reproduce the amount (849/1200 sampled 2900-sets were partial); verifier check for 2900 sets was too weak.
+- Other findings: Docker never run, verify CLI has no totals, hard mode not in replay/transform tests, test gaps, PITCH/DESIGN
+  structure. All in REVIEW.md.
+
+## 2026-11-19 15:40 — hinabaina + Claude (jury-review, phase 2)
+- #1 fixed: payment_allocation evidence — partial → AR-credit set only; nothing allocated → 2900 set; verifier: 2900 set must
+  equal the full expected credit. Old dev export failed the new verifier (3/10 episodes) → re-exported train/dev, regenerated
+  trajectories (only the policy text changed; naive_reconcile lost 2 TPs that only matched the insufficient set).
+  Regression tests fail on the old verifier. New dev naive: 0.169/0.700/0.273, −0.506; hard naive 0.093/0.543/0.159, −0.747.
+- #2: GitHub Actions workflow (docker build + run --network none; plain Python check + verifier). #3 verify totals. #4 hard replay/transform test.
+- check: ALL CHECKS PASSED, 196 tests, 11.5 s.
+
+## 2026-11-19 16:00 — hinabaina + Claude (jury-review, phase 3)
+- CI run 44503197633 (GitHub Actions): docker build + `docker run --rm --network none auditenv` → ALL CHECKS PASSED; plain Python job too. REVIEW #2 closed.
+- tests/test_jury.py: 30 tests mapped to the jury checklist (contract, leaks, matcher/reward, reproducibility, exported data:
+  balance before/after, evidence reachable through the tools, manifest/truth schema, coverage of 4 types + I1 + I2 + clean).
+  Sensitivity: an injected `expected_amount_minor` in tool results and a removed episode_over guard both make them fail.
+- check: ALL CHECKS PASSED, 226 tests, 13.9 s.
+
+## 2026-11-19 16:20 — hinabaina + Claude (jury-review, phase 4)
+- New `python -m auditenv.fuzz` (seed sweep): per episode generate + verifier + oracle/random/flag-all through the env.
+- Default, seeds 0-999 × {random mix, clean, heavy} = 3000 episodes (1989 dirty, 1011 clean), 45 s: 0 exceptions,
+  0 verifier problems, oracle 1.0 everywhere (> 0.9 dirty, 1.0 clean); random > 0 on 245/3000, all on clean books
+  (it submitted nothing — the correct answer), 0 on dirty; flag-all < 0 on 3000/3000.
+- Hard, seeds 0-199 = 600 episodes (395 dirty): 0 problems; random > 0 on 50/600, 0 on dirty; flag-all < 0 on 600/600.
+- tests/test_fuzz_sweep.py (clean sweep + a corrupted ledger is reported); CI runs both sweeps.
+
+## 2026-11-19 16:50 — hinabaina + Claude (jury-review, phase 5)
+- README: why/how, error table, reward, results table, all commands (verify --dir, fuzz, stress, analyze, demo, export), layout, license.
+- DESIGN: §0 key decisions, worked examples per type/scenario from real dev episodes (amounts recomputed), seeds column,
+  edge-case table, seed sweep + reproducible stress (`auditenv.fuzz --stress`), naive numbers after the evidence fix.
+- PITCH: 10 slides in the requested order. DEMO: 15 s check, hard table, optional test_jury step; `demo --pause` and `--seed 2005` run.
+- tests: EdgeCaseDataTests (JPY, refunds, unidentified, multi-invoice, split payments, midnight documents). 231 tests, check PASSED 14.9 s.
+
+## 2026-11-19 17:05 — hinabaina + Claude (jury-review, phase 6: final check)
+1. check: ALL CHECKS PASSED, 231 tests, 15.1 s. 2. unittest: 231 OK. 3. verify --seeds 0-199: 600/600; --dir train/dev: 10/10 + 10/10.
+4. demo: exit 0 (also --pause, --seed 2005). 5. Docker: CI job `docker` (build + run --network none) green on every push of this branch.
+6. Docs re-read against check/analyze/fuzz output (README, DESIGN, PITCH, DEMO, CONTRACT, HANDOFF). 7. No TODO/FIXME/HACK.
+8. `print` only in CLI entry points (check, run, verify, analyze, export, demo, fuzz). 9. HANDOFF updated.
+Left for humans: merge the PR stack into main, make the repo public (owner), record the video, build slides (Team slide), Google Doc + submit.

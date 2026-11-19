@@ -4,11 +4,12 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Last updated:** 2026-11-19 · by: Claude (night lead) · branch: `night/2026-11-19`
+**Last updated:** 2026-11-19 · by: Chingiz (hinabaina) + Claude · branch: `hinabaina/jury-review`
+(stack: `night/2026-11-19` ← `hinabaina/T19-T22` (PR #6) ← `hinabaina/hard-mode` ← `hinabaina/jury-review`; nothing merged yet)
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
-2026-11-19 at 12:00.** **Final deadline: 2026-11-22, 22:00.**
+2026-11-19 at 12:00.** **Final deadline: 2026-11-22, 22:00 (Astana; the PDF says 23:59, we plan for 22:00).**
 Results: 7 teams per case (14 finalists) go to the offline final in Astana,
 planned for 2026-11-28/29 (exact dates and venue TBA).
 
@@ -23,16 +24,16 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] GitHub repo viewable by the jury — **it's private now**: make it public
       (or otherwise give access) before submitting
 - [ ] Demo video: short demo + explanation of the solution — script: `docs/DEMO.md`
-- [ ] Presentation — outline: `docs/PITCH.md` (written by the night agent)
+- [ ] Presentation — 10-slide outline with numbers: `docs/PITCH.md` (fill in the Team slide)
 - [ ] Google Doc with the 3 links (repo, video, presentation); the Doc and all
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
 ## Status
-Environment is feature-complete for the case and passes the single check command
-(`uv run python -m auditenv.check` → ALL CHECKS PASSED, ~7 s, 175 tests). Jury materials are drafted
-(`docs/DESIGN.md`, `docs/DEMO.md`, `docs/PITCH.md`). Night run continues on `night/2026-11-19`
-with hardening (review, fuzzing, on-disk episode verification); task list: `night/TASKS.md`.
+**Ready for submission (code side).** Jury-style review done (`REVIEW.md`: 6 findings, all fixed).
+`uv run python -m auditenv.check` → ALL CHECKS PASSED, 231 tests, ~15 s (dev table, hard-mode table and gates).
+Docker image built and run with `--network none` in GitHub Actions (`.github/workflows/check.yml`, green on every push).
+Seed sweep: 3 000 default + 600 hard episodes, 0 problems. Docs (README, DESIGN, PITCH, DEMO) match the check output.
 
 ## Done
 - Generator (`auditenv/generator.py`, `inject.py`): hidden company history → correct double-entry
@@ -47,17 +48,24 @@ with hardening (review, fuzzing, on-disk episode verification); task list: `nigh
 - Data: `configs/{train,dev,eval_example}.json`, `episodes/{train,dev}` (10+10 exported),
   `trajectories/train_*.jsonl`.
 - Docs: `README.md`, `docs/CONTRACT.md`, `docs/DESIGN.md` (with measured results), `docs/DEMO.md`, `docs/PITCH.md`.
+- Hard mode (`difficulty: "hard"`, `configs/eval_hard.json`, `reconcile_hard`): reconcile F1 1.0 → 0.611, oracle 1.0.
+- Jury review (`REVIEW.md`): self-sufficient `payment_allocation` evidence (episodes re-exported), `tests/test_jury.py`
+  (jury checklist as 33 tests), `auditenv.fuzz` (seed sweep + `--stress`), CI with Docker, verify totals, docs pass.
 
 ## In progress
-- gemini T28 (load + verify exported episodes from disk), codex T29 (env fuzz test), lead: jury-style review.
+- Nothing in code. All of `night/TASKS.md` is [x]; all `REVIEW.md` findings fixed.
 
 ## Left to do (humans)
 - Record the demo video following `docs/DEMO.md` (`uv run python -m auditenv.demo --pause`).
 - Build slides from `docs/PITCH.md`; fill in the Team slide.
-- Merge `night/2026-11-19` into `main` via PR; make the repo public (or share) before submitting.
+- Merge the stack into `main` via PRs: #6 → `night/2026-11-19`, then `hinabaina/hard-mode` and `hinabaina/jury-review`,
+  then `night/2026-11-19` → `main` (or one PR `hinabaina/jury-review` → `main`, it contains everything).
+- Make the repo public (only the owner `madiyar-abi` can) before submitting.
 - Submission checklist above ("Deadline & submission").
 
 ## Decisions & assumptions
+- Hidden evaluation: set `AUDITENV_SECRET` in the grader process only (keys generator RNG + HMAC episode_id).
+- After ANY generator change: re-export `episodes/` and regenerate `trajectories/` (tests/test_load.py fails otherwise).
 - Work goes through branches + PRs into `main`; nobody pushes to `main` directly.
 - Night agent never asks questions; every assumption it makes is logged in `night/LOG.md`.
 - Interfaces are fixed in `docs/CONTRACT.md` (ledger in base currency only; truth amounts are
@@ -72,8 +80,11 @@ uv run python -m unittest discover -s tests -t .      # unit tests only
 uv run python -m auditenv.verify --seeds 0-199        # data/truth verifier
 uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/traj.jsonl
 uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json
+uv run python -m auditenv.fuzz --seeds 0-999          # seed sweep (3 000 episodes, ~45 s)
+uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299
 ```
-No `uv`: `python3.11 -m auditenv.check` from the repo root. Docker: `docker build -t auditenv . && docker run --rm auditenv`.
+No `uv`: `python3.11 -m auditenv.check` from the repo root. Docker: `docker build -t auditenv . && docker run --rm --network none auditenv`
+(verified in CI; Docker is not installed on the dev Mac).
 
 ## How to continue (process for the next person)
 1. `git pull` → read this file → open `night/TASKS.md`.

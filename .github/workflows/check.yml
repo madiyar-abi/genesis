@@ -1,0 +1,39 @@
+name: check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  docker:
+    # The jury's container path: build the image, run the single check with no network.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t auditenv .
+      - name: Run the check in the container (no network)
+        run: docker run --rm --network none auditenv
+
+  python:
+    # The same check without Docker, on plain Python 3.11 (stdlib only, nothing to install).
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Single check
+        run: python -m auditenv.check
+      - name: Verifier on 600 episodes and on the exported splits
+        run: |
+          python -m auditenv.verify --seeds 0-199
+          python -m auditenv.verify --dir episodes/train
+          python -m auditenv.verify --dir episodes/dev
+      - name: Seed sweep (1 000 seeds default, 200 seeds hard)
+        run: |
+          python -m auditenv.fuzz --seeds 0-999
+          python -m auditenv.fuzz --seeds 0-199 --hard

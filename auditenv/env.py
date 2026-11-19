@@ -14,7 +14,7 @@ TABLES = {"ledger": "row_id", "invoices": "invoice_id", "payments": "payment_id"
 PAGE_MAX = 50
 DEFAULTS = {"mode": "train", "max_steps": 100, "time_limit_s": 60.0}
 CONFIG_KEYS = {"mode", "max_steps", "time_limit_s", "errors", "interacting", "n_invoices", "distractors",
-               "transform_seed"}
+               "transform_seed", "difficulty"}
 TOOLS = [
     {"type": "list_records", "params": {"table": "ledger|invoices|payments|fx", "cursor": "null|str",
                                         "limit": "int<=50"},
@@ -72,6 +72,13 @@ class AuditEnv:
         info = {"episode_id": self._ep["episode_id"], "mode": cfg["mode"], "max_steps": cfg["max_steps"]}
         return obs, info
 
+    def abandon(self) -> None:
+        """Grade an open episode as truncated with an empty answer (server: reset/close mid-episode),
+        so a policy cannot skip hard hidden episodes without a score."""
+        if self._ep is not None and not self._done:
+            self._done, self._truncated = True, True
+            self._finish({"episode_id": self.episode_id, "findings": []}, self._steps, "abandoned")
+
     @property
     def episode_id(self) -> str:
         return self._ep["episode_id"]
@@ -106,6 +113,8 @@ class AuditEnv:
                     result = self._tool(kind, action)
             except ToolError as e:
                 error = {"code": e.code, "message": e.message}
+            except Exception:  # never crash on malformed input: bounded error, the step still counts
+                error = {"code": "bad_params", "message": "malformed action"}
         if not terminated and (timed_out or self._steps >= max_steps):
             truncated = True
             res = self._finish({"episode_id": self.episode_id, "findings": []}, self._steps,
@@ -157,7 +166,7 @@ class AuditEnv:
         raise ToolError("unknown_action", "unknown action type; see tools in the first observation")
 
     def _table(self, table):
-        if table not in TABLES:
+        if not isinstance(table, str) or table not in TABLES:
             raise ToolError("unknown_table", "table must be one of ledger, invoices, payments, fx")
         return table
 
@@ -171,7 +180,8 @@ class AuditEnv:
         cursor = action.get("cursor")
         offset = 0
         if cursor is not None:
-            if not (isinstance(cursor, str) and cursor.startswith(table + ":") and cursor[len(table) + 1:].isdigit()):
+            if not (isinstance(cursor, str) and cursor.startswith(table + ":") and cursor[len(table) + 1:].isascii()
+                    and cursor[len(table) + 1:].isdigit()):
                 raise ToolError("bad_params", "invalid cursor")
             offset = int(cursor[len(table) + 1:])
             if offset > len(rows):

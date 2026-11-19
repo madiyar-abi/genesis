@@ -18,12 +18,21 @@ quoted are what the default seed prints.
 uv run python -m auditenv.check
 ```
 
-Show the `[PASS]` lines and the baseline table.
+Show the `[PASS]` lines, the dev baseline table and the hard-mode table.
 
-> "This is the official check, one command, about six seconds. It runs the unit tests, an
-> independent verifier that recomputes every hidden error from the records, four baseline
-> policies, twenty paired reproducibility checks, and a closed run in a separate process.
-> The oracle reaches reward 1, the flag-everything attack gets −1."
+> "This is the official check, one command, about fifteen seconds. It runs 231 unit tests, an
+> independent verifier that recomputes every hidden error from the records, the baseline
+> policies, twenty paired reproducibility checks, a closed run in a separate process and the hard
+> mode. The oracle reaches reward 1, the flag-everything attack gets −1, a rule script that is
+> perfect on the default books drops to F1 0.61 in hard mode."
+
+Optional, if time allows (tests only, ~10 s):
+
+```bash
+uv run python -m unittest tests.test_jury -v 2>&1 | tail -5
+```
+
+> "The jury's checklist is a test file: contract, leaks, reward, reproducibility, data."
 
 **3. A company and the first observation (0:40–1:00)**
 
@@ -71,8 +80,8 @@ Point at the `payment_allocation` + `fx_error` pair on the same payment.
 **8. Wrap-up (2:40–3:00)** — show `docs/DESIGN.md` headings and the `configs/` + `episodes/` folders.
 
 > "Four error types, two interacting scenarios, clean companies and look-alike distractors; ten train
-> and ten dev episodes, trajectories, and a design note with measured results and honest limitations.
-> Run it yourself with one command."
+> and ten dev episodes, trajectories, a seed sweep over three thousand episodes with zero problems,
+> and a design note with measured results and honest limitations. Run it yourself with one command."
 
 ---
 

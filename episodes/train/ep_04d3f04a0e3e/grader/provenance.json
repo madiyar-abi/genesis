@@ -1,0 +1,166 @@
+{
+  "company": {
+    "bank_offset": "-05:00",
+    "base_currency": "KZT",
+    "entities": 9,
+    "foreign_currencies": [
+      "JPY",
+      "USD"
+    ],
+    "timezone": "+09:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 1,
+      "fx_error": 1,
+      "payment_allocation": 0,
+      "period_cutoff": 1
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 35
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 596648500,
+              "entity_id": "E8898",
+              "invoice_id": "2611-531917",
+              "payment_id": null,
+              "row_id": "R1136",
+              "timestamp": "2026-11-30T17:55:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 596648500,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E8898",
+              "invoice_id": "2611-531917",
+              "payment_id": null,
+              "row_id": "R1137",
+              "timestamp": "2026-11-30T17:55:00+09:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2611-531917"
+        }
+      ],
+      "description": "invoice 2611-531917 issued 2026-12-03 (outside the period) booked on 2026-11-30",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 335432600,
+              "entity_id": "E4887",
+              "invoice_id": "2611-152443",
+              "payment_id": null,
+              "row_id": "R860",
+              "timestamp": "2026-11-04T18:10:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 335432600,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E4887",
+              "invoice_id": "2611-152443",
+              "payment_id": null,
+              "row_id": "R859",
+              "timestamp": "2026-11-04T18:10:00+09:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2611-152443"
+        }
+      ],
+      "description": "invoice 2611-628191 entered a second time as 2611-152443 and booked again",
+      "documents_added": [
+        "af4e1cff"
+      ],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 602582957,
+              "entity_id": "E6747",
+              "invoice_id": "2611-289904",
+              "payment_id": null,
+              "row_id": "R853",
+              "timestamp": "2026-11-04T14:42:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 602582957,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E6747",
+              "invoice_id": "2611-289904",
+              "payment_id": null,
+              "row_id": "R854",
+              "timestamp": "2026-11-04T14:42:00+09:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 607172340,
+              "entity_id": "E6747",
+              "invoice_id": "2611-289904",
+              "payment_id": null,
+              "row_id": "R853",
+              "timestamp": "2026-11-04T14:42:00+09:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 607172340,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E6747",
+              "invoice_id": "2611-289904",
+              "payment_id": null,
+              "row_id": "R854",
+              "timestamp": "2026-11-04T14:42:00+09:00"
+            }
+          ],
+          "journal": "inv:2611-289904"
+        }
+      ],
+      "description": "invoice 2611-289904 converted with the 2026-11-07 rate instead of 2026-11-04",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    }
+  ],
+  "seed": 1004
+}

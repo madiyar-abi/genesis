@@ -1,0 +1,82 @@
+{
+  "episode_id": "ep_df28bd05243e",
+  "issues": [
+    {
+      "affected_ids": [
+        "F0101155"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "D-021a5f",
+          "GL-004656"
+        ],
+        [
+          "D-021a5f",
+          "GL-004655"
+        ]
+      ],
+      "expected_amount_minor": 360401300,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "F0184118"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "D-02b4ea",
+          "GL-004649"
+        ],
+        [
+          "D-02b4ea",
+          "GL-004650"
+        ]
+      ],
+      "expected_amount_minor": 558298700,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "F0607880",
+        "RCPT0386503"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "D-047f84",
+          "D-0d8c8c",
+          "GL-004820"
+        ]
+      ],
+      "expected_amount_minor": 227210437,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "affected_ids": [
+        "F0991018",
+        "RCPT0064871"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "2025-04-01:JPY:KZT",
+          "D-07a4be",
+          "D-0974c0",
+          "GL-004846"
+        ]
+      ],
+      "expected_amount_minor": 51628277,
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ]
+}

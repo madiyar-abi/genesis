@@ -7,6 +7,7 @@ from pathlib import Path
 from statistics import mean
 
 from .env import AuditEnv
+from .metrics import prf1
 from .run import POLICIES, make_policy, parse_seeds, run_episode
 from .schema import ISSUE_TYPES
 
@@ -43,9 +44,9 @@ def analyze(policy: str, episodes: list[tuple[int, dict]]) -> dict:
             by_type[issue["type"]]["fn"] += 1
             by_scenario[issue.get("scenario", "single")]["fn"] += 1
         scores.append({
-            "precision": result["precision"],
-            "recall": result["recall"],
-            "f1": result["f1"],
+            "tp": result["tp"],
+            "fp": result["fp"],
+            "fn": result["fn"],
             "return": result["reward"],
             "steps": trajectory[-1]["step"],
         })
@@ -54,10 +55,20 @@ def analyze(policy: str, episodes: list[tuple[int, dict]]) -> dict:
         support = counts["tp"] + counts["fn"]
         counts["recall"] = counts["tp"] / support if support else 0.0
 
+    # Micro-averaged like auditenv.check: a per-episode mean would count a clean episode
+    # answered with silence (P = R = 0 by definition, F1 = 1) as a miss.
+    tp, fp, fn = (sum(score[key] for score in scores) for key in ("tp", "fp", "fn"))
+    precision, recall, f1 = prf1(tp, fp, fn)
     return {
         "policy": policy,
         "episodes": len(scores),
-        "mean": {key: mean(score[key] for score in scores) for key in scores[0]},
+        "mean": {
+            "precision": precision,
+            "recall": recall,
+            "f1": f1,
+            "return": mean(score["return"] for score in scores),
+            "steps": mean(score["steps"] for score in scores),
+        },
         "by_type": by_type,
         "by_scenario": by_scenario,
         "fp_total": sum(fp_reasons.values()),
@@ -77,7 +88,7 @@ def markdown(report: dict) -> str:
     averages = report["mean"]
     return "\n\n".join([
         _markdown_table(
-            ("Policy", "Episodes", "Mean P", "Mean R", "Mean F1", "Mean return", "Mean steps"),
+            ("Policy", "Episodes", "P (micro)", "R (micro)", "F1 (micro)", "Mean return", "Mean steps"),
             [(report["policy"], report["episodes"], *averages.values())],
         ),
         _markdown_table(
