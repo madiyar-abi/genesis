@@ -395,9 +395,13 @@ def _build_expenses(st: State) -> None:
 # ---------------------------------------------------------------- render
 def _plan(st: State) -> tuple[dict, dict]:
     cfg, rng = st.config, st.rng
-    if "errors" in cfg:
-        errors = {t: int((cfg.get("errors") or {}).get(t, 0)) for t in ISSUE_TYPES}
-        inter = {s: int((cfg.get("interacting") or {}).get(s, 0)) for s in SCENARIOS}
+    if "errors" in cfg or "interacting" in cfg:  # explicit plan; missing entries = 0
+        given_e, given_i = cfg.get("errors") or {}, cfg.get("interacting") or {}
+        for key, val in list(given_e.items()) + list(given_i.items()):
+            if key not in ISSUE_TYPES + SCENARIOS or isinstance(val, bool) or not isinstance(val, int) or val < 0:
+                raise ValueError(f"bad error config entry {key!r}: {val!r}")
+        errors = {t: given_e.get(t, 0) for t in ISSUE_TYPES}
+        inter = {s: given_i.get(s, 0) for s in SCENARIOS}
     else:
         errors = {t: rng.choice((0, 0, 1, 1, 2)) for t in ISSUE_TYPES}
         inter = {s: int(rng.random() < 0.3) for s in SCENARIOS}
@@ -526,6 +530,9 @@ def generate(seed: int, config: dict | None = None) -> dict:
     from . import inject  # local import: inject uses State
 
     config = dict(config or {})
+    n = config.get("n_invoices")
+    if n is not None and (isinstance(n, bool) or not isinstance(n, int) or not 10 <= n <= 100):
+        raise ValueError("n_invoices must be an int in [10, 100] (keeps documents <= 200)")
     st = State(int(seed), config)
     build_history(st)
     errors, inter = _plan(st)

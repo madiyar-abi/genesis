@@ -66,7 +66,7 @@ Actions: `list_records(table, cursor, limit≤50)`, `get_record(table, id)`, `ge
 
 Config keys: `mode` (`train` returns the terminal reward, `eval` hides it), `max_steps` (≤ 100),
 `time_limit_s` (60), `errors` (`{type: count}`; omitted → random mix), `interacting`
-(`{"I1": n, "I2": n}`), `n_invoices`, `distractors`, `transform_seed` (benign relabel/permute).
+(`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`, `transform_seed` (benign relabel/permute).
 
 ### Run a policy, write trajectories
 
