@@ -5,5 +5,5 @@
 - [ ] T3 (gemini2) Verify measured hard-mode failure explanations with analyze on both reconciliation policies — files: night/LOG.md — accept: record exact commands, TP/FN by type and FP reason counts for both; compare docs/DESIGN.md and flag discrepancies.
 - [ ] T4 (gemini3) Audit per-policy step counts and timing claims in jury materials against benchmark outputs and stated methodology — files: night/LOG.md — accept: list exact commands and reproducible step counts, identify any unsupported timing claim.
 - [ ] T5 (deepseek) Check public export integrity against all three versioned configs — files: night/LOG.md — accept: regenerate splits in a temporary directory and diff all files, log command and counts.
-- [ ] T6 (lead) Verify the numbered 2–3 minute demo script against the public recording command — files: docs/DEMO.md — accept: match IDs, amounts, steps and scores.
+- [x] T6 (lead) Verify the numbered 2–3 minute demo script against the public recording command — files: docs/DEMO.md — accept: match IDs, amounts, steps and scores.
 - [ ] T7 (lead) Verify slide outline, run commands and metrics; sync jury documentation — files: docs/PITCH.md, docs/CHECKS.md, docs/DESIGN.md, README.md — accept: metrics sync passes and slide claims trace to measured results.
