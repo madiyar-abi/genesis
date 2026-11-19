@@ -91,8 +91,8 @@ Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs
    every evidence set exists and covers the affected records.
 3. **Baselines on the dev split** — random explorer, naive reconciliation, rule-based reconciliation, flag-everything
    attack, oracle → P / R / F1 / return / steps / time.
-4. **20 paired checks** — exact replay of seed + actions; relabelled ids + permuted rows keep the
-   oracle answer and reward (under the new ids).
+4. **20 paired checks** replay the same seed and actions, then relabel IDs and shuffle rows.
+   Each translated public row must match in full, and the translated oracle answer must earn the same reward.
 5. **Out-of-process eval run** — environment and grader in a subprocess; the policy sees no
    reward and no truth; results go only to the grader log.
 6. **Hard mode** — verifier on hard episodes, baselines on `configs/eval_hard.json`; gates: oracle 1.0,
