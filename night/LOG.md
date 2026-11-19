@@ -121,3 +121,7 @@
 - Export format: public/{manifest.json,ledger.csv,invoices.jsonl,payments.jsonl,fx.csv,policy.json}, grader/{truth.json,provenance.json}, index.json.
 - Verified: export twice is byte-identical; all 40 episodes pass independent verifier; tests/test_export passes; auditenv.check passes all gates.
 - All assigned gemini tasks (T3, T12, T16) complete.
+
+## 2026-11-19 14:02 — lead
+- Merged gemini T16: configs/{train,dev,eval_example}.json (config_version 1.0), auditenv/export.py, episodes/{train,dev} (10+10, 1.8 MB). Check uses configs/dev.json now: reconcile F1 1.000 / return 0.958; naive F1 0.325; random −0.614; flag-all −1.000; oracle 1.000.
+- T27 done: trajectories/train_{reconcile,random,naive_reconcile}.jsonl (train split, mode train, 3.6 MB) + tests/test_trajectory_files.py.
