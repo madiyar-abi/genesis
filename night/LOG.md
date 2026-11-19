@@ -33,3 +33,8 @@
   trajectories/train_hard_{random,naive_reconcile,reconcile,reconcile_hard}.jsonl (~10.5 MB), regenerate commands
   in README (reproduce byte-for-byte), test_trajectory_files covers them, CI badge at the top of README.
   Note: the D4 hard-mode leak fix will require regenerating these files.
+
+## 2026-11-19 21:34 lead
+- R3 done (subagent, reviewed): scripts/sensitivity.py re-grades each baseline episode with the real matcher, step
+  cost 0.001/0.002/0.005 and tolerance 0/0.1%/1% patched in a context manager (default re-grade == env reward,
+  asserted). Ranking unchanged on dev and hard. Table in DESIGN §6. Shared reward untouched.
