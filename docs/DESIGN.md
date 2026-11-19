@@ -57,7 +57,7 @@ brute-forced from the id nor the episode regenerated from the open-source code. 
 | type | causal change | expected amount (base currency) | evidence (any one full set) |
 |---|---|---|---|
 | `duplicate_invoice` | a second invoice document with identical entity, currency and line items, issued strictly later, booked again | AR debit of the later copy | both invoice docs + one positive booking row for each invoice (AR debit or revenue credit) |
-| `payment_allocation` | remittance says the payment covers an invoice, the ledger credits only part (or none) of it to AR; the rest lands in 2900 | expected AR credit − posted AR credit | payment doc + invoice doc + 2900 row (or AR row) + invoice-date FX rate if foreign |
+| `payment_allocation` | remittance says the payment covers an invoice, the ledger credits only part (or none) of it to AR; the rest lands in 2900 | expected AR credit − posted AR credit | payment doc + invoice doc + payment’s AR credit for that invoice (2900 row when the credit is missing) + invoice-date FX rate if foreign |
 | `fx_error` | invoice or payment converted at the rate of a wrong date (the document's own local/UTC date, or ±1..7 days); difference ≥ 10 minor units | abs(posted − correct) | doc + AR/revenue row (invoice) or cash row (payment) + the correct-date FX rate |
 | `period_cutoff` | invoice issued in the next period (backdated to the period end) or in the previous period, booked in this period | AR debit posted | invoice doc + AR (or revenue) row |
 
@@ -258,9 +258,9 @@ byte-identical (the committed `episodes/` still match the generator).
 
 | change | effect on a shortcut | why it stays solvable |
 |---|---|---|
-| 2–3 legitimate **cancel-and-reissue** pairs per episode: the unpaid original is reversed by a full credit note (`Dr 4000 / Cr 1200`, same invoice_id), the replacement has identical line items | looks exactly like a duplicate | the reversal rows are in the ledger; the rule is in `policy.ledger.credit_note` and the task text |
-| half of the injected **duplicates are re-typed**: other line order, case and ref punctuation | exact line-item comparison misses them | same products, quantities and prices; duplicates are defined order/case/punctuation-insensitively (CONTRACT §3) |
-| **larger ledger**: 900–1 400 rows instead of 230–420 | more pages to read, higher step cost | full reading still fits in 100 steps |
+| Up to three eligible invoices form legitimate **cancel-and-reissue** pairs: the unpaid original is reversed by a full credit note (`Dr 4000 / Cr 1200`, same invoice_id), the replacement carries equivalent line items that may be re-typed | looks exactly like a duplicate | the reversal rows are in the ledger; the rule is in `policy.ledger.credit_note` and the task text |
+| each injected **duplicate has a 50% chance of being re-typed**: other line order, case and ref punctuation | exact line-item comparison misses them | same products, quantities and prices; duplicates are defined order/case/punctuation-insensitively (CONTRACT §3) |
+| **larger ledger**: expense journals pad the pre-injection ledger to a target of 900–1 400 rows (default target 230–420) | more pages to read, higher step cost | full reading still fits in 100 steps |
 
 The verifier treats credit-noted invoices as non-duplicates, compares lines with the same normalised key
 and checks that every credit note is in the period and after its booking.

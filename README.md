@@ -121,10 +121,12 @@ Actions: `list_records(table, cursor, limit≤50)`, `get_record(table, id)`, `ge
 `calculator(expression)`, `submit(findings)`. Full interface: [`docs/CONTRACT.md`](docs/CONTRACT.md).
 
 Config keys: `mode` (`train` returns the terminal reward, `eval` hides it), `max_steps` (≤ 100),
-`time_limit_s` (60), `errors` (`{type: count}`; omitted → random mix), `interacting`
+`time_limit_s` (60), `errors` (`{type: count}`), `interacting`
 (`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`, `transform_seed` (benign relabel/permute),
-`difficulty` (`"default"` | `"hard"`: credit-note reissues, re-typed duplicates, 900–1 400 ledger rows —
+`difficulty` (`"default"` | `"hard"`: credit-note reissues, re-typed duplicates, a ledger padded to a target of 900–1 400 rows before injection —
 see [`docs/DESIGN.md`](docs/DESIGN.md) “Hard mode”; `configs/eval_hard.json` is a 20-episode hard split).
+
+Omit both `errors` and `interacting` for a random mix. Supplying either object sets every unspecified count to zero.
 
 ### Run a policy, write trajectories
 
@@ -211,8 +213,8 @@ uv run python scripts/shortcut_miner.py --report-only  # single-feature data-lea
 uv run python scripts/golden.py --check              # 80 golden hashes: generator drift detector
 uv run python scripts/bench.py                       # timing benchmark
 uv run python scripts/chart.py                       # docs/baselines.svg from the check --json output
-make check | make test | make verify | make fuzz | make stress | make attack | make golden | make mutate
-make miner | make bench | make sensitivity | make chart
+make check                                           # run one target, or combine targets: make test verify
+make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart  # preview commands
 ```
 
 ## Repository layout

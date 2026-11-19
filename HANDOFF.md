@@ -32,6 +32,8 @@ message says a Google Doc — follow the latest, re-check the form before submit
 
 Branch `night/2026-11-20-r10`, tasks in `night/TASKS.md`. `reset` now rejects `errors` / `interacting` values that are not objects (`"x"` used to raise `AttributeError`, `0` / `false` / `[]` / `null` silently gave a clean company) and a `config` that is not an object (`REVIEW.md` → "Round 10"). Episodes, trajectories and golden hashes are unchanged. `uv run python -m auditenv.check`: 360 unit tests, all gates pass.
 
+The Round 10 docs audit corrected hard-mode ledger targets, credit-note eligibility and the evidence required for a partial allocation. Reproduction cases are in REVIEW.md.
+
 ## Round 9 · 20 November 2026
 
 Branch `night/2026-11-20-r9`, tasks in `night/TASKS.md`. A read-only red-team pass on contract, isolation, reward and reproducibility found nothing that leaks truth or beats the oracle, and three smaller defects, now fixed test-first (`REVIEW.md` → "Round 9"):
