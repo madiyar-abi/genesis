@@ -70,3 +70,8 @@
 - Reconcile baseline: pages ledger, invoices, payments, fx (max 50 rows/page); fetches line_items for duplicate candidates via get_document; rule-based detection for duplicate_invoice, period_cutoff, fx_error, payment_allocation.
 - Results on dev seeds 2000–2009: Mean F1 = 1.000, 0 error steps (0.00%), ~22 steps/episode.
 - Next: T16 episode export (after T9).
+
+## 2026-11-19 13:55 — codex
+- T23 done: grader-side Markdown and JSON failure analysis. Oracle recalls every tested type and scenario with zero FPs; FlagAll records FPs. T7 environment and T11 baseline tests also passed.
+- Assumptions: recall is zero for groups with no issues, means are per episode, steps include submit, and explicit seeds must exist in the supplied config. Reconcile verification awaits T12.
+- Next: no open codex tasks.
