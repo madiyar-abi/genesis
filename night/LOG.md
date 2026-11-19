@@ -44,3 +44,12 @@
 - Bug found by the verifier and fixed: retainer labels used ISO week → two invoices could get the same label (false duplicate in clean books). Now labelled by service-week dates.
 - Fix: duplicate copy is always issued strictly after the original; truth amount = later copy's AR debit (documented in policy + CONTRACT).
 - Next: T13 tests, T14 server, T17 check command.
+
+## 2026-11-19 13:52 — lead
+- T6/T7/T13/T14/T15 done. Subagent-written tests reviewed: tests/test_matcher.py (33), tests/test_env.py (30),
+  tests/test_reward_attacks.py (12, all SPEC §05 properties over 12 seeds); plus tests/test_run.py, tests/test_server.py.
+  Full suite: 150 tests OK in ~4 s.
+- T14: auditenv/server.py (JSON-lines stdio; --episodes hidden list → client seeds ignored; --grader-log JSONL) + client.py (RemoteEnv).
+- Env config validation tightened (bool max_steps, time_limit_s type). CONTRACT updated (error codes time_limit/invalid_findings, get_document kind, scenario key).
+- Known design limit (for DESIGN.md): with 12 issues, missing one finding at 0 steps (0.913) beats full answer after 60 steps (0.88) — step cost vs F1 granularity.
+- Next: merge workers, T17 check command.
