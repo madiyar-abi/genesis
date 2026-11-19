@@ -34,6 +34,7 @@ The five-pause demo in `docs/DEMO.md` reproduced all four findings and the close
 The ten-slide pitch now describes both possible rate choices for the backdated invoice. Its metrics match the official check.
 The contract and design note now explain the backdated invoice rate selection, including the conversion threshold.
 The README lists the naive dev baseline and both hard replay policies.
+All ledger postings now undergo a company-local period check in both the reconstructed books and the public ledger.
 A fresh sweep of 200 heavy episodes checked the identifiers and uniqueness of all 52,901 FX rows. The reproduction command is in `night/LOG.md`.
 
 The verifier checks each public FX identifier against its date and currency pair and rejects duplicate rate keys. Run `uv run python -m unittest tests.test_fx_identity`. The remaining verifier work, evidence checks, and jury materials are tracked in `night/TASKS.md`.
