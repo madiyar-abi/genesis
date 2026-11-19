@@ -72,3 +72,9 @@
 - Reconcile baseline: pages ledger, invoices, payments, fx (max 50 rows/page); fetches line_items for duplicate candidates via get_document; rule-based detection for duplicate_invoice, period_cutoff, fx_error, payment_allocation.
 - Results on dev seeds 2000–2009: Mean F1 = 1.000, 0 error steps (0.00%), ~22 steps/episode.
 - Next: T16 episode export (after T9).
+
+## 2026-11-19 14:00 — gemini
+- T16 done: auditenv/export.py, configs/train.json (1000–1009), configs/dev.json (2000–2009), configs/eval_example.json (9000–9019, 5 clean, 5 interacting, 10 mixed), episodes/train, episodes/dev, tests/test_export.py.
+- Export format: public/{manifest.json,ledger.csv,invoices.jsonl,payments.jsonl,fx.csv,policy.json}, grader/{truth.json,provenance.json}, index.json.
+- Verified: export twice is byte-identical; all 40 episodes pass independent verifier; tests/test_export passes; auditenv.check passes all gates.
+- All assigned gemini tasks (T3, T12, T16) complete.

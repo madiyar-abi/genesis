@@ -1,0 +1,228 @@
+{
+  "company": {
+    "bank_offset": "+03:00",
+    "base_currency": "EUR",
+    "entities": 15,
+    "foreign_currencies": [
+      "CHF",
+      "USD"
+    ],
+    "timezone": "+01:00"
+  },
+  "config": {
+    "errors": {
+      "payment_allocation": 2,
+      "period_cutoff": 2
+    },
+    "n_invoices": 70
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 822300,
+              "entity_id": "C-6372",
+              "invoice_id": "INV-465895",
+              "payment_id": null,
+              "row_id": "GL-001647",
+              "timestamp": "2026-03-31T17:06:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 822300,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-6372",
+              "invoice_id": "INV-465895",
+              "payment_id": null,
+              "row_id": "GL-001646",
+              "timestamp": "2026-03-31T17:06:00+01:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-465895"
+        }
+      ],
+      "description": "invoice INV-465895 issued 2026-04-02 (outside the period) booked on 2026-03-31",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 107179,
+              "entity_id": "C-8803",
+              "invoice_id": "INV-126858",
+              "payment_id": null,
+              "row_id": "GL-001640",
+              "timestamp": "2026-03-31T15:57:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 107179,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-8803",
+              "invoice_id": "INV-126858",
+              "payment_id": null,
+              "row_id": "GL-001641",
+              "timestamp": "2026-03-31T15:57:00+01:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-126858"
+        }
+      ],
+      "description": "invoice INV-126858 issued 2026-04-05 (outside the period) booked on 2026-03-31",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1330500,
+              "entity_id": "C-7680",
+              "invoice_id": null,
+              "payment_id": "BNK-536008",
+              "row_id": "GL-001551",
+              "timestamp": "2026-03-24T16:58:00+01:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 1330500,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-7680",
+              "invoice_id": null,
+              "payment_id": "BNK-536008",
+              "row_id": "GL-001550",
+              "timestamp": "2026-03-24T16:58:00+01:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1330500,
+              "entity_id": "C-7680",
+              "invoice_id": null,
+              "payment_id": "BNK-536008",
+              "row_id": "GL-001551",
+              "timestamp": "2026-03-24T16:58:00+01:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 1330500,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-7680",
+              "invoice_id": "INV-022913",
+              "payment_id": "BNK-536008",
+              "row_id": "pre-170",
+              "timestamp": "2026-03-24T16:58:00+01:00"
+            }
+          ],
+          "journal": "pay:BNK-536008"
+        }
+      ],
+      "description": "payment BNK-536008 allocated nothing to INV-022913; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 515700,
+              "entity_id": "C-2379",
+              "invoice_id": null,
+              "payment_id": "BNK-064243",
+              "row_id": "GL-001450",
+              "timestamp": "2026-03-14T17:32:00+01:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 330283,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2379",
+              "invoice_id": "INV-764132",
+              "payment_id": "BNK-064243",
+              "row_id": "GL-001451",
+              "timestamp": "2026-03-14T17:32:00+01:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 185417,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2379",
+              "invoice_id": null,
+              "payment_id": "BNK-064243",
+              "row_id": "GL-001452",
+              "timestamp": "2026-03-14T17:32:00+01:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 515700,
+              "entity_id": "C-2379",
+              "invoice_id": null,
+              "payment_id": "BNK-064243",
+              "row_id": "GL-001450",
+              "timestamp": "2026-03-14T17:32:00+01:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 515700,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2379",
+              "invoice_id": "INV-764132",
+              "payment_id": "BNK-064243",
+              "row_id": "GL-001451",
+              "timestamp": "2026-03-14T17:32:00+01:00"
+            }
+          ],
+          "journal": "pay:BNK-064243"
+        }
+      ],
+      "description": "payment BNK-064243 allocated partially to INV-764132; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 2007
+}

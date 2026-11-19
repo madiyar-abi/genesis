@@ -1,0 +1,23 @@
+{
+  "amount_exponents": {
+    "CHF": 2,
+    "JPY": 0,
+    "KZT": 2,
+    "USD": 2
+  },
+  "base_currency": "KZT",
+  "counts": {
+    "documents": 71,
+    "fx": 318,
+    "invoices": 47,
+    "ledger": 357,
+    "payments": 24
+  },
+  "episode_id": "ep_47673b8201cf",
+  "generator_version": "1.0.0",
+  "period_end": "2025-03-31",
+  "period_start": "2025-03-01",
+  "rounding": "ROUND_HALF_UP",
+  "schema_version": "1.0",
+  "timezone": "-05:00"
+}

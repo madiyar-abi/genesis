@@ -1,0 +1,201 @@
+{
+  "company": {
+    "bank_offset": "+03:00",
+    "base_currency": "KZT",
+    "entities": 17,
+    "foreign_currencies": [
+      "GBP",
+      "JPY",
+      "USD"
+    ],
+    "timezone": "+01:00"
+  },
+  "config": {
+    "errors": {
+      "duplicate_invoice": 3,
+      "fx_error": 1
+    },
+    "n_invoices": 45
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 55518600,
+              "entity_id": "C-5277",
+              "invoice_id": "2605-178866",
+              "payment_id": null,
+              "row_id": "GL-003398",
+              "timestamp": "2026-05-25T15:45:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 55518600,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5277",
+              "invoice_id": "2605-178866",
+              "payment_id": null,
+              "row_id": "GL-003399",
+              "timestamp": "2026-05-25T15:45:00+01:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2605-178866"
+        }
+      ],
+      "description": "invoice 2605-539369 entered a second time as 2605-178866 and booked again",
+      "documents_added": [
+        "DOC0481013"
+      ],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 542073700,
+              "entity_id": "C-5984",
+              "invoice_id": "2605-567030",
+              "payment_id": null,
+              "row_id": "GL-003283",
+              "timestamp": "2026-05-15T10:24:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 542073700,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5984",
+              "invoice_id": "2605-567030",
+              "payment_id": null,
+              "row_id": "GL-003282",
+              "timestamp": "2026-05-15T10:24:00+01:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2605-567030"
+        }
+      ],
+      "description": "invoice 2605-142114 entered a second time as 2605-567030 and booked again",
+      "documents_added": [
+        "DOC0845013"
+      ],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 1035102500,
+              "entity_id": "C-4100",
+              "invoice_id": "2605-077474",
+              "payment_id": null,
+              "row_id": "GL-003417",
+              "timestamp": "2026-05-27T11:21:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1035102500,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-4100",
+              "invoice_id": "2605-077474",
+              "payment_id": null,
+              "row_id": "GL-003416",
+              "timestamp": "2026-05-27T11:21:00+01:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2605-077474"
+        }
+      ],
+      "description": "invoice 2605-255908 entered a second time as 2605-077474 and booked again",
+      "documents_added": [
+        "DOC0558339"
+      ],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 62406379,
+              "entity_id": "C-8494",
+              "invoice_id": "2605-091639",
+              "payment_id": null,
+              "row_id": "GL-003185",
+              "timestamp": "2026-05-02T10:01:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 62406379,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-8494",
+              "invoice_id": "2605-091639",
+              "payment_id": null,
+              "row_id": "GL-003184",
+              "timestamp": "2026-05-02T10:01:00+01:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 62774623,
+              "entity_id": "C-8494",
+              "invoice_id": "2605-091639",
+              "payment_id": null,
+              "row_id": "GL-003185",
+              "timestamp": "2026-05-02T10:01:00+01:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 62774623,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-8494",
+              "invoice_id": "2605-091639",
+              "payment_id": null,
+              "row_id": "GL-003184",
+              "timestamp": "2026-05-02T10:01:00+01:00"
+            }
+          ],
+          "journal": "inv:2605-091639"
+        }
+      ],
+      "description": "invoice 2605-091639 converted with the 2026-05-01 rate instead of 2026-05-02",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "fx_error"
+    }
+  ],
+  "seed": 2008
+}
