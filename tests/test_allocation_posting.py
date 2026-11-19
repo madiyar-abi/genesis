@@ -15,4 +15,5 @@ class AllocationPostingTest(unittest.TestCase):
         booking = next(r for r in ledger if r["invoice_id"] in issue["affected_ids"]
                        and r["payment_id"] is None and r["account"] == "1200" and r["debit_minor"] > 0)
         evidence[evidence.index(unapplied["row_id"])] = booking["row_id"]
-        self.assertTrue(any("does not reproduce" in problem for problem in verify_episode(ep)))
+        self.assertTrue(any("does not reproduce" in problem or "missing a record" in problem
+                            for problem in verify_episode(ep)))

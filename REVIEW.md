@@ -115,3 +115,15 @@ invalid submission, −1, logged (CONTRACT updated).
 ## Round 8 jury review
 
 - On clean seed 0 the verifier accepted five ledger tampers that break the published `policy.ledger`. It accepted moving payment L02594's 2900 remainder (a payment with invoice refs) or the 7900 row L02583 to revenue 4000. It also accepted booking an expense to an unknown account 9999 or to 4000, and re-tagging an invoice journal with another customer's entity. The round-7 check of the 2900 amount covered only payments without invoice refs. The verifier now checks account usage in both the reconstructed and the published books: the chart of accounts, the accounts allowed per journal type, the entity on invoice and receivables rows, and the 2900 remainder at the payment-date rate for every payment. `tests/test_ledger_policy.py` covers the five tampers plus three variants.
+- An independent red-team pass found more accepted tampers on generated seeds, each now rejected by `tests/test_verify_redteam.py`:
+  - On clean seed 0, a remittance listing one invoice twice let a half-credited receivable pass with an invented FX gain on a base-currency payment.
+  - On heavy seed 0, the unapplied cash of a payment with an allocation shortfall could be inflated by 50,000.00 against a matching FX loss. The first fix in this round had no upper bound.
+  - A full credit note in default mode passed, although only the hard-mode policy publishes that rule.
+  - A refund could debit receivables through a negative invoice reference.
+  - A payment could settle an invoice issued after it.
+  - An inverted invoice journal (Cr 1200 / Dr 4000) passed as an FX error.
+  - Period-cutoff evidence accepted a payment's receivable credit in place of the booking row.
+  - A policy file contradicting the manifest or the contract chart, exponents or rounding passed.
+  - A payment row dated weeks after the payment passed, and so did an invoice booked before its issue date.
+
+  Accepted and not changed: the verifier checks that each truth evidence set is sufficient, not that it is minimal. Malformed rates or currencies still raise an exception in `verify_episode`, which the directory verifier reports as a problem.

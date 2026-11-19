@@ -24,12 +24,15 @@ from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
-from .money import convert, local_date, parse_offset
+from .money import EXPONENT, convert, local_date, parse_offset
+
+CHART = {"1000", "1200", "2900", "4000", "6100", "6200", "6300", "6400", "7900"}  # docs/CONTRACT.md §2
 
 
 class Books:
-    def __init__(self, manifest: dict, tables: dict):
+    def __init__(self, manifest: dict, tables: dict, credit_notes: bool = True):
         self.m = manifest
+        self.credit_notes = credit_notes  # only the hard-mode policy publishes the credit-note rule
         self.base = manifest["base_currency"]
         self.tz = parse_offset(manifest["timezone"])
         self.ps = date.fromisoformat(manifest["period_start"])
@@ -77,7 +80,8 @@ class Books:
             if jid.startswith("inv:"):
                 ar = [r for r in rows if r["account"] == "1200"]
                 rev = [r for r in rows if r["account"] == "4000"]
-                if len(ar) == 2 and len(rev) == 2:  # booking + full credit note (cancelled invoice)
+                # booking + full credit note (cancelled invoice)
+                if self.credit_notes and len(ar) == 2 and len(rev) == 2:
                     ar_dr = [r for r in ar if r["debit_minor"]]
                     amounts = {r["debit_minor"] + r["credit_minor"] for r in ar + rev}
                     reversal = [r for r in ar + rev if (r["account"] == "1200") == bool(r["credit_minor"])]
@@ -89,7 +93,8 @@ class Books:
                     self.voided.add(jid[4:])
                     ar = ar_dr
                     rev = [r for r in rev if r["credit_minor"]]
-                if len(ar) != 1 or len(rev) != 1 or ar[0]["debit_minor"] != rev[0]["credit_minor"]:
+                if len(ar) != 1 or len(rev) != 1 or not ar[0]["debit_minor"] \
+                        or ar[0]["debit_minor"] != rev[0]["credit_minor"]:
                     problems.append(f"malformed invoice journal {jid}")
                     continue
                 booked[jid[4:]] = ar[0]
@@ -100,6 +105,8 @@ class Books:
                 continue
             if not self.in_period(inv["issued_at"]):
                 issues.append(("period_cutoff", (iid,), ar["debit_minor"]))
+            elif datetime_key(ar["timestamp"]) < datetime_key(inv["issued_at"]):
+                problems.append(f"invoice {iid} booked before it was issued")
             correct = self.conv(inv["total_minor"], inv["currency"], inv["issued_at"])
             if ar["debit_minor"] != correct:
                 issues.append(("fx_error", (iid,), abs(ar["debit_minor"] - correct)))
@@ -137,6 +144,8 @@ class Books:
             if not rows:
                 problems.append(f"in-period payment {pid} not booked")
                 continue
+            if any(datetime_key(r["timestamp"]) != datetime_key(pay["timestamp"]) for r in rows):
+                problems.append(f"payment {pid}: journal row not dated at the payment")
             cash = [r for r in rows if r["account"] == "1000"]
             if len(cash) != 1:
                 problems.append(f"payment {pid}: expected one cash row")
@@ -148,25 +157,36 @@ class Books:
             refs = pay["invoice_refs"] or []
             if sum(r["amount_minor"] for r in refs) > max(pay["amount_minor"], 0):
                 problems.append(f"payment {pid}: refs exceed amount")
-            short = False
+            if len({r["invoice_id"] for r in refs}) != len(refs):
+                problems.append(f"payment {pid} references an invoice twice")
+            if any(r["amount_minor"] <= 0 for r in refs):
+                problems.append(f"payment {pid}: non-positive invoice ref")
+            if pay["currency"] == self.base and any(r["account"] == "7900" for r in rows):
+                problems.append(f"payment {pid}: FX gain/loss on a base-currency payment")
+            short = 0  # the refs with an allocation shortfall, each at the payment-date rate
             for ref in refs:
                 inv = self.invoices.get(ref["invoice_id"])
                 if inv is None:
                     problems.append(f"payment {pid} references unknown invoice")
                     continue
+                if datetime_key(inv["issued_at"]) > datetime_key(pay["timestamp"]):
+                    problems.append(f"payment {pid} settles invoice {inv['invoice_id']} issued after the payment")
+                if inv["invoice_id"] in self.voided or inv["currency"] != pay["currency"]:
+                    problems.append(f"payment {pid} settles a cancelled or other-currency invoice {inv['invoice_id']}")
                 expected = self.conv(ref["amount_minor"], pay["currency"], inv["issued_at"])
                 credit = sum(r["credit_minor"] - r["debit_minor"] for r in rows
                              if r["account"] == "1200" and r["invoice_id"] == inv["invoice_id"])
                 if credit < expected:
-                    short = True
+                    short += self.conv(ref["amount_minor"], pay["currency"], pay["timestamp"])
                     issues.append(("payment_allocation", tuple(sorted((inv["invoice_id"], pid))), expected - credit))
                 elif credit > expected:
                     problems.append(f"payment {pid} over-allocated to {inv['invoice_id']}")
-            # the unreferenced remainder is Cr 2900 at the payment-date rate; an allocation shortfall adds to it
+            # the unreferenced remainder is Cr 2900 at the payment-date rate; an allocation shortfall adds to it,
+            # at most the whole short refs
             rest = pay["amount_minor"] - sum(r["amount_minor"] for r in refs)
             rest = self.conv(rest, pay["currency"], pay["timestamp"])
             unapplied = sum(r["credit_minor"] - r["debit_minor"] for r in rows if r["account"] == "2900")
-            if unapplied != rest and not (short and unapplied > rest):
+            if unapplied != rest and not (short and rest < unapplied <= rest + short):
                 problems.append(f"payment {pid}: incorrect unapplied cash for {'' if refs else 'un'}referenced payment")
             ar_ids = {r["invoice_id"] for r in rows if r["account"] == "1200"}
             if not ar_ids <= {r["invoice_id"] for r in refs}:
@@ -208,6 +228,14 @@ def _structure(ep: dict) -> list[str]:
         rate_keys.add(key)
         if rate["fx_id"] != ":".join(key):
             problems.append(f"fx_id differs from date and currency pair: {rate['fx_id']}")
+    pol = ep["policy"]
+    if (pol["base_currency"], pol["timezone"], pol["period"]["start"], pol["period"]["end"]) != \
+            (m["base_currency"], m["timezone"], m["period_start"], m["period_end"]):
+        problems.append("policy contradicts the manifest (base currency, timezone or period)")
+    if set(pol["ledger"]["accounts"]) != CHART:
+        problems.append("policy chart of accounts contradicts the contract")
+    if m["rounding"] != "ROUND_HALF_UP" or any(EXPONENT.get(c) != e for c, e in m["amount_exponents"].items()):
+        problems.append("manifest rounding or amount exponents contradict the contract")
     inv_ids = {i["invoice_id"] for i in t["invoices"]}
     pay_ids = {p["payment_id"] for p in t["payments"]}
     for r in t["ledger"]:
@@ -273,6 +301,12 @@ def revert(ep: dict) -> dict:
     return tables
 
 
+def _booking_row(r: dict, iid: str) -> bool:
+    """The invoice's own booking: Dr 1200 or Cr 4000 with its invoice_id and no payment."""
+    return r["invoice_id"] == iid and r["payment_id"] is None and \
+        ((r["account"] == "1200" and r["debit_minor"] > 0) or (r["account"] == "4000" and r["credit_minor"] > 0))
+
+
 def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> list[str]:
     """Recompute the declared amount from the evidence records alone (plus the manifest)."""
     ev_rows = [rows[i] for i in s if i in rows]
@@ -308,14 +342,16 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
                   and bool(bookings[a["invoice_id"]]) and exp in bookings[b["invoice_id"]])
         elif typ == "period_cutoff":
             inv = next(d for d in ev_docs if "invoice_id" in d)
-            row = ev_rows[0]
+            row = next(r for r in ev_rows if _booking_row(r, inv["invoice_id"]))
             ok = (not books.in_period(inv["issued_at"]) and books.in_period(row["timestamp"])
                   and row["debit_minor"] + row["credit_minor"] == exp)
         elif typ == "fx_error":
-            doc, row = ev_docs[0], ev_rows[0]
+            doc = ev_docs[0]
             if "invoice_id" in doc:
+                row = next(r for r in ev_rows if _booking_row(r, doc["invoice_id"]))
                 correct = conv(doc["total_minor"], doc["currency"], doc["issued_at"])
             else:
+                row = next(r for r in ev_rows if r["payment_id"] == doc["payment_id"] and r["account"] == "1000")
                 correct = conv(doc["amount_minor"], doc["currency"], doc["timestamp"])
             ok = abs(row["debit_minor"] + row["credit_minor"] - correct) == exp
         else:  # payment_allocation
@@ -323,7 +359,8 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
             inv = next(d for d in ev_docs if "invoice_id" in d and "payment_id" not in d)
             ref = next(r for r in pay["invoice_refs"] if r["invoice_id"] == inv["invoice_id"])
             expected = conv(ref["amount_minor"], pay["currency"], inv["issued_at"])
-            row = ev_rows[0]
+            row = next(r for r in ev_rows if r["payment_id"] == pay["payment_id"] and (
+                r["account"] == "2900" or (r["account"] == "1200" and r["invoice_id"] == inv["invoice_id"])))
             if row["account"] == "1200":
                 ok = ({pay["payment_id"], inv["invoice_id"]} == set(iss["affected_ids"])
                       and row["payment_id"] == pay["payment_id"] and row["invoice_id"] == inv["invoice_id"]
@@ -347,11 +384,12 @@ def verify_episode(ep: dict) -> list[str]:
     accounts = ep["policy"]["ledger"]["accounts"]
     # pre-injection: correct books
     pre_tables = revert(ep)
-    pre_issues, pre_problems = Books(m, pre_tables).discrepancies()
+    credit_notes = "credit_note" in ep["policy"]["ledger"]
+    pre_issues, pre_problems = Books(m, pre_tables, credit_notes).discrepancies()
     problems += [f"pre-injection: {p}" for p in pre_problems + _ledger_policy(pre_tables, accounts)]
     problems += [f"pre-injection discrepancy {i}" for i in pre_issues]
     # post-injection: declared discrepancies == recomputed discrepancies
-    issues, post_problems = Books(m, t).discrepancies()
+    issues, post_problems = Books(m, t, credit_notes).discrepancies()
     problems += [f"post-injection: {p}" for p in post_problems + _ledger_policy(t, accounts)]
     found = sorted(issues)
     declared = sorted((i["type"], tuple(i["affected_ids"]), i["expected_amount_minor"])
