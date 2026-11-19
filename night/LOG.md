@@ -35,3 +35,12 @@
 - Assumptions: expense journals carry no ids (schema has no journal id) → grouped by timestamp in checks;
   period window for documents = prior 35 days .. next 7 days; FX table covers period −60 .. +15 days, only foreign→base pairs.
 - Next: T6 matcher, T7 env (lead).
+
+## 2026-11-19 13:50 — lead
+- T6/T7 code in (matcher.py, env.py) + oracle + run.py; end-to-end oracle = 1.0. Tests for T6/T7 and T15 being written by subagents.
+- T8/T9/T10 done: transform.py (relabel all ids, permute rows; truth/provenance remapped), verify.py (independent verifier:
+  revert provenance → zero discrepancies; post-injection discrepancies recomputed from records == truth; evidence coverage).
+  `uv run python -m auditenv.verify --seeds 0-199` → 0 problems on 600 episodes.
+- Bug found by the verifier and fixed: retainer labels used ISO week → two invoices could get the same label (false duplicate in clean books). Now labelled by service-week dates.
+- Fix: duplicate copy is always issued strictly after the original; truth amount = later copy's AR debit (documented in policy + CONTRACT).
+- Next: T13 tests, T14 server, T17 check command.

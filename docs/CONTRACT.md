@@ -64,7 +64,7 @@ Truth issue: `{issue_id, type, affected_ids, expected_amount_minor, currency, ev
 
 | type | affected_ids | amount | evidence (any one full set) |
 |---|---|---|---|
-| `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the duplicate | [both invoice doc_ids] or [both AR row_ids] |
+| `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the later-issued copy | [both invoice doc_ids] or [both AR row_ids] |
 | `payment_allocation` | [invoice_id, payment_id] | `convert(ref.amount, rate(inv date))` − AR credit actually posted | [payment doc_id, the 2900 row_id] |
 | `fx_error` | [invoice_id] or [payment_id] | abs(posted − correct) of the AR (resp. cash) row | [doc_id, that row_id] |
 | `period_cutoff` | [invoice_id] | AR debit posted for an invoice dated outside the period | [invoice doc_id, AR row_id] |
