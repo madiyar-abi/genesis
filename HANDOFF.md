@@ -28,27 +28,17 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
-## Round 10 · 20 November 2026 (in progress)
+## Round 10 complete · 20 November 2026
 
-Branch `night/2026-11-20-r10`, tasks in `night/TASKS.md`. `reset` now rejects `errors` / `interacting` values that are not objects (`"x"` used to raise `AttributeError`, `0` / `false` / `[]` / `null` silently gave a clean company) and a `config` that is not an object (`REVIEW.md` → "Round 10"). Episodes, trajectories and golden hashes are unchanged. `uv run python -m auditenv.check`: 366 unit tests, all gates pass.
+All eleven tasks passed on `night/2026-11-20-r10`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 366 tests passed, along with 20 default and 20 hard paired checks.
 
-The Round 10 docs audit corrected hard-mode ledger targets, credit-note eligibility and the evidence required for a partial allocation. Reproduction cases are in REVIEW.md.
+- The new sweep sampled 20,000 configurations (8,037 hard). The independent verifier accepted every episode. The oracle and the reconciliation policy for each difficulty reached F1 1.000 within 59 actions. Replay any case N with `uv run python -m auditenv.fuzz --configs 1 --start N`.
+- Reset rejects malformed config objects and counts filed under the wrong group. A subprocess test sends eight invalid requests, then successfully opens an episode on the same connection.
+- Both policies solved their 4,000 stress episodes without truncation. Maximum action counts were 33 on default and 58 on hard. A separate hard sweep over seeds 1000–1999 found zero problems across 3,000 episodes.
+- All 40 exported episodes and seven trajectories reproduced byte for byte. All 80 golden hashes matched. The reward suite caught 15/15 mutants and found zero violations across 11,000 answer mutations.
+- The documentation now describes hard-mode sizing, credit-note eligibility and allocation evidence. The seed-2003 demo reproduced four matched findings after 21 inspections for a return of 0.958.
 
-The reproducible configuration sweep passed 3,000 cases, including 1,186 hard cases. Replay case N with `uv run python -m auditenv.fuzz --configs 1 --start N`.
-
-The rule policies solved all 4,000 default and 4,000 hard stress episodes without truncation. Maximum action counts were 33 and 58 respectively.
-
-The subprocess test sends eight invalid reset configurations and then opens a valid episode on the same connection.
-
-Reset now rejects scenario names in errors and individual issue types in interacting. All 40 public episodes and seven trajectories reproduced after the change.
-
-The README lists the new command and docs/CHECKS.md links both the config sweep and reset regressions to their checks.
-
-Record the seed-2003 walkthrough in docs/DEMO.md: 21 inspections, four matched findings, return 0.958.
-
-The ten-slide outline includes the 3,000-case configuration result. Add confirmed names and contributions to slide 10 before exporting.
-
-The independent hard-mode sweep covered 3,000 episodes on seeds 1000–1999. No verifier, generation or oracle problems occurred.
+The marathon handles PR integration and CI. Record the walkthrough in `docs/DEMO.md`, add confirmed team names and contributions to `docs/PITCH.md`, export the deck, and complete the access and submission checklist above.
 
 ## Round 9 · 20 November 2026
 
@@ -162,7 +152,7 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 
 ## Remaining work before submission
 
-- **Engineering:** finish Round 10 on the night branch, then follow its marathon PR and offline container CI.
+- **Engineering:** follow the Round 10 marathon PR and offline container CI.
 - **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md` (chart: `docs/baselines.svg`), including the Team slide.
 - **Access and submission:** the repository owner arranges jury access. The team checks the repo, video and presentation links, adds them to the Google Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 
