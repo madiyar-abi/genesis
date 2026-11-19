@@ -80,3 +80,9 @@ invalid submission, −1, logged (CONTRACT updated).
   `hidden.json` format and secret scope, train/hard re-export commands, `trajectories.jsonl` naming.
   Not changed: Docker base image not pinned by digest (no network to resolve a digest here); nightly CI Python
   patch versions unverified locally.
+
+## Round 3 jury review
+
+- On heavy seed 5, changing one truth currency to a different denomination left the verifier green. It now checks the currency against the base currency, as required for ledger misstatements. A separate allocation-evidence test was nested under the module entry point and escaped discovery. Both checks now run in the official suite.
+- The jury map described the closed grader transport as a socket. The implementation uses JSON lines over subprocess stdin/stdout.
+- The pitch formula abbreviated the chargeable inspections as steps. The seed-2003 demo takes 22 actions including submission and charges 21 inspections.

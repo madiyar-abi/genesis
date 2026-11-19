@@ -1,56 +1,46 @@
-# Pitch outline (one heading = one slide, 10 slides)
+# Auditenv pitch outline
 
-Numbers come from `uv run python -m auditenv.check`, `auditenv.analyze`, `auditenv.fuzz` and
-`auditenv.demo` on the committed code (dev split = 10 episodes, seeds 2000–2009; hard split = 20
-episodes, seeds 9100–9119). Re-run the check before exporting the final slides.
+## 1. How can we score an audit finding?
 
-## 1. Problem: why an RL environment for audit
-- AI auditors need practice on books with known, verifiable errors; real ledgers can't be shared
-  and have no answer key.
-- Audit rewards are easy to game: flag everything, guess ids, write a persuasive story.
-- RL needs thousands of reproducible episodes and a grader that cannot leak the answer.
+- An invoice can look like a duplicate even when a credit note reverses the original booking.
+- To evaluate an auditor, we need to know which entries are wrong, by how much, and which records establish the error.
 
-## 2. Solution: auditenv
-- Synthetic company → correct double-entry books → errors injected as recorded changes → truth with evidence.
-- The agent investigates only through 5 read-only tools and submits findings with evidence.
-- One published matcher and reward; closed evaluation in a separate process.
-- Python 3.11 standard library, zero dependencies, one check command, Docker (built and run in CI).
+## 2. A synthetic company with a verifiable answer
 
-## 3. Architecture
-- `generator` (history → ledger → inject → render) → `env` (reset/step, tools, limits, train/eval) →
-  `matcher` (validate → normalise → one-to-one match → reward).
-- Independent `verify` (revert the recorded changes → 0 discrepancies; re-apply → exactly the truth),
-  `transform` (new ids + permuted rows), `server`/`client` (grader in another process).
-- Truth and provenance are grader-only; `episode_id` is an HMAC; a grader-only key makes hidden seeds unrecoverable.
+- The generator builds balanced books, injects configured errors, and records each change.
+- A policy investigates the public records and submits findings with evidence IDs. The grader checks each finding against the recorded discrepancy.
+- The same company can be replayed with different policies.
 
-## 4. Generator: 4 errors, 2 interacting scenarios, clean books
-- Duplicate invoice · missing/partial payment allocation · wrong FX date · period cutoff — each
-  configurable by count; I1 (late partial foreign payment) and I2 (backdated foreign invoice at the wrong rate).
-- Clean companies plus legitimate look-alikes: split/partial payments, refunds, unidentified receipts,
-  weekly retainers with equal amounts, documents near midnight in other timezones.
-- 6 currencies (incl. 0-decimal JPY), 8 timezones, randomised id formats, order and amounts.
-- Opt-in hard mode: credit-note reissues, re-typed duplicates, 3× larger ledger.
+## 3. Live demo
 
-## 5. Environment and contract (live demo here)
-- `reset(seed, config) → (obs, info)`, `step(action) → (obs, reward, terminated, truncated, info)`, JSON only.
-- `list_records` (≤ 50 rows, stable cursors), `get_record`, `get_document`, `calculator` (decimal
-  arithmetic only), `submit`. 100 steps incl. submit, 60 s; every error costs a step.
-- Demo: `uv run python -m auditenv.demo` → company → investigation → 4 findings → reward 0.958;
-  the closed run: policy sees reward 0 and empty info, the grader log has the score.
+- Run `uv run python -m auditenv.demo --seed 2003`. Follow the scripted policy as it pages through ledger entries and submits four findings.
+- Show the training result. All four findings match. After 21 inspection steps, the return is 0.958.
+- Show the closed run. Over 22 actions including submission, the policy receives only zero rewards and ends with empty info. The separate grader records four true positives and zero false positives or misses.
 
-## 6. Reward and matcher
-- TP = type + canonical ids + currency + amount within max(1, 0.1 %) + one complete evidence set;
-  one-to-one matching; repeats are FP.
-- `reward = clip(2·F1 − 1 − 0.002·steps, −1, 1)`; invalid submission −1; F1 = 1 for silence on clean books.
-- Same books, other answers (demo): silence −1, guessed ids −1, answer repeated twice 0.33,
-  flag-everything −1; clean company: silence 1.0, guessed ids −1.
-- Tests bite: 15/15 one-line mutants of matcher/reward caught; baseline ranking unchanged for step cost
-  0.001–0.005 and tolerance 0–1 % (`scripts/mutate_reward.py`, `scripts/sensitivity.py`).
+## 4. From company history to evidence
+
+- Each episode can contain duplicate invoices, missing or partial payment allocations, FX conversion errors, and period cutoff errors.
+- Interacting scenarios combine late foreign payments with partial allocations, or backdated invoices with an incorrect exchange rate.
+- Clean books include split payments, refunds, and recurring charges. Hard episodes add credit-note reissues and retyped invoice lines.
+- The verifier independently derives discrepancies from the records and checks the evidence cited for each issue.
+
+## 5. How the environment runs
+
+- Python 3.11 and its standard library implement a JSON reset/step interface. The policy and closed grader communicate across processes.
+- The policy can list up to 50 records per page, retrieve a record or document, and calculate with decimals. Submission ends the episode.
+- The environment enforces a 100-action budget including submission and a 60-second time limit.
+- For private evaluation, a grader-held secret keys episode generation and the public episode identifier.
+
+## 6. How the grader scores an answer
+
+- A match requires the correct issue type, affected IDs, currency, amount, and one complete evidence set. The amount tolerance in minor units is `max(1, expected_minor // 1000)`.
+- Each truth issue matches once. Repeated findings count as false positives.
+- Terminal return is `clip(2 × F1 − 1 − 0.002 × inspection_steps, −1, 1)`. Invalid submissions score −1. On clean books, an empty answer has F1 of 1.
+- On the demo company, repeating every oracle finding in one submission earns 0.333. Flagging everything earns −1.
 
 ## 7. Results
 
-Chart for this slide: `docs/baselines.svg` (mean return per baseline, dev vs hard; regenerate with
-`uv run python -m auditenv.check --json /tmp/auditenv-metrics.json && uv run python scripts/chart.py`).
+Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision, recall, and F1, plus mean episode return, on 10 dev and 20 hard episodes.
 
 | policy | split | P | R | F1 | return |
 |---|---|---|---|---|---|
@@ -63,29 +53,20 @@ Chart for this slide: `docs/baselines.svg` (mean return per baseline, dev vs har
 | reconcile (default) | hard | 0.651 | 0.891 | 0.752 | 0.288 |
 | oracle (grader-side) | hard | 1.000 | 1.000 | 1.000 | 1.000 |
 
-- Dev split (micro P/R/F1 · mean return): oracle 1.0/1.0/1.0 · 1.000; reconcile 1.0/1.0/1.0 · 0.957;
-  naive 0.17/0.70/0.27 · −0.506; random 0/0/0 · −0.807; flag-all 0/0/0 · −1.000.
-- Naive rules: 103 false accusations (22 on clean books), allocation recall 1/8, I1 0/2 →
-  distractors and timezones defeat shortcuts.
-- Hard split: reconcile drops to 0.65/0.89/0.75 · 0.288 (22 false accusations); with the two policy rules
-  (`reconcile_hard`) 1.0 · 0.916; oracle 1.0 → harder, still solvable.
+- On hard episodes, the default reconciliation policy misses retyped duplicates and flags legitimate reissues. Accounting for line normalization and credit notes restores F1 to 1.000 on this split.
 
-## 8. Reproducibility and tests
-- 283 unit tests incl. a 20 312-action fuzz test and `tests/test_jury.py` (the jury checklist as tests);
-  80 golden hashes catch any generator drift.
-- Verifier 600/600 generated + 40/40 exported episodes; seed sweep 3 000 default + 600 hard episodes:
-  0 exceptions, 0 verifier problems, oracle 1.0 everywhere, flag-all negative on all.
-- 20/20 paired checks on default and 20/20 on hard episodes: replay is byte-exact; relabel + permute
-  keeps the oracle answer and reward.
-- Stress: 1 200 default + 1 200 hard episodes, every error found, max 57 of 100 steps; a shortcut
-  miner hunts single-feature leaks (one found in hard mode and fixed).
+## 8. How the jury can reproduce the checks
 
-## 9. Team
-- [names, roles — fill in]
-- Built for the Genesis Hackathon 2026, FinTech case.
+- Run `uv run python -m auditenv.check` for tests, independent verification, baseline comparisons, paired episodes, and the closed-process check.
+- Paired checks cover 20 default and 20 hard episodes. They replay actions and compare oracle results after IDs and row order change.
+- A separate mutation test, `uv run python scripts/mutate_reward.py`, caught 15 of 15 deliberately introduced matcher and reward changes.
 
-## 10. Q&A (backup)
-- Limits: synthetic data, receivables only, fixed UTC offsets, no trained model; hidden runs need `AUDITENV_SECRET`.
-- Next: payables/accruals/tax, near-duplicates with changed amounts, difficulty curriculum, a small
-  local model trained against the environment with a held-out comparison.
-- Links: repo README (one command), `docs/DESIGN.md` (results, examples, limitations), `REVIEW.md`.
+## 9. Limits and next experiment
+
+- The simulator covers synthetic receivables and uses fixed UTC offsets. Its benchmark measures performance on the generated cases.
+- The reported baselines are scripted. A next experiment would compare a learned policy with these baselines on held-out companies under the same investigation budget.
+
+## 10. Team
+
+- [Add confirmed team member names and each person’s contribution before exporting the deck.]
+- Genesis Hackathon 2026, FinTech case.

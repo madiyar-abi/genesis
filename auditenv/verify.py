@@ -293,6 +293,8 @@ def verify_episode(ep: dict) -> list[str]:
     docs = {d["doc_id"]: d for d in t["invoices"] + t["payments"]}
     fx_ids = {r["fx_id"] for r in t["fx"]}
     for iss in ep["truth"]["issues"]:
+        if iss.get("currency") != m["base_currency"]:
+            problems.append(f"{iss['issue_id']}: truth currency differs from ledger base currency")
         aff = set(iss["affected_ids"])
         if not iss["evidence_sets"]:
             problems.append(f"{iss['issue_id']}: no evidence set")
