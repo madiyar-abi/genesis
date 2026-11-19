@@ -90,7 +90,7 @@ Workers: touch ONLY the files listed for your task.
   tests/test_shortcut_miner.py (test: an entity_id feature is never flagged), Makefile — accept: `uv run python -m
   unittest tests.test_shortcut_miner` green; `uv run python scripts/shortcut_miner.py --seeds 0-199 --report-only`
   shows no `entity_id` value among flagged items; `make -n miner bench sensitivity chart` prints the commands
-- [ ] G1 (gemini) `docs/CHECKS.md` — jury criteria map. One section per criterion of `night/SPEC.md` §10 (Контракт и
+- [x] G1 (gemini) `docs/CHECKS.md` — jury criteria map. One section per criterion of `night/SPEC.md` §10 (Контракт и
   изоляция 25, Данные и эталон 25, Надёжность награды 25, Воспроизводимость и обобщение 15, Инженерия и объяснение 10).
   For each: a table "what the jury checks → where it lives (file / test name) → command to see it → measured result".
   Find the tests with `grep -n "def test" tests/test_jury.py tests/test_env.py tests/test_reward_attacks.py

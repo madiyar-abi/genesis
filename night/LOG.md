@@ -127,3 +127,9 @@
 - Final SPEC pass found a conflict in my R2-3 fix: SPEC §04 "submit завершает эпизод" — a submit with extra action
   keys was a non-terminating bad_params. Now it terminates as an invalid submission (−1, reason kept, logged).
   Test added; CONTRACT/REVIEW updated; test counts 283. check exit 0.
+
+## 2026-11-19 22:24 gemini
+- Implemented G1: created `docs/CHECKS.md` mapping all 5 jury criteria from `night/SPEC.md` §10 (Contract and Isolation 25, Data and Ground Truth 25, Reward Reliability 25, Reproducibility and Generalization 15, Engineering and Explanation 10) to code locations, verification commands, and measured pass counts from execution.
+- Verified that all commands in `docs/CHECKS.md` pass with exit code 0 (`auditenv.check`, `auditenv.verify --seeds 0-199`, `scripts/mutate_reward.py`, `scripts/golden.py --check`, `auditenv.attack`, `tests.test_fuzz`, etc.).
+- Verified that all 76 file and test method references exist in the repository via automated validation.
+- Next: check if any remaining tasks are tagged (gemini).
