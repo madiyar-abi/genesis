@@ -38,6 +38,8 @@ The reproducible configuration sweep passed 3,000 cases, including 1,186 hard ca
 
 The rule policies solved all 4,000 default and 4,000 hard stress episodes without truncation. Maximum action counts were 33 and 58 respectively.
 
+The subprocess test sends eight invalid reset configurations and then opens a valid episode on the same connection.
+
 ## Round 9 · 20 November 2026
 
 Branch `night/2026-11-20-r9`, tasks in `night/TASKS.md`. A read-only red-team pass on contract, isolation, reward and reproducibility found nothing that leaks truth or beats the oracle, and three smaller defects, now fixed test-first (`REVIEW.md` → "Round 9"):

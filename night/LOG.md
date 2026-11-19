@@ -9,5 +9,6 @@
 - Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile_hard --seeds 0-999 --hard`
   Wall time: 60.31s
   Summary: reconcile_hard on 4000 hard episodes (seeds 0-999 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (60.3 s)
+2026-11-20 03:49 gemini3 — T6 done: added tests/test_server_config.py. Tested bad reset configs ({"errors": "x"}, {"errors": 5}, {"interacting": [1]}, {"foo": 1}, {"max_steps": 0}, {"mode": "test"}, {"n_invoices": 9}, {"difficulty": "expert"}) over out-of-process server subprocess (python -m auditenv.server). Verified each response contains only the key "error", error string <= 200 chars without Traceback or "/", followed by valid reset returning an observation. Ran `uv run python -m unittest tests.test_server_config` (Ran 1 test in 0.030s, OK). What's next: await lead merge / further tasks. Assumption: none.
 2026-11-20 03:51 lead — T3: Reproduced ledger and credit-note edge cases on seeds 3 and 4, corrected config, evidence, lifecycle and Make examples. Official check passed in 63.0 s; measured tables matched.
 2026-11-20 03:51 lead — T1: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000: 3,000 cases (1,186 hard), 132.9 s, 0 problems, max 56 steps. Six focused tests passed, full check green.
