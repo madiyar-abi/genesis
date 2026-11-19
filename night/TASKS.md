@@ -8,4 +8,4 @@
 - [x] T8 (lead) Bind allocation evidence to a positive AR credit on the affected payment and invoice — files: auditenv/verify.py (_sufficient), tests/test_allocation_posting.py — accept: seed 1 original invoice debit substituted for payment posting fails verification.
 - [x] T9 (lead) Remove the embedded worker API credential and require an explicit key before contacting the service — files: scripts/deepseek_worker.py — accept: missing key fails locally, tracked source scan is clear.
 - [x] T6 (lead) Rehearse the numbered demo and check narrated evidence and terminal results — files: docs/DEMO.md — accept: public walkthrough reproduces scripted outputs within the timed outline.
-- [ ] T7 (lead) Verify slide claims against the integrated checks and sync metrics — files: docs/PITCH.md — accept: ten-slide outline matches measured output and docs sync passes.
+- [x] T7 (lead) Verify slide claims against the integrated checks and sync metrics — files: docs/PITCH.md — accept: ten-slide outline matches measured output and docs sync passes.
