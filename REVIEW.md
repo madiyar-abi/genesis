@@ -1,0 +1,58 @@
+# REVIEW.md — jury-style review (2026-11-19)
+
+Scope: every module in `auditenv/` (env, generator, inject, matcher, metrics, schema, calculator,
+experimental, verify, transform, server, client, run, export, load, analyze, check, demo, policies/),
+tests/, configs/, Dockerfile, docs. Base: branch `hinabaina/hard-mode` (includes hard mode).
+Method: reading the code plus a probe script that plays the jury's checks against the live env
+(bad actions, leaks, limits, truncation, time limit, eval mode, determinism, evidence reachability
+through the tools) and targeted data checks.
+
+Status legend: **OK** = checked, no problem; **ISSUE n** = see "Findings" below.
+
+## 1.1 Contract and isolation (25)
+- `reset(seed, config) -> (observation, info)`; `step -> (obs, reward, terminated, truncated, info)`, JSON-only — OK (`env.py`, probe).
+- Exactly 5 actions; anything else → `unknown_action`, step consumed — OK.
+- `list_records` ≤ 50 rows (larger limit clamped), stable `table:offset` cursors, cursor at the end → empty page, past the end → `bad_params` — OK.
+- Calculator: AST whitelist over `Decimal`, character whitelist, 200-char cap; `__import__`, `open`, `**`, `//`, names, `1e5` rejected; division by zero → `calc_error` — OK.
+- Unknown id / doc / table / malformed action (None, str, list, nested dicts) → bounded error, step consumed, never raises — OK (+ 3 000-action fuzz test).
+- Observation = `{step, steps_remaining, result, error}` only; no shell/SQL/files/network — OK.
+- `submit` → `terminated`; 100th non-submit step or 60 s → `truncated` with an empty answer graded; submit as step 100 is a submit — OK.
+- No leak of truth/provenance/seed through observations, errors, info (train: counts and metrics only; eval: reward 0, info `{}`); `episode_id` is an HMAC, seed not recoverable with `AUDITENV_SECRET` — OK.
+- `reset` rebuilds all state — OK.
+
+## 1.2 Data and truth (25)
+- 4 error types + I1, I2 + clean companies + distractors; history → documents → errors with recorded causal change — OK.
+- Journals balance before and after injection; recomputed discrepancies == truth (verifier, 600 default + hard episodes) — OK.
+- Formats: ISO-8601 with offset, int minor units + exponents, decimal-string rates, explicit nulls, manifest fields — OK.
+- Evidence ids exist and are reachable through `get_document` / `get_record` (probe, 30 seeds) — OK.
+- **ISSUE 1** — evidence sufficiency of `payment_allocation` (see below).
+
+## 1.3 Reward reliability (25)
+- Formula, P/R/F1, zero denominators, empty/empty = 1, empty truth + findings = 0 (`metrics.py`) — OK.
+- TP rule (type, canonical ids, tolerance, currency, one full evidence set), one-to-one greedy matching, repeats = FP, missed = FN — OK.
+- Limits 30 / 10 / 1000, unknown keys, bad types → invalid → reward −1 — OK.
+- Attack tests (correct > silence, silence > accusations, duplicates, flag-all, step cost, guessed ids, unsupported evidence, wrong currency, resubmit, bad input, timeout, tolerance) exist and pass — OK.
+
+## 1.4 Reproducibility and generalisation (15)
+- Same seed + config + version + actions → identical episode and transitions (hash-compared in the check) — OK.
+- Relabel + permute keeps the oracle answer/reward under the new ids; old answer scores 0 TP — OK.
+- **ISSUE 4** — hard mode is not covered by the replay/transform tests.
+
+## 1.5 Engineering (10)
+- One command `uv run python -m auditenv.check`, stdlib only, Python 3.11, JSONL trajectories without truth, versioned configs, failure analysis, honest limitations — OK.
+- **ISSUE 2** — the Dockerfile was never built or run (no Docker on the dev machine).
+- **ISSUE 3** — `auditenv.verify --seeds` prints only the number of bad episodes, not how many were checked.
+- **ISSUE 5** — test gaps from the jury list (see Phase 3).
+- **ISSUE 6** — docs: PITCH does not follow the 10-slide structure; DESIGN has no worked example per error type and no seeds column in the baseline table.
+- No TODO/FIXME/HACK in code; `print` only in CLI entry points (check, run, verify, analyze, export, demo) — OK.
+
+## Findings
+
+| # | area | severity | finding | status |
+|---|---|---|---|---|
+| 1 | data & truth | high | For a **partial** `payment_allocation` (incl. I1) truth also accepted the set {payment doc, invoice doc, 2900 row, fx}. That set cannot reproduce the amount (expected AR credit − posted AR credit): the posted AR credit is not in it, and the 2900 row is at the payment-date rate and may hold other remainder. 849 of 1 200 such sets in a 300-seed sample were partial. The verifier only checked `0 < amount ≤ expected` for 2900 sets, so it did not catch it. | open |
+| 2 | engineering | medium | Dockerfile never built/run; README promises `docker run`. | open |
+| 3 | engineering | low | `verify --seeds` output has no total. | open |
+| 4 | reproducibility | low | Replay/transform invariance not tested for `difficulty: "hard"`. | open |
+| 5 | tests | medium | Missing explicit tests: different seeds → different episodes; action after truncation; error messages without paths/truth; reward 0 on every non-terminal tool; train/dev cover all 4 types, I1, I2 and clean books; every truth evidence id reachable via the tools; exported manifests match the schema. | open |
+| 6 | docs | medium | PITCH not in the requested 10-slide order; DESIGN lacks per-type examples and seeds per baseline row. | open |

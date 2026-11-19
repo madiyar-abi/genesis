@@ -151,3 +151,12 @@
 - Re-exported episodes/, regenerated trajectories/. Reconcile stress 1200 episodes still 0 imperfect (max 30 steps). New dev numbers in DESIGN/PITCH.
 - tests/test_hardening.py (5 regression tests). 187 tests, check ALL PASSED.
 - Assumption: I2 double-reporting (cutoff + fx on one booking) kept as designed (documented interacting scenario).
+
+## 2026-11-19 15:10 — hinabaina + Claude (jury-review, phase 1)
+- Branch `hinabaina/jury-review` from `hinabaina/hard-mode` (hard mode approved by the user, included in the review).
+- Full read of auditenv/ + live probe of the jury checks (bad actions, leaks, limits, truncation, time limit, eval mode,
+  determinism, evidence reachable via tools on 30 seeds): no contract/isolation defect found.
+- Data finding: partial payment_allocation accepted an evidence set {payment doc, invoice doc, 2900 row, fx} that cannot
+  reproduce the amount (849/1200 sampled 2900-sets were partial); verifier check for 2900 sets was too weak.
+- Other findings: Docker never run, verify CLI has no totals, hard mode not in replay/transform tests, test gaps, PITCH/DESIGN
+  structure. All in REVIEW.md.
