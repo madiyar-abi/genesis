@@ -18,7 +18,7 @@ Numbers come from `uv run python -m auditenv.check` / `auditenv.analyze` on the 
 - Python 3.11 standard library, zero dependencies, one check command, Dockerfile.
 
 ## 3. Live demo
-- `uv run python -m auditenv.check` → all gates pass in ~8 s.
+- `uv run python -m auditenv.check` → all gates pass in ~11 s.
 - `uv run python -m auditenv.demo` → company → investigation → findings → reward 0.958.
 - Same books, other answers: silence −1, guessed ids −1, repeated answer 0.33, flag-everything −1.
 - Closed run in a separate process: the policy sees reward 0, the grader log has the score.
@@ -32,6 +32,8 @@ Numbers come from `uv run python -m auditenv.check` / `auditenv.analyze` on the 
 - Ids, id formats, order, amounts, 6 currencies (incl. 0-decimal JPY) and 8 timezones vary per episode.
 - Naive reconciliation: micro-F1 0.286, 102 false positives (22 on clean books), 0/2 on the interacting
   payment case; policy-aware reconciliation: F1 1.0 → solvable from the evidence, not by shortcuts.
+- Hard mode (opt-in): legitimate cancel-and-reissue with a credit note, re-typed duplicates, 3× larger
+  ledger → the same rule script drops to F1 0.611 (45 false accusations), oracle stays 1.0.
 
 ## 5. How it works
 - `generator` (history → ledger → inject → render) · `env` (tools, limits, modes) ·
@@ -42,11 +44,14 @@ Numbers come from `uv run python -m auditenv.check` / `auditenv.analyze` on the 
   declared ones, recomputed from public records.
 
 ## 6. Results
-- Checks: 187 unit tests (incl. a 3 000-action fuzz test); verifier 600/600 episodes valid; 20/20 paired checks (replay exact;
+- Checks: 193 unit tests (incl. a 3 000-action fuzz test); verifier 600/600 episodes valid; 20/20 paired checks (replay exact;
   relabel + permute keeps the oracle reward).
 - Dev split (micro P/R/F1, mean return): oracle 1.0/1.0/1.0, 1.000 · reconcile 1.0/1.0/1.0, 0.957 ·
   naive 0.18/0.73/0.29, −0.488 · random 0/0/0, −0.807 · flag-all 0/0/0, −1.000.
-- Reconcile stress test: 1 200 episodes, 0 imperfect, ≤ 30 steps → every error is findable in budget.
+- Hard split (20 episodes, micro P/R/F1, mean return): oracle 1.0/1.0/1.0, 1.000 · reconcile_hard
+  1.0/1.0/1.0, 0.917 · reconcile 0.47/0.87/0.61, −0.095 · naive 0.10/0.59/0.17, −0.727 · random −0.806 · flag-all −1.000.
+- Stress tests: 1 200 default episodes (reconcile) and 1 200 hard episodes (reconcile_hard), 0 imperfect,
+  no truncation → every error is findable in budget.
 - 12 attack tests from the case (silence, false accusations, duplicates, flag-all, step cost, guessed
   ids, bad evidence, wrong currency, resubmit, malformed input, timeout, tolerance) all pass.
 

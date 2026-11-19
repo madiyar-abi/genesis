@@ -53,6 +53,10 @@ If you need something not described here, choose the simplest option and log it.
   rate; any difference `7900`. Every journal (rows sharing payment_id, or an invoice's
   rows with payment_id null) balances: Σdebit == Σcredit.
 - Expenses: `Dr 6xxx / Cr 1000`, no invoice/payment ids.
+- Hard mode only (`difficulty: "hard"`): a cancelled invoice is reversed in full by a credit note,
+  `Dr 4000 / Cr 1200` with the same invoice_id, payment_id null, inside the period and after the
+  booking; its replacement is a new invoice (new id, identical line items) booked normally. The
+  invoice journal then has 4 rows and still balances. A credit-noted invoice is never a duplicate.
 - A record belongs to the period iff its timestamp converted to company tz has a
   date in `[period_start, period_end]`.
 
@@ -66,6 +70,10 @@ Truth issue: `{issue_id, type, scenario, affected_ids, expected_amount_minor, cu
 | type | affected_ids | amount | evidence (any one full set) |
 |---|---|---|---|
 | `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the later-issued copy | both invoice doc_ids + the later copy's AR (or revenue) row_id |
+
+"Same line items" = equal as a multiset of `(description, quantity, unit_price_minor, amount_minor)`
+with descriptions compared lower-case, letters and digits only (order, case and punctuation ignored).
+In default mode copies are exact; in hard mode half of them are re-typed.
 | `payment_allocation` | [invoice_id, payment_id] | `convert(ref.amount, rate(inv date))` − AR credit actually posted | payment doc_id + invoice doc_id + the 2900 row_id (or the AR credit row_id) + the invoice-date fx_id if foreign |
 | `fx_error` | [invoice_id] or [payment_id] | abs(posted − correct) of the AR (resp. cash) row | doc_id + that row_id (invoice: AR or revenue row) + the fx_id of the correct date |
 | `period_cutoff` | [invoice_id] | AR debit posted for an invoice dated outside the period | invoice doc_id + AR (or revenue) row_id |
@@ -87,7 +95,10 @@ obs, reward, terminated, truncated, info = env.step(action: dict)
 All values JSON-compatible. `config` keys (all optional): `mode` ("train" | "eval",
 default "train"), `max_steps` (100), `time_limit_s` (60), `errors`
 (`{type: count}`), `interacting` (`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`
-(bool), `transform_seed` (int | null: benign relabel/permutation).
+(bool), `transform_seed` (int | null: benign relabel/permutation), `difficulty` ("default" |
+"hard"; default "default" — absent from the normalised config, so default episodes are unchanged).
+Hard: 900–1 400 ledger rows, 2–3 credit-note reissues, re-typed duplicates; `policy.ledger.credit_note`
+and the task text state the extra rules.
 
 Grader secret: if the env var `AUDITENV_SECRET` is set (grader process only), it keys both the
 generator RNG and the HMAC `episode_id`, so a policy cannot recover the seed or regenerate the

@@ -15,7 +15,7 @@ Python 3.11, **standard library only** (zero runtime dependencies), MIT licence.
 
 ```bash
 git clone https://github.com/madiyar-abi/genesis.git && cd genesis
-uv run python -m auditenv.check        # the single official check (≈ 8 s, exit code 0 = pass)
+uv run python -m auditenv.check        # the single official check (≈ 11 s, exit code 0 = pass)
 ```
 
 No `uv`? Any Python 3.11 works the same: `python3.11 -m auditenv.check` from the repo root.
@@ -42,6 +42,8 @@ docker run --rm --network none auditenv            # runs python -m auditenv.che
    oracle answer and reward (under the new ids).
 5. **Out-of-process eval run** — environment and grader in a subprocess; the policy sees no
    reward and no truth; results go only to the grader log.
+6. **Hard mode** — verifier on hard episodes, baselines on `configs/eval_hard.json`; gates: oracle 1.0,
+   `reconcile_hard` (the policy's hard rules) solves it from the records, plain `reconcile` does not.
 
 ## Using the environment
 
@@ -66,7 +68,9 @@ Actions: `list_records(table, cursor, limit≤50)`, `get_record(table, id)`, `ge
 
 Config keys: `mode` (`train` returns the terminal reward, `eval` hides it), `max_steps` (≤ 100),
 `time_limit_s` (60), `errors` (`{type: count}`; omitted → random mix), `interacting`
-(`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`, `transform_seed` (benign relabel/permute).
+(`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`, `transform_seed` (benign relabel/permute),
+`difficulty` (`"default"` | `"hard"`: credit-note reissues, re-typed duplicates, 900–1 400 ledger rows —
+see [`docs/DESIGN.md`](docs/DESIGN.md) “Hard mode”; `configs/eval_hard.json` is a 20-episode hard split).
 
 ### Run a policy, write trajectories
 
@@ -75,7 +79,7 @@ uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out
 uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval
 ```
 
-Policies: `random`, `reconcile`, `flag_all`, `oracle` (grader-side, reads truth — reward ceiling only).
+Policies: `random`, `naive_reconcile`, `reconcile`, `reconcile_hard`, `flag_all`, `oracle` (grader-side, reads truth — reward ceiling only).
 Each trajectory line: `episode_id, step, action, observation, reward, terminated, truncated`.
 
 ### Plugging in your own policy (organisers' baselines)

@@ -159,7 +159,7 @@ Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30
 P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode.
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount; reported separately, the shared reward is unchanged.
-Other gates in the same run: 187 unit tests pass; verifier 200/200 episodes valid (600/600 with
+Other gates in the same run: 193 unit tests pass; verifier 200/200 episodes valid (600/600 with
 `auditenv.verify --seeds 0-199`); 20/20 paired checks; out-of-process run leaks nothing.
 
 Reconcile stress test: 1 200 episodes (300 seeds × default / clean / 12-issue / 12-issue with
@@ -184,6 +184,42 @@ on the 2 clean companies):
 The random explorer finds nothing (0 TP) and is punished on dirty books (−1) while scoring on
 clean books only when it happens to submit no findings. Flag-everything scores −1 on every episode.
 
+### Hard mode (`{"difficulty": "hard"}`, `configs/eval_hard.json`)
+
+The default distribution is solved by a hand-written rule script, so we add an opt-in hard level.
+It is additive: without the key the normalised config, the RNG stream and every default episode are
+byte-identical (the committed `episodes/` still match the generator).
+
+| change | effect on a shortcut | why it stays solvable |
+|---|---|---|
+| 2–3 legitimate **cancel-and-reissue** pairs per episode: the unpaid original is reversed by a full credit note (`Dr 4000 / Cr 1200`, same invoice_id), the replacement has identical line items | looks exactly like a duplicate | the reversal rows are in the ledger; the rule is in `policy.ledger.credit_note` and the task text |
+| half of the injected **duplicates are re-typed**: other line order, case and ref punctuation | exact line-item comparison misses them | same products, quantities and prices; duplicates are defined order/case/punctuation-insensitively (CONTRACT §3) |
+| **larger ledger**: 900–1 400 rows instead of 230–420 | more pages to read, higher step cost | full reading still fits in 100 steps |
+
+The verifier treats credit-noted invoices as non-duplicates, compares lines with the same normalised key
+and checks that every credit note is in the period and after its booking.
+
+`uv run python -m auditenv.check`, hard section (`configs/eval_hard.json`: 20 episodes, seeds 9100–9119,
+5 clean, 5 interacting, 10 mixed — the `eval_example` mix):
+
+| policy | P | R | F1 | return | steps | exp. return* |
+|---|---|---|---|---|---|---|
+| random explorer (seeded) | 0.000 | 0.000 | 0.000 | −0.806 | 33.1 | −0.806 |
+| naive reconciliation | 0.101 | 0.587 | 0.172 | −0.727 | 33.2 | −0.633 |
+| reconciliation (default rules) | 0.471 | 0.870 | 0.611 | −0.095 | 42.6 | −0.341 |
+| reconciliation + hard rules (`reconcile_hard`) | 1.000 | 1.000 | 1.000 | 0.917 | 42.6 | 0.917 |
+| flag-everything attack | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | −1.000 |
+| oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 1.000 |
+
+Gates in the check: hard verifier 50/50 episodes valid; oracle 1.0; `reconcile_hard` F1 ≥ 0.95;
+default `reconcile` F1 ≤ 0.8; flag-everything < 0. Failure analysis of the default rules
+(`auditenv.analyze --policy reconcile --config configs/eval_hard.json`): duplicate recall 2/8 (re-typed
+copies missed), all other types 100 %; 45 false positives, all `no_matching_issue` — the credit-note
+reissues flagged as duplicates. `reconcile_hard` is the same script plus the two policy rules: it shows
+the level is solvable from the records, not that a learning agent finds those rules.
+Stress test of `reconcile_hard` (1 200 hard episodes: 300 seeds × default / clean / 12-issue / 12-issue
+with 100 invoices): 0 imperfect, max 58 steps, no truncation.
+
 ## 10. Honest limitations
 
 - Synthetic and simplified: receivables only (no payables, tax, accruals), one functional
@@ -196,12 +232,14 @@ clean books only when it happens to submit no findings. Flag-everything scores �
 - The I1 payment is always on the last evening of the period (by the definition of the scenario);
   "last-evening payment" alone has precision 0.35.
 - Expense journals carry no ids (the schema has no journal id); checks group them by timestamp.
-- Duplicates are exact copies; near-duplicates (changed description, rounded amounts) are not modelled.
+- Default duplicates are exact copies; hard mode re-types the text, but changed amounts or quantities
+  (a "near-duplicate" that is really a different sale) are not modelled.
 - Wall-clock truncation (60 s) is the only non-deterministic transition; it never triggers for the
   baselines (≤ 0.01 s per episode).
 - Step cost vs F1 granularity: with 12 issues, skipping one finding at 0 steps (0.913) beats the full
   answer after 60 steps (0.880); with ≤ 10 issues the full answer always wins.
-- A policy-aware rule script solves the default distribution (F1 1.0). The difficulty is for a
-  learning agent that must discover these rules from 100 tool calls, not for a hand-written solver;
-  the naive-rules baseline measures how much the distractors and timezones hurt shortcuts.
+- A policy-aware rule script solves the default distribution (F1 1.0); the same script gets F1 0.611 in
+  hard mode, and only after adding the two hard rules (`reconcile_hard`) is it perfect again. Every level
+  a script can solve is still learnable for an agent that must discover the rules within 100 tool calls;
+  the baselines measure how much the distractors hurt shortcuts, not agent difficulty.
 - No model was trained; we make no claim about training improvements.
