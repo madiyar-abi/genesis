@@ -210,7 +210,7 @@ Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30
 P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode. Timing is a snapshot of the measurement host. CI compares deterministic cells and checks that times are finite and nonnegative.
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount; reported separately, the shared reward is unchanged.
-Other gates in the same run: 316 unit tests pass; verifier 200/200 episodes valid (600/600 with
+Other gates in the same run: 322 unit tests pass; verifier 200/200 episodes valid (600/600 with
 `auditenv.verify --seeds 0-199`); 20/20 paired checks on default and 20/20 on hard episodes; out-of-process run leaks nothing.
 
 Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200

@@ -28,9 +28,11 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
-## Round 7 in progress
+## Round 7 complete · 20 November 2026
 
-The seed-2003 demo rehearsal passed. Both recording tabs now use public companies even on a private grading machine. Slide 7 now reports false positives and misses alongside the investigation cost. The verifier now checks the signed unapplied-cash posting for an unidentified receipt or refund. All 317 tests and the default and hard seed sweeps passed. The jury map now links stable pagination and invalid parameters to the exact tests. The published chart reproduced byte for byte across all eleven plotted returns. The README includes offline Python and container instructions and verification for all exported splits. Worker assignments are in `night/TASKS.md`.
+All seven tasks passed on `night/2026-11-20-r7`. The verifier now checks the signed unapplied-cash posting (account 2900) for an unidentified receipt or refund; on clean seed 7, moving such a receipt to revenue used to pass. A new test confirms every payment receivables posting names the customer of the invoice it settles: 0 mismatches across 200 heavy episodes (5,148 postings).
+
+Run `uv run python -m auditenv.check` from the repository root. All 322 unit tests and both sets of 20 paired checks passed, and `auditenv.verify --seeds 0-199` found 600/600 episodes valid. The seed-2003 demo rehearsal passed, and both recording tabs use public companies even on a machine holding a private grading key. The published chart reproduced byte for byte. The README covers offline Python, the container check and verification of all exported splits. The jury map in `docs/CHECKS.md` resolves every referenced test.
 
 ## Round 6 complete · 20 November 2026
 

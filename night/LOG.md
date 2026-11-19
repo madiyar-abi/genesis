@@ -36,3 +36,4 @@ PY
 ```
 
 Next: IDLE.
+2026-11-20 02:35 lead (Claude fallback) — Integrated T2 from gemini2. Confirmed the hard config follows the fuzz convention. The 5 new tests pass in 1.2 s, and the full suite passes 322 tests. Added the entity test to the Data row of docs/CHECKS.md and corrected the stale "316 unit tests" in docs/DESIGN.md. Re-ran checks: auditenv.check passed, sync_docs reports no drift and verify found 600/600 episodes valid. All Round 7 tasks are done, so the round is closing with night/DONE. Assumption: T2 adds only a test, so the default and hard fuzz sweeps from T5 still hold and episodes need no re-export.
