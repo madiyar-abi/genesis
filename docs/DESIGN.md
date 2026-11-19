@@ -326,13 +326,13 @@ to explore.
 - The generator is open and deterministic: hidden runs must set `AUDITENV_SECRET` in the grader
   process (otherwise, as for the public splits, anyone can regenerate an episode from its seed).
 - Shortcut miner (`uv run python scripts/shortcut_miner.py [--hard]`, 1 000 seeds): single observable
-  features that predict truth records with precision > 0.5. Fixed: re-typed descriptions marked hard-mode
-  duplicate copies (1.000 → 0.467: invoices and re-issues are now keyed in by hand too). Left, measured:
-  in default mode "same entity, currency and total exactly twice" finds duplicates (0.996) — it is the
-  duplicate definition, but default mode has no near-miss decoys (hard mode has: 0.360); I1 payments are
-  always on the last day, so a 2900/7900 row on the last day hints at fx_error (0.70) and a large 2900
-  amount at payment_allocation (0.75–0.78). Each hint names a record, not the claimed amount — scoring
-  still needs the reconciliation.
+  features that predict truth records with precision > 0.5 (16 flagged in default mode, 11 in hard mode).
+  Fixed: re-typed descriptions marked hard-mode duplicate copies (1.000 → 0.449 on 1 000 seeds, 0.467 on 500
+  seeds: invoices and re-issues are now keyed in by hand too). Left, measured: in default mode "same entity,
+  currency and total exactly twice" finds duplicates (0.996) — it is the duplicate definition, but default mode
+  has no near-miss decoys (hard mode has: 0.358); I1 payments are always on the last day, so a 2900/7900 row on
+  the last day hints at fx_error (0.70) and a large 2900 amount at payment_allocation (0.75–0.78). Each hint names
+  a record, not the claimed amount — scoring still needs the reconciliation.
 - Cutoff of a next-period invoice is booked *before* its issue instant; a policy can learn that
   direction-of-lag cue, but it is exactly the audit rule (document date outside the period).
 - The I1 payment is always on the last evening of the period (by the definition of the scenario);
@@ -341,7 +341,7 @@ to explore.
 - Default duplicates are exact copies; hard mode re-types the text, but changed amounts or quantities
   (a "near-duplicate" that is really a different sale) are not modelled.
 - Wall-clock truncation (60 s) is the only non-deterministic transition; it never triggers for the
-  baselines (≤ 0.01 s per episode).
+  baselines (≤ 0.012 s per episode).
 - Step cost vs F1 granularity: with 12 issues, skipping one finding at 0 steps (0.913) beats the full
   answer after 60 steps (0.880); with ≤ 10 issues the full answer always wins.
 - A policy-aware rule script solves the default distribution (F1 1.0); the same script gets F1 0.752 in
