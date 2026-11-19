@@ -46,6 +46,8 @@ Branch `night/2026-11-20-r12`. See `night/TASKS.md` for remaining work.
 
 - T2. Gemini1 and the lead independently counted generated truth. Each 20-company evaluation config contains five clean companies and five with interacting errors.
 
+- T4. All seven trajectory files have the required fields across 2,258 records, including 70 resets. All 70 episodes terminated and none truncated.
+
 ## Round 11 complete · 20 November 2026
 
 Work is on `night/2026-11-20-r11`. See `night/TASKS.md` for ownership and
