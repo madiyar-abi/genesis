@@ -22,3 +22,9 @@ hard mode, seeds 1000-1999: 3000 episodes (1988 dirty, 1012 clean) in 192.9 s
   random explorer reward > 0: 246/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
   flag-all reward < 0: 3000/3000
 FUZZ PASSED
+
+2026-11-20 04:08 gemini1 — T4 done: Long config sweep completed (0 problems).
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 20000`
+  Wall time: 671.47s (11m 11.47s)
+  Summary: config sweep, cases 0-19999: 20000 random configs (8037 hard) in 671.4 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 59
+  FUZZ PASSED
