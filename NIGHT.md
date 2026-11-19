@@ -88,6 +88,34 @@ Your name and branch are in the prompt (e.g. name `codex`, branch `night/<date>-
    LOG.md, commit, `git push -u origin <your branch>` after every task.
    Don't edit HANDOFF.md — the lead owns it. Never touch `main`.
 
+## Continuous mode (`scripts/marathon.sh`)
+The marathon runs rounds back to back until the freeze time: each round is a
+new branch `night/<date>-r<N>` from `origin/main`; after `night/DONE` it merges
+`main`, runs the check, opens a PR, waits for CI and merges it, then starts the
+next round. The round's goal is in `night/ROUND.md` (read it first).
+- **Open improvement round** (lead): there is no fixed spec beyond SPEC.md, so
+  find the work yourself:
+  1. Read `night/archive/` (previous rounds' TASKS/LOG/ROUND), `REVIEW.md`,
+     `docs/CHECKS.md`, HANDOFF "Ideas". Don't repeat done or rejected work.
+  2. Review the repo against SPEC §10 (jury criteria, points) like a strict
+     jury member: run `auditenv.check`, `auditenv.fuzz`, `auditenv.attack`,
+     the shortcut miner; read the code and docs for wrong claims. Record
+     findings with evidence in `REVIEW.md` → "Round N".
+  3. Write `night/TASKS.md`: 3–8 tasks with the highest jury value per hour
+     (real defects first, then evidence/tests, then docs accuracy). Small,
+     safe, each with a mechanical check. Grunt work → `(gemini)`.
+  4. Do them, keep `auditenv.check` green after every commit, sync doc numbers
+     (`scripts/sync_docs.py`), update HANDOFF, then `night/DONE`.
+  5. Nothing with real jury value left? Log "no valuable improvement found"
+     with what you checked, and create `night/DONE` without code changes —
+     the marathon then pauses for 2 h instead of burning quota.
+- **Fix round**: do exactly what `night/ROUND.md` says (merge conflict, red
+  check or red CI), nothing else, then `night/DONE`.
+- All "Rules first" in HANDOFF.md still apply (fixed contract and reward,
+  stdlib only, byte-identical default episodes unless a data fix needs a re-export).
+- Humans start/stop it: `nohup scripts/marathon.sh "2026-11-22 18:00" >> .night-logs/marathon.out 2>&1 &`
+  · stop: `touch .night-logs/STOP` · watch: `tail -f .night-logs/marathon.out .night-logs/lead.out`
+
 ## Priorities (hackathon, final deadline 2026-11-22 22:00)
 A run ends at its `--until` time (default 07:00); the whole project has ~3.5 days. Order tasks so that a
 working end-to-end demo exists as early as possible and stays working after

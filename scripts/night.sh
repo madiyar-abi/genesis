@@ -17,7 +17,7 @@ MODELS=""
 ACCOUNTS="default"
 SLOTS=""
 usage() {
-  echo "usage: $0 [--role lead|worker] [--name NAME] [--engine claude|agy|codex] [--until HH:MM]"
+  echo "usage: $0 [--role lead|worker] [--name NAME] [--engine claude|agy|codex] [--until HH:MM|\"YYYY-MM-DD HH:MM\"]"
   echo "          [--branch night/YYYY-MM-DD] [--model \"A,B\"] [--accounts \"default,DIR\"] [--workers \"gemini,codex\"]"
   echo "          [--slots \"engine|account|model;engine|account|model\"]   (overrides --engine/--model/--accounts)"
   exit 2
@@ -91,8 +91,11 @@ mkdir -p .night-logs night
 caffeinate -dimsu -w $$ &
 
 now() { date +%s; }
-DEADLINE=$(date -j -f "%Y-%m-%d %H:%M" "$(date +%F) $UNTIL" +%s) || exit 1
-[ "$DEADLINE" -le "$(now)" ] && DEADLINE=$((DEADLINE + 86400))
+case "$UNTIL" in
+  *-*) DEADLINE=$(date -j -f "%Y-%m-%d %H:%M:%S" "$UNTIL:00" +%s) || exit 1 ;;   # full "YYYY-MM-DD HH:MM"
+  *)   DEADLINE=$(date -j -f "%Y-%m-%d %H:%M:%S" "$(date +%F) $UNTIL:00" +%s) || exit 1
+       [ "$DEADLINE" -le "$(now)" ] && DEADLINE=$((DEADLINE + 86400)) ;;
+esac
 DEADLINE_HUMAN=$(date -r "$DEADLINE" "+%Y-%m-%d %H:%M")
 log() { echo "[$(date '+%H:%M:%S')] [$NAME/$(cur_engine)] $*"; }
 

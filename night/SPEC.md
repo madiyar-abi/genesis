@@ -21,7 +21,7 @@ PDF disagree, the PDF wins.
   tests must exist as early as possible.
 - The jury scores the environment and grader (sections 06, 10), not our agent.
   No UI, no weight training.
-- **Round 2 (polish) is running: goals and rules in `night/ROUND2.md`.**
+- **Continuous improvement rounds (`scripts/marathon.sh`): the current round's goal is in `night/ROUND.md`.**
 
 ---
 
