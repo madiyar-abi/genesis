@@ -284,6 +284,8 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
 def verify_episode(ep: dict) -> list[str]:
     problems = _structure(ep)
     m, t = ep["manifest"], ep["tables"]
+    if ep["truth"].get("episode_id") != m["episode_id"]:
+        problems.append("truth episode_id differs from manifest")
     # pre-injection: correct books
     pre_issues, pre_problems = Books(m, revert(ep)).discrepancies()
     problems += [f"pre-injection: {p}" for p in pre_problems]
@@ -300,7 +302,11 @@ def verify_episode(ep: dict) -> list[str]:
     rows = {r["row_id"]: r for r in t["ledger"]}
     docs = {d["doc_id"]: d for d in t["invoices"] + t["payments"]}
     fx_ids = {r["fx_id"] for r in t["fx"]}
+    issue_ids = set()
     for iss in ep["truth"]["issues"]:
+        if iss["issue_id"] in issue_ids:
+            problems.append(f"duplicate truth issue_id {iss['issue_id']}")
+        issue_ids.add(iss["issue_id"])
         if iss.get("currency") != m["base_currency"]:
             problems.append(f"{iss['issue_id']}: truth currency differs from ledger base currency")
         aff = set(iss["affected_ids"])

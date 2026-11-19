@@ -93,3 +93,10 @@ invalid submission, −1, logged (CONTRACT updated).
 - The same seed advertised 68 documents. Substituting 20 passed the verifier because it read the size bound from the manifest.
 - An empty directory or an indexed export with an episode folder removed could pass the directory verifier. The reported denominator counted only discovered episodes.
 - With a grader key set, the pitch's public demo command could change the company and reported score.
+
+## Round 5 jury review
+
+- In a clean seed-7 company, assigning a missing payment ID to both sides of an expense journal preserved the journal balance and passed verification. Neither posting had a corresponding payment document.
+- Replacing the paired transformation with an identity function and an empty ID map passed the default and hard paired gates. The translated answer could reuse all original IDs.
+- A clean company's truth file carrying another company's episode ID passed verification. Reusing an issue ID for two distinct findings on dirty books also passed.
+- On seed 1 with a single payment allocation error, replacing the unapplied cash posting in the evidence with the original invoice debit passed verification. That debit establishes the invoice booking but provides no evidence of a payment allocation.

@@ -28,6 +28,12 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 5 in progress · 20 November 2026
+
+The verifier now checks the truth episode ID and requires distinct issue IDs.
+
+Branch `night/2026-11-20-r5`. The starting check passed 295 tests. Current work covers independent accounting verification and transformed-episode checks. See `night/TASKS.md` for ownership and acceptance checks. Use `uv run python -m auditenv.check` at the repo root. The engineering freeze is 22 November at 18:00 Astana.
+
 ## Round 4 complete · 19 November 2026
 
 All eight tasks on `night/2026-11-19-r4` passed. The verifier now compares invoice lines with quantity times unit price, counts documents directly from the public tables, and rejects empty, unreadable or incomplete indexed exports. The demo and pitch reproduce the same public company even on a machine configured with a private grader key.
