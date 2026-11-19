@@ -32,6 +32,7 @@ message says a Google Doc — follow the latest, re-check the form before submit
 
 The five-pause demo in `docs/DEMO.md` reproduced all four findings and the closed grader return of 0.958.
 The ten-slide pitch now describes both possible rate choices for the backdated invoice. Its metrics match the official check.
+A fresh sweep of 200 heavy episodes checked the identifiers and uniqueness of all 52,901 FX rows. The reproduction command is in `night/LOG.md`.
 
 The verifier checks each public FX identifier against its date and currency pair and rejects duplicate rate keys. Run `uv run python -m unittest tests.test_fx_identity`. The remaining verifier work, evidence checks, and jury materials are tracked in `night/TASKS.md`.
 
