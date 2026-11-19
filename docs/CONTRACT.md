@@ -83,7 +83,7 @@ obs, reward, terminated, truncated, info = env.step(action: dict)
 ```
 All values JSON-compatible. `config` keys (all optional): `mode` ("train" | "eval",
 default "train"), `max_steps` (100), `time_limit_s` (60), `errors`
-(`{type: count}`), `interacting` (`{"I1": n, "I2": n}`), `n_invoices`, `distractors`
+(`{type: count}`), `interacting` (`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`
 (bool), `transform_seed` (int | null: benign relabel/permutation).
 
 First observation: `{task, manifest, policy, tools, steps_remaining}`.
