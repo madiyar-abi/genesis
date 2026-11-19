@@ -175,3 +175,8 @@ A reversed seed interval made the verifier print `0/0 episodes valid` and exit
 successfully. The shared range parser now rejects reversed intervals, including
 an invalid interval mixed into a valid list. The command regression exercises
 run, analyze, fuzz, attack and verify.
+
+A failed reset installed the requested configuration before the generator
+validated its error counts. On an existing evaluation episode, the next step
+then used the rejected budget and mode. The regression takes an inspection,
+attempts the reset, continues inspecting and submits in the original episode.

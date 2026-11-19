@@ -65,8 +65,8 @@ class AuditEnv:
         tl = cfg["time_limit_s"]
         if isinstance(tl, bool) or not isinstance(tl, (int, float)) or not 0 <= tl <= sys.float_info.max:
             raise ValueError("time_limit_s must be a finite non-negative number")
-        self._cfg = cfg
         self._ep = generate(seed, config)
+        self._cfg = cfg
         t = self._ep["tables"]
         self._index = {name: {r[key]: r for r in t[name]} for name, key in TABLES.items()}
         self._docs = {d["doc_id"]: ("invoice", d) for d in t["invoices"]}
