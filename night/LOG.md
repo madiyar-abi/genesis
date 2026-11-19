@@ -70,3 +70,8 @@
 - T23 done: grader-side Markdown and JSON failure analysis. Oracle recalls every tested type and scenario with zero FPs; FlagAll records FPs. T7 environment and T11 baseline tests also passed.
 - Assumptions: recall is zero for groups with no issues, means are per episode, steps include submit, and explicit seeds must exist in the supplied config. Reconcile verification awaits T12.
 - Next: no open codex tasks.
+
+## 2026-11-19 13:56 — codex
+- T24 done: six Draft 2020-12 JSON Schemas with stdlib smoke checks against generated manifests, truth and real environment trajectories. Full suite passed.
+- Assumptions: action schemas describe intended valid inputs; list cursor and limit are optional as in the environment, and the manifest includes the optional generator version. Episode-ID equality is enforced by the grader.
+- Next: T25 experimental reward.

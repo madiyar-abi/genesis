@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit environment action",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "list_records"
+        },
+        "table": {
+          "enum": [
+            "ledger",
+            "invoices",
+            "payments",
+            "fx"
+          ]
+        },
+        "cursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Values above 50 are clamped to 50."
+        }
+      },
+      "required": [
+        "type",
+        "table"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "get_record"
+        },
+        "table": {
+          "enum": [
+            "ledger",
+            "invoices",
+            "payments",
+            "fx"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "type",
+        "table",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "get_document"
+        },
+        "doc_id": {
+          "type": "string",
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "type",
+        "doc_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "calculator"
+        },
+        "expression": {
+          "type": "string",
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "type",
+        "expression"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "submit"
+        },
+        "findings": {
+          "$ref": "findings.schema.json"
+        }
+      },
+      "required": [
+        "type",
+        "findings"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
