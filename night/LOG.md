@@ -1,31 +1,48 @@
-# Round 10 log
+2026-11-20 04:16 lead — Published round 11 assignments. The repeated-seed reproduction uses two configs sharing seed 1. Use the public seed domain for artifact checks and the 18:00 local freeze.
+2026-11-20 04:17 lead — T1 Failure reports now retain each configuration sharing a seed. The full and filtered report regressions failed before the fix and pass after it. Explicit seed ordering and missing-seed errors are preserved.
+2026-11-20 04:17 lead — T6 The five Enter prompts in the 2:40 demo script reproduced the two PAY-136430 discrepancies, 21 inspections, four matches and a closed-run return of 0.958.
+2026-11-20 04:17 lead — T5 The DeepSeek launcher reported a missing API key, so the lead reassigned its export check. For split/config pairs train/train, dev/dev and hard/eval_hard, ran env -u AUDITENV_SECRET uv run python -m auditenv.export --config "configs/$cfg.json" --out "$tmpdir/$split" and diff -qr "episodes/$split" "$tmpdir/$split". All 81 train, 81 dev and 161 hard files matched.
+2026-11-20 04:22 gemini2 — T3 Verified measured hard-mode failure explanations using auditenv.analyze on configs/eval_hard.json for reconciliation policies. Exact commands and outputs:
+1) `uv run python -m auditenv.analyze --policy reconcile --config configs/eval_hard.json`
+- Metrics: P=0.651, R=0.891, F1=0.752, return=0.288, steps=43.2
+- TP/FN by type: duplicate_invoice TP=3 FN=5 (recall 3/8 = 0.375), payment_allocation TP=12 FN=0 (recall 1.0), fx_error TP=15 FN=0 (recall 1.0), period_cutoff TP=11 FN=0 (recall 1.0)
+- Scenario TP/FN: single TP=29 FN=5, I1 TP=6 FN=0, I2 TP=6 FN=0
+- FP reasons: no_matching_issue=22 (total FP=22)
+2) `uv run python -m auditenv.analyze --policy reconcile_hard --config configs/eval_hard.json`
+- Metrics: P=1.000, R=1.000, F1=1.000, return=0.916, steps=43.2
+- TP/FN by type: duplicate_invoice TP=8 FN=0 (recall 1.0), payment_allocation TP=12 FN=0 (recall 1.0), fx_error TP=15 FN=0 (recall 1.0), period_cutoff TP=11 FN=0 (recall 1.0)
+- Scenario TP/FN: single TP=34 FN=0, I1 TP=6 FN=0, I2 TP=6 FN=0
+- FP reasons: total FP=0
+3) `uv run python -m auditenv.analyze --policy naive_reconcile --config configs/eval_hard.json`
+- Metrics: P=0.105, R=0.630, F1=0.181, return=-0.711, steps=33.4
+- TP/FN by type: duplicate_invoice TP=8 FN=0 (recall 1.0), payment_allocation TP=2 FN=10 (recall 0.167), fx_error TP=10 FN=5 (recall 0.667), period_cutoff TP=9 FN=2 (recall 0.818)
+- Scenario TP/FN: single TP=24 FN=10, I1 TP=0 FN=6, I2 TP=5 FN=1
+- FP reasons: no_matching_issue=234, wrong_amount=8, wrong_type=3, wrong_evidence=1 (total FP=246)
+Comparison to docs/DESIGN.md: All hard-mode metrics in §9 (table metrics for all policies, plus the failure analysis text stating reconcile has duplicate recall 3/8, all other types 100%, and 22 false positives all no_matching_issue) match the measured analyze results with 0 discrepancies.
+2026-11-20 04:24 lead — T3 Reviewed the hard split across both policies. Default reconciliation missed five duplicates and returned 22 unmatched false positives. The hard rules matched all 46 issues. Both averaged 43.2 actions.
+2026-11-20 04:24 gemini3 — T4 Audited per-policy step counts and timing claims in jury materials against benchmark outputs and stated methodology.
+Exact commands executed:
+1) `uv run python -m auditenv.check --json /tmp/auditenv_check.json`
+2) `uv run python scripts/bench.py --json /tmp/auditenv_bench.json`
+3) `uv run python -m auditenv.demo --seed 2003`
+4) `uv run python scripts/sensitivity.py`
 
-2026-11-20 03:44 lead (Claude) — Started round 10 as first lead (no TASKS.md). Read NIGHT, HANDOFF, SPEC, REVIEW rounds 1–9, archive r9. Official check: ALL CHECKS PASSED (33.0 s, exit 0). Probes in /tmp/r10-probe: (a) 3,300 random config combinations (0–12 issues incl. I1/I2, n_invoices 10–100, distractors, transform_seed, both difficulties) → verifier 0 problems, oracle and reconcile/reconcile_hard F1 1.0 everywhere, max 56 steps; edge configs (12 of one type on 10 invoices, 6×I1, 6×I2, hard, no distractors) all valid and solved — the shipped sweeps only use 3 fixed configs, so T1 publishes this as `fuzz --configs`. (b) `reset(1, {"errors": "x"})` raises AttributeError, `{"errors": 0 | false | []}` silently gives a clean company → T2. Assumption: workers gemini1–3 and deepseek are running per the prompt; T4 depends on T1 and says IDLE until it lands.
-2026-11-20 03:45 lead — T2 done: test_reset_rejects_config_of_the_wrong_shape red (AttributeError / no raise) → green. gen_config raises ValueError unless errors/interacting are dicts; env.reset requires config dict or None. CONTRACT config paragraph states it. Golden 80/80, test_load + trajectory files unchanged; auditenv.check ALL CHECKS PASSED (33.3 s, 360 tests). Assumption: `errors: null` (previously = clean company, undocumented, used nowhere in configs/ or code) is now rejected like any non-object — the contract only documents `{type: count}`.
-2026-11-20 03:48 gemini2 — T5 done: Solvability stress sweeps completed (0 non-zero exits).
-- Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 0-999`
-  Wall time: 23.34s
-  Summary: reconcile on 4000 default episodes (seeds 0-999 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (23.3 s)
-- Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile_hard --seeds 0-999 --hard`
-  Wall time: 60.31s
-  Summary: reconcile_hard on 4000 hard episodes (seeds 0-999 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (60.3 s)
-2026-11-20 03:49 gemini3 — T6 done: added tests/test_server_config.py. Tested bad reset configs ({"errors": "x"}, {"errors": 5}, {"interacting": [1]}, {"foo": 1}, {"max_steps": 0}, {"mode": "test"}, {"n_invoices": 9}, {"difficulty": "expert"}) over out-of-process server subprocess (python -m auditenv.server). Verified each response contains only the key "error", error string <= 200 chars without Traceback or "/", followed by valid reset returning an observation. Ran `uv run python -m unittest tests.test_server_config` (Ran 1 test in 0.030s, OK). What's next: await lead merge / further tasks. Assumption: none.
-2026-11-20 03:51 lead — T3: Reproduced ledger and credit-note edge cases on seeds 3 and 4, corrected config, evidence, lifecycle and Make examples. Official check passed in 63.0 s; measured tables matched.
-2026-11-20 03:51 lead — T1: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000: 3,000 cases (1,186 hard), 132.9 s, 0 problems, max 56 steps. Six focused tests passed, full check green.
-2026-11-20 03:52 lead — T11: Audit follow-up. Both misplaced count groups previously passed the new test inputs without raising. Scoped validation to each group; seven strict tests pass. Regenerated train/dev/hard exports and all seven trajectories, git diff empty, golden 80/80. Integrated gate: 366 tests pass.
-2026-11-20 03:52 lead — T8: Published the sweep, verified the jury-map references, synced docs with the integrated 366-test check, corrected remaining-work instructions.
-2026-11-20 03:52 lead — T9: Rehearsed seed 2003 including five pauses and verified the walkthrough figures and baseline tab against the integrated check. Existing script matches.
-2026-11-20 03:52 lead — T10: Traced pitch figures to check, analyze, demo, config sweep and 15/15 reward mutants. Added config sweep to slide 8; team names remain human input.
-2026-11-20 03:53 lead — T7: Independent lead verification already ran the exact assigned command; accepted its output directly. DeepSeek had no round branch at fetch. Command: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 1000-1999 --hard. Wall time 3:12.99, exit 0.
-hard mode, seeds 1000-1999: 3000 episodes (1988 dirty, 1012 clean) in 192.9 s
-  episodes with a problem (exception / verifier / oracle): 0
-  random explorer reward > 0: 246/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
-  flag-all reward < 0: 3000/3000
-FUZZ PASSED
+Reproducible step counts across jury materials:
+- Dev split (configs/dev.json, 10 episodes; mean steps incl. submit): oracle=1.0, reconcile=22.5, naive_reconcile=17.2, random=31.0, flag_all=3.8. Matches README.md Results table, docs/DESIGN.md §9 dev table, and docs/PITCH.md.
+- Hard split (configs/eval_hard.json, 20 episodes; mean steps incl. submit): oracle=1.0, reconcile_hard=43.2, reconcile=43.2, naive_reconcile=33.4, random=33.1, flag_all=3.8. Matches docs/DESIGN.md §9 hard table and docs/PITCH.md slide 7 ("Both reconciliation policies averaged 43.2 actions on hard episodes").
+- Demo company (seed 2003): 21 inspection steps + 1 submission step = 22 total actions, return 0.958 (= clip(2*1.0 - 1 - 0.002*21)). Matches docs/DEMO.md ("21 steps inspecting records and one submitting"), docs/PITCH.md slide 3 ("21 inspection steps, the return is 0.958... Over 22 actions including submission"), docs/DESIGN.md §9.
+- Stress test bounds (fuzz --stress, 300 seeds x 4 configs = 1,200 episodes): reconcile default max=33 steps (budget margin 67%), reconcile_hard hard max=57 steps (budget margin 43%). Matches docs/DESIGN.md §9 step-budget margin table.
+- Config sweep bounds (fuzz --configs): 3,000 configs max=56 steps (matches docs/PITCH.md slide 8 and docs/CHECKS.md row 40); 20,000 configs max=59 steps (matches HANDOFF.md Round 10).
+- Methodology check: "inspection_steps" (actions preceding submit, penalized at 0.002/step) and total episode "steps" (inclusive of submit, step = inspection_steps + 1) are clearly distinguished across CONTRACT.md, DEMO.md, PITCH.md, and DESIGN.md.
 
-2026-11-20 04:08 gemini1 — T4 done: Long config sweep completed (0 problems).
-- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 20000`
-  Wall time: 671.47s (11m 11.47s)
-  Summary: config sweep, cases 0-19999: 20000 random configs (8037 hard) in 671.4 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 59
-  FUZZ PASSED
-2026-11-20 04:09 lead — Closed Round 10 after reviewing SPEC §§01–13 and all eleven task checks. The final offline Python check passed 366 tests plus every verifier, baseline, paired and process-isolation gate. Independent lead replay of all 20,000 configs passed in 743.59 s, matching gemini1. Public fixtures, trajectories, published metrics, README run steps, demo and pitch verified. Docker CI and human submission follow branch handoff.
+Timing claims audit & findings:
+- Supported: `generate()` default 100 seeds = 0.266 s (claimed 0.28 s, 2.8 ms/ep); `generate()` hard 100 seeds = 0.953 s (claimed 0.98 s, 9.8 ms/ep); `auditenv.verify` 300 episodes = 1.783 s (claimed 1.69 s, 5.6 ms/ep); single episode baseline execution times = dev 2.88–4.64 ms (claimed 3–5 ms), hard 7.50–10.56 ms (claimed 9–12 ms).
+- Unsupported / drifted timing claims identified:
+  1) `auditenv.check` wall time in docs/DESIGN.md §9 timing table and HANDOFF.md Round-2 status states "≈ 24 s". Measured runtime on the benchmark host is 33.8 s. The ≈ 24 s figure was recorded during Round 2 before the suite expanded to 367 unit tests, 20 hard paired checks, and additional verifier/config passes.
+  2) docs/DESIGN.md §10 limitation claim: "Wall-clock truncation (60 s) is the only non-deterministic transition; it never triggers for the baselines (≤ 0.012 s per episode)." In `auditenv.check` on 20 hard episodes, mean time per episode for naive_reconcile, reconcile, and reconcile_hard measured 0.013 s, slightly exceeding the literal 0.012 s upper bound (though still >4600x below the 60 s limit).
+2026-11-20 04:25 lead — T4 Verified split-wide mean action counts against the official metrics. The timing audit identified an outdated whole-suite runtime and an unsupported per-episode upper bound. The updated timing table uses the benchmark’s actual first-company workload.
+2026-11-20 04:26 lead — T2 revealed later document fetches retroactively enriched earlier invoice-list observations. Added T8 to repair the recorder and regenerate trajectories. Exact replay is the acceptance criterion.
+2026-11-20 04:27 lead — T8 Snapshotting actions and observations fixed 40 stored invoice-list responses across three files. All 2,258 records now replay exactly. All seven files were regenerated; actions, rewards, IDs, step numbers and termination flags matched their earlier values. The mutating-policy regression and official check passed.
+2026-11-20 04:28 gemini1 — T2 Added deterministic action replay of all seven committed trajectory files against their training configs in tests/test_trajectory_files.py with public secret environment isolated. Verified exact match for all observations, rewards, termination/truncation flags, reset records and episode boundaries across all 70 episodes and 2,258 steps. uv run python -m unittest tests.test_trajectory_files passes in 0.71 s (2 tests, OK).
+2026-11-20 04:36 lead — T2 Reviewed the gemini1 replay merge, including reset, episode boundaries and each action response. Next is the final jury documentation check.
+2026-11-20 04:36 lead — T7 Checked the pitch against official metrics and the archived 20,000-config sweep. Confirmed the timing table from the worker benchmark. The docs sync check passed. Reviewed SPEC sections 01–13 against the official check, recorded round evidence and submission checklist. Human recording, team credits and submission remain with the team.

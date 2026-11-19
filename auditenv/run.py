@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import importlib
 import json
 import time
@@ -35,14 +36,15 @@ def run_episode(env: AuditEnv, policy, seed: int, config: dict | None = None, po
     obs, info = env.reset(seed, config)
     if policy_factory is not None:
         policy = policy_factory(env)
-    policy.reset(obs)
     ep = info["episode_id"]
-    traj = [{"episode_id": ep, "step": 0, "action": None, "observation": obs, "reward": 0.0,
+    traj = [{"episode_id": ep, "step": 0, "action": None, "observation": deepcopy(obs), "reward": 0.0,
              "terminated": False, "truncated": False}]
+    policy.reset(obs)
     while True:
         action = policy.act(obs)
+        recorded_action = deepcopy(action)
         obs, reward, terminated, truncated, info = env.step(action)
-        traj.append({"episode_id": ep, "step": obs["step"], "action": action, "observation": obs,
+        traj.append({"episode_id": ep, "step": obs["step"], "action": recorded_action, "observation": deepcopy(obs),
                      "reward": reward, "terminated": terminated, "truncated": truncated})
         if terminated or truncated:
             return traj

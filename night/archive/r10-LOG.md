@@ -1,0 +1,31 @@
+# Round 10 log
+
+2026-11-20 03:44 lead (Claude) — Started round 10 as first lead (no TASKS.md). Read NIGHT, HANDOFF, SPEC, REVIEW rounds 1–9, archive r9. Official check: ALL CHECKS PASSED (33.0 s, exit 0). Probes in /tmp/r10-probe: (a) 3,300 random config combinations (0–12 issues incl. I1/I2, n_invoices 10–100, distractors, transform_seed, both difficulties) → verifier 0 problems, oracle and reconcile/reconcile_hard F1 1.0 everywhere, max 56 steps; edge configs (12 of one type on 10 invoices, 6×I1, 6×I2, hard, no distractors) all valid and solved — the shipped sweeps only use 3 fixed configs, so T1 publishes this as `fuzz --configs`. (b) `reset(1, {"errors": "x"})` raises AttributeError, `{"errors": 0 | false | []}` silently gives a clean company → T2. Assumption: workers gemini1–3 and deepseek are running per the prompt; T4 depends on T1 and says IDLE until it lands.
+2026-11-20 03:45 lead — T2 done: test_reset_rejects_config_of_the_wrong_shape red (AttributeError / no raise) → green. gen_config raises ValueError unless errors/interacting are dicts; env.reset requires config dict or None. CONTRACT config paragraph states it. Golden 80/80, test_load + trajectory files unchanged; auditenv.check ALL CHECKS PASSED (33.3 s, 360 tests). Assumption: `errors: null` (previously = clean company, undocumented, used nowhere in configs/ or code) is now rejected like any non-object — the contract only documents `{type: count}`.
+2026-11-20 03:48 gemini2 — T5 done: Solvability stress sweeps completed (0 non-zero exits).
+- Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 0-999`
+  Wall time: 23.34s
+  Summary: reconcile on 4000 default episodes (seeds 0-999 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (23.3 s)
+- Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile_hard --seeds 0-999 --hard`
+  Wall time: 60.31s
+  Summary: reconcile_hard on 4000 hard episodes (seeds 0-999 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (60.3 s)
+2026-11-20 03:49 gemini3 — T6 done: added tests/test_server_config.py. Tested bad reset configs ({"errors": "x"}, {"errors": 5}, {"interacting": [1]}, {"foo": 1}, {"max_steps": 0}, {"mode": "test"}, {"n_invoices": 9}, {"difficulty": "expert"}) over out-of-process server subprocess (python -m auditenv.server). Verified each response contains only the key "error", error string <= 200 chars without Traceback or "/", followed by valid reset returning an observation. Ran `uv run python -m unittest tests.test_server_config` (Ran 1 test in 0.030s, OK). What's next: await lead merge / further tasks. Assumption: none.
+2026-11-20 03:51 lead — T3: Reproduced ledger and credit-note edge cases on seeds 3 and 4, corrected config, evidence, lifecycle and Make examples. Official check passed in 63.0 s; measured tables matched.
+2026-11-20 03:51 lead — T1: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000: 3,000 cases (1,186 hard), 132.9 s, 0 problems, max 56 steps. Six focused tests passed, full check green.
+2026-11-20 03:52 lead — T11: Audit follow-up. Both misplaced count groups previously passed the new test inputs without raising. Scoped validation to each group; seven strict tests pass. Regenerated train/dev/hard exports and all seven trajectories, git diff empty, golden 80/80. Integrated gate: 366 tests pass.
+2026-11-20 03:52 lead — T8: Published the sweep, verified the jury-map references, synced docs with the integrated 366-test check, corrected remaining-work instructions.
+2026-11-20 03:52 lead — T9: Rehearsed seed 2003 including five pauses and verified the walkthrough figures and baseline tab against the integrated check. Existing script matches.
+2026-11-20 03:52 lead — T10: Traced pitch figures to check, analyze, demo, config sweep and 15/15 reward mutants. Added config sweep to slide 8; team names remain human input.
+2026-11-20 03:53 lead — T7: Independent lead verification already ran the exact assigned command; accepted its output directly. DeepSeek had no round branch at fetch. Command: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 1000-1999 --hard. Wall time 3:12.99, exit 0.
+hard mode, seeds 1000-1999: 3000 episodes (1988 dirty, 1012 clean) in 192.9 s
+  episodes with a problem (exception / verifier / oracle): 0
+  random explorer reward > 0: 246/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+  flag-all reward < 0: 3000/3000
+FUZZ PASSED
+
+2026-11-20 04:08 gemini1 — T4 done: Long config sweep completed (0 problems).
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 20000`
+  Wall time: 671.47s (11m 11.47s)
+  Summary: config sweep, cases 0-19999: 20000 random configs (8037 hard) in 671.4 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 59
+  FUZZ PASSED
+2026-11-20 04:09 lead — Closed Round 10 after reviewing SPEC §§01–13 and all eleven task checks. The final offline Python check passed 366 tests plus every verifier, baseline, paired and process-isolation gate. Independent lead replay of all 20,000 configs passed in 743.59 s, matching gemini1. Public fixtures, trajectories, published metrics, README run steps, demo and pitch verified. Docker CI and human submission follow branch handoff.

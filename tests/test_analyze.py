@@ -1,4 +1,4 @@
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 import io
 import json
 from pathlib import Path
@@ -72,3 +72,21 @@ class AnalyzeTests(unittest.TestCase):
         self.assertEqual(stdout.getvalue(), markdown(report) + "\n")
         self.assertIn("| Scenario | TP | FN | Recall |", stdout.getvalue())
         self.assertEqual(report["by_scenario"]["I1"]["recall"], 0.0)
+
+    def test_cli_keeps_each_configuration_of_a_seed(self):
+        episodes = [*_EPISODES, (2000, {"difficulty": "hard", "errors": {}})]
+        with tempfile.TemporaryDirectory() as tmp:
+            config = Path(tmp) / "cases.json"
+            config.write_text(json.dumps({
+                "episodes": [{"seed": seed, "config": cfg} for seed, cfg in episodes],
+            }), encoding="utf-8")
+            output = Path(tmp) / "report.json"
+            args = ["--policy", "oracle", "--config", str(config), "--json", str(output)]
+            for selection, expected in [([], episodes), (["--seeds", "2000"], episodes[::2])]:
+                with self.subTest(selection=selection), redirect_stdout(io.StringIO()):
+                    self.assertEqual(main(args + selection), 0)
+                    self.assertEqual(json.loads(output.read_text()), analyze("oracle", expected))
+            with self.assertRaises(SystemExit) as exc, redirect_stderr(io.StringIO()) as stderr:
+                main(args + ["--seeds", "2000,9999"])
+            self.assertEqual(exc.exception.code, 2)
+            self.assertIn("seeds missing from --config: [9999]", stderr.getvalue())

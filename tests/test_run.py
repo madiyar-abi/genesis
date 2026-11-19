@@ -30,6 +30,28 @@ class RunTest(unittest.TestCase):
                 self.assertNotIn(word, text)
         self.assertEqual([r["step"] for r in traj], list(range(len(traj))))
 
+    def test_trajectory_snapshots_policy_inputs_and_actions(self):
+        class MutatingPolicy:
+            def reset(self, obs):
+                self.episode_id = obs["manifest"]["episode_id"]
+                obs["manifest"]["counts"].clear()
+                self.action = {"type": "list_records", "table": "ledger", "limit": 1}
+
+            def act(self, obs):
+                if obs.get("step") == 1:
+                    obs["result"]["rows"].clear()
+                    self.action.clear()
+                    self.action.update({"type": "submit", "findings": {"episode_id": self.episode_id, "findings": []}})
+                return self.action
+
+        policy = MutatingPolicy()
+        traj = run.run_episode(AuditEnv(), policy, 7)
+        policy.action["findings"]["findings"].append({})
+        self.assertTrue(traj[0]["observation"]["manifest"]["counts"])
+        self.assertEqual(len(traj[1]["observation"]["result"]["rows"]), 1)
+        self.assertEqual(traj[1]["action"], {"type": "list_records", "table": "ledger", "limit": 1})
+        self.assertEqual(traj[2]["action"]["findings"]["findings"], [])
+
     def test_cli_writes_jsonl(self):
         with tempfile.TemporaryDirectory() as d:
             out = os.path.join(d, "t.jsonl")

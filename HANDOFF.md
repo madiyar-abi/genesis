@@ -28,6 +28,31 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 11 complete · 20 November 2026
+
+Work is on `night/2026-11-20-r11`. See `night/TASKS.md` for ownership and
+`night/LOG.md` for verification. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`
+from the repository root. This round addresses duplicate seeds in failure reports
+and verifies the actions recorded in the seven published training trajectories.
+
+- T1. Failure reports now retain each configuration sharing a seed. The full and filtered report regressions failed before the fix and pass after it. Explicit seed ordering and missing-seed errors are preserved.
+
+- T6. The five Enter prompts in the 2:40 demo script reproduced the two PAY-136430 discrepancies, 21 inspections, four matches and a closed-run return of 0.958.
+
+- T5. The DeepSeek launcher reported a missing API key, so the lead reassigned its export check. For split/config pairs train/train, dev/dev and hard/eval_hard, ran env -u AUDITENV_SECRET uv run python -m auditenv.export --config "configs/$cfg.json" --out "$tmpdir/$split" and diff -qr "episodes/$split" "$tmpdir/$split". All 81 train, 81 dev and 161 hard files matched.
+
+- T3. Reviewed the hard split across both policies. Default reconciliation missed five duplicates and returned 22 unmatched false positives. The hard rules matched all 46 issues. Both averaged 43.2 actions.
+
+- T4. Verified split-wide mean action counts against the official metrics. The timing audit identified an outdated whole-suite runtime and an unsupported per-episode upper bound. The updated timing table uses the benchmark’s actual first-company workload.
+
+- T8. Snapshotting actions and observations fixed 40 stored invoice-list responses across three files. All 2,258 records now replay exactly. All seven files were regenerated; actions, rewards, IDs, step numbers and termination flags matched their earlier values. The mutating-policy regression and official check passed.
+
+- T2. The official suite now replays the seven published trajectory files against the train and hard-train configs and checks every reset and transition.
+
+- T7. Verified the pitch against measured results, including the archived 20,000-config sweep. The offline check passed 369 unit tests and both 20-pair replay suites. The README, pitch and design tables matched the official metrics.
+
+Next, record the demo and add the confirmed team credits before exporting the slides. The marathon handles CI and PR integration.
+
 ## Round 10 complete · 20 November 2026
 
 All eleven tasks passed on `night/2026-11-20-r10`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 366 tests passed, along with 20 default and 20 hard paired checks.
@@ -102,7 +127,7 @@ Demo rehearsal complete. Follow `docs/DEMO.md` for the 2:40 video. The ten-slide
 Branch `night/2026-11-19-r3`. The round freeze is 22 November at 18:00 local time. Round 2 is in main. The verifier now rejects a truth amount denominated in the wrong currency. Run `uv run python -m unittest tests.test_verify` for all six verifier tests. Gemini’s jury map in `docs/CHECKS.md` matches the merged suite. The official check passed all 285 tests. All 40 exported episodes verified and both seed sweeps passed (3,000 default and 600 hard episodes). Record the demo, finish the team slide, and complete the access and submission checklist above.
 
 ## Status
-Round 10 is on `night/2026-11-20-r10`. The current task board is `night/TASKS.md`. Rounds 1–9 are in main. Round 2 evidence is retained below.
+Round 11 is on `night/2026-11-20-r11`. The current task board is `night/TASKS.md`. Rounds 1–10 are in main. Round 2 evidence is retained below.
 
 Round-2 results (each with its command; numbers from the current code):
 - Reward: R2 `scripts/mutate_reward.py` — 15/15 one-line mutants of matcher/reward caught; R3
