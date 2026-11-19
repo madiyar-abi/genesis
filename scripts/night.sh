@@ -1,7 +1,10 @@
 #!/bin/bash
 # Overnight watchdog for Claude Code / Antigravity CLI (agy) / Codex CLI. See NIGHT.md.
 # Re-prompts one headless session until night/DONE, night/STOP or the deadline.
-# On a usage limit: next model/account; after the last one waits LIMIT_SLEEP (1h).
+# Slots = (engine, account, model) tried in order; the first slot that is not
+# rate-limited is always used. A limited slot waits until its reported reset
+# time (or LIMIT_SLEEP if none); when every slot is limited, sleep until the
+# earliest reset.
 set -u
 
 ROLE=lead
@@ -12,9 +15,11 @@ WORKERS=""
 BRANCH="night/$(date +%F)"
 MODELS=""
 ACCOUNTS="default"
+SLOTS=""
 usage() {
   echo "usage: $0 [--role lead|worker] [--name NAME] [--engine claude|agy|codex] [--until HH:MM]"
   echo "          [--branch night/YYYY-MM-DD] [--model \"A,B\"] [--accounts \"default,DIR\"] [--workers \"gemini,codex\"]"
+  echo "          [--slots \"engine|account|model;engine|account|model\"]   (overrides --engine/--model/--accounts)"
   exit 2
 }
 while [ $# -gt 0 ]; do
@@ -28,32 +33,50 @@ while [ $# -gt 0 ]; do
     --branch)      BRANCH="$2"; shift 2 ;;
     --model)       MODELS="$2"; shift 2 ;;    # comma list: next one is used on a usage limit
     --accounts)    ACCOUNTS="$2"; shift 2 ;;  # agy: HOME dirs, codex: CODEX_HOME dirs; "default" = own login
+    --slots)       SLOTS="$2"; shift 2 ;;     # mixed engines, e.g. codex first, claude as fallback
     *) usage ;;
   esac
 done
-case "$ENGINE" in claude|agy|codex) ;; *) usage ;; esac
 case "$ROLE" in lead|worker) ;; *) usage ;; esac
 [ -z "$NAME" ] && NAME="$ROLE"
-# agy default: strongest model first, fallback with its own quota second.
-[ "$ENGINE" = agy ] && [ -z "$MODELS" ] && MODELS="Claude Opus 4.6 (Thinking),Gemini 3.8 Flash (High)"
-[ "$ENGINE" = claude ] && ACCOUNTS="default"
 
-# Slots = every account x every model, tried in order.
+# Build SLOTS from --engine/--accounts/--model when --slots is not given.
+if [ -z "$SLOTS" ]; then
+  case "$ENGINE" in claude|agy|codex) ;; *) usage ;; esac
+  # agy default: strongest model first, fallback with its own quota second.
+  [ "$ENGINE" = agy ] && [ -z "$MODELS" ] && MODELS="Claude Opus 4.6 (Thinking),Gemini 3.8 Flash (High)"
+  [ "$ENGINE" = claude ] && ACCOUNTS="default"
+  for a in $(echo "$ACCOUNTS" | tr ',' ' '); do
+    if [ -z "$MODELS" ]; then SLOTS="$SLOTS;$ENGINE|$a|"
+    else
+      n=$(echo "$MODELS" | awk -F, '{print NF}')
+      for k in $(seq 1 "$n"); do SLOTS="$SLOTS;$ENGINE|$a|$(echo "$MODELS" | cut -d, -f"$k")"; done
+    fi
+  done
+  SLOTS="${SLOTS#;}"
+fi
+N_SLOTS=$(echo "$SLOTS" | awk -F';' '{print NF}')
+slot_spec()  { echo "$SLOTS" | cut -d';' -f"$1"; }
+slot_field() { slot_spec "$1" | cut -d'|' -f"$2"; }
+for k in $(seq 1 "$N_SLOTS"); do
+  case "$(slot_field "$k" 1)" in claude|agy|codex) ;; *) echo "bad slot: $(slot_spec "$k")"; usage ;; esac
+done
+
 slot=1
-count() { echo "$1" | awk -F, '{print NF}'; }
-nth() { echo "$1" | cut -d, -f"$2"; }
-n_models() { if [ -z "$MODELS" ]; then echo 1; else count "$MODELS"; fi; }
-slot_count() { echo $(( $(count "$ACCOUNTS") * $(n_models) )); }
-acc_idx() { echo $(( (slot - 1) / $(n_models) + 1 )); }
-current_model() { [ -n "$MODELS" ] && nth "$MODELS" $(( (slot - 1) % $(n_models) + 1 )); }
-current_home() { local a; a=$(nth "$ACCOUNTS" "$(acc_idx)"); [ "$a" = default ] || echo "$a"; }
+cur_engine() { slot_field "$slot" 1; }
+cur_acc()    { local a; a=$(slot_field "$slot" 2); echo "${a:-default}"; }
+cur_home()   { local a; a=$(cur_acc); [ "$a" = default ] || echo "$a"; }
+cur_model()  { slot_field "$slot" 3; }
+# Conversations belong to (engine, account); switching models keeps the conversation.
+session_file() { echo ".night-logs/session-$NAME-$(cur_engine)-$(cur_acc | tr -c 'A-Za-z0-9\n' '_')"; }
 
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"                       # overridable for testing
 AGY_BIN="${AGY_BIN:-$HOME/.gemini/bin/agy}"              # full paths: nohup shells may lack PATH
 CODEX_BIN="${CODEX_BIN:-$(command -v codex || echo codex)}"
-LIMIT_SLEEP="${LIMIT_SLEEP:-3600}"                       # wait after a usage limit on every slot
+LIMIT_SLEEP="${LIMIT_SLEEP:-3600}"                       # limited slot with no reset time in the message
 ERROR_SLEEP="${ERROR_SLEEP:-300}"                        # wait after other errors
-IDLE_SLEEP="${IDLE_SLEEP:-300}"                          # worker with nothing to do
+IDLE_SLEEP="${IDLE_SLEEP:-300}"                          # worker with nothing to do (doubles while idle)
+IDLE_MAX="${IDLE_MAX:-1200}"                             # cap for the idle back-off
 NEXT_SLEEP="${NEXT_SLEEP:-15}"                           # pause between normal runs
 AGY_TURN_TIMEOUT="${AGY_TURN_TIMEOUT:-7200s}"            # agy turn cap (e.g. stuck waiting for a login)
 
@@ -67,7 +90,7 @@ now() { date +%s; }
 DEADLINE=$(date -j -f "%Y-%m-%d %H:%M" "$(date +%F) $UNTIL" +%s) || exit 1
 [ "$DEADLINE" -le "$(now)" ] && DEADLINE=$((DEADLINE + 86400))
 DEADLINE_HUMAN=$(date -r "$DEADLINE" "+%Y-%m-%d %H:%M")
-log() { echo "[$(date '+%H:%M:%S')] [$NAME/$ENGINE] $*"; }
+log() { echo "[$(date '+%H:%M:%S')] [$NAME/$(cur_engine)] $*"; }
 
 # Sleep, but never past the deadline and wake early on DONE/STOP.
 nap() {
@@ -76,29 +99,61 @@ nap() {
   while [ "$(now)" -lt "$end" ] && [ ! -e night/DONE ] && [ ! -e night/STOP ]; do sleep "${NAP_POLL:-20}"; done
 }
 
+# Epoch when a limited slot is usable again, parsed from the engine's message; empty if unknown.
+#   claude: "resets 9:30pm (Asia/...)"  codex: "try again at 11:29 PM"  agy: "Resets in 151h35m20s"
+reset_epoch() {
+  local f="$1" t h m ap s
+  t=$(grep -oiE 'resets in [0-9]+h([0-9]+m)?' "$f" | head -1)
+  if [ -n "$t" ]; then
+    h=$(echo "$t" | sed -E 's/.* ([0-9]+)h.*/\1/'); m=$(echo "$t" | sed -nE 's/.*h([0-9]+)m.*/\1/p')
+    echo $(( $(now) + h * 3600 + ${m:-0} * 60 + 60 )); return
+  fi
+  t=$(grep -oiE '(resets|try again at) [0-9]{1,2}(:[0-9]{2})? ?(am|pm)' "$f" | head -1)
+  [ -z "$t" ] && return
+  h=$(echo "$t" | sed -E 's/.* ([0-9]{1,2})(:[0-9]{2})? ?([aApP][mM])$/\1/')
+  m=$(echo "$t" | sed -nE 's/.*:([0-9]{2}) ?[aApP][mM]$/\1/p')
+  ap=$(echo "$t" | grep -oiE '(am|pm)$' | tr 'a-z' 'A-Z')
+  s=$(date -j -f "%Y-%m-%d %I:%M %p" "$(date +%F) $h:${m:-00} $ap" +%s 2>/dev/null) || return
+  [ "$s" -le "$(now)" ] && s=$((s + 86400))
+  echo $((s + 60))
+}
+
+# Per-slot "usable again at" epochs, space separated (bash 3.2: no associative arrays).
+AVAIL=""; for k in $(seq 1 "$N_SLOTS"); do AVAIL="$AVAIL 0"; done
+avail_get() { echo $AVAIL | cut -d' ' -f"$1"; }
+avail_set() { AVAIL=$(echo $AVAIL | awk -v i="$1" -v v="$2" '{$i=v; print}'); }
+# First slot (in order) that is usable now; 0 if none.
+first_free() {
+  local k t=$(now)
+  for k in $(seq 1 "$N_SLOTS"); do [ "$(avail_get "$k")" -le "$t" ] && { echo "$k"; return; }; done
+  echo 0
+}
+earliest_reset() { echo $AVAIL | tr ' ' '\n' | sort -n | head -1; }
+
 if [ "$ROLE" = lead ]; then
   TEAM_NOTE=""
   if [ -n "$WORKERS" ]; then
     list=""; for w in $(echo "$WORKERS" | tr ',' ' '); do list="$list $w (branch $BRANCH-$w),"; done
     TEAM_NOTE=" Workers running in parallel:${list%,}. Assign tasks to them by tagging with the worker name, as NIGHT.md describes."
   fi
-  FIRST_PROMPT="Read CLAUDE.md, HANDOFF.md and NIGHT.md, then follow NIGHT.md exactly as role=lead. Night branch: $BRANCH. The deadline is $DEADLINE_HUMAN. Work autonomously, use subagents, commit and push after every finished task.$TEAM_NOTE"
-  NEXT_PROMPT="Continue the night run per NIGHT.md as role=lead (night branch $BRANCH, deadline $DEADLINE_HUMAN). Re-read night/TASKS.md and the end of night/LOG.md, then pick up where you left off.$TEAM_NOTE"
+  FIRST_PROMPT="Read CLAUDE.md, HANDOFF.md and NIGHT.md, then follow NIGHT.md exactly as role=lead. Night branch: $BRANCH. The deadline is $DEADLINE_HUMAN. Work autonomously, use subagents if your tool has them, commit and push after every finished task. If night/TASKS.md already exists, another lead engine worked before you: continue from TASKS.md and the end of night/LOG.md (check git status for its unfinished changes).$TEAM_NOTE"
+  NEXT_PROMPT="Continue the night run per NIGHT.md as role=lead (night branch $BRANCH, deadline $DEADLINE_HUMAN). Re-read night/TASKS.md and the end of night/LOG.md (another lead engine may have worked meanwhile), then pick up where you left off.$TEAM_NOTE"
 else
   ME="role=worker, worker name=$NAME: take only tasks tagged ($NAME); your branch is $BRANCH-$NAME (created from origin/$BRANCH); night branch $BRANCH"
   FIRST_PROMPT="Read CLAUDE.md, HANDOFF.md and NIGHT.md, then follow NIGHT.md exactly as $ME. The deadline is $DEADLINE_HUMAN. Work autonomously, commit and push after every finished task."
   NEXT_PROMPT="Continue the night run per NIGHT.md as $ME (deadline $DEADLINE_HUMAN). Fetch, re-read night/TASKS.md, then pick up where you left off."
 fi
 
-# One turn of the selected engine. $1 = prompt, $2 = session id (may be empty).
+# One turn of the current slot's engine. $1 = prompt, $2 = session id (may be empty).
 run_engine() {
   local prompt="$1" sid="$2" home model
-  home=$(current_home); model=$(current_model)
-  case "$ENGINE" in
+  home=$(cur_home); model=$(cur_model)
+  case "$(cur_engine)" in
     claude)
       if [ -n "$sid" ]; then set -- --resume "$sid"; else set -- --session-id "$NEW_SID"; fi
       [ -n "$model" ] && set -- "$@" --model "$model"
-      "$CLAUDE_BIN" -p "$prompt" "$@" --dangerously-skip-permissions --output-format json ;;
+      if [ -n "$home" ]; then CLAUDE_CONFIG_DIR="$home" "$CLAUDE_BIN" -p "$prompt" "$@" --dangerously-skip-permissions --output-format json
+      else "$CLAUDE_BIN" -p "$prompt" "$@" --dangerously-skip-permissions --output-format json; fi ;;
     agy)
       if [ -n "$sid" ]; then set -- --conversation "$sid"; else set --; fi
       [ -n "$model" ] && set -- "$@" --model "$model"
@@ -114,25 +169,33 @@ run_engine() {
   esac
 }
 
-log "started ($ROLE), branch $BRANCH, deadline $DEADLINE_HUMAN"
-i=0
+log "started ($ROLE), branch $BRANCH, deadline $DEADLINE_HUMAN, slots: $N_SLOTS"
+i=0; idle_n=0
 while [ "$(now)" -lt "$DEADLINE" ]; do
   [ -e night/DONE ] && { log "night/DONE found — finished"; break; }
   [ -e night/STOP ] && { log "night/STOP found — stopping"; break; }
   # The lead may have finished in another worktree: check the pushed branch too.
   git fetch -q origin 2>/dev/null
   git cat-file -e "origin/$BRANCH:night/DONE" 2>/dev/null && { log "night/DONE on origin/$BRANCH — finished"; break; }
+
+  free=$(first_free)
+  if [ "$free" -eq 0 ]; then
+    wake=$(earliest_reset); log "every slot is rate-limited — sleeping until $(date -r "$wake" '+%m-%d %H:%M')"
+    nap $(( wake - $(now) > 60 ? wake - $(now) : 60 )); continue
+  fi
+  [ "$free" -ne "$slot" ] && { slot=$free; log "using slot $slot: $(cur_engine) $(cur_model) (account $(cur_acc))"; }
+
   i=$((i + 1))
-  out=".night-logs/$NAME-$ENGINE-run-$i.json"
-  SESSION_FILE=".night-logs/session-$NAME-$ENGINE-acc$(acc_idx)"   # conversations are per account
+  ENG=$(cur_engine)
+  out=".night-logs/$NAME-$ENG-run-$i.json"
+  SESSION_FILE=$(session_file)
   sid=""; [ -s "$SESSION_FILE" ] && sid=$(cat "$SESSION_FILE")
   prompt="$FIRST_PROMPT"; [ -n "$sid" ] && prompt="$NEXT_PROMPT"
-  if [ "$ENGINE" = claude ] && [ -z "$sid" ]; then NEW_SID=$(uuidgen | tr 'A-Z' 'a-z'); echo "$NEW_SID" > "$SESSION_FILE"; fi
+  if [ "$ENG" = claude ] && [ -z "$sid" ]; then NEW_SID=$(uuidgen | tr 'A-Z' 'a-z'); echo "$NEW_SID" > "$SESSION_FILE"; fi
 
   run_engine "$prompt" "$sid" < /dev/null > "$out" 2>&1 &
   pid=$!
-  acc_note=""; [ "$(count "$ACCOUNTS")" -gt 1 ] && acc_note=" account: $(nth "$ACCOUNTS" "$(acc_idx)")"
-  log "run $i (${sid:-new session})${MODELS:+ model: $(current_model)}$acc_note"
+  log "run $i (${sid:-new session}) slot $slot: model ${ENG}/$(cur_model) account $(cur_acc)"
 
   # Wait for the run; hard stop at the deadline.
   while kill -0 "$pid" 2>/dev/null; do
@@ -142,7 +205,7 @@ while [ "$(now)" -lt "$DEADLINE" ]; do
   wait "$pid"; rc=$?
 
   failed=0
-  case "$ENGINE" in
+  case "$ENG" in
     claude)
       { [ "$rc" -ne 0 ] || grep -q '"is_error": *true' "$out"; } && failed=1 ;;
     agy)
@@ -152,24 +215,26 @@ while [ "$(now)" -lt "$DEADLINE" ]; do
     codex)
       cid=$(grep -oE '"thread_id": *"[^"]+"' "$out" | head -1 | sed -E 's/.*"([^"]+)"$/\1/')
       [ -n "$cid" ] && echo "$cid" > "$SESSION_FILE"
-      { [ "$rc" -ne 0 ] || grep -qE '"type": *"(turn\.failed|error)"' "$out"; } && failed=1 ;;
+      # "type":"error" alone can be a warning (e.g. resumed with another model): the turn must complete.
+      { [ "$rc" -ne 0 ] || grep -q '"type": *"turn\.failed"' "$out" || ! grep -q '"type": *"turn\.completed"' "$out"; } && failed=1 ;;
   esac
 
-  if [ "$failed" -eq 1 ] && grep -qiE 'usage limit|hit your limit|limit reached|rate.?limit|429|overloaded|quota|resource.?exhausted|resets|authentication required|not logged in' "$out"; then
-    if [ "$slot" -lt "$(slot_count)" ]; then
-      slot=$((slot + 1)); log "usage limit — switching to: ${MODELS:+$(current_model) }(account $(nth "$ACCOUNTS" "$(acc_idx)"))"; nap "$NEXT_SLEEP"
-    else
-      slot=1; log "usage limit on every model/account (rc=$rc) — sleeping ${LIMIT_SLEEP}s"; nap "$LIMIT_SLEEP"
-    fi
+  if [ "$failed" -eq 1 ] && grep -qiE 'usage limit|hit your limit|limit reached|rate.?limit|429|overloaded|quota|resource.?exhausted|resets|try again at|authentication required|not logged in' "$out"; then
+    r=$(reset_epoch "$out"); [ -z "$r" ] && r=$(( $(now) + LIMIT_SLEEP ))
+    avail_set "$slot" "$r"
+    log "usage limit on slot $slot until $(date -r "$r" '+%m-%d %H:%M')"; nap "$NEXT_SLEEP"
   elif [ "$failed" -eq 1 ]; then
     if grep -qiE 'no conversation found|session.*not found|thread.*not found' "$out"; then
       log "session lost — starting a fresh one"; rm -f "$SESSION_FILE"
     fi
     log "error rc=$rc (see $out) — sleeping ${ERROR_SLEEP}s"; nap "$ERROR_SLEEP"
   elif grep -qE '("|\\n)[*_` ]*IDLE[*_`. ]*(\\n)*"' "$out"; then   # IDLE as the reply's last line
-    log "idle — sleeping ${IDLE_SLEEP}s"; nap "$IDLE_SLEEP"
+    idle_n=$((idle_n + 1)); s=$IDLE_SLEEP; k=1
+    while [ "$k" -lt "$idle_n" ] && [ "$s" -lt "$IDLE_MAX" ]; do s=$((s * 2)); k=$((k + 1)); done
+    [ "$s" -gt "$IDLE_MAX" ] && s=$IDLE_MAX
+    log "idle — sleeping ${s}s"; nap "$s"
   else
-    nap "$NEXT_SLEEP"
+    idle_n=0; nap "$NEXT_SLEEP"
   fi
 done
 log "exit"
