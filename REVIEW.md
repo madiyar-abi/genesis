@@ -106,3 +106,8 @@ invalid submission, −1, logged (CONTRACT updated).
 - Swapping the public IDs of two FX rows on clean seed 0 passed verification. Looking up evidence by ID could therefore return a different dated rate from the one used to check the books.
 - Moving the revenue credit L02511 on clean seed 0 to 2099 left its receivables debit in the reporting period. The verifier still reported valid books.
 - With one I2 scenario, seed 180 books the invoice on 2025-02-28 using the rate for 2025-02-27. The scenario descriptions assumed the booking date always produced a large enough discrepancy.
+
+## Round 7 jury review
+
+- On clean seed 7, moving the unidentified receipt BNK-775392 from unapplied cash to sales revenue preserved journal balance and passed verification. The verifier now checks the signed payment-date amount in account 2900 for payments without invoice references. The regression covers both a foreign-currency receipt and a foreign-currency refund reclassified to FX gain or loss.
+- A private grading key on the recording machine changed the hard reconciliation F1 shown in the check tab. Both recording tabs and the slide reproduction command now select the public companies.
