@@ -28,9 +28,11 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
-## Round 8 in progress · 20 November 2026
+## Round 8 · 20 November 2026
 
-Branch `night/2026-11-20-r8`, tasks in `night/TASKS.md`. The verifier now enforces the published ledger policy's account usage. On clean seed 0 it used to accept a payment's 2900 remainder or 7900 row moved to revenue, an expense booked to an unknown account, and an invoice journal re-tagged to another customer (`REVIEW.md` → "Round 8"). `tests/test_ledger_policy.py` covers these tampers. The official check, `verify --seeds 0-199` (600/600) and both seed sweeps pass. Workers are adding independent sweeps of ledger accounts and timestamps.
+Branch `night/2026-11-20-r8`, tasks in `night/TASKS.md`. The verifier now enforces the published posting policy in both the reconstructed and the published books. It checks accounts per journal type, entities, the unapplied-cash remainder of every payment and the dates against documents. It also rejects invalid invoice refs, credit notes outside the hard-mode policy and inverted invoice journals. It selects evidence rows by role and requires the policy to agree with the manifest and the contract. A seed-0 probe and an independent red-team pass found these accepted tampers (`REVIEW.md` → "Round 8"). `tests/test_ledger_policy.py` and `tests/test_verify_redteam.py` cover them. Generator-side sweeps (`tests/test_ledger_accounts.py`, `tests/test_ledger_timestamps.py`) confirm the new invariants on 200 heavy episodes. Generated data is unchanged.
+
+Run `uv run python -m auditenv.check` from the repository root. All 355 unit tests pass, `verify --seeds 0-199` finds 600/600 valid, and the 0–4999 nightly sweep found 0 problems in 15,000 episodes. The 40 exported episodes verify, and the seed-2003 demo in `docs/DEMO.md` still matches.
 
 ## Round 7 complete · 20 November 2026
 
