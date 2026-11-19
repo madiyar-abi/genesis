@@ -51,7 +51,7 @@ network, plus the verifier and the seed sweep on plain Python 3.11).
 | `fx_error` | an invoice or payment converted with the rate of a wrong date | abs(posted − correct) |
 | `period_cutoff` | an invoice issued outside the period booked inside it | AR debit posted |
 | `I1` (interacting) | foreign payment late on the last day: partially allocated **and** converted at the next day's rate | two issues |
-| `I2` (interacting) | next-period foreign invoice backdated **and** converted at the booking-date rate | two issues |
+| `I2` (interacting) | next-period foreign invoice backdated into the period **and** converted using the booking-date rate or an earlier fallback rate | two issues |
 
 Clean companies (no errors) and legitimate look-alikes (split/partial payments, refunds,
 unidentified receipts, weekly retainers with equal amounts, documents near midnight in other
@@ -87,7 +87,7 @@ Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs
    injections reverted the books contain zero discrepancies; after injection the discrepancies
    recomputed independently from the public records equal `truth.json` (type, ids, amount);
    every evidence set exists and covers the affected records.
-3. **Baselines on the dev split** — random explorer, rule-based reconciliation, flag-everything
+3. **Baselines on the dev split** — random explorer, naive reconciliation, rule-based reconciliation, flag-everything
    attack, oracle → P / R / F1 / return / steps / time.
 4. **20 paired checks** — exact replay of seed + actions; relabelled ids + permuted rows keep the
    oracle answer and reward (under the new ids).
@@ -95,7 +95,7 @@ Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs
    reward and no truth; results go only to the grader log.
 6. **Hard mode** — verifier on hard episodes, baselines on `configs/eval_hard.json`; gates: oracle 1.0,
    `reconcile_hard` (the policy's hard rules) solves it from the records, plain `reconcile` does not;
-   20 more paired checks on hard episodes (replay with `reconcile_hard`, relabel + permute incl. FX rows).
+   20 more paired checks on hard episodes (replay with `reconcile_hard` and `random`, relabel + permute incl. FX rows).
 
 ## Using the environment
 
