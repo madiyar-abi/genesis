@@ -28,3 +28,4 @@ FUZZ PASSED
   Wall time: 671.47s (11m 11.47s)
   Summary: config sweep, cases 0-19999: 20000 random configs (8037 hard) in 671.4 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 59
   FUZZ PASSED
+2026-11-20 04:09 lead — Closed Round 10 after reviewing SPEC §§01–13 and all eleven task checks. The final offline Python check passed 366 tests plus every verifier, baseline, paired and process-isolation gate. Independent lead replay of all 20,000 configs passed in 743.59 s, matching gemini1. Public fixtures, trajectories, published metrics, README run steps, demo and pitch verified. Docker CI and human submission follow branch handoff.
