@@ -22,3 +22,6 @@
 - Dispatched subagents: R3 sensitivity (scripts/sensitivity.py), E3b hard trajectories + CI badge.
 
 - 2026-11-19 20:55 codex — R2: all 15 isolated single-line mutants killed by the existing reward tests; the unmodified baseline, smoke tests, full check and 3,000-episode sweep passed. Used existing regression coverage because no mutant survived. Next: C3.
+
+## 2026-11-19 20:56 codex
+- C3 done. Fake-clock tests cover 59.9 s, exactly 60 s, late submit, empty-answer grade, post-terminal calls, a custom limit and eval isolation. Preserved the existing strict greater-than comparison. Targeted tests, full check (264 tests) and 3,000-episode sweep passed. Next: E3a.

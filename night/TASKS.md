@@ -18,7 +18,7 @@ Workers: touch ONLY the files listed for your task.
   tests/test_reward_attacks.py, tests/test_mutate_reward.py (smoke test: the script's mutant list is non-empty and
   every mutation pattern matches the source exactly once) — accept: `uv run python scripts/mutate_reward.py` exit 0,
   all mutants killed; `uv run python -m unittest tests.test_mutate_reward tests.test_reward_attacks` green
-- [ ] C3 (codex) Injectable clock for the 60 s limit: `AuditEnv(clock=time.monotonic)` — optional constructor
+- [x] C3 (codex) Injectable clock for the 60 s limit: `AuditEnv(clock=time.monotonic)` — optional constructor
   argument, default unchanged; replace the three `time.monotonic()` calls in `auditenv/env.py` with `self._clock()`.
   New `tests/test_clock.py` with a fake clock: (a) a step at elapsed 59.9 s works, (b) the first step after 60.0+ s
   returns error code `time_limit`, truncated=True, terminated=False, empty-answer grade in train mode, (c) the step

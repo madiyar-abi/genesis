@@ -37,7 +37,8 @@ class ToolError(Exception):
 class AuditEnv:
     """One episode at a time. `grader_log` is grader-side state; never send it to a policy."""
 
-    def __init__(self):
+    def __init__(self, clock=time.monotonic):
+        self._clock = clock
         self._ep = None
         self.grader_log: list[dict] = []
 
@@ -64,7 +65,7 @@ class AuditEnv:
         self._steps = 0
         self._done = False
         self._terminated = self._truncated = False
-        self._start = time.monotonic()
+        self._start = self._clock()
         self.result = None
         obs = {"task": self._ep["task"], "manifest": copy.deepcopy(self._ep["manifest"]),
                "policy": copy.deepcopy(self._ep["policy"]), "tools": copy.deepcopy(TOOLS),
@@ -93,7 +94,7 @@ class AuditEnv:
             return obs, 0.0, self._terminated, self._truncated, {}
         self._steps += 1
         result, error, reward, terminated, truncated, info = None, None, 0.0, False, False, {}
-        timed_out = time.monotonic() - self._start > float(self._cfg["time_limit_s"])
+        timed_out = self._clock() - self._start > float(self._cfg["time_limit_s"])
         if timed_out:
             error = {"code": "time_limit", "message": "time limit reached"}
         else:
@@ -134,7 +135,7 @@ class AuditEnv:
             res, self._ep["truth"], submission["findings"] if res["valid"] else [])
         self.result = res
         self.grader_log.append({"episode_id": self.episode_id, "end": how, "steps": self._steps,
-                                "elapsed_s": round(time.monotonic() - self._start, 4), **res})
+                                "elapsed_s": round(self._clock() - self._start, 4), **res})
         return res
 
     def _tool(self, kind, action: dict):
