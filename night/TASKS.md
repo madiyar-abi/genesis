@@ -61,7 +61,7 @@ Workers: touch ONLY the files listed for your task.
   lead pastes the table into DESIGN — files: scripts/bench.py, tests/test_bench.py (smoke test running a tiny
   subset via a function call, < 10 s) — accept: `uv run python scripts/bench.py` prints the table, exit 0;
   `uv run python -m unittest tests.test_bench` green
-- [ ] E3a (codex) Makefile targets `fuzz` (`uv run python -m auditenv.fuzz --seeds 0-999`), `stress`
+- [x] E3a (codex) Makefile targets `fuzz` (`uv run python -m auditenv.fuzz --seeds 0-999`), `stress`
   (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299` and the hard variant `--hard --stress
   reconcile_hard --seeds 0-299` if `--hard` supports it — check `auditenv/fuzz.py`), `attack`
   (`uv run python -m auditenv.attack`), `golden` (`uv run python scripts/golden.py --check`), `mutate`
