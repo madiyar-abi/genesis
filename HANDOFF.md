@@ -4,7 +4,7 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Last updated:** 2026-11-19 · by: Claude (night lead) · branch: `night/2026-11-19`
+**Last updated:** 2026-11-19 · by: Chingiz (hinabaina) + Claude · branch: `hinabaina/T19-T22` → PR into `night/2026-11-19`
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
@@ -30,7 +30,7 @@ message says a Google Doc — follow the latest, re-check the form before submit
 
 ## Status
 Environment is feature-complete for the case and passes the single check command
-(`uv run python -m auditenv.check` → ALL CHECKS PASSED, ~7 s, 187 tests). Jury materials are drafted
+(`uv run python -m auditenv.check` → ALL CHECKS PASSED, ~8 s, 187 tests). Jury materials are written and re-checked against the check output
 (`docs/DESIGN.md`, `docs/DEMO.md`, `docs/PITCH.md`). Night run continues on `night/2026-11-19`
 with hardening (review, fuzzing, on-disk episode verification); task list: `night/TASKS.md`.
 
@@ -49,7 +49,10 @@ with hardening (review, fuzzing, on-disk episode verification); task list: `nigh
 - Docs: `README.md`, `docs/CONTRACT.md`, `docs/DESIGN.md` (with measured results), `docs/DEMO.md`, `docs/PITCH.md`.
 
 ## In progress
-- Final SPEC pass and polishing (lead). Jury-style review done; all 10 confirmed findings fixed (see `night/LOG.md`).
+- Nothing. T19–T22 re-verified: every command in README/DEMO runs, numbers in DESIGN/PITCH match
+  `auditenv.check` and `auditenv.analyze`. `auditenv.analyze` now reports micro P/R/F1 like the check
+  (before, the per-episode mean scored silence on clean books as P = R = 0: reconcile showed 0.8/0.8/1.0).
+  All of `night/TASKS.md` is [x].
 
 ## Left to do (humans)
 - Record the demo video following `docs/DEMO.md` (`uv run python -m auditenv.demo --pause`).

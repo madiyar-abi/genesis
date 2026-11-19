@@ -18,7 +18,7 @@ Numbers come from `uv run python -m auditenv.check` / `auditenv.analyze` on the 
 - Python 3.11 standard library, zero dependencies, one check command, Dockerfile.
 
 ## 3. Live demo
-- `uv run python -m auditenv.check` → all gates pass in ~6 s.
+- `uv run python -m auditenv.check` → all gates pass in ~8 s.
 - `uv run python -m auditenv.demo` → company → investigation → findings → reward 0.958.
 - Same books, other answers: silence −1, guessed ids −1, repeated answer 0.33, flag-everything −1.
 - Closed run in a separate process: the policy sees reward 0, the grader log has the score.

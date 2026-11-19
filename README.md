@@ -15,7 +15,7 @@ Python 3.11, **standard library only** (zero runtime dependencies), MIT licence.
 
 ```bash
 git clone https://github.com/madiyar-abi/genesis.git && cd genesis
-uv run python -m auditenv.check        # the single official check (≈ 6 s, exit code 0 = pass)
+uv run python -m auditenv.check        # the single official check (≈ 8 s, exit code 0 = pass)
 ```
 
 No `uv`? Any Python 3.11 works the same: `python3.11 -m auditenv.check` from the repo root.
