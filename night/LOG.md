@@ -53,3 +53,7 @@
 - Env config validation tightened (bool max_steps, time_limit_s type). CONTRACT updated (error codes time_limit/invalid_findings, get_document kind, scenario key).
 - Known design limit (for DESIGN.md): with 12 issues, missing one finding at 0 steps (0.913) beats full answer after 60 steps (0.88) — step cost vs F1 granularity.
 - Next: merge workers, T17 check command.
+## 2026-11-19 13:48 — codex
+- T11 done: RandomExplorer and FlagAll. Five seeds each via run_episode produced repeatable trajectories and negative mean FlagAll reward. Targeted tests and full available suite passed.
+- Assumptions: policies reserve the final available step for submit; FlagAll keeps paging after reaching the findings cap, uses base currency at a naive 1:1, and takes absolute payment amounts to satisfy the nonnegative claim schema.
+- Next: rerun the full suite after the lead publishes T7 tests. No other codex tasks are open.
