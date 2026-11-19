@@ -8,3 +8,8 @@
   invoice_refs carry explicit per-invoice amounts (remittance advice); evidence ids = doc_id / row_id;
   run deadline for this session 2026-11-20 09:00 (from the prompt, overrides NIGHT.md 07:00 default).
 - Next: T5 generator (lead).
+
+## 2026-11-19 13:40 — codex
+- T2 done: bounded decimal calculator. Targeted and full unittest runs passed.
+- Assumptions: whitespace may surround expressions; unary signs preserve literal digits, and binary operations use precision 28.
+- Next: T4 metrics.
