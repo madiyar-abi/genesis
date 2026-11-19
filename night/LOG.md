@@ -1,1 +1,2 @@
 2026-11-19 23:39 lead — T8: seed 7 failed the new line-extension test before the fix. All seven verifier tests pass. Confirmed the public split and pitch defects in REVIEW.md. Worker wrappers entered the main checkout; attached worker branches in their named worktrees to preserve isolation. Next: indexed split verification.
+2026-11-19 23:40 lead — T2: five directory regression tests pass. The complete suite passed 291 tests; train/dev/hard verified 10/10, 10/10 and 20/20. Unindexed episode directories remain supported. Next: review worker results and jury materials.
