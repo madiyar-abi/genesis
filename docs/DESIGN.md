@@ -57,7 +57,7 @@ brute-forced from the id nor the episode regenerated from the open-source code. 
 | type | causal change | expected amount (base currency) | evidence (any one full set) |
 |---|---|---|---|
 | `duplicate_invoice` | a second invoice document with identical entity, currency and line items, issued strictly later, booked again | AR debit of the later copy | both invoice docs + one positive booking row for each invoice (AR debit or revenue credit) |
-| `payment_allocation` | remittance says the payment covers an invoice, the ledger credits only part (or none) of it to AR; the rest lands in 2900 | expected AR credit − posted AR credit | payment doc + invoice doc + 2900 row (or AR row) + invoice-date FX rate if foreign |
+| `payment_allocation` | remittance says the payment covers an invoice, the ledger credits only part (or none) of it to AR; the rest lands in 2900 | expected AR credit − posted AR credit | payment doc + invoice doc + payment’s AR credit for that invoice (2900 row when the credit is missing) + invoice-date FX rate if foreign |
 | `fx_error` | invoice or payment converted at the rate of a wrong date (the document's own local/UTC date, or ±1..7 days); difference ≥ 10 minor units | abs(posted − correct) | doc + AR/revenue row (invoice) or cash row (payment) + the correct-date FX rate |
 | `period_cutoff` | invoice issued in the next period (backdated to the period end) or in the previous period, booked in this period | AR debit posted | invoice doc + AR (or revenue) row |
 
@@ -218,7 +218,7 @@ P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means 
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount but at least the mean expected amount (a zero claim is no free
 accusation); reported separately, the shared reward is unchanged.
-Other gates in the same run: 359 unit tests pass; verifier 200/200 episodes valid (600/600 with
+Other gates in the same run: 366 unit tests pass; verifier 200/200 episodes valid (600/600 with
 `auditenv.verify --seeds 0-199`); 20/20 paired checks on default and 20/20 on hard episodes; out-of-process run leaks nothing.
 
 Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200
@@ -258,9 +258,9 @@ byte-identical (the committed `episodes/` still match the generator).
 
 | change | effect on a shortcut | why it stays solvable |
 |---|---|---|
-| 2–3 legitimate **cancel-and-reissue** pairs per episode: the unpaid original is reversed by a full credit note (`Dr 4000 / Cr 1200`, same invoice_id), the replacement has identical line items | looks exactly like a duplicate | the reversal rows are in the ledger; the rule is in `policy.ledger.credit_note` and the task text |
-| half of the injected **duplicates are re-typed**: other line order, case and ref punctuation | exact line-item comparison misses them | same products, quantities and prices; duplicates are defined order/case/punctuation-insensitively (CONTRACT §3) |
-| **larger ledger**: 900–1 400 rows instead of 230–420 | more pages to read, higher step cost | full reading still fits in 100 steps |
+| Up to three eligible invoices form legitimate **cancel-and-reissue** pairs: the unpaid original is reversed by a full credit note (`Dr 4000 / Cr 1200`, same invoice_id), the replacement carries equivalent line items that may be re-typed | looks exactly like a duplicate | the reversal rows are in the ledger; the rule is in `policy.ledger.credit_note` and the task text |
+| each injected **duplicate has a 50% chance of being re-typed**: other line order, case and ref punctuation | exact line-item comparison misses them | same products, quantities and prices; duplicates are defined order/case/punctuation-insensitively (CONTRACT §3) |
+| **larger ledger**: expense journals pad the pre-injection ledger to a target of 900–1 400 rows (default target 230–420) | more pages to read, higher step cost | full reading still fits in 100 steps |
 
 The verifier treats credit-noted invoices as non-duplicates, compares lines with the same normalised key
 and checks that every credit note is in the period and after its booking.
@@ -320,7 +320,7 @@ to explore.
 | the 100th action is not a submit / 60 s elapsed | `truncated`, empty answer graded | `test_env`, `test_jury` |
 | the 100th action is the submit | it is a submit (`terminated`) | `test_env.test_submit_on_last_step_is_submit` |
 | action after the end, resubmission | `episode_over`, nothing changes, the first grade stays | `test_jury` |
-| malformed actions (None, lists, nested dicts, huge strings, unicode digits in cursors) | bounded error, step consumed, never an exception | `test_fuzz` (20 314 actions) |
+| malformed actions (None, lists, nested dicts, huge strings, unicode digits in cursors) | bounded error, step consumed, never an exception | `test_fuzz` (20 312 episode actions) |
 | cursor exactly at the end / past the end | empty page / `bad_params` | `test_jury` |
 | JPY (exponent 0), refunds (negative payment), multi-invoice and split payments, overpayments, unidentified receipts | correct postings, verifier finds 0 discrepancies | `test_jury.EdgeCaseDataTests`, seed sweep |
 | documents near midnight in other timezones | period and rate date decided in the company timezone | `test_jury.EdgeCaseDataTests`, naive baseline FPs |

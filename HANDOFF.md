@@ -28,6 +28,18 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 10 complete · 20 November 2026
+
+All eleven tasks passed on `night/2026-11-20-r10`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 366 tests passed, along with 20 default and 20 hard paired checks.
+
+- The new sweep sampled 20,000 configurations (8,037 hard). The independent verifier accepted every episode. The oracle and the reconciliation policy for each difficulty reached F1 1.000 within 59 actions. Replay any case N with `uv run python -m auditenv.fuzz --configs 1 --start N`.
+- Reset rejects malformed config objects and counts filed under the wrong group. A subprocess test sends eight invalid requests, then successfully opens an episode on the same connection.
+- Both policies solved their 4,000 stress episodes without truncation. Maximum action counts were 33 on default and 58 on hard. A separate hard sweep over seeds 1000–1999 found zero problems across 3,000 episodes.
+- All 40 exported episodes and seven trajectories reproduced byte for byte. All 80 golden hashes matched. The reward suite caught 15/15 mutants and found zero violations across 11,000 answer mutations.
+- The documentation now describes hard-mode sizing, credit-note eligibility and allocation evidence. The seed-2003 demo reproduced four matched findings after 21 inspections for a return of 0.958.
+
+The marathon handles PR integration and CI. Record the walkthrough in `docs/DEMO.md`, add confirmed team names and contributions to `docs/PITCH.md`, export the deck, and complete the access and submission checklist above.
+
 ## Round 9 · 20 November 2026
 
 Branch `night/2026-11-20-r9`, tasks in `night/TASKS.md`. A read-only red-team pass on contract, isolation, reward and reproducibility found nothing that leaks truth or beats the oracle, and three smaller defects, now fixed test-first (`REVIEW.md` → "Round 9"):
@@ -90,11 +102,7 @@ Demo rehearsal complete. Follow `docs/DEMO.md` for the 2:40 video. The ten-slide
 Branch `night/2026-11-19-r3`. The round freeze is 22 November at 18:00 local time. Round 2 is in main. The verifier now rejects a truth amount denominated in the wrong currency. Run `uv run python -m unittest tests.test_verify` for all six verifier tests. Gemini’s jury map in `docs/CHECKS.md` matches the merged suite. The official check passed all 285 tests. All 40 exported episodes verified and both seed sweeps passed (3,000 default and 600 hard episodes). Record the demo, finish the team slide, and complete the access and submission checklist above.
 
 ## Status
-**Round 2 (agent polish run) on `night/2026-11-19-r2` is DONE (`night/DONE`): all planned ideas done except the
-optional H1/E5 (skipped on purpose, see `night/LOG.md`), plus fixes from an independent jury-style review
-(`REVIEW.md` → "Round 2": a stale agent-facing duplicate evidence rule — the one high-impact defect — and stricter
-input handling). Jury criteria → tests → commands: `docs/CHECKS.md`.** Goals: `night/archive/r2-ROUND.md`; tasks: `night/archive/r2-TASKS.md`.
-Round 2 has since merged into main.
+Round 10 is on `night/2026-11-20-r10`. The current task board is `night/TASKS.md`. Rounds 1–9 are in main. Round 2 evidence is retained below.
 
 Round-2 results (each with its command; numbers from the current code):
 - Reward: R2 `scripts/mutate_reward.py` — 15/15 one-line mutants of matcher/reward caught; R3
@@ -144,7 +152,7 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 
 ## Remaining work before submission
 
-- **Engineering:** round 5 is merged. Follow round-6 integration and CI. The first scheduled nightly CI run can be checked after merge.
+- **Engineering:** follow the Round 10 marathon PR and offline container CI.
 - **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md` (chart: `docs/baselines.svg`), including the Team slide.
 - **Access and submission:** the repository owner arranges jury access. The team checks the repo, video and presentation links, adds them to the Google Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 
@@ -234,7 +242,7 @@ uv run python -m auditenv.fuzz --seeds 0-999          # seed sweep (3 000 episod
 uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299
 uv run python scripts/mutate_reward.py                # 15/15 reward mutants caught
 uv run python scripts/golden.py --check               # generator drift detector (80 hashes)
-make fuzz | make stress | make attack | make miner | make sensitivity | make bench | make chart
+make -n fuzz stress attack miner sensitivity bench chart  # preview available targets
 ```
 No `uv`: `python3.11 -m auditenv.check` from the repo root. Docker: `docker build -t auditenv . && docker run --rm --network none auditenv`
 (verified in CI; Docker is not installed on the dev Mac).

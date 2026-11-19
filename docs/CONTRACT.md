@@ -70,13 +70,13 @@ Truth issue: `{issue_id, type, scenario, affected_ids, expected_amount_minor, cu
 | type | affected_ids | amount | evidence (any one full set) |
 |---|---|---|---|
 | `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the later-issued copy | both invoice doc_ids + the original's and later copy's AR (or revenue) row_ids |
-
-"Same line items" = equal as a multiset of `(description, quantity, unit_price_minor, amount_minor)`
-with descriptions compared lower-case, letters and digits only (order, case and punctuation ignored).
-In default mode copies are exact; in hard mode half of them are re-typed.
 | `payment_allocation` | [invoice_id, payment_id] | `convert(ref.amount, rate(inv date))` − AR credit actually posted | payment doc_id + invoice doc_id + the AR credit row_id of that invoice in the payment (if nothing was allocated to it: the 2900 row_id) + the invoice-date fx_id if foreign |
 | `fx_error` | [invoice_id] or [payment_id] | abs(posted − correct) of the AR (resp. cash) row | doc_id + that row_id (invoice: AR or revenue row) + the fx_id of the correct date |
 | `period_cutoff` | [invoice_id] | AR debit posted for an invoice dated outside the period | invoice doc_id + AR (or revenue) row_id |
+
+"Same line items" = equal as a multiset of `(description, quantity, unit_price_minor, amount_minor)`
+with descriptions compared lower-case, letters and digits only (order, case and punctuation ignored).
+Default-mode copies are exact. Each hard-mode copy has a 50% chance of being re-typed.
 
 Every evidence set is sufficient on its own: `auditenv/verify.py` recomputes the amount from the
 set's records (plus the manifest).
@@ -97,11 +97,11 @@ obs, reward, terminated, truncated, info = env.step(action: dict)
 ```
 All values JSON-compatible. `config` keys (all optional): `mode` ("train" | "eval",
 default "train"), `max_steps` (100), `time_limit_s` (60), `errors`
-(`{type: count}`), `interacting` (`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`
+(`{type: count}`), `interacting` (`{"I1": n, "I2": n}`; both must be objects — both omitted → random mix,
+either given → exactly the listed counts, the rest 0), `n_invoices` (10–100), `distractors`
 (bool), `transform_seed` (int | null: benign relabel/permutation), `difficulty` ("default" |
 "hard"; default "default" — absent from the normalised config, so default episodes are unchanged).
-Hard: 900–1 400 ledger rows, 2–3 credit-note reissues, re-typed duplicates; `policy.ledger.credit_note`
-and the task text state the extra rules.
+Hard mode pads the ledger to a target of 900–1 400 rows before injection and selects up to three eligible invoices for credit-note reissues. Duplicates may be re-typed. The task text and `policy.ledger.credit_note` give the extra rules.
 
 Grader secret: if the env var `AUDITENV_SECRET` is set (grader process only), it keys both the
 generator RNG and the HMAC `episode_id`, so a policy cannot recover the seed or regenerate the
@@ -128,7 +128,7 @@ submission) consume a step; codes:
 `unknown_action, bad_params, unknown_table, not_found, calc_error, episode_over`, plus
 `time_limit` (wall-clock limit hit → truncated) and `invalid_findings` (train mode only; in eval
 the policy just sees `{"submitted": true}`).
-Step 100 without submit → `truncated=true`, empty findings are graded.
+A non-submit action at the configured `max_steps` (default 100) truncates the episode and grades empty findings. After termination or truncation, `episode_over` preserves the final step counter.
 Reward is 0.0 on every non-terminal step. Terminal reward is returned to the policy
 only in `mode="train"`; in `"eval"` it is 0.0 and the result goes to the grader log only.
 

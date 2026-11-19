@@ -121,10 +121,12 @@ Actions: `list_records(table, cursor, limit≤50)`, `get_record(table, id)`, `ge
 `calculator(expression)`, `submit(findings)`. Full interface: [`docs/CONTRACT.md`](docs/CONTRACT.md).
 
 Config keys: `mode` (`train` returns the terminal reward, `eval` hides it), `max_steps` (≤ 100),
-`time_limit_s` (60), `errors` (`{type: count}`; omitted → random mix), `interacting`
+`time_limit_s` (60), `errors` (`{type: count}`), `interacting`
 (`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`, `transform_seed` (benign relabel/permute),
-`difficulty` (`"default"` | `"hard"`: credit-note reissues, re-typed duplicates, 900–1 400 ledger rows —
+`difficulty` (`"default"` | `"hard"`: credit-note reissues, re-typed duplicates, a ledger padded to a target of 900–1 400 rows before injection —
 see [`docs/DESIGN.md`](docs/DESIGN.md) “Hard mode”; `configs/eval_hard.json` is a 20-episode hard split).
+
+Omit both `errors` and `interacting` for a random mix. Supplying either object sets every unspecified count to zero.
 
 ### Run a policy, write trajectories
 
@@ -199,6 +201,7 @@ uv run python -m tests.test_fuzz                     # action count and runtime
 uv run python -m auditenv.check --json /tmp/auditenv-metrics.json
 uv run python scripts/sync_docs.py --check --json /tmp/auditenv-metrics.json  # omit --check to update
 uv run python -m auditenv.fuzz --seeds 0-999         # seed sweep: 3 000 episodes end to end
+uv run python -m auditenv.fuzz --configs 3000        # sample valid parameter combinations (add --start N to replay from case N)
 uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299   # every error findable in budget?
 uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json  # failure analysis
 uv run python -m auditenv.demo                       # narrated demo (see docs/DEMO.md)
@@ -211,8 +214,8 @@ uv run python scripts/shortcut_miner.py --report-only  # single-feature data-lea
 uv run python scripts/golden.py --check              # 80 golden hashes: generator drift detector
 uv run python scripts/bench.py                       # timing benchmark
 uv run python scripts/chart.py                       # docs/baselines.svg from the check --json output
-make check | make test | make verify | make fuzz | make stress | make attack | make golden | make mutate
-make miner | make bench | make sensitivity | make chart
+make check                                           # run one target, or combine targets: make test verify
+make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart  # preview commands
 ```
 
 ## Repository layout
@@ -229,7 +232,7 @@ make miner | make bench | make sensitivity | make chart
 | `auditenv/policies/` | baselines: random explorer, naive reconcile, reconcile, reconcile_hard, flag-all, oracle |
 | `scripts/` | round-2 tools: mutation testing, sensitivity, shortcut miner, golden hashes, benchmark, chart, doc sync |
 | `auditenv/run.py`, `check.py` | runner/trajectories, single check command |
-| `auditenv/fuzz.py`, `analyze.py` | seed sweep + stress test, measured failure analysis |
+| `auditenv/fuzz.py`, `analyze.py` | seed and configuration sweeps, policy stress tests, measured failure analysis |
 | `auditenv/export.py`, `load.py`, `demo.py` | episode files on disk and back, narrated demo |
 | `auditenv/experimental.py` | materiality-weighted reward, reported next to the shared one |
 | `schemas/` | JSON Schemas: action, observation, findings, manifest, truth, trajectory step |

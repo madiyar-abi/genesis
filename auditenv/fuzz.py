@@ -4,6 +4,7 @@
     uv run python -m auditenv.fuzz --seeds 0-199 --hard     # hard mode
     uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299        # solvability stress test
     uv run python -m auditenv.fuzz --stress reconcile_hard --seeds 0-299 --hard
+    uv run python -m auditenv.fuzz --configs 3000          # random config combinations, both difficulties
 
 Per episode: generation and the verifier raise nothing and find no problem (balanced journals
 before/after, truth == recomputed discrepancies, every evidence set sufficient); the oracle reaches
@@ -16,10 +17,11 @@ policies stay bad (random > 0 on < 25 % of all and < 1 % of dirty episodes, flag
 from __future__ import annotations
 
 import argparse
+import random
 import time
 
 from .env import AuditEnv
-from .generator import ISSUE_TYPES, generate
+from .generator import ISSUE_TYPES, SCENARIOS, generate
 from .run import make_policy, parse_seeds, run_episode
 from .verify import verify_episode
 
@@ -77,13 +79,89 @@ def stress(policy: str, seeds: list[int], hard: bool = False) -> dict:
     return {"episodes": n, "imperfect": imperfect, "max_steps": max_steps, "truncated": truncated}
 
 
+def random_config(i: int) -> tuple[int, dict]:
+    """Config sweep case i: a seed and a random valid config (SPEC §06 "new parameter combinations")."""
+    r = random.Random(i)
+    cfg: dict = {}
+    if r.random() < 0.85:  # otherwise the generator picks the issue mix
+        errors, inter = dict.fromkeys(ISSUE_TYPES, 0), dict.fromkeys(SCENARIOS, 0)
+        budget = r.randint(0, 12)  # an interacting scenario is two issues
+        while budget:
+            key = r.choice(ISSUE_TYPES + SCENARIOS) if budget > 1 else r.choice(ISSUE_TYPES)
+            if key in inter:
+                inter[key] += 1
+                budget -= 2
+            else:
+                errors[key] += 1
+                budget -= 1
+        cfg["errors"] = {k: v for k, v in errors.items() if v or r.random() < 0.3}
+        if any(inter.values()) or r.random() < 0.3:
+            cfg["interacting"] = {k: v for k, v in inter.items() if v or r.random() < 0.5}
+    if r.random() < 0.6:
+        cfg["n_invoices"] = r.randint(10, 100)
+    if r.random() < 0.3:
+        cfg["distractors"] = r.random() < 0.5
+    if r.random() < 0.3:
+        cfg["transform_seed"] = r.randint(0, 10**6)
+    if r.random() < 0.4:
+        cfg["difficulty"] = "hard"
+    return r.randint(0, 10**6), cfg
+
+
+def expected_issues(cfg: dict) -> int | None:
+    if "errors" not in cfg and "interacting" not in cfg:
+        return None
+    return sum(cfg.get("errors", {}).values()) + 2 * sum(cfg.get("interacting", {}).values())
+
+
+def config_sweep(n: int, start: int = 0) -> dict:
+    """Per random config: verifier finds nothing, truth has the configured issue count, the oracle and the
+    difficulty's rule policy (reconcile / reconcile_hard) both reach F1 1.0 within the step budget."""
+    env = AuditEnv()
+    problems: list[tuple] = []
+    max_steps = hard = 0
+    for i in range(start, start + n):
+        seed, cfg = random_config(i)
+        hard += cfg.get("difficulty") == "hard"
+        try:
+            ep = generate(seed, cfg)
+            bad = verify_episode(ep)
+            if bad:
+                problems.append((i, seed, cfg, "verifier", bad[:2]))
+            want, got = expected_issues(cfg), len(ep["truth"]["issues"])
+            if want is not None and got != want:
+                problems.append((i, seed, cfg, "issue count", (got, want)))
+            rules = "reconcile_hard" if cfg.get("difficulty") == "hard" else "reconcile"
+            for policy in ("oracle", rules):
+                traj = run_episode(env, None, seed, cfg, policy_factory=lambda e, p=policy: make_policy(p, e, seed))
+                max_steps = max(max_steps, traj[-1]["step"])
+                if env.result["f1"] < 1.0 or traj[-1]["truncated"]:
+                    problems.append((i, seed, cfg, policy, (env.result["tp"], env.result["fp"], env.result["fn"])))
+        except Exception as exc:  # a crash is a finding, not a stop
+            problems.append((i, seed, cfg, "exception", f"{type(exc).__name__}: {exc}"[:200]))
+    return {"episodes": n, "hard": hard, "problems": problems, "max_steps": max_steps}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--seeds", default="0-999")
     ap.add_argument("--hard", action="store_true", help="difficulty: hard")
     ap.add_argument("--stress", metavar="POLICY", help="stress test a rule policy instead of the sweep")
+    ap.add_argument("--configs", type=int, metavar="N", help="sweep N random config combinations instead of seeds")
+    ap.add_argument("--start", type=int, default=0, help="first config case for --configs")
     args = ap.parse_args(argv)
     t0 = time.monotonic()
+    if args.configs is not None:
+        if args.configs < 1:
+            ap.error("--configs requires a positive number of cases")
+        r = config_sweep(args.configs, args.start)
+        for p in r["problems"][:20]:
+            print("   ", p)
+        print(f"config sweep, cases {args.start}-{args.start + args.configs - 1}: {r['episodes']} random configs "
+              f"({r['hard']} hard) in {time.monotonic() - t0:.1f} s; problems (exception / verifier / issue count / "
+              f"oracle or rule policy F1 < 1): {len(r['problems'])}; max steps {r['max_steps']}")
+        print("FUZZ PASSED" if not r["problems"] else "FUZZ FAILED")
+        return 0 if not r["problems"] else 1
     if args.stress:
         r = stress(args.stress, parse_seeds(args.seeds), args.hard)
         for p in r["imperfect"][:20]:
