@@ -15,3 +15,4 @@
 2026-11-20 03:52 lead — T11: Audit follow-up. Both misplaced count groups previously passed the new test inputs without raising. Scoped validation to each group; seven strict tests pass. Regenerated train/dev/hard exports and all seven trajectories, git diff empty, golden 80/80. Integrated gate: 366 tests pass.
 2026-11-20 03:52 lead — T8: Published the sweep, verified the jury-map references, synced docs with the integrated 366-test check, corrected remaining-work instructions.
 2026-11-20 03:52 lead — T9: Rehearsed seed 2003 including five pauses and verified the walkthrough figures and baseline tab against the integrated check. Existing script matches.
+2026-11-20 03:52 lead — T10: Traced pitch figures to check, analyze, demo, config sweep and 15/15 reward mutants. Added config sweep to slide 8; team names remain human input.

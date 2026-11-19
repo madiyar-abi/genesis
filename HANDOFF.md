@@ -46,6 +46,8 @@ The README lists the new command and docs/CHECKS.md links both the config sweep 
 
 Record the seed-2003 walkthrough in docs/DEMO.md: 21 inspections, four matched findings, return 0.958.
 
+The ten-slide outline includes the 3,000-case configuration result. Add confirmed names and contributions to slide 10 before exporting.
+
 ## Round 9 · 20 November 2026
 
 Branch `night/2026-11-20-r9`, tasks in `night/TASKS.md`. A read-only red-team pass on contract, isolation, reward and reproducibility found nothing that leaks truth or beats the oracle, and three smaller defects, now fixed test-first (`REVIEW.md` → "Round 9"):
