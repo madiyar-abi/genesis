@@ -25,7 +25,7 @@ Workers: touch ONLY the files listed for your task.
   after that returns `episode_over`, (d) a custom `time_limit_s` in config is honoured, (e) eval mode: no reward/info
   leak on time limit (info == {} and reward == 0.0). No sleeping in tests — files: auditenv/env.py, tests/test_clock.py
   — accept: `uv run python -m unittest tests.test_clock tests.test_env` green; `uv run python -m auditenv.check` exit 0
-- [ ] C2 (gemini) Bound request size and bad bytes in `auditenv/server.py`: read stdin as bytes (`sys.stdin.buffer`),
+- [x] C2 (gemini) Bound request size and bad bytes in `auditenv/server.py`: read stdin as bytes (`sys.stdin.buffer`),
   reject any request line longer than 1 MiB (constant `MAX_LINE = 1 << 20`) with `{"error": "request too large"}`
   without parsing it, decode UTF-8 strictly and answer `{"error": "invalid utf-8"}` on failure; the server keeps
   serving after either error (next valid request works). Keep the JSON-lines protocol and all existing responses

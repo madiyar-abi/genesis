@@ -20,3 +20,7 @@
 - H2 done: per-config steps over 300 seeds (stress configs from auditenv/fuzz.py): default reconcile max 33,
   hard reconcile_hard max 58 (12 issues + 100 invoices), 0 imperfect, 0 truncated → ≤ 80 holds. Table in DESIGN §9.
 - Dispatched subagents: R3 sensitivity (scripts/sensitivity.py), E3b hard trajectories + CI badge.
+
+## 2026-11-19 20:57 gemini
+- C2 done: bounded request size and bad bytes in auditenv/server.py (MAX_LINE = 1 << 20, read stdin as bytes via sys.stdin.buffer, strict UTF-8 decoding, keep serving after error). Added tests in tests/test_server.py: in-process serve() with BytesIO / StringIO and subprocess test sending 10 MB line, invalid UTF-8, then valid reset and clean close. Tests green, check exit 0.
+- Next: P1 golden hashes (scripts/golden.py, tests/golden_hashes.json, tests/test_golden.py).
