@@ -24,3 +24,7 @@
 ## 2026-11-19 20:57 gemini
 - C2 done: bounded request size and bad bytes in auditenv/server.py (MAX_LINE = 1 << 20, read stdin as bytes via sys.stdin.buffer, strict UTF-8 decoding, keep serving after error). Added tests in tests/test_server.py: in-process serve() with BytesIO / StringIO and subprocess test sending 10 MB line, invalid UTF-8, then valid reset and clean close. Tests green, check exit 0.
 - Next: P1 golden hashes (scripts/golden.py, tests/golden_hashes.json, tests/test_golden.py).
+
+## 2026-11-19 21:00 gemini
+- P1 done: scripts/golden.py generates 80 canonical hashes across seeds 0–19 × 4 configs, writes tests/golden_hashes.json, and supports --check to exit 1 on drift. tests/test_golden.py recomputes all 80 hashes in 0.4s and asserts equality with actionable guidance on intentional drift. scripts/golden.py --check exits 0.
+- Next: E2 timing benchmark (scripts/bench.py, tests/test_bench.py).

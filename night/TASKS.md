@@ -35,7 +35,7 @@ Workers: touch ONLY the files listed for your task.
   `uv run python -m unittest tests.test_server` green; `uv run python -m auditenv.check` exit 0 (remote gate passes)
 
 ## Block 2 — reproducibility / data
-- [ ] P1 (gemini) Golden hashes: new `scripts/golden.py` computes sha256 of `json.dumps(generate(seed, config),
+- [x] P1 (gemini) Golden hashes: new `scripts/golden.py` computes sha256 of `json.dumps(generate(seed, config),
   sort_keys=True, separators=(",", ":"))` for seeds 0–19 × configs [default `{}`, `{"errors": {}}`,
   `{"difficulty": "hard"}`, `{"transform_seed": 7}`] (80 hashes) and writes `tests/golden_hashes.json`
   (`{"<config-json>|<seed>": "<hex>"}`); `--check` mode compares and exits 1 on drift. New `tests/test_golden.py`
