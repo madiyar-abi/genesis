@@ -1,0 +1,67 @@
+{
+  "episode_id": "ep_47673b8201cf",
+  "issues": [
+    {
+      "affected_ids": [
+        "INV-129948"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "D-09e4e2",
+          "R1180"
+        ],
+        [
+          "D-09e4e2",
+          "R1181"
+        ]
+      ],
+      "expected_amount_minor": 487128811,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "INV-117573",
+        "INV-898397"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "D-096f6e",
+          "D-0e7d96"
+        ],
+        [
+          "R1434",
+          "R1436"
+        ]
+      ],
+      "expected_amount_minor": 680771000,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "INV-624024",
+        "INV-775643"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "D-050ba7",
+          "D-0606fd"
+        ],
+        [
+          "R1176",
+          "R1199"
+        ]
+      ],
+      "expected_amount_minor": 893852900,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    }
+  ]
+}

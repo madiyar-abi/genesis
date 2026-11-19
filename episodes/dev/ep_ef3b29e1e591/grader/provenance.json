@@ -1,0 +1,258 @@
+{
+  "company": {
+    "bank_offset": "-03:00",
+    "base_currency": "EUR",
+    "entities": 11,
+    "foreign_currencies": [
+      "KZT",
+      "USD"
+    ],
+    "timezone": "+00:00"
+  },
+  "config": {
+    "errors": {
+      "period_cutoff": 1
+    },
+    "interacting": {
+      "I1": 1
+    }
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 329502,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005230",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 192932,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3720",
+              "invoice_id": "2506-280405",
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005232",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 135239,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005231",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 1331,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005233",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 329502,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005230",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 327245,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3720",
+              "invoice_id": "2506-280405",
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005232",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 2257,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005233",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            }
+          ],
+          "journal": "pay:BNK-567659"
+        }
+      ],
+      "description": "payment BNK-567659 allocated partially to 2506-280405; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "I1",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 327656,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005230",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 192932,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3720",
+              "invoice_id": "2506-280405",
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005232",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 135239,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005231",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 515,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005233",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 329502,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005230",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 192932,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3720",
+              "invoice_id": "2506-280405",
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005232",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 135239,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005231",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 1331,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3720",
+              "invoice_id": null,
+              "payment_id": "BNK-567659",
+              "row_id": "GL-005233",
+              "timestamp": "2025-06-30T22:28:00+00:00"
+            }
+          ],
+          "journal": "pay:BNK-567659"
+        }
+      ],
+      "description": "payment BNK-567659 cash converted with the 2025-07-01 rate instead of 2025-06-30",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "I1",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1050000,
+              "entity_id": "E5000",
+              "invoice_id": "2506-084103",
+              "payment_id": null,
+              "row_id": "GL-004994",
+              "timestamp": "2025-06-02T22:52:00+00:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1050000,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E5000",
+              "invoice_id": "2506-084103",
+              "payment_id": null,
+              "row_id": "GL-004993",
+              "timestamp": "2025-06-02T22:52:00+00:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2506-084103"
+        }
+      ],
+      "description": "invoice 2506-084103 issued 2025-05-25 (outside the period) booked on 2025-06-02",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "period_cutoff"
+    }
+  ],
+  "seed": 2002
+}

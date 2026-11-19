@@ -1,0 +1,185 @@
+{
+  "config_version": "1.0",
+  "split": "eval_example",
+  "episodes": [
+    {
+      "seed": 9000,
+      "config": {
+        "errors": {}
+      }
+    },
+    {
+      "seed": 9001,
+      "config": {
+        "errors": {}
+      }
+    },
+    {
+      "seed": 9002,
+      "config": {
+        "errors": {}
+      }
+    },
+    {
+      "seed": 9003,
+      "config": {
+        "errors": {}
+      }
+    },
+    {
+      "seed": 9004,
+      "config": {
+        "errors": {}
+      }
+    },
+    {
+      "seed": 9005,
+      "config": {
+        "interacting": {
+          "I1": 1
+        }
+      }
+    },
+    {
+      "seed": 9006,
+      "config": {
+        "interacting": {
+          "I2": 1
+        }
+      }
+    },
+    {
+      "seed": 9007,
+      "config": {
+        "errors": {
+          "duplicate_invoice": 1
+        },
+        "interacting": {
+          "I1": 1
+        }
+      }
+    },
+    {
+      "seed": 9008,
+      "config": {
+        "errors": {
+          "fx_error": 1
+        },
+        "interacting": {
+          "I2": 1
+        }
+      }
+    },
+    {
+      "seed": 9009,
+      "config": {
+        "interacting": {
+          "I1": 1,
+          "I2": 1
+        }
+      }
+    },
+    {
+      "seed": 9010,
+      "config": {
+        "errors": {
+          "duplicate_invoice": 1,
+          "period_cutoff": 1
+        },
+        "n_invoices": 35
+      }
+    },
+    {
+      "seed": 9011,
+      "config": {
+        "errors": {
+          "payment_allocation": 2
+        },
+        "n_invoices": 45
+      }
+    },
+    {
+      "seed": 9012,
+      "config": {
+        "errors": {
+          "fx_error": 2,
+          "period_cutoff": 1
+        },
+        "n_invoices": 55
+      }
+    },
+    {
+      "seed": 9013,
+      "config": {
+        "errors": {
+          "duplicate_invoice": 2,
+          "payment_allocation": 1
+        },
+        "n_invoices": 65
+      }
+    },
+    {
+      "seed": 9014,
+      "config": {
+        "errors": {
+          "duplicate_invoice": 1,
+          "fx_error": 1,
+          "payment_allocation": 1,
+          "period_cutoff": 1
+        },
+        "n_invoices": 40
+      }
+    },
+    {
+      "seed": 9015,
+      "config": {
+        "errors": {
+          "payment_allocation": 2,
+          "period_cutoff": 2
+        },
+        "n_invoices": 50
+      }
+    },
+    {
+      "seed": 9016,
+      "config": {
+        "errors": {
+          "duplicate_invoice": 1,
+          "fx_error": 2
+        },
+        "n_invoices": 60
+      }
+    },
+    {
+      "seed": 9017,
+      "config": {
+        "errors": {
+          "fx_error": 1,
+          "period_cutoff": 2
+        },
+        "n_invoices": 70
+      }
+    },
+    {
+      "seed": 9018,
+      "config": {
+        "errors": {
+          "fx_error": 2,
+          "payment_allocation": 2
+        },
+        "n_invoices": 45
+      }
+    },
+    {
+      "seed": 9019,
+      "config": {
+        "errors": {
+          "duplicate_invoice": 2,
+          "payment_allocation": 1,
+          "period_cutoff": 1
+        },
+        "n_invoices": 75
+      }
+    }
+  ]
+}

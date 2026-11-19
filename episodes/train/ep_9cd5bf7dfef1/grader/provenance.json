@@ -1,0 +1,244 @@
+{
+  "company": {
+    "bank_offset": "+09:00",
+    "base_currency": "USD",
+    "entities": 14,
+    "foreign_currencies": [
+      "CHF",
+      "GBP",
+      "KZT"
+    ],
+    "timezone": "+05:30"
+  },
+  "config": {
+    "errors": {
+      "duplicate_invoice": 2,
+      "payment_allocation": 2
+    },
+    "n_invoices": 45
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 925500,
+              "entity_id": "C-8852",
+              "invoice_id": "F0486938",
+              "payment_id": null,
+              "row_id": "L03412",
+              "timestamp": "2026-03-10T17:49:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 925500,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-8852",
+              "invoice_id": "F0486938",
+              "payment_id": null,
+              "row_id": "L03411",
+              "timestamp": "2026-03-10T17:49:00+05:30"
+            }
+          ],
+          "before": null,
+          "journal": "inv:F0486938"
+        }
+      ],
+      "description": "invoice F0154627 entered a second time as F0486938 and booked again",
+      "documents_added": [
+        "DOC0749676"
+      ],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 91000,
+              "entity_id": "C-8852",
+              "invoice_id": "F0096682",
+              "payment_id": null,
+              "row_id": "L03561",
+              "timestamp": "2026-03-24T20:39:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 91000,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-8852",
+              "invoice_id": "F0096682",
+              "payment_id": null,
+              "row_id": "L03560",
+              "timestamp": "2026-03-24T20:39:00+05:30"
+            }
+          ],
+          "before": null,
+          "journal": "inv:F0096682"
+        }
+      ],
+      "description": "invoice F0598747 entered a second time as F0096682 and booked again",
+      "documents_added": [
+        "DOC0829019"
+      ],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 91000,
+              "entity_id": "C-8852",
+              "invoice_id": null,
+              "payment_id": "PAY-298328",
+              "row_id": "L03429",
+              "timestamp": "2026-03-13T12:47:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 56337,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-8852",
+              "invoice_id": "F0436650",
+              "payment_id": "PAY-298328",
+              "row_id": "L03431",
+              "timestamp": "2026-03-13T12:47:00+05:30"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 34663,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-8852",
+              "invoice_id": null,
+              "payment_id": "PAY-298328",
+              "row_id": "L03430",
+              "timestamp": "2026-03-13T12:47:00+05:30"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 91000,
+              "entity_id": "C-8852",
+              "invoice_id": null,
+              "payment_id": "PAY-298328",
+              "row_id": "L03429",
+              "timestamp": "2026-03-13T12:47:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 91000,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-8852",
+              "invoice_id": "F0436650",
+              "payment_id": "PAY-298328",
+              "row_id": "L03431",
+              "timestamp": "2026-03-13T12:47:00+05:30"
+            }
+          ],
+          "journal": "pay:PAY-298328"
+        }
+      ],
+      "description": "payment PAY-298328 allocated partially to F0436650; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 1833086,
+              "entity_id": "C-1672",
+              "invoice_id": null,
+              "payment_id": "PAY-498853",
+              "row_id": "L03611",
+              "timestamp": "2026-03-29T15:27:00+05:30"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 1833086,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-1672",
+              "invoice_id": null,
+              "payment_id": "PAY-498853",
+              "row_id": "L03610",
+              "timestamp": "2026-03-29T15:27:00+05:30"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 1833086,
+              "entity_id": "C-1672",
+              "invoice_id": null,
+              "payment_id": "PAY-498853",
+              "row_id": "L03611",
+              "timestamp": "2026-03-29T15:27:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 1799315,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-1672",
+              "invoice_id": "F0770518",
+              "payment_id": "PAY-498853",
+              "row_id": "pre-124",
+              "timestamp": "2026-03-29T15:27:00+05:30"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 33771,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-1672",
+              "invoice_id": null,
+              "payment_id": "PAY-498853",
+              "row_id": "pre-125",
+              "timestamp": "2026-03-29T15:27:00+05:30"
+            }
+          ],
+          "journal": "pay:PAY-498853"
+        }
+      ],
+      "description": "payment PAY-498853 allocated nothing to F0770518; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 1005
+}

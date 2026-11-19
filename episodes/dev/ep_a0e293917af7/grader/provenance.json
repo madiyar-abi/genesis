@@ -1,0 +1,203 @@
+{
+  "company": {
+    "bank_offset": "+09:00",
+    "base_currency": "KZT",
+    "entities": 11,
+    "foreign_currencies": [
+      "GBP",
+      "USD"
+    ],
+    "timezone": "-03:00"
+  },
+  "config": {
+    "errors": {
+      "fx_error": 2,
+      "payment_allocation": 1
+    },
+    "n_invoices": 50
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 410370366,
+              "entity_id": "E2429",
+              "invoice_id": "F0559138",
+              "payment_id": null,
+              "row_id": "GL-003542",
+              "timestamp": "2026-11-11T12:36:00-03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 410370366,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E2429",
+              "invoice_id": "F0559138",
+              "payment_id": null,
+              "row_id": "GL-003543",
+              "timestamp": "2026-11-11T12:36:00-03:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 410820891,
+              "entity_id": "E2429",
+              "invoice_id": "F0559138",
+              "payment_id": null,
+              "row_id": "GL-003542",
+              "timestamp": "2026-11-11T12:36:00-03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 410820891,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E2429",
+              "invoice_id": "F0559138",
+              "payment_id": null,
+              "row_id": "GL-003543",
+              "timestamp": "2026-11-11T12:36:00-03:00"
+            }
+          ],
+          "journal": "inv:F0559138"
+        }
+      ],
+      "description": "invoice F0559138 converted with the 2026-11-06 rate instead of 2026-11-11",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 500020235,
+              "entity_id": "E4606",
+              "invoice_id": "F0975006",
+              "payment_id": null,
+              "row_id": "GL-003497",
+              "timestamp": "2026-11-08T09:43:00-03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 500020235,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E4606",
+              "invoice_id": "F0975006",
+              "payment_id": null,
+              "row_id": "GL-003498",
+              "timestamp": "2026-11-08T09:43:00-03:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 499127129,
+              "entity_id": "E4606",
+              "invoice_id": "F0975006",
+              "payment_id": null,
+              "row_id": "GL-003497",
+              "timestamp": "2026-11-08T09:43:00-03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 499127129,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E4606",
+              "invoice_id": "F0975006",
+              "payment_id": null,
+              "row_id": "GL-003498",
+              "timestamp": "2026-11-08T09:43:00-03:00"
+            }
+          ],
+          "journal": "inv:F0975006"
+        }
+      ],
+      "description": "invoice F0975006 converted with the 2026-11-09 rate instead of 2026-11-08",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 47290723,
+              "entity_id": "E2517",
+              "invoice_id": null,
+              "payment_id": "PAY-284994",
+              "row_id": "GL-003638",
+              "timestamp": "2026-11-20T10:19:00-03:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 47290723,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E2517",
+              "invoice_id": null,
+              "payment_id": "PAY-284994",
+              "row_id": "GL-003639",
+              "timestamp": "2026-11-20T10:19:00-03:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 47290723,
+              "entity_id": "E2517",
+              "invoice_id": null,
+              "payment_id": "PAY-284994",
+              "row_id": "GL-003638",
+              "timestamp": "2026-11-20T10:19:00-03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 47290723,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E2517",
+              "invoice_id": "F0418443",
+              "payment_id": "PAY-284994",
+              "row_id": "pre-129",
+              "timestamp": "2026-11-20T10:19:00-03:00"
+            }
+          ],
+          "journal": "pay:PAY-284994"
+        }
+      ],
+      "description": "payment PAY-284994 allocated nothing to F0418443; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 2005
+}

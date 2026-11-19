@@ -1,0 +1,11 @@
+.git
+.venv
+.night-logs
+**/__pycache__
+**/*.pyc
+**/.DS_Store
+**/.env*
+.vscode
+.idea
+.claude/settings.local.json
+CLAUDE.local.md

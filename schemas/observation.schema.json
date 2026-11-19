@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit environment observation",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/initial"
+    },
+    {
+      "$ref": "#/$defs/step"
+    }
+  ],
+  "$defs": {
+    "initial": {
+      "type": "object",
+      "properties": {
+        "task": {
+          "type": "string"
+        },
+        "manifest": {
+          "$ref": "manifest.schema.json"
+        },
+        "policy": {
+          "type": "object"
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "list_records",
+                  "get_record",
+                  "get_document",
+                  "calculator",
+                  "submit"
+                ]
+              },
+              "params": {
+                "type": "object"
+              },
+              "returns": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "params",
+              "returns"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "steps_remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "task",
+        "manifest",
+        "policy",
+        "tools",
+        "steps_remaining"
+      ],
+      "additionalProperties": false
+    },
+    "step": {
+      "type": "object",
+      "properties": {
+        "step": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "steps_remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "result": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Public tool result, or null when unavailable."
+        },
+        "error": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "enum": [
+                    "unknown_action",
+                    "bad_params",
+                    "unknown_table",
+                    "not_found",
+                    "calc_error",
+                    "episode_over",
+                    "time_limit",
+                    "invalid_findings"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "step",
+        "steps_remaining",
+        "result",
+        "error"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

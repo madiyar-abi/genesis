@@ -1,0 +1,12 @@
+[project]
+name = "auditenv"
+version = "1.0.0"
+description = "Reproducible RL environment for training AI financial auditors (synthetic companies, hidden errors, matcher, terminal reward)"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+license = "MIT"
+dependencies = []
+
+[tool.uv]
+# Not installed as a package: run from the repo root (`uv run python -m auditenv.check`).
+package = false

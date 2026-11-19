@@ -1,0 +1,62 @@
+{
+  "episode_id": "ep_a0e293917af7",
+  "issues": [
+    {
+      "affected_ids": [
+        "F0559138"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "DOC0110310",
+          "GL-003542"
+        ],
+        [
+          "DOC0110310",
+          "GL-003543"
+        ]
+      ],
+      "expected_amount_minor": 450525,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "F0975006"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "DOC0289105",
+          "GL-003497"
+        ],
+        [
+          "DOC0289105",
+          "GL-003498"
+        ]
+      ],
+      "expected_amount_minor": 893106,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "F0418443",
+        "PAY-284994"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "DOC0308523",
+          "GL-003639"
+        ]
+      ],
+      "expected_amount_minor": 47290723,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ]
+}
