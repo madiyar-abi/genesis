@@ -76,7 +76,7 @@ the episode with −1. Code: `auditenv/matcher.py`, `metrics.py`.
 | random explorer | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 |
 | flag-everything | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 |
 
-Hard mode (`configs/eval_hard.json`): the same reconcile script drops to F1 0.611, oracle stays 1.0.
+Hard mode (`configs/eval_hard.json`): the same reconcile script drops to F1 0.752, oracle stays 1.0.
 Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs/DESIGN.md`](docs/DESIGN.md) §9.
 ## What the check does
 

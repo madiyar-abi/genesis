@@ -9,11 +9,11 @@
       "evidence_sets": [
         [
           "D-07f508",
-          "GL-005586"
+          "GL-004660"
         ],
         [
           "D-07f508",
-          "GL-005587"
+          "GL-004661"
         ]
       ],
       "expected_amount_minor": 391800,
@@ -23,57 +23,56 @@
     },
     {
       "affected_ids": [
-        "SI-2025-903663"
+        "SI-2025-401955"
       ],
       "currency": "GBP",
       "evidence_sets": [
         [
-          "D-069401",
-          "GL-005603"
+          "D-0a2ba9",
+          "GL-004606"
         ],
         [
-          "D-069401",
-          "GL-005602"
+          "D-0a2ba9",
+          "GL-004607"
         ]
       ],
-      "expected_amount_minor": 1158479,
+      "expected_amount_minor": 1586706,
       "issue_id": "ISS-2",
       "scenario": "single",
       "type": "period_cutoff"
     },
     {
       "affected_ids": [
-        "RCPT0518393",
-        "SI-2025-685342"
+        "RCPT0013532",
+        "SI-2025-754411"
       ],
       "currency": "GBP",
       "evidence_sets": [
         [
-          "2025-08-16:CHF:GBP",
-          "D-03f95a",
-          "D-0c386b",
-          "GL-005550"
+          "D-03786d",
+          "D-0e7f2e",
+          "GL-004574"
         ]
       ],
-      "expected_amount_minor": 226436,
+      "expected_amount_minor": 2075000,
       "issue_id": "ISS-3",
       "scenario": "single",
       "type": "payment_allocation"
     },
     {
       "affected_ids": [
-        "RCPT0952238",
-        "SI-2025-926590"
+        "RCPT0550241",
+        "SI-2025-765158"
       ],
       "currency": "GBP",
       "evidence_sets": [
         [
-          "D-05b101",
-          "D-06c3f2",
-          "GL-005451"
+          "D-084422",
+          "D-0e3b0c",
+          "GL-004293"
         ]
       ],
-      "expected_amount_minor": 295302,
+      "expected_amount_minor": 57604,
       "issue_id": "ISS-4",
       "scenario": "single",
       "type": "payment_allocation"

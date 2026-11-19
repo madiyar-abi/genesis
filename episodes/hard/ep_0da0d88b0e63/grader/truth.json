@@ -9,11 +9,11 @@
       "evidence_sets": [
         [
           "DOC0836067",
-          "R4586"
+          "R4514"
         ],
         [
           "DOC0836067",
-          "R4585"
+          "R4513"
         ]
       ],
       "expected_amount_minor": 1590600,
@@ -23,42 +23,42 @@
     },
     {
       "affected_ids": [
-        "2609-525763"
+        "2609-792565"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "DOC0691331",
-          "R4622"
+          "DOC0511545",
+          "R4558"
         ],
         [
-          "DOC0691331",
-          "R4621"
+          "DOC0511545",
+          "R4557"
         ]
       ],
-      "expected_amount_minor": 858300,
+      "expected_amount_minor": 179100,
       "issue_id": "ISS-2",
       "scenario": "single",
       "type": "period_cutoff"
     },
     {
       "affected_ids": [
-        "2609-708333"
+        "2609-913431"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "2026-09-01:JPY:EUR",
-          "DOC0456184",
-          "R3299"
+          "2026-09-28:CHF:EUR",
+          "DOC0714433",
+          "R4485"
         ],
         [
-          "2026-09-01:JPY:EUR",
-          "DOC0456184",
-          "R3298"
+          "2026-09-28:CHF:EUR",
+          "DOC0714433",
+          "R4486"
         ]
       ],
-      "expected_amount_minor": 4111,
+      "expected_amount_minor": 119,
       "issue_id": "ISS-3",
       "scenario": "single",
       "type": "fx_error"

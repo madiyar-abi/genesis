@@ -46,7 +46,7 @@ Workers: touch ONLY the files listed for your task.
 - [x] P2 (lead) Paired checks for hard mode inside `auditenv.check` (seed replay + transform keeps oracle reward,
   hard config); confirm transform shuffles FX (it does) — files: auditenv/check.py, tests/ — accept: check prints the
   hard paired gate and exits 0
-- [ ] D4 (lead) Shortcut miner: new `scripts/shortcut_miner.py` — for each truth issue type, single-column predictors
+- [x] D4 (lead) Shortcut miner: new `scripts/shortcut_miner.py` — for each truth issue type, single-column predictors
   (hour, weekday, id format/suffix, amount pattern, row position, description tokens) on 1 000 seeds; report max
   precision; fix any leak > 0.5 in the generator (re-export) — files: scripts/shortcut_miner.py, generator/inject
   if needed — accept: miner reports no column > 0.5 (or documented why acceptable)

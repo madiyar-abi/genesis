@@ -35,30 +35,30 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "USD",
-              "debit_minor": 898262,
+              "debit_minor": 2974447,
               "entity_id": "CUST13201",
-              "invoice_id": "INV-618956",
+              "invoice_id": "INV-202997",
               "payment_id": null,
-              "row_id": "R4330",
-              "timestamp": "2026-09-29T13:55:00-03:00"
+              "row_id": "R5901",
+              "timestamp": "2026-09-30T17:35:00-03:00"
             },
             {
               "account": "4000",
-              "credit_minor": 898262,
+              "credit_minor": 2974447,
               "currency": "USD",
               "debit_minor": 0,
               "entity_id": "CUST13201",
-              "invoice_id": "INV-618956",
+              "invoice_id": "INV-202997",
               "payment_id": null,
-              "row_id": "R4329",
-              "timestamp": "2026-09-29T13:55:00-03:00"
+              "row_id": "R5900",
+              "timestamp": "2026-09-30T17:35:00-03:00"
             }
           ],
           "before": null,
-          "journal": "inv:INV-618956"
+          "journal": "inv:INV-202997"
         }
       ],
-      "description": "invoice INV-618956 issued 2026-10-01 (outside the period) booked on 2026-09-29",
+      "description": "invoice INV-202997 issued 2026-10-02 (outside the period) booked on 2026-09-30",
       "documents_added": [],
       "issue_id": "ISS-1",
       "scenario": "I2",
@@ -66,7 +66,7 @@
     },
     {
       "changes": [],
-      "description": "invoice INV-618956 converted with the 2026-09-29 rate instead of 2026-10-01",
+      "description": "invoice INV-202997 converted with the 2026-09-30 rate instead of 2026-10-02",
       "documents_added": [],
       "issue_id": "ISS-2",
       "scenario": "I2",
@@ -80,23 +80,23 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "USD",
-              "debit_minor": 847432,
-              "entity_id": "CUST35241",
-              "invoice_id": "INV-770076",
+              "debit_minor": 1479262,
+              "entity_id": "CUST99528",
+              "invoice_id": "INV-425977",
               "payment_id": null,
-              "row_id": "R4138",
-              "timestamp": "2026-09-25T11:34:00-03:00"
+              "row_id": "R4906",
+              "timestamp": "2026-09-01T21:10:00-03:00"
             },
             {
               "account": "4000",
-              "credit_minor": 847432,
+              "credit_minor": 1479262,
               "currency": "USD",
               "debit_minor": 0,
-              "entity_id": "CUST35241",
-              "invoice_id": "INV-770076",
+              "entity_id": "CUST99528",
+              "invoice_id": "INV-425977",
               "payment_id": null,
-              "row_id": "R4139",
-              "timestamp": "2026-09-25T11:34:00-03:00"
+              "row_id": "R4905",
+              "timestamp": "2026-09-01T21:10:00-03:00"
             }
           ],
           "before": [
@@ -104,29 +104,29 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "USD",
-              "debit_minor": 857728,
-              "entity_id": "CUST35241",
-              "invoice_id": "INV-770076",
+              "debit_minor": 1473903,
+              "entity_id": "CUST99528",
+              "invoice_id": "INV-425977",
               "payment_id": null,
-              "row_id": "R4138",
-              "timestamp": "2026-09-25T11:34:00-03:00"
+              "row_id": "R4906",
+              "timestamp": "2026-09-01T21:10:00-03:00"
             },
             {
               "account": "4000",
-              "credit_minor": 857728,
+              "credit_minor": 1473903,
               "currency": "USD",
               "debit_minor": 0,
-              "entity_id": "CUST35241",
-              "invoice_id": "INV-770076",
+              "entity_id": "CUST99528",
+              "invoice_id": "INV-425977",
               "payment_id": null,
-              "row_id": "R4139",
-              "timestamp": "2026-09-25T11:34:00-03:00"
+              "row_id": "R4905",
+              "timestamp": "2026-09-01T21:10:00-03:00"
             }
           ],
-          "journal": "inv:INV-770076"
+          "journal": "inv:INV-425977"
         }
       ],
-      "description": "invoice INV-770076 converted with the 2026-10-02 rate instead of 2026-09-25",
+      "description": "invoice INV-425977 converted with the 2026-09-02 rate instead of 2026-09-01",
       "documents_added": [],
       "issue_id": "ISS-3",
       "scenario": "single",

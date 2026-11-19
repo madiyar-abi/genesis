@@ -3,81 +3,81 @@
   "issues": [
     {
       "affected_ids": [
-        "F0601647",
-        "F0655595"
+        "F0084974",
+        "F0170398"
       ],
       "currency": "GBP",
       "evidence_sets": [
         [
-          "9b7cb182",
-          "GL-005135",
-          "GL-005194",
-          "b1a4e051"
+          "2940da3f",
+          "5a334d9f",
+          "GL-001818",
+          "GL-001907"
         ],
         [
-          "9b7cb182",
-          "GL-005135",
-          "GL-005195",
-          "b1a4e051"
+          "2940da3f",
+          "5a334d9f",
+          "GL-001818",
+          "GL-001908"
         ],
         [
-          "9b7cb182",
-          "GL-005134",
-          "GL-005194",
-          "b1a4e051"
+          "2940da3f",
+          "5a334d9f",
+          "GL-001817",
+          "GL-001907"
         ],
         [
-          "9b7cb182",
-          "GL-005134",
-          "GL-005195",
-          "b1a4e051"
+          "2940da3f",
+          "5a334d9f",
+          "GL-001817",
+          "GL-001908"
         ]
       ],
-      "expected_amount_minor": 365383,
+      "expected_amount_minor": 517210,
       "issue_id": "ISS-1",
       "scenario": "single",
       "type": "duplicate_invoice"
     },
     {
       "affected_ids": [
-        "F0013836"
+        "F0601647"
       ],
       "currency": "GBP",
       "evidence_sets": [
         [
-          "2026-09-04:CHF:GBP",
-          "GL-005095",
-          "ff590c17"
+          "2026-09-05:CHF:GBP",
+          "GL-001755",
+          "b1a4e051"
         ],
         [
-          "2026-09-04:CHF:GBP",
-          "GL-005094",
-          "ff590c17"
+          "2026-09-05:CHF:GBP",
+          "GL-001756",
+          "b1a4e051"
         ]
       ],
-      "expected_amount_minor": 15708,
+      "expected_amount_minor": 1359,
       "issue_id": "ISS-2",
       "scenario": "single",
       "type": "fx_error"
     },
     {
       "affected_ids": [
-        "F0265813"
+        "F0083477"
       ],
       "currency": "GBP",
       "evidence_sets": [
         [
-          "2026-09-05:CHF:GBP",
-          "GL-005127",
-          "de245a4b"
+          "2026-09-01:CHF:GBP",
+          "7a7b371a",
+          "GL-001656"
         ],
         [
-          "2026-09-05:CHF:GBP",
-          "GL-005126",
-          "de245a4b"
+          "2026-09-01:CHF:GBP",
+          "7a7b371a",
+          "GL-001657"
         ]
       ],
-      "expected_amount_minor": 1644,
+      "expected_amount_minor": 591,
       "issue_id": "ISS-3",
       "scenario": "single",
       "type": "fx_error"

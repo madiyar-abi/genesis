@@ -31,7 +31,8 @@ message says a Google Doc — follow the latest, re-check the form before submit
 ## Status
 **Round 2 (agent polish run) in progress on `night/2026-11-19-r2`: goals in `night/ROUND2.md`, tasks in `night/TASKS.md`.**
 Round-2 done so far: P2 (check now also runs 20 paired checks on hard episodes with `reconcile_hard`);
-E4 (`scripts/chart.py` → `docs/baselines.svg`, the results-slide chart); H2 (step-budget margin table in DESIGN §9: max 58/100).
+E4 (`scripts/chart.py` → `docs/baselines.svg`, the results-slide chart); H2 (step-budget margin table in DESIGN §9: max 57/100);
+D2, R3, E2, E3a/b, C2, C3, R2, P1 (see night/TASKS.md); D4 fixed a hard-mode leak (re-typed text marked duplicate copies) — hard episodes, hard trajectories and golden hashes regenerated; default episodes unchanged.
 
 The official local check passed all 256 tests and all evaluation gates on Python 3.11.18. The final 0–999 sweep ran 3,000 episodes with zero problems. All 120 existing public train/dev files matched main byte for byte after the evidence fix.
 
@@ -63,7 +64,7 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 - Data: `configs/{train,dev,eval_example}.json`, `episodes/{train,dev,hard}` (10+10+20 exported),
   `trajectories/train_*.jsonl`.
 - Docs: `README.md`, `docs/CONTRACT.md`, `docs/DESIGN.md` (with measured results), `docs/DEMO.md`, `docs/PITCH.md`.
-- Hard mode (`difficulty: "hard"`, `configs/eval_hard.json`, `reconcile_hard`): reconcile F1 1.0 → 0.611, oracle 1.0.
+- Hard mode (`difficulty: "hard"`, `configs/eval_hard.json`, `reconcile_hard`): reconcile F1 1.0 → 0.752, oracle 1.0.
 - Jury review (`REVIEW.md`): self-sufficient `payment_allocation` evidence (episodes re-exported), `tests/test_jury.py`
   (jury checklist as 33 tests), `auditenv.fuzz` (seed sweep + `--stress`), CI with Docker, verify totals, docs pass.
 

@@ -34,30 +34,30 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "KZT",
-              "debit_minor": 1324310944,
-              "entity_id": "C-3811",
-              "invoice_id": "SI-2026-269176",
+              "debit_minor": 1242772500,
+              "entity_id": "C-4646",
+              "invoice_id": "SI-2026-084278",
               "payment_id": null,
-              "row_id": "L03193",
-              "timestamp": "2026-01-01T16:44:00+05:30"
+              "row_id": "L03025",
+              "timestamp": "2026-01-31T12:35:00+05:30"
             },
             {
               "account": "4000",
-              "credit_minor": 1324310944,
+              "credit_minor": 1242772500,
               "currency": "KZT",
               "debit_minor": 0,
-              "entity_id": "C-3811",
-              "invoice_id": "SI-2026-269176",
+              "entity_id": "C-4646",
+              "invoice_id": "SI-2026-084278",
               "payment_id": null,
-              "row_id": "L03192",
-              "timestamp": "2026-01-01T16:44:00+05:30"
+              "row_id": "L03024",
+              "timestamp": "2026-01-31T12:35:00+05:30"
             }
           ],
           "before": null,
-          "journal": "inv:SI-2026-269176"
+          "journal": "inv:SI-2026-084278"
         }
       ],
-      "description": "invoice SI-2026-269176 issued 2025-12-22 (outside the period) booked on 2026-01-01",
+      "description": "invoice SI-2026-084278 issued 2026-02-05 (outside the period) booked on 2026-01-31",
       "documents_added": [],
       "issue_id": "ISS-1",
       "scenario": "single",
@@ -71,32 +71,32 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "KZT",
-              "debit_minor": 361278100,
-              "entity_id": "C-1336",
-              "invoice_id": "SI-2026-888717",
+              "debit_minor": 462570000,
+              "entity_id": "C-5471",
+              "invoice_id": "SI-2026-001687",
               "payment_id": null,
-              "row_id": "L03754",
-              "timestamp": "2026-01-16T20:39:00+05:30"
+              "row_id": "L02682",
+              "timestamp": "2026-01-23T09:44:00+05:30"
             },
             {
               "account": "4000",
-              "credit_minor": 361278100,
+              "credit_minor": 462570000,
               "currency": "KZT",
               "debit_minor": 0,
-              "entity_id": "C-1336",
-              "invoice_id": "SI-2026-888717",
+              "entity_id": "C-5471",
+              "invoice_id": "SI-2026-001687",
               "payment_id": null,
-              "row_id": "L03753",
-              "timestamp": "2026-01-16T20:39:00+05:30"
+              "row_id": "L02683",
+              "timestamp": "2026-01-23T09:44:00+05:30"
             }
           ],
           "before": null,
-          "journal": "inv:SI-2026-888717"
+          "journal": "inv:SI-2026-001687"
         }
       ],
-      "description": "invoice SI-2026-815500 entered a second time as SI-2026-888717 and booked again",
+      "description": "invoice SI-2026-326182 entered a second time as SI-2026-001687 and booked again",
       "documents_added": [
-        "D-0b8d85"
+        "D-00d6ba"
       ],
       "issue_id": "ISS-2",
       "scenario": "single",

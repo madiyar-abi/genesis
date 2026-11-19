@@ -72,3 +72,16 @@
 ## 2026-11-19 21:37 lead
 - C2/P1/E2 marked done after review. E2 timing table pasted into DESIGN §9 (scripts/bench.py output).
 - Committed scripts/shortcut_miner.py + test (D4 still open: leak fixes next).
+
+## 2026-11-19 21:42 lead
+- D4 done. Hard-mode leak fixed in the generator: State.retype (moved from inject._retype) now also keys in by hand
+  12 % of ordinary invoices and 50 % of credit-note re-issues (hard mode only; default RNG path untouched — the 60
+  default golden hashes and episodes/train|dev are byte-identical). Miner hard: duplicate max precision 1.000 → 0.467.
+  Re-exported episodes/hard (verify 20/20), regenerated trajectories/train_hard_*, golden hashes, chart.
+- Effect: plain reconcile on hard F1 0.611 → 0.752 (gate ≤ 0.8 still passes) because half the re-issue traps are
+  now re-typed and the exact-match script skips them. Kept: re-typing re-issues is needed, otherwise
+  "re-typed + has a twin ⇒ duplicate" stays a 2-feature shortcut. Prose numbers updated in README/DESIGN/PITCH.
+- Decision (not asking): default-mode miner signals (entity+currency+total pair 0.996, last-day 2900/7900 → fx 0.70,
+  large 2900 → allocation 0.75–0.78) documented in DESIGN §10 instead of fixed — fixing them regenerates all default
+  data and doc numbers for little gain (each hint names a record, the amount still needs reconciling).
+- tests/test_hardening seed-7 test now derives row ids from truth (hard ids moved), default ids still asserted.

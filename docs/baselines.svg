@@ -32,18 +32,18 @@
 <text x="724.0" y="140.0" font-size="11" fill="#57606a" text-anchor="start">1.000</text>
 <text x="138.0" y="177.0" font-size="13" fill="#1f2328" text-anchor="end">reconcile_hard</text>
 <text x="466.0" y="169.0" font-size="11" fill="#8c959f" text-anchor="start">not run on dev</text>
-<path class="bar" data-split="hard" data-policy="reconcile_hard" d="M460.0,174.0H692.5Q696.5,174.0 696.5,178.0V185.0Q696.5,189.0 692.5,189.0H460.0Z" fill="#c98500"><title>reconcile_hard, hard: 0.917</title></path>
-<text x="702.5" y="186.0" font-size="11" fill="#57606a" text-anchor="start">0.917</text>
+<path class="bar" data-split="hard" data-policy="reconcile_hard" d="M460.0,174.0H692.2Q696.2,174.0 696.2,178.0V185.0Q696.2,189.0 692.2,189.0H460.0Z" fill="#c98500"><title>reconcile_hard, hard: 0.916</title></path>
+<text x="702.2" y="186.0" font-size="11" fill="#57606a" text-anchor="start">0.916</text>
 <text x="138.0" y="223.0" font-size="13" fill="#1f2328" text-anchor="end">reconcile</text>
 <path class="bar" data-split="dev" data-policy="reconcile" d="M460.0,203.0H702.9Q706.9,203.0 706.9,207.0V214.0Q706.9,218.0 702.9,218.0H460.0Z" fill="#3e6fb0"><title>reconcile, dev: 0.957</title></path>
 <text x="712.9" y="215.0" font-size="11" fill="#57606a" text-anchor="start">0.957</text>
-<path class="bar" data-split="hard" data-policy="reconcile" d="M460.0,220.0H439.5Q435.5,220.0 435.5,224.0V231.0Q435.5,235.0 439.5,235.0H460.0Z" fill="#c98500"><title>reconcile, hard: −0.095</title></path>
-<text x="429.5" y="232.0" font-size="11" fill="#57606a" text-anchor="end">−0.095</text>
+<path class="bar" data-split="hard" data-policy="reconcile" d="M460.0,220.0H530.2Q534.2,220.0 534.2,224.0V231.0Q534.2,235.0 530.2,235.0H460.0Z" fill="#c98500"><title>reconcile, hard: 0.288</title></path>
+<text x="540.2" y="232.0" font-size="11" fill="#57606a" text-anchor="start">0.288</text>
 <text x="138.0" y="269.0" font-size="13" fill="#1f2328" text-anchor="end">naive_reconcile</text>
 <path class="bar" data-split="dev" data-policy="naive_reconcile" d="M460.0,249.0H333.4Q329.4,249.0 329.4,253.0V260.0Q329.4,264.0 333.4,264.0H460.0Z" fill="#3e6fb0"><title>naive_reconcile, dev: −0.506</title></path>
 <text x="323.4" y="261.0" font-size="11" fill="#57606a" text-anchor="end">−0.506</text>
-<path class="bar" data-split="hard" data-policy="naive_reconcile" d="M460.0,266.0H271.3Q267.3,266.0 267.3,270.0V277.0Q267.3,281.0 271.3,281.0H460.0Z" fill="#c98500"><title>naive_reconcile, hard: −0.747</title></path>
-<text x="261.3" y="278.0" font-size="11" fill="#57606a" text-anchor="end">−0.747</text>
+<path class="bar" data-split="hard" data-policy="naive_reconcile" d="M460.0,266.0H280.7Q276.7,266.0 276.7,270.0V277.0Q276.7,281.0 280.7,281.0H460.0Z" fill="#c98500"><title>naive_reconcile, hard: −0.711</title></path>
+<text x="270.7" y="278.0" font-size="11" fill="#57606a" text-anchor="end">−0.711</text>
 <text x="138.0" y="315.0" font-size="13" fill="#1f2328" text-anchor="end">random</text>
 <path class="bar" data-split="dev" data-policy="random" d="M460.0,295.0H255.8Q251.8,295.0 251.8,299.0V306.0Q251.8,310.0 255.8,310.0H460.0Z" fill="#3e6fb0"><title>random, dev: −0.807</title></path>
 <text x="245.8" y="307.0" font-size="11" fill="#57606a" text-anchor="end">−0.807</text>

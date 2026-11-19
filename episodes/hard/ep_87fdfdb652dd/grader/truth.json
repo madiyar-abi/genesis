@@ -3,113 +3,113 @@
   "issues": [
     {
       "affected_ids": [
-        "INV-094699"
+        "INV-212303"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "GL-003066",
-          "cf8d84a6"
+          "GL-003824",
+          "d1eec2de"
         ],
         [
-          "GL-003065",
-          "cf8d84a6"
+          "GL-003825",
+          "d1eec2de"
         ]
       ],
-      "expected_amount_minor": 799124,
+      "expected_amount_minor": 824100,
       "issue_id": "ISS-1",
       "scenario": "single",
       "type": "period_cutoff"
     },
     {
       "affected_ids": [
-        "INV-840151",
-        "INV-927532"
+        "INV-437541",
+        "INV-550978"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "048ff6cc",
-          "GL-002637",
-          "GL-002694",
-          "ffa73a07"
+          "2ed775d3",
+          "GL-003243",
+          "GL-003303",
+          "b3689814"
         ],
         [
-          "048ff6cc",
-          "GL-002637",
-          "GL-002695",
-          "ffa73a07"
+          "2ed775d3",
+          "GL-003243",
+          "GL-003302",
+          "b3689814"
         ],
         [
-          "048ff6cc",
-          "GL-002638",
-          "GL-002694",
-          "ffa73a07"
+          "2ed775d3",
+          "GL-003242",
+          "GL-003303",
+          "b3689814"
         ],
         [
-          "048ff6cc",
-          "GL-002638",
-          "GL-002695",
-          "ffa73a07"
+          "2ed775d3",
+          "GL-003242",
+          "GL-003302",
+          "b3689814"
         ]
       ],
-      "expected_amount_minor": 704800,
+      "expected_amount_minor": 1131700,
       "issue_id": "ISS-2",
       "scenario": "single",
       "type": "duplicate_invoice"
     },
     {
       "affected_ids": [
-        "INV-417418",
-        "INV-919656"
+        "INV-410491",
+        "INV-437149"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "753557a5",
-          "GL-002516",
-          "GL-002568",
-          "e7ec2241"
+          "15a28801",
+          "976c4b2a",
+          "GL-003014",
+          "GL-003016"
         ],
         [
-          "753557a5",
-          "GL-002515",
-          "GL-002568",
-          "e7ec2241"
+          "15a28801",
+          "976c4b2a",
+          "GL-003014",
+          "GL-003017"
         ],
         [
-          "753557a5",
-          "GL-002516",
-          "GL-002569",
-          "e7ec2241"
+          "15a28801",
+          "976c4b2a",
+          "GL-003015",
+          "GL-003016"
         ],
         [
-          "753557a5",
-          "GL-002515",
-          "GL-002569",
-          "e7ec2241"
+          "15a28801",
+          "976c4b2a",
+          "GL-003015",
+          "GL-003017"
         ]
       ],
-      "expected_amount_minor": 121285,
+      "expected_amount_minor": 484436,
       "issue_id": "ISS-3",
       "scenario": "single",
       "type": "duplicate_invoice"
     },
     {
       "affected_ids": [
-        "BNK-869911",
-        "INV-680404"
+        "BNK-316265",
+        "INV-668600"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "2025-08-31:JPY:EUR",
-          "GL-003067",
-          "b3c21f9e",
-          "d89cce05"
+          "2025-10-05:JPY:EUR",
+          "GL-003344",
+          "c069fd58",
+          "daaf90fb"
         ]
       ],
-      "expected_amount_minor": 892589,
+      "expected_amount_minor": 380989,
       "issue_id": "ISS-4",
       "scenario": "single",
       "type": "payment_allocation"

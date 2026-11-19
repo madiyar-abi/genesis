@@ -34,23 +34,23 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 937915,
-              "entity_id": "E5274",
-              "invoice_id": "F0849842",
+              "debit_minor": 737233,
+              "entity_id": "E9938",
+              "invoice_id": "F0637973",
               "payment_id": null,
-              "row_id": "L02965",
-              "timestamp": "2026-06-02T17:39:00+01:00"
+              "row_id": "L03560",
+              "timestamp": "2026-06-17T08:39:00+01:00"
             },
             {
               "account": "4000",
-              "credit_minor": 937915,
+              "credit_minor": 737233,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "E5274",
-              "invoice_id": "F0849842",
+              "entity_id": "E9938",
+              "invoice_id": "F0637973",
               "payment_id": null,
-              "row_id": "L02964",
-              "timestamp": "2026-06-02T17:39:00+01:00"
+              "row_id": "L03561",
+              "timestamp": "2026-06-17T08:39:00+01:00"
             }
           ],
           "before": [
@@ -58,29 +58,29 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 936767,
-              "entity_id": "E5274",
-              "invoice_id": "F0849842",
+              "debit_minor": 732675,
+              "entity_id": "E9938",
+              "invoice_id": "F0637973",
               "payment_id": null,
-              "row_id": "L02965",
-              "timestamp": "2026-06-02T17:39:00+01:00"
+              "row_id": "L03560",
+              "timestamp": "2026-06-17T08:39:00+01:00"
             },
             {
               "account": "4000",
-              "credit_minor": 936767,
+              "credit_minor": 732675,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "E5274",
-              "invoice_id": "F0849842",
+              "entity_id": "E9938",
+              "invoice_id": "F0637973",
               "payment_id": null,
-              "row_id": "L02964",
-              "timestamp": "2026-06-02T17:39:00+01:00"
+              "row_id": "L03561",
+              "timestamp": "2026-06-17T08:39:00+01:00"
             }
           ],
-          "journal": "inv:F0849842"
+          "journal": "inv:F0637973"
         }
       ],
-      "description": "invoice F0849842 converted with the 2026-05-31 rate instead of 2026-06-01",
+      "description": "invoice F0637973 converted with the 2026-06-14 rate instead of 2026-06-17",
       "documents_added": [],
       "issue_id": "ISS-1",
       "scenario": "single",
@@ -94,23 +94,23 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 1483815,
-              "entity_id": "E3217",
-              "invoice_id": "F0681845",
+              "debit_minor": 607768,
+              "entity_id": "E3831",
+              "invoice_id": "F0091080",
               "payment_id": null,
-              "row_id": "L03902",
-              "timestamp": "2026-06-24T15:20:00+01:00"
+              "row_id": "L04159",
+              "timestamp": "2026-06-29T20:50:00+01:00"
             },
             {
               "account": "4000",
-              "credit_minor": 1483815,
+              "credit_minor": 607768,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "E3217",
-              "invoice_id": "F0681845",
+              "entity_id": "E3831",
+              "invoice_id": "F0091080",
               "payment_id": null,
-              "row_id": "L03901",
-              "timestamp": "2026-06-24T15:20:00+01:00"
+              "row_id": "L04160",
+              "timestamp": "2026-06-29T20:50:00+01:00"
             }
           ],
           "before": [
@@ -118,29 +118,29 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 1497309,
-              "entity_id": "E3217",
-              "invoice_id": "F0681845",
+              "debit_minor": 605475,
+              "entity_id": "E3831",
+              "invoice_id": "F0091080",
               "payment_id": null,
-              "row_id": "L03902",
-              "timestamp": "2026-06-24T15:20:00+01:00"
+              "row_id": "L04159",
+              "timestamp": "2026-06-29T20:50:00+01:00"
             },
             {
               "account": "4000",
-              "credit_minor": 1497309,
+              "credit_minor": 605475,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "E3217",
-              "invoice_id": "F0681845",
+              "entity_id": "E3831",
+              "invoice_id": "F0091080",
               "payment_id": null,
-              "row_id": "L03901",
-              "timestamp": "2026-06-24T15:20:00+01:00"
+              "row_id": "L04160",
+              "timestamp": "2026-06-29T20:50:00+01:00"
             }
           ],
-          "journal": "inv:F0681845"
+          "journal": "inv:F0091080"
         }
       ],
-      "description": "invoice F0681845 converted with the 2026-06-19 rate instead of 2026-06-24",
+      "description": "invoice F0091080 converted with the 2026-06-28 rate instead of 2026-06-29",
       "documents_added": [],
       "issue_id": "ISS-2",
       "scenario": "single",
@@ -154,45 +154,23 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 41606,
-              "entity_id": "E9695",
+              "debit_minor": 1783390,
+              "entity_id": "E3831",
               "invoice_id": null,
-              "payment_id": "RCPT0198436",
-              "row_id": "L03849",
-              "timestamp": "2026-06-23T10:01:00+01:00"
-            },
-            {
-              "account": "1200",
-              "credit_minor": 16694,
-              "currency": "EUR",
-              "debit_minor": 0,
-              "entity_id": "E9695",
-              "invoice_id": "F0372188",
-              "payment_id": "RCPT0198436",
-              "row_id": "L03848",
-              "timestamp": "2026-06-23T10:01:00+01:00"
+              "payment_id": "RCPT0339311",
+              "row_id": "L04114",
+              "timestamp": "2026-06-28T18:10:00+01:00"
             },
             {
               "account": "2900",
-              "credit_minor": 24593,
+              "credit_minor": 1783390,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "E9695",
+              "entity_id": "E3831",
               "invoice_id": null,
-              "payment_id": "RCPT0198436",
-              "row_id": "L03850",
-              "timestamp": "2026-06-23T10:01:00+01:00"
-            },
-            {
-              "account": "7900",
-              "credit_minor": 319,
-              "currency": "EUR",
-              "debit_minor": 0,
-              "entity_id": "E9695",
-              "invoice_id": null,
-              "payment_id": "RCPT0198436",
-              "row_id": "L03847",
-              "timestamp": "2026-06-23T10:01:00+01:00"
+              "payment_id": "RCPT0339311",
+              "row_id": "L04113",
+              "timestamp": "2026-06-28T18:10:00+01:00"
             }
           ],
           "before": [
@@ -200,40 +178,40 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 41606,
-              "entity_id": "E9695",
+              "debit_minor": 1783390,
+              "entity_id": "E3831",
               "invoice_id": null,
-              "payment_id": "RCPT0198436",
-              "row_id": "L03849",
-              "timestamp": "2026-06-23T10:01:00+01:00"
+              "payment_id": "RCPT0339311",
+              "row_id": "L04114",
+              "timestamp": "2026-06-28T18:10:00+01:00"
             },
             {
               "account": "1200",
-              "credit_minor": 40826,
+              "credit_minor": 1762188,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "E9695",
-              "invoice_id": "F0372188",
-              "payment_id": "RCPT0198436",
-              "row_id": "L03848",
-              "timestamp": "2026-06-23T10:01:00+01:00"
+              "entity_id": "E3831",
+              "invoice_id": "F0637103",
+              "payment_id": "RCPT0339311",
+              "row_id": "pre-132",
+              "timestamp": "2026-06-28T18:10:00+01:00"
             },
             {
               "account": "7900",
-              "credit_minor": 780,
+              "credit_minor": 21202,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "E9695",
+              "entity_id": "E3831",
               "invoice_id": null,
-              "payment_id": "RCPT0198436",
-              "row_id": "L03847",
-              "timestamp": "2026-06-23T10:01:00+01:00"
+              "payment_id": "RCPT0339311",
+              "row_id": "pre-133",
+              "timestamp": "2026-06-28T18:10:00+01:00"
             }
           ],
-          "journal": "pay:RCPT0198436"
+          "journal": "pay:RCPT0339311"
         }
       ],
-      "description": "payment RCPT0198436 allocated partially to F0372188; the rest went to unapplied cash",
+      "description": "payment RCPT0339311 allocated nothing to F0637103; the rest went to unapplied cash",
       "documents_added": [],
       "issue_id": "ISS-3",
       "scenario": "single",
@@ -247,23 +225,23 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 53000,
-              "entity_id": "E4051",
+              "debit_minor": 2729200,
+              "entity_id": "E3790",
               "invoice_id": null,
-              "payment_id": "RCPT0002523",
-              "row_id": "L03412",
-              "timestamp": "2026-06-13T22:07:00+01:00"
+              "payment_id": "RCPT0836507",
+              "row_id": "L03627",
+              "timestamp": "2026-06-18T16:21:00+01:00"
             },
             {
               "account": "2900",
-              "credit_minor": 53000,
+              "credit_minor": 2729200,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "E4051",
+              "entity_id": "E3790",
               "invoice_id": null,
-              "payment_id": "RCPT0002523",
-              "row_id": "L03413",
-              "timestamp": "2026-06-13T22:07:00+01:00"
+              "payment_id": "RCPT0836507",
+              "row_id": "L03626",
+              "timestamp": "2026-06-18T16:21:00+01:00"
             }
           ],
           "before": [
@@ -271,29 +249,29 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 53000,
-              "entity_id": "E4051",
+              "debit_minor": 2729200,
+              "entity_id": "E3790",
               "invoice_id": null,
-              "payment_id": "RCPT0002523",
-              "row_id": "L03412",
-              "timestamp": "2026-06-13T22:07:00+01:00"
+              "payment_id": "RCPT0836507",
+              "row_id": "L03627",
+              "timestamp": "2026-06-18T16:21:00+01:00"
             },
             {
               "account": "1200",
-              "credit_minor": 53000,
+              "credit_minor": 2729200,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "E4051",
-              "invoice_id": "F0866394",
-              "payment_id": "RCPT0002523",
-              "row_id": "pre-98",
-              "timestamp": "2026-06-13T22:07:00+01:00"
+              "entity_id": "E3790",
+              "invoice_id": "F0093487",
+              "payment_id": "RCPT0836507",
+              "row_id": "pre-113",
+              "timestamp": "2026-06-18T16:21:00+01:00"
             }
           ],
-          "journal": "pay:RCPT0002523"
+          "journal": "pay:RCPT0836507"
         }
       ],
-      "description": "payment RCPT0002523 allocated nothing to F0866394; the rest went to unapplied cash",
+      "description": "payment RCPT0836507 allocated nothing to F0093487; the rest went to unapplied cash",
       "documents_added": [],
       "issue_id": "ISS-4",
       "scenario": "single",

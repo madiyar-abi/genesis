@@ -3,42 +3,42 @@
   "issues": [
     {
       "affected_ids": [
-        "INV-495482"
+        "INV-488276"
       ],
       "currency": "KZT",
       "evidence_sets": [
         [
-          "DOC0750429",
-          "L02234"
+          "DOC0150234",
+          "L02841"
         ],
         [
-          "DOC0750429",
-          "L02237"
+          "DOC0150234",
+          "L02840"
         ]
       ],
-      "expected_amount_minor": 1831506678,
+      "expected_amount_minor": 182177179,
       "issue_id": "ISS-1",
       "scenario": "I2",
       "type": "period_cutoff"
     },
     {
       "affected_ids": [
-        "INV-495482"
+        "INV-488276"
       ],
       "currency": "KZT",
       "evidence_sets": [
         [
-          "2026-02-02:GBP:KZT",
-          "DOC0750429",
-          "L02234"
+          "2026-02-03:GBP:KZT",
+          "DOC0150234",
+          "L02841"
         ],
         [
-          "2026-02-02:GBP:KZT",
-          "DOC0750429",
-          "L02237"
+          "2026-02-03:GBP:KZT",
+          "DOC0150234",
+          "L02840"
         ]
       ],
-      "expected_amount_minor": 1388121,
+      "expected_amount_minor": 163406,
       "issue_id": "ISS-2",
       "scenario": "I2",
       "type": "fx_error"

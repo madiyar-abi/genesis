@@ -3,93 +3,93 @@
   "issues": [
     {
       "affected_ids": [
-        "INV-045702",
-        "INV-181390"
+        "INV-336577",
+        "INV-916384"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "DOC0130689",
-          "DOC0747987",
-          "L04701",
-          "L04710"
+          "DOC0133831",
+          "DOC0765266",
+          "L01663",
+          "L01729"
         ],
         [
-          "DOC0130689",
-          "DOC0747987",
-          "L04701",
-          "L04709"
+          "DOC0133831",
+          "DOC0765266",
+          "L01663",
+          "L01730"
         ],
         [
-          "DOC0130689",
-          "DOC0747987",
-          "L04702",
-          "L04710"
+          "DOC0133831",
+          "DOC0765266",
+          "L01662",
+          "L01729"
         ],
         [
-          "DOC0130689",
-          "DOC0747987",
-          "L04702",
-          "L04709"
+          "DOC0133831",
+          "DOC0765266",
+          "L01662",
+          "L01730"
         ]
       ],
-      "expected_amount_minor": 787437,
+      "expected_amount_minor": 663800,
       "issue_id": "ISS-1",
       "scenario": "single",
       "type": "duplicate_invoice"
     },
     {
       "affected_ids": [
-        "INV-588507",
-        "INV-605184"
+        "INV-350774",
+        "INV-917891"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "DOC0651376",
-          "DOC0758499",
-          "L04784",
-          "L04828"
+          "DOC0238552",
+          "DOC0804254",
+          "L01991",
+          "L02110"
         ],
         [
-          "DOC0651376",
-          "DOC0758499",
-          "L04784",
-          "L04827"
+          "DOC0238552",
+          "DOC0804254",
+          "L01991",
+          "L02109"
         ],
         [
-          "DOC0651376",
-          "DOC0758499",
-          "L04785",
-          "L04828"
+          "DOC0238552",
+          "DOC0804254",
+          "L01990",
+          "L02110"
         ],
         [
-          "DOC0651376",
-          "DOC0758499",
-          "L04785",
-          "L04827"
+          "DOC0238552",
+          "DOC0804254",
+          "L01990",
+          "L02109"
         ]
       ],
-      "expected_amount_minor": 1121400,
+      "expected_amount_minor": 273515,
       "issue_id": "ISS-2",
       "scenario": "single",
       "type": "duplicate_invoice"
     },
     {
       "affected_ids": [
-        "INV-933101",
-        "PAY-420648"
+        "INV-924062",
+        "PAY-090255"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "2025-05-16:USD:EUR",
-          "DOC0674315",
-          "DOC0690304",
-          "L05195"
+          "2025-04-22:JPY:EUR",
+          "DOC0120183",
+          "DOC0641678",
+          "L01623"
         ]
       ],
-      "expected_amount_minor": 53940,
+      "expected_amount_minor": 305828,
       "issue_id": "ISS-3",
       "scenario": "single",
       "type": "payment_allocation"
