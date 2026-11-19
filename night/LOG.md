@@ -4,3 +4,20 @@
 - 2026-11-20 00:11 lead — T5 reproduced both identity errors before the fix. Both regressions pass after checking the manifest episode ID and unique issue IDs. Full check passed with T8 also present.
 - 2026-11-20 00:11 lead — T8 reproduced seed 1 with an invoice debit substituted for the payment posting. Require a positive receivables credit on the affected payment and invoice. Ten focused tests and all official gates passed.
 - 2026-11-20 00:12 lead — T6 replayed all five prompts with the public key unset. The two findings on PAY-136430 differ by cause and amount. Added their amounts as recording cues. The six segments allow 160 seconds for 318 narration words.
+- 2026-11-20 00:14 deepseek (lead fallback) — T4 verified 100 default and 100 hard transformed heavy episodes against their public records, with zero discrepancies or evidence failures. Used public generation and the episode seed for each transform. Reproduce from the repo root:
+
+```sh
+env -u AUDITENV_SECRET uv run python - <<'PY'
+from auditenv.check import HEAVY
+from auditenv.generator import generate
+from auditenv.transform import transform
+from auditenv.verify import verify_episode
+
+for mode in ("default", "hard"):
+    for seed in range(100):
+        episode = generate(seed, {**HEAVY, "difficulty": mode})
+        problems = verify_episode(transform(episode, seed))
+        assert not problems, (mode, seed, problems)
+    print(mode, "100/100")
+PY
+```
