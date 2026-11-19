@@ -1,0 +1,19 @@
+{
+  "company": {
+    "bank_offset": "+09:00",
+    "base_currency": "USD",
+    "entities": 16,
+    "foreign_currencies": [
+      "CHF",
+      "EUR",
+      "KZT"
+    ],
+    "timezone": "+01:00"
+  },
+  "config": {
+    "errors": {}
+  },
+  "generator_version": "1.0.0",
+  "injections": [],
+  "seed": 1001
+}

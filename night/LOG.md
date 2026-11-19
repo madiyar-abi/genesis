@@ -116,3 +116,8 @@
 - auditenv/demo.py (narrated 5-section demo) + docs/DEMO.md (T21 draft) + docs/PITCH.md (T22 draft). Numbers from check/analyze output.
 - Added T27 (lead) trajectories after T16.
 - Next: wait for gemini T16 (export/configs), then refresh numbers in DESIGN/PITCH/DEMO, final SPEC pass.
+## 2026-11-19 14:00 — gemini
+- T16 done: auditenv/export.py, configs/train.json (1000–1009), configs/dev.json (2000–2009), configs/eval_example.json (9000–9019, 5 clean, 5 interacting, 10 mixed), episodes/train, episodes/dev, tests/test_export.py.
+- Export format: public/{manifest.json,ledger.csv,invoices.jsonl,payments.jsonl,fx.csv,policy.json}, grader/{truth.json,provenance.json}, index.json.
+- Verified: export twice is byte-identical; all 40 episodes pass independent verifier; tests/test_export passes; auditenv.check passes all gates.
+- All assigned gemini tasks (T3, T12, T16) complete.
