@@ -7,4 +7,4 @@
 - [ ] T5 (deepseek) Independently verify all 80 golden hashes and reward mutation checks on this branch — files: night/LOG.md — accept: both scripts pass and record counts.
 - [x] T8 (lead) Verify quantity times unit price on each invoice line — files: auditenv/verify.py (Books), tests/test_verify.py — accept: seed 7 clean invoice with doubled quantity is rejected.
 - [x] T6 (lead) Rehearse the demo and verify timing cues and output — files: docs/DEMO.md — accept: five sections show scripted seed results.
-- [ ] T7 (lead) Check pitch against current metrics and update inaccurate claims — files: docs/PITCH.md — accept: slide narrative and measured claims verified.
+- [x] T7 (lead) Check pitch against current metrics and update inaccurate claims — files: docs/PITCH.md — accept: slide narrative and measured claims verified.
