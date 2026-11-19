@@ -65,6 +65,12 @@ class StrictInputTests(unittest.TestCase):
         env.reset(1, None)
         env.reset(1, {"errors": {}, "interacting": {}})
 
+    def test_reset_rejects_counts_in_the_wrong_group(self):
+        env = AuditEnv()
+        for config in ({"errors": {"I1": 1}}, {"interacting": {"duplicate_invoice": 1}}):
+            with self.subTest(config=config), self.assertRaises(ValueError):
+                env.reset(1, config)
+
     def test_server_does_not_coerce_seeds(self):
         inp = io.StringIO(json.dumps({"cmd": "reset", "seed": 1.5}) + "\n" + json.dumps({"cmd": "reset", "seed": 1}) + "\n")
         out = io.StringIO()
