@@ -190,3 +190,10 @@
   edge-case table, seed sweep + reproducible stress (`auditenv.fuzz --stress`), naive numbers after the evidence fix.
 - PITCH: 10 slides in the requested order. DEMO: 15 s check, hard table, optional test_jury step; `demo --pause` and `--seed 2005` run.
 - tests: EdgeCaseDataTests (JPY, refunds, unidentified, multi-invoice, split payments, midnight documents). 231 tests, check PASSED 14.9 s.
+
+## 2026-11-19 17:05 — hinabaina + Claude (jury-review, phase 6: final check)
+1. check: ALL CHECKS PASSED, 231 tests, 15.1 s. 2. unittest: 231 OK. 3. verify --seeds 0-199: 600/600; --dir train/dev: 10/10 + 10/10.
+4. demo: exit 0 (also --pause, --seed 2005). 5. Docker: CI job `docker` (build + run --network none) green on every push of this branch.
+6. Docs re-read against check/analyze/fuzz output (README, DESIGN, PITCH, DEMO, CONTRACT, HANDOFF). 7. No TODO/FIXME/HACK.
+8. `print` only in CLI entry points (check, run, verify, analyze, export, demo, fuzz). 9. HANDOFF updated.
+Left for humans: merge the PR stack into main, make the repo public (owner), record the video, build slides (Team slide), Google Doc + submit.
