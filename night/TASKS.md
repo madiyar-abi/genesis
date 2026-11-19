@@ -70,7 +70,7 @@ Workers: touch ONLY the files listed for your task.
 - [ ] R3 (lead) Sensitivity table: baseline ranking under step cost 0.001/0.002/0.005 and tolerance 0/0.1 %/1 %
   (grader-side param in analysis only, shared reward unchanged) — files: auditenv/analyze.py or scripts/, DESIGN §6 —
   accept: table in DESIGN, ranking stated
-- [ ] H2 (lead) Step-budget margin with 100 invoices + 12 issues (+ hard) via `fuzz --stress`; keep max ≤ 80 —
+- [x] H2 (lead) Step-budget margin with 100 invoices + 12 issues (+ hard) via `fuzz --stress`; keep max ≤ 80 —
   files: DESIGN — accept: numbers in DESIGN from the stress output
 - [ ] E3b (lead) Hard-mode trajectories `trajectories/train_hard_*.jsonl`, CI badge in README — files: README.md,
   trajectories/, tests — accept: test_trajectory_files green
