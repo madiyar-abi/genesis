@@ -182,6 +182,9 @@ def _structure(ep: dict) -> list[str]:
     for name in ("ledger", "invoices", "payments", "fx"):
         if m["counts"][name] != len(t[name]):
             problems.append(f"manifest count mismatch for {name}")
+    actual_docs = len(t["invoices"]) + len(t["payments"])
+    if m["counts"].get("documents") != actual_docs:
+        problems.append("manifest count mismatch for documents")
     ids = [r["row_id"] for r in t["ledger"]] + [d["doc_id"] for d in t["invoices"] + t["payments"]]
     if len(ids) != len(set(ids)):
         problems.append("duplicate row_id/doc_id")
@@ -193,7 +196,7 @@ def _structure(ep: dict) -> list[str]:
         if r["currency"] != m["base_currency"] or type(d) is not int or type(c) is not int or (d > 0) == (c > 0) \
                 or d < 0 or c < 0:
             problems.append(f"bad ledger row {r['row_id']}")
-    if not 200 <= len(t["ledger"]) <= 2000 or not 20 <= m["counts"]["documents"] <= 200:
+    if not 200 <= len(t["ledger"]) <= 2000 or not 20 <= actual_docs <= 200:
         problems.append("episode size outside 200-2000 rows / 20-200 documents")
     return problems
 

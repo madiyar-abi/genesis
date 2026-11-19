@@ -1,6 +1,6 @@
 # Round 4
 
-- [ ] T1 (gemini1) Reject incorrect combined document counts and apply size checks to actual records in _structure — files: auditenv/verify.py (only _structure), tests/test_manifest_counts.py — accept: seed 7 with documents=20 fails and original passes.
+- [x] T1 (gemini1) Reject incorrect combined document counts and apply size checks to actual records in _structure — files: auditenv/verify.py (only _structure), tests/test_manifest_counts.py — accept: seed 7 with documents=20 fails and original passes.
 - [x] T2 (lead) Make verify --dir reject empty and incomplete indexed splits and report unreadable episode files — files: auditenv/verify.py (CLI only), tests/test_verify_dir.py — accept: invalid splits exit nonzero and train/dev/hard pass.
 - [x] T3 (gemini2) Check all three public exports against fresh output recursively and record reproduction commands in the log — files: night/LOG.md — accept: 3 identical directories.
 - [ ] T4 (gemini3) Check committed trajectories against fresh runner output, document any timing fields and reproducibility evidence — files: night/LOG.md — accept: compare every JSONL step on each split and record results.
