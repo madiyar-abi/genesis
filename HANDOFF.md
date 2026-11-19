@@ -18,8 +18,8 @@ Every material must be viewable by anyone with the link. (The earlier
 `submit.exe` form asked for a Google Drive folder; the organizers' latest
 message says a Google Doc — follow the latest, re-check the form before submitting.)
 
-- [ ] Working end-to-end demo flow
-- [ ] `README.md`: what it is, how to run — the jury opens the repo
+- [x] Working end-to-end demo flow (`uv run python -m auditenv.demo`)
+- [x] `README.md`: what it is, how to run — the jury opens the repo
 - [ ] GitHub repo viewable by the jury — **it's private now**: make it public
       (or otherwise give access) before submitting
 - [ ] Demo video: short demo + explanation of the solution — script: `docs/DEMO.md`
@@ -29,28 +29,33 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] Doc link submitted in the personal account on the site
 
 ## Status
-Core environment works end-to-end and passes the single check command
-(`uv run python -m auditenv.check` → ALL CHECKS PASSED, ~6 s). Night run (lead Claude +
-workers gemini, codex) continues on `night/2026-11-19`; task list: `night/TASKS.md`.
+Environment is feature-complete for the case and passes the single check command
+(`uv run python -m auditenv.check` → ALL CHECKS PASSED, ~7 s, 175 tests). Jury materials are drafted
+(`docs/DESIGN.md`, `docs/DEMO.md`, `docs/PITCH.md`). Night run continues on `night/2026-11-19`
+with hardening (review, fuzzing, on-disk episode verification); task list: `night/TASKS.md`.
 
 ## Done
 - Generator (`auditenv/generator.py`, `inject.py`): hidden company history → correct double-entry
-  ledger → 4 error types (duplicate_invoice, payment_allocation, fx_error, period_cutoff) +
-  2 interacting scenarios (I1, I2) + clean companies + distractors; truth + provenance.
-- Env (`auditenv/env.py`): JSON `reset/step`, 5 tools, 50-row pages, 100-step limit, 60 s limit,
-  train/eval modes. Matcher + reward (`matcher.py`, `metrics.py`, `schema.py`, `calculator.py`).
-- Independent verifier (`verify.py`), benign transform for paired checks (`transform.py`),
-  out-of-process server/client (`server.py`, `client.py`), runner + trajectories (`run.py`),
-  baselines random / flag-all / oracle (`policies/`), check command (`check.py`), Dockerfile.
-- 154 unit tests (`tests/`), incl. all SPEC §05 attack properties.
+  ledger → 4 error types + 2 interacting scenarios + clean companies + distractors; truth + provenance.
+- Env (`auditenv/env.py`): JSON `reset/step`, 5 tools, 50-row pages, 100-step + 60 s limits,
+  train/eval modes. Matcher + reward (`matcher.py`, `metrics.py`, `schema.py`, `calculator.py`);
+  experimental materiality-weighted reward reported separately (`experimental.py`).
+- Independent verifier (`verify.py`), benign transform (`transform.py`), out-of-process
+  server/client (`server.py`, `client.py`), runner (`run.py`), failure analysis (`analyze.py`),
+  narrated demo (`demo.py`), exporter (`export.py`), check command (`check.py`), Dockerfile, JSON schemas (`schemas/`).
+- Baselines (`policies/`): random explorer, naive reconcile, reconcile, flag-all, oracle.
+- Data: `configs/{train,dev,eval_example}.json`, `episodes/{train,dev}` (10+10 exported),
+  `trajectories/train_*.jsonl`.
+- Docs: `README.md`, `docs/CONTRACT.md`, `docs/DESIGN.md` (with measured results), `docs/DEMO.md`, `docs/PITCH.md`.
 
 ## In progress
-- gemini: T12 reconcile baseline, T16 episode export + configs. codex: T23 failure analysis.
-- lead: design note, README, demo script, pitch outline (T19–T22).
+- gemini T28 (load + verify exported episodes from disk), codex T29 (env fuzz test), lead: jury-style review.
 
-## Left to do
-- See `night/TASKS.md` (unchecked items).
-- Fill the `[TODO]` sections in `CLAUDE.md` (stack now chosen: Python 3.11 stdlib, unittest, uv).
+## Left to do (humans)
+- Record the demo video following `docs/DEMO.md` (`uv run python -m auditenv.demo --pause`).
+- Build slides from `docs/PITCH.md`; fill in the Team slide.
+- Merge `night/2026-11-19` into `main` via PR; make the repo public (or share) before submitting.
+- Submission checklist above ("Deadline & submission").
 
 ## Decisions & assumptions
 - Work goes through branches + PRs into `main`; nobody pushes to `main` directly.
@@ -61,11 +66,14 @@ workers gemini, codex) continues on `night/2026-11-19`; task list: `night/TASKS.
 
 ## How to run
 ```bash
-uv run python -m auditenv.check                       # everything (tests, verifier, baselines, paired, remote)
+uv run python -m auditenv.check                       # everything: tests, verifier, baselines, paired, remote
+uv run python -m auditenv.demo --pause                # narrated demo for the video
 uv run python -m unittest discover -s tests -t .      # unit tests only
 uv run python -m auditenv.verify --seeds 0-199        # data/truth verifier
-uv run python -m auditenv.run --policy oracle --seeds 2000-2009 --out /tmp/traj.jsonl
+uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/traj.jsonl
+uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json
 ```
+No `uv`: `python3.11 -m auditenv.check` from the repo root. Docker: `docker build -t auditenv . && docker run --rm auditenv`.
 
 ## How to continue (process for the next person)
 1. `git pull` → read this file → open `night/TASKS.md`.
