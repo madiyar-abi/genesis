@@ -172,8 +172,39 @@ def run_paired(n: int = 20, hard: bool = False) -> bool:
                [(x["type"], x["expected_amount_minor"]) for x in ep2["truth"]["issues"]]
         if r1 != r2 or not same:
             failures.append((seed, "oracle", f"transform changed reward {r1} -> {r2}"))
+
+        # Detect no-op transform (including on clean episodes): id_map must exist with no identity mappings
+        id_map = ep2.get("provenance", {}).get("id_map", {})
+        if not id_map or any(k == v for k, v in id_map.items()):
+            failures.append((seed, "transform", "id_map missing or contains identity mappings"))
+
+        # Check actual relabelled public IDs on public tables
+        for tbl, id_key in (("ledger", "row_id"), ("invoices", "doc_id"), ("payments", "doc_id")):
+            rows1, rows2 = ep1["tables"].get(tbl, []), ep2["tables"].get(tbl, [])
+            if rows1:
+                ids1 = [r[id_key] for r in rows1 if r.get(id_key)]
+                ids2 = [r[id_key] for r in rows2 if r.get(id_key)]
+                if ids1 and set(ids1) == set(ids2):
+                    failures.append((seed, "transform", f"{tbl} public IDs were not relabelled"))
+                elif ids1 and any(r_id in set(ids1) for r_id in ids2):
+                    failures.append((seed, "transform", f"{tbl} contains untranslated original IDs"))
+
+        # Check shuffled order on the fixed paired fixtures (FX ids are stable)
+        for tbl in ("ledger", "invoices", "payments", "fx"):
+            rows1, rows2 = ep1["tables"].get(tbl, []), ep2["tables"].get(tbl, [])
+            if len(rows1) > 1 and rows1 == rows2:
+                failures.append((seed, "transform", f"{tbl} row order was not shuffled"))
+
+        # Untranslated dirty findings must earn zero TP against the transformed truth
+        if ep1["truth"]["issues"]:
+            untranslated = [{"type": iss["type"], "affected_ids": list(iss["affected_ids"]),
+                             "claimed_amount_minor": iss["expected_amount_minor"], "currency": iss["currency"],
+                             "evidence_ids": list(iss["evidence_sets"][0])} for iss in ep1["truth"]["issues"]]
+            m_untrans = grade(ep2["truth"], {"episode_id": ep2["episode_id"], "findings": untranslated}, ep2["episode_id"], 0)
+            if m_untrans["tp"] > 0:
+                failures.append((seed, "transform", f"untranslated dirty findings earned TP: {m_untrans['tp']}"))
+
         # the ORIGINAL oracle answer, translated through the id relabelling, must stay a full answer
-        id_map = ep2["provenance"]["id_map"]
         moved = [{"type": i["type"], "affected_ids": [id_map.get(a, a) for a in i["affected_ids"]],
                   "claimed_amount_minor": i["expected_amount_minor"], "currency": i["currency"],
                   "evidence_ids": [id_map.get(e, e) for e in i["evidence_sets"][0]]} for i in ep1["truth"]["issues"]]
