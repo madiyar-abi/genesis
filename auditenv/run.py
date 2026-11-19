@@ -1,0 +1,97 @@
+"""Run policies on episodes and write trajectories.jsonl (CONTRACT §7).
+
+    uv run python -m auditenv.run --policy reconcile --seeds 2000-2009 --out trajectories.jsonl
+"""
+
+from __future__ import annotations
+
+import argparse
+import importlib
+import json
+import sys
+import time
+
+from .env import AuditEnv
+
+POLICIES = {  # name -> (module, class); the oracle is built grader-side from truth
+    "random": ("auditenv.policies.random_explorer", "RandomExplorer"),
+    "flag_all": ("auditenv.policies.flag_all", "FlagAll"),
+    "reconcile": ("auditenv.policies.reconcile", "Reconcile"),
+    "oracle": ("auditenv.policies.oracle", "Oracle"),
+}
+
+
+def make_policy(name: str, env: AuditEnv, seed: int = 0):
+    module, cls = POLICIES[name]
+    klass = getattr(importlib.import_module(module), cls)
+    if name == "oracle":
+        return klass(env._ep["truth"])  # grader-side only
+    return klass(seed=seed)
+
+
+def run_episode(env: AuditEnv, policy, seed: int, config: dict | None = None, policy_factory=None) -> list[dict]:
+    """Play one episode. If `policy_factory(env)` is given it builds the policy after reset."""
+    obs, info = env.reset(seed, config)
+    if policy_factory is not None:
+        policy = policy_factory(env)
+    policy.reset(obs)
+    ep = info["episode_id"]
+    traj = [{"episode_id": ep, "step": 0, "action": None, "observation": obs, "reward": 0.0,
+             "terminated": False, "truncated": False}]
+    while True:
+        action = policy.act(obs)
+        obs, reward, terminated, truncated, info = env.step(action)
+        traj.append({"episode_id": ep, "step": obs["step"], "action": action, "observation": obs,
+                     "reward": reward, "terminated": terminated, "truncated": truncated})
+        if terminated or truncated:
+            return traj
+
+
+def parse_seeds(text: str) -> list[int]:
+    seeds = []
+    for part in text.split(","):
+        if "-" in part:
+            a, b = part.split("-")
+            seeds += list(range(int(a), int(b) + 1))
+        else:
+            seeds.append(int(part))
+    return seeds
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--policy", choices=sorted(POLICIES), default="reconcile")
+    ap.add_argument("--seeds", default="2000-2009", help="e.g. 2000-2009 or 1,2,3")
+    ap.add_argument("--config", help="configs/*.json (uses its seeds and config unless --seeds is given)")
+    ap.add_argument("--mode", choices=("train", "eval"), default="train")
+    ap.add_argument("--out", help="write trajectories.jsonl here")
+    ap.add_argument("--policy-seed", type=int, default=0)
+    args = ap.parse_args(argv)
+    config, seeds = {}, parse_seeds(args.seeds)
+    if args.config:
+        with open(args.config) as fh:
+            spec = json.load(fh)
+        config = spec.get("config", {})
+        if "--seeds" not in (argv if argv is not None else sys.argv):
+            seeds = spec["seeds"]
+    config = {**config, "mode": args.mode}
+    env = AuditEnv()
+    out = open(args.out, "w") if args.out else None
+    print(f"{'episode':<16} {'P':>5} {'R':>5} {'F1':>5} {'return':>7} {'steps':>5} {'time_s':>6}")
+    for seed in seeds:
+        t0 = time.monotonic()
+        traj = run_episode(env, None, seed, config,
+                           policy_factory=lambda e, s=seed: make_policy(args.policy, e, args.policy_seed + s))
+        res = env.result
+        if out:
+            for rec in traj:
+                out.write(json.dumps(rec, sort_keys=True) + "\n")
+        print(f"{traj[0]['episode_id']:<16} {res['precision']:5.2f} {res['recall']:5.2f} {res['f1']:5.2f} "
+              f"{res['reward']:7.3f} {traj[-1]['step']:5d} {time.monotonic() - t0:6.2f}")
+    if out:
+        out.close()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
