@@ -28,18 +28,18 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
-## Round 3 · 19 November 2026
+## Round 3 complete · 19 November 2026
 
 Demo rehearsal complete. Follow `docs/DEMO.md` for the 2:40 video. The ten-slide outline in `docs/PITCH.md` is verified against the same demo and the measured results.
 
-Branch `night/2026-11-19-r3`. The round freeze is 22 November at 18:00 local time. Round 2 is in main. The verifier now rejects a truth amount denominated in the wrong currency. Run `uv run python -m unittest tests.test_verify` for all six verifier tests. Jury map, demo and pitch checks are tracked in `night/TASKS.md`.
+Branch `night/2026-11-19-r3`. The round freeze is 22 November at 18:00 local time. Round 2 is in main. The verifier now rejects a truth amount denominated in the wrong currency. Run `uv run python -m unittest tests.test_verify` for all six verifier tests. Gemini’s jury map in `docs/CHECKS.md` matches the merged suite. The official check passed all 285 tests. All 40 exported episodes verified and both seed sweeps passed (3,000 default and 600 hard episodes). Record the demo, finish the team slide, and complete the access and submission checklist above.
 
 ## Status
 **Round 2 (agent polish run) on `night/2026-11-19-r2` is DONE (`night/DONE`): all planned ideas done except the
 optional H1/E5 (skipped on purpose, see `night/LOG.md`), plus fixes from an independent jury-style review
 (`REVIEW.md` → "Round 2": a stale agent-facing duplicate evidence rule — the one high-impact defect — and stricter
-input handling). Jury criteria → tests → commands: `docs/CHECKS.md`.** Goals: `night/ROUND2.md`; tasks: `night/TASKS.md`.
-Humans open the PR from `night/2026-11-19-r2` into `main` (the night run never touches `main`).
+input handling). Jury criteria → tests → commands: `docs/CHECKS.md`.** Goals: `night/archive/r2-ROUND.md`; tasks: `night/archive/r2-TASKS.md`.
+Round 2 has since merged into main.
 
 Round-2 results (each with its command; numbers from the current code):
 - Reward: R2 `scripts/mutate_reward.py` — 15/15 one-line mutants of matcher/reward caught; R3
