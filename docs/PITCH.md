@@ -42,7 +42,7 @@ Numbers come from `uv run python -m auditenv.check` / `auditenv.analyze` on the 
   declared ones, recomputed from public records.
 
 ## 6. Results
-- Checks: 187 unit tests (incl. a 3 000-action fuzz test); verifier 600/600 episodes valid; 20/20 paired checks (replay exact;
+- Checks: 190 unit tests (incl. a 3 000-action fuzz test); verifier 600/600 episodes valid; 20/20 paired checks (replay exact;
   relabel + permute keeps the oracle reward).
 - Dev split (micro P/R/F1, mean return): oracle 1.0/1.0/1.0, 1.000 · reconcile 1.0/1.0/1.0, 0.957 ·
   naive 0.18/0.73/0.29, −0.488 · random 0/0/0, −0.807 · flag-all 0/0/0, −1.000.

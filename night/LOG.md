@@ -163,3 +163,15 @@
 ## 2026-11-19 16:34 — codex
 - T30 done: failure analysis now pools TP/FP/FN via metrics.prf1. The dev CLI matches the check table for Reconcile (1.000/1.000/1.000) and NaiveReconcile (0.177/0.733/0.286). Targeted tests and the full project check passed.
 - Assumptions: JSON places pooled metrics under "micro" and keeps return/steps under "mean". JSON rounds numeric values to three decimals, and Markdown displays three decimal places.
+
+## 2026-11-19 16:36 — lead
+- Merged codex T30 (analyze micro P/R/F1, matches check table). T19–T22 marked done (numbers verified against check output).
+- Final SPEC pass (line by line): §02 4 independent error types, 2 interacting scenarios, clean + distractors, varied ids/order/amounts/currencies/timezones ✓;
+  §03 manifest/value formats/5 public files/explicit nulls/closed truth+provenance, no leaks (2 reviews) ✓; §04 reset/step, 5 actions, 50-row pages, stable cursors,
+  calculator, bounded errors consume steps, 100 steps incl. submit, truncation, zero exploration reward, eval hides reward ✓; §05 findings limits, invalid → −1,
+  one-to-one matching, published normalisation/tolerance/tie rule, metrics edge cases, shared reward + separate experimental, all listed tests ✓;
+  §06 train/dev vs hidden (AUDITENV_SECRET), transforms, 4 baselines, eval_example shape ✓; §07 minimum requirements ✓; §09 deliverables (licence, pinned zero deps,
+  README + container + one command, matcher/schemas/policies, 10+10 episodes, tests, adapters, trajectories, design note, demo) ✓; §10 diagnostics P/R/F1/return/steps/time ✓.
+- Verified now: 190 tests OK; auditenv.check ALL PASSED; verifier 0 problems on 600 generated + 20 on-disk episodes.
+- Left for humans (HANDOFF): demo video (docs/DEMO.md), slides (docs/PITCH.md, team slide), PR night/2026-11-19 → main, repo access, Google Doc submission.
+- Created night/DONE.

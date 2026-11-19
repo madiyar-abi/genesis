@@ -4,7 +4,7 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Last updated:** 2026-11-19 · by: Claude (night lead) · branch: `night/2026-11-19`
+**Last updated:** 2026-11-19 17:00 · by: Claude (night lead) · branch: `night/2026-11-19`
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
@@ -30,9 +30,9 @@ message says a Google Doc — follow the latest, re-check the form before submit
 
 ## Status
 Environment is feature-complete for the case and passes the single check command
-(`uv run python -m auditenv.check` → ALL CHECKS PASSED, ~7 s, 187 tests). Jury materials are drafted
-(`docs/DESIGN.md`, `docs/DEMO.md`, `docs/PITCH.md`). Night run continues on `night/2026-11-19`
-with hardening (review, fuzzing, on-disk episode verification); task list: `night/TASKS.md`.
+(`uv run python -m auditenv.check` → ALL CHECKS PASSED, ~7 s, 190 tests). Jury materials are written
+(`docs/DESIGN.md`, `docs/DEMO.md`, `docs/PITCH.md`); numbers match the check output. Night run finished on `night/2026-11-19` (all tasks in
+`night/TASKS.md` checked); what's left is human work (video, slides, PR to `main`, repo access).
 
 ## Done
 - Generator (`auditenv/generator.py`, `inject.py`): hidden company history → correct double-entry
@@ -49,7 +49,8 @@ with hardening (review, fuzzing, on-disk episode verification); task list: `nigh
 - Docs: `README.md`, `docs/CONTRACT.md`, `docs/DESIGN.md` (with measured results), `docs/DEMO.md`, `docs/PITCH.md`.
 
 ## In progress
-- Final SPEC pass and polishing (lead). Jury-style review done; all 10 confirmed findings fixed (see `night/LOG.md`).
+- Nothing — night run complete (`night/DONE`). Two independent jury-style reviews were run; all 18 confirmed
+  findings are fixed (details in `night/LOG.md`).
 
 ## Left to do (humans)
 - Record the demo video following `docs/DEMO.md` (`uv run python -m auditenv.demo --pause`).

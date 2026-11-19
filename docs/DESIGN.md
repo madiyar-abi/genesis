@@ -165,7 +165,7 @@ Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30
 P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode.
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount; reported separately, the shared reward is unchanged.
-Other gates in the same run: 187 unit tests pass; verifier 200/200 episodes valid (600/600 with
+Other gates in the same run: 190 unit tests pass; verifier 200/200 episodes valid (600/600 with
 `auditenv.verify --seeds 0-199`); 20/20 paired checks; out-of-process run leaks nothing.
 
 Reconcile stress test: 1 200 episodes (300 seeds × default / clean / 12-issue / 12-issue with
