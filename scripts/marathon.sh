@@ -13,6 +13,7 @@ LEAD_SLOTS="${LEAD_SLOTS:-claude|default|;codex|$C2|gpt-6.2-astra;codex|$C2|gpt-
 GEM_ACCOUNTS="${GEM_ACCOUNTS:-default,$HOME/.agy-acc2,$HOME/.agy-acc3}"
 GEM_MODEL="${GEM_MODEL:-Gemini 3.8 Flash (High)}"
 GEM_DIR="${GEM_DIR-../genesis-gemini}"         # worker worktree (created if missing); "" = no worker
+DEEPSEEK_DIR="${DEEPSEEK_DIR-../genesis-deepseek}"
 CHECK_CMD="${CHECK_CMD:-uv run python -m auditenv.check}"
 PR="${PR:-1}"                                   # 0 = push only, no PR/merge (testing)
 EMPTY_SLEEP="${EMPTY_SLEEP:-7200}"              # after a round with no product change
@@ -78,7 +79,9 @@ fix_round() {     # same branch, new goal
 }
 
 run_team() {
+  local workers=""
   if [ -n "$GEM_DIR" ]; then
+    workers="${workers:+$workers,}gemini"
     [ -d "$GEM_DIR" ] || git worktree add -q --detach "$GEM_DIR" "origin/$B"
     ( cd "$GEM_DIR" && git stash -q -u 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
       && rm -f night/STOP .night-logs/session-* && mkdir -p .night-logs \
@@ -86,11 +89,23 @@ run_team() {
            --accounts "$GEM_ACCOUNTS" --until "$FREEZE" >> .night-logs/worker.out 2>&1 ) &
     gpid=$!
   fi
+  if [ -n "$DEEPSEEK_DIR" ]; then
+    workers="${workers:+$workers,}deepseek"
+    [ -d "$DEEPSEEK_DIR" ] || git worktree add -q --detach "$DEEPSEEK_DIR" "origin/$B"
+    ( cd "$DEEPSEEK_DIR" && git stash -q -u 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
+      && rm -f night/STOP .night-logs/session-* && mkdir -p .night-logs \
+      && exec "$NIGHT_SH" --role worker --name deepseek --engine deepseek --branch "$B" --model "deepseek-v4.1-flash" \
+           --until "$FREEZE" >> .night-logs/worker-deepseek.out 2>&1 ) &
+    dpid=$!
+  fi
   rm -f .night-logs/session-lead-*            # fresh lead conversation each round
-  "$NIGHT_SH" --role lead --branch "$B" ${GEM_DIR:+--workers gemini} --until "$FREEZE" --slots "$LEAD_SLOTS" \
+  "$NIGHT_SH" --role lead --branch "$B" ${workers:+--workers "$workers"} --until "$FREEZE" --slots "$LEAD_SLOTS" \
     >> .night-logs/lead.out 2>&1
   if [ -n "$GEM_DIR" ]; then
     touch "$GEM_DIR/night/STOP"; wait "$gpid" 2>/dev/null; rm -f "$GEM_DIR/night/STOP"
+  fi
+  if [ -n "$DEEPSEEK_DIR" ]; then
+    touch "$DEEPSEEK_DIR/night/STOP"; wait "$dpid" 2>/dev/null; rm -f "$DEEPSEEK_DIR/night/STOP"
   fi
 }
 
