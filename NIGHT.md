@@ -143,12 +143,13 @@ mkdir -p .night-logs && nohup scripts/night.sh --role lead --branch $B --workers
   > .night-logs/lead.out 2>&1 &
 # 3. worker for grunt work, in its own worktree
 git worktree add --detach ../genesis-gemini origin/$B && mkdir -p ../genesis-gemini/.night-logs
-nohup ../genesis-gemini/scripts/night.sh --role worker --name gemini --engine agy --branch $B \
+(cd ../genesis-gemini && nohup scripts/night.sh --role worker --name gemini --engine agy --branch $B \
   --model "Gemini 3.8 Flash (High)" --accounts "default,$HOME/.agy-acc2,$HOME/.agy-acc3" --until 07:00 \
-  > ../genesis-gemini/.night-logs/worker.out 2>&1 &
+  > .night-logs/worker.out 2>&1 &)
 # optional (only if Codex is NOT in the lead slots): codex worker in ../genesis-codex
-#   ../genesis-codex/scripts/night.sh --role worker --name codex --engine codex --branch $B \
-#     --model "gpt-6.2-astra,gpt-6.2-sol" --accounts "$C1,$C2" --until 07:00
+#   (cd ../genesis-codex && scripts/night.sh --role worker --name codex --engine codex --branch $B \
+#     --model "gpt-6.2-astra,gpt-6.2-sol" --accounts "$C1,$C2" --until 07:00)
+# night.sh always works in the git worktree of the current directory — cd there first.
 # logins (one-time): agy: HOME=$HOME/.agy-accN ~/.gemini/bin/agy · codex: CODEX_HOME=$HOME/.codex-accN codex login --device-auth
 # watch:  tail -f .night-logs/lead.out ../genesis-*/.night-logs/worker.out
 # stop:   touch night/STOP ../genesis-*/night/STOP
