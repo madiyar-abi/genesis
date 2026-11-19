@@ -1,2 +1,3 @@
 2026-11-20 04:48 lead T1. The verifier previously accepted 3-1 after checking zero episodes. Five command entry points now reject reversed ranges. Ordered and repeated seeds still work. The focused tests and official check passed.
 2026-11-20 04:48 lead T8. A failed reset now preserves the active episode’s evaluation mode and budget. The regression failed on the old code and all 33 environment tests passed after the fix.
+2026-11-20 04:48 lead T6. The rehearsed demo labels each amount in USD minor units. PAY-136430 shows $2.86 and $3,513.31. Four findings matched after 21 inspections and the closed return was 0.958.

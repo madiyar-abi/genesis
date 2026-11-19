@@ -87,7 +87,7 @@ def main(argv=None) -> int:
     last = traj[-1]
     print("\nsubmitted findings:")
     for f in last["action"]["findings"]["findings"]:
-        print(f"  {f['type']:<19} ids={f['affected_ids']} amount={f['claimed_amount_minor']} {f['currency']} "
+        print(f"  {f['type']:<19} ids={f['affected_ids']} amount={f['claimed_amount_minor']} {f['currency']} minor units "
               f"evidence={f['evidence_ids']}")
     res = env.result
     print(f"\nterminal reward {last['reward']:.3f} = clip(2*F1 - 1 - 0.002*{res['inspection_steps']} steps)   "
@@ -98,7 +98,7 @@ def main(argv=None) -> int:
     for iss in ep["truth"]["issues"]:
         label = next((lb for lb in res["labels"] if lb.get("issue_id") == iss["issue_id"]), None)
         print(f"  {iss['issue_id']:<6} {iss['type']:<19} scenario={iss['scenario']:<6} amount={iss['expected_amount_minor']:>10} "
-              f"{'TP' if label else 'FN'}")
+              f"{iss['currency']} minor units {'TP' if label else 'FN'}")
     for inj in ep["provenance"]["injections"]:
         print(f"         cause: {inj['description']}")
 

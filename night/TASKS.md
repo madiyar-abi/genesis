@@ -6,5 +6,5 @@
 - [ ] T4 (gemini3) Check documented trajectory fields and terminal coverage — files: night/LOG.md — accept: report file, episode and terminal/truncation counts for each policy file and any missing required fields.
 - [ ] T5 (deepseek) Verify committed export directories independently — files: night/LOG.md — accept: verify --dir succeeds for train, dev and hard.
 - [x] T8 (lead) Preserve active episode settings after rejected resets — files: auditenv/env.py, reset regression tests — accept: rejected config preserves eval isolation and remaining budget.
-- [ ] T6 (lead) Rehearse the numbered recording script — files: docs/DEMO.md, auditenv/demo.py, tests/test_demo.py — accept: reproduce the payment evidence, four matches and closed return with the printed commands.
+- [x] T6 (lead) Rehearse the numbered recording script — files: docs/DEMO.md, auditenv/demo.py, tests/test_demo.py — accept: reproduce the payment evidence, four matches and closed return with the printed commands.
 - [ ] T7 (lead) Verify slide outline and submission handoff — files: docs/PITCH.md, README.md, HANDOFF.md, auditenv/check.py, tests/test_paired_transform.py — accept: current metrics match slides, official check and SPEC review pass.

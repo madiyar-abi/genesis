@@ -36,6 +36,8 @@ Branch `night/2026-11-20-r12`. See `night/TASKS.md` for remaining work.
 
 - T8. A failed reset now preserves the active episode’s evaluation mode and budget. The regression failed on the old code and all 33 environment tests passed after the fix.
 
+- T6. The rehearsed demo labels each amount in USD minor units. PAY-136430 shows $2.86 and $3,513.31. Four findings matched after 21 inspections and the closed return was 0.958.
+
 ## Round 11 complete · 20 November 2026
 
 Work is on `night/2026-11-20-r11`. See `night/TASKS.md` for ownership and
