@@ -146,6 +146,14 @@ Independent of the generator, from the public tables and closed files only:
 4. **evidence** — every id exists in the public tables, each set covers the affected records, and
    the declared amount is recomputed from the records of each set alone (sufficiency).
 
+Decision for `payment_allocation` with **nothing allocated** (the AR credit row was removed): the set is the
+payment document, the invoice document, the payment's 2900 unapplied-cash row (and the invoice-date FX rate
+for foreign currency). The amount is the referenced amount × the invoice-date rate, reproduced from the two
+documents and the rate; the 2900 row shows where the money went (linked by `payment_id`, and for a
+base-currency payment it must carry at least the whole referenced amount). The missing AR credit itself is
+an absence no record id can cite — an auditor proves it by listing the ledger, and the verifier proves it in
+step 3 by recomputing every discrepancy from the full ledger. We keep the set minimal instead of padding it.
+
 A jury-style review (separate agent, before submission) found and we fixed: seed recovery from a
 plain-hash `episode_id` (now HMAC + grader key in the RNG); a crash/overrun on non-string `table`
 (now a bounded error, 100-step cap holds — plus a 20 314-action fuzz test); a telltale timezone on the

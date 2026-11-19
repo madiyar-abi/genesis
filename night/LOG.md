@@ -20,3 +20,10 @@
 - H2 done: per-config steps over 300 seeds (stress configs from auditenv/fuzz.py): default reconcile max 33,
   hard reconcile_hard max 58 (12 issues + 100 invoices), 0 imperfect, 0 truncated → ≤ 80 holds. Table in DESIGN §9.
 - Dispatched subagents: R3 sensitivity (scripts/sensitivity.py), E3b hard trajectories + CI badge.
+
+## 2026-11-19 21:33 lead
+- Usage limit hit 20:53–21:30 (all three subagents paused, resumed after reset).
+- D2 done: decision documented in DESIGN §7 — nothing-allocated evidence = payment doc + invoice doc + 2900 row
+  (+ invoice-date FX); the missing AR credit is an absence, proven by the whole-ledger recomputation (verify step 3).
+  Tightened verify._sufficient: for base-currency payments the 2900 credit must cover the whole referenced amount
+  (no data change; verify 600/600, dev/train/hard dirs all valid). Test in tests/test_verify.py.

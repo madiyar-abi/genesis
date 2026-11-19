@@ -50,7 +50,7 @@ Workers: touch ONLY the files listed for your task.
   (hour, weekday, id format/suffix, amount pattern, row position, description tokens) on 1 000 seeds; report max
   precision; fix any leak > 0.5 in the generator (re-export) — files: scripts/shortcut_miner.py, generator/inject
   if needed — accept: miner reports no column > 0.5 (or documented why acceptable)
-- [ ] D2 (lead) Decide/document "nothing allocated" evidence for payment_allocation (DESIGN §7) — files:
+- [x] D2 (lead) Decide/document "nothing allocated" evidence for payment_allocation (DESIGN §7) — files:
   docs/DESIGN.md (+ inject/verify if changed) — accept: verify 0 problems, decision in DESIGN
 
 ## Block 3 — measured design / engineering
