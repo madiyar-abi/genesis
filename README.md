@@ -75,7 +75,9 @@ uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out
 uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval
 ```
 
-Policies: `random`, `reconcile`, `flag_all`, `oracle` (grader-side, reads truth — reward ceiling only).
+Policies: `random`, `naive_reconcile`, `reconcile`, `flag_all`, `oracle` (grader-side, reads truth —
+reward ceiling only). Committed training trajectories (SPEC's `trajectories.jsonl`, one file per
+policy): `trajectories/train_{reconcile,random,naive_reconcile}.jsonl`.
 Each trajectory line: `episode_id, step, action, observation, reward, terminated, truncated`.
 
 ### Plugging in your own policy (organisers' baselines)
@@ -106,6 +108,8 @@ The four baseline adapters live in `auditenv/policies/` (`random_explorer.py`, `
 AUDITENV_SECRET=<grader-only key> python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl
 ```
 
+`hidden.json` uses the `configs/*.json` format (`{"episodes": [{"seed": ..., "config": {...}}]}`,
+e.g. `configs/eval_example.json`: 5 clean, 5 interacting, 10 mixed) or `{"seeds": [...], "config": {...}}`.
 `auditenv.client.RemoteEnv` speaks the same `reset/step` API over JSON lines; with `--episodes`
 the client cannot choose seeds, rewards are 0.0 and results are written only to `grader.jsonl`.
 
@@ -133,6 +137,8 @@ make check | make test | make verify
 | `auditenv/run.py`, `check.py` | runner/trajectories, single check command |
 | `configs/` | versioned train/dev/eval-example episode lists |
 | `episodes/` | exported 10 train + 10 dev episodes (`public/` for agents, `grader/` closed) |
+| `trajectories/` | training trajectories of the baselines on the train split |
+| `schemas/` | JSON Schemas: findings, action, observation, manifest, truth, trajectory step |
 | `docs/` | contract, design note, demo script, pitch outline |
 
 ## Honest limitations

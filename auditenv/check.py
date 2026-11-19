@@ -24,6 +24,7 @@ import unittest
 
 from .env import AuditEnv
 from .generator import ISSUE_TYPES, generate
+from .matcher import grade
 from .metrics import prf1
 from .run import POLICIES, load_episodes, make_policy, run_episode
 from .verify import verify_episode
@@ -127,6 +128,14 @@ def run_paired(n: int = 20) -> bool:
                [(x["type"], x["expected_amount_minor"]) for x in ep2["truth"]["issues"]]
         if r1 != r2 or not same:
             failures.append((seed, "oracle", f"transform changed reward {r1} -> {r2}"))
+        # the ORIGINAL oracle answer, translated through the id relabelling, must stay a full answer
+        id_map = ep2["provenance"]["id_map"]
+        moved = [{"type": i["type"], "affected_ids": [id_map.get(a, a) for a in i["affected_ids"]],
+                  "claimed_amount_minor": i["expected_amount_minor"], "currency": i["currency"],
+                  "evidence_ids": [id_map.get(e, e) for e in i["evidence_sets"][0]]} for i in ep1["truth"]["issues"]]
+        m = grade(ep2["truth"], {"episode_id": ep2["episode_id"], "findings": moved}, ep2["episode_id"], 0)
+        if m["fn"] or m["fp"]:
+            failures.append((seed, "oracle", "translated answer no longer matches"))
         if "reconcile" in names:
             a = run_episode(env, None, seed, cfg, policy_factory=lambda e: make_policy("reconcile", e))[-1]["reward"]
             b = run_episode(env, None, seed, t_cfg, policy_factory=lambda e: make_policy("reconcile", e))[-1]["reward"]
@@ -135,7 +144,8 @@ def run_paired(n: int = 20) -> bool:
     for f in failures[:5]:
         print("   ", f)
     return _gate("paired checks (replay + relabel/permute)", not failures,
-                 f"{n - len({f[0] for f in failures})}/{n} pairs pass; policies: oracle, {', '.join(names)}")
+                 f"{n - len({f[0] for f in failures})}/{n} pairs pass; replay: {', '.join(names)}; relabel: "
+                 "translated oracle answer stays full, oracle/reconcile rewards unchanged")
 
 
 def run_remote() -> bool:

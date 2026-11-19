@@ -23,7 +23,7 @@ AuditEnv.step  -> read-only tools ... submit -> matcher -> terminal reward (trai
 Same `(seed, config, GENERATOR_VERSION)` → byte-identical episode (the config is normalised first,
 so equivalent configs give the same company). `episode_id` is an HMAC of them; with the grader-only
 key `AUDITENV_SECRET` set, the key also enters the generator RNG, so the seed can neither be
-brute-forced from the id nor the episode regenerated from the open-source code. Episode size: 230–420 ledger rows by default
+brute-forced from the id nor the episode regenerated from the open-source code. Episode size: about 236–435 ledger rows and 52–108 documents by default (measured over 300 seeds)
 (≤ 2000), 20–200 documents (enforced by `n_invoices` ∈ [10, 100]), 0–12 issues.
 
 ## 2. Company model and correct bookkeeping
@@ -53,7 +53,10 @@ brute-forced from the id nor the episode regenerated from the open-source code. 
 - `I1` — foreign-currency payment late on the last day: partially allocated **and** its cash
   converted at the next day's rate (the date shown in the bank's timezone).
 - `I2` — next-period foreign invoice backdated into the period **and** converted at the
-  booking-date rate (period_cutoff + fx_error on the same invoice).
+  booking-date rate (period_cutoff + fx_error on the same invoice). The two amounts overlap on
+  purpose: the cutoff amount is the whole posting (it must be reversed), the FX amount is the rate
+  component (it would remain wrong if the invoice were simply re-dated into the next period). Both
+  are reportable, each is matched by its own type, so an auditor who finds only one gets partial credit.
 
 Every type is independently configurable (`errors: {type: count}`), injectors never touch an
 already-affected document, and amounts are the real ledger misstatement — not a "suspicious row".
@@ -95,7 +98,8 @@ contains legitimate look-alikes:
 - **Validation** (`schema.py`): ≤ 30 findings, ≤ 10 evidence ids, explanation ≤ 1000 chars,
   known type, integer non-negative amount, 3-letter upper-case currency, matching episode_id,
   no unknown keys. Invalid → episode ends, reward −1, error in the grader log.
-- **Normalisation**: strip ids, dedupe and sort affected/evidence ids, upper-case currency.
+- **Normalisation**: strip ids, dedupe and sort affected/evidence ids (ids are case-sensitive; the
+  currency must already be 3 upper-case ASCII letters, otherwise the submission is invalid).
 - **TP** iff type, canonical affected_ids, currency equal, `|claimed − expected| ≤ max(1,
   expected // 1000)` and the evidence ids contain one complete acceptable set.
 - **One-to-one, greedy in submission order**: a finding takes the first unmatched truth issue
@@ -139,7 +143,9 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 - Replay: same seed + config + version + actions → identical records, transitions, rewards
   (hash-compared in the check). `reset` rebuilds all episode state.
 - `transform_seed` relabels every id (rows, documents, invoices, payments, entities) and permutes
-  row order; truth and provenance are remapped. The oracle answer under the new ids keeps the
+  row order (incl. the FX table; `fx_id` stays `date:currency:base` because it is derived data); truth and
+  provenance are remapped. The check translates the *original* oracle answer through the id map and
+  requires it to stay a full answer on the transformed episode. The oracle answer under the new ids keeps the
   same reward and the old answer scores 0 TP. Train (1000–1009) and dev (2000–2009) seeds are
   public; evaluation should use secret large seeds, new parameter mixes and transforms.
 
@@ -163,7 +169,7 @@ Other gates in the same run: 187 unit tests pass; verifier 200/200 episodes vali
 `auditenv.verify --seeds 0-199`); 20/20 paired checks; out-of-process run leaks nothing.
 
 Reconcile stress test: 1 200 episodes (300 seeds × default / clean / 12-issue / 12-issue with
-100 invoices): **0 imperfect episodes**, max 30 steps, no truncation — every truth issue can be
+100 invoices): **0 imperfect episodes**, max 32 steps, no truncation — every truth issue can be
 found from the records within the budget.
 
 **Measured failure analysis** (`uv run python -m auditenv.analyze --policy <p> --config configs/dev.json`):
@@ -199,8 +205,10 @@ clean books only when it happens to submit no findings. Flag-everything scores �
 - Duplicates are exact copies; near-duplicates (changed description, rounded amounts) are not modelled.
 - Wall-clock truncation (60 s) is the only non-deterministic transition; it never triggers for the
   baselines (≤ 0.01 s per episode).
-- Step cost vs F1 granularity: with 12 issues, skipping one finding at 0 steps (0.913) beats the full
-  answer after 60 steps (0.880); with ≤ 10 issues the full answer always wins.
+- Step cost vs F1 granularity: an answer missing one of k issues at 0 steps scores 2·F1 − 1 =
+  0.867 / 0.895 / 0.913 for k = 8 / 10 / 12, so the complete answer wins only if it takes fewer than
+  66 / 52 / 43 inspection steps. The policy-aware baseline needs ≤ 32 steps, so in practice the
+  complete answer wins; the step cost is deliberately small (SPEC: "only slightly separates equal answers").
 - A policy-aware rule script solves the default distribution (F1 1.0). The difficulty is for a
   learning agent that must discover these rules from 100 tool calls, not for a hand-written solver;
   the naive-rules baseline measures how much the distractors and timezones hurt shortcuts.

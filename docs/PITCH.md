@@ -46,7 +46,7 @@ Numbers come from `uv run python -m auditenv.check` / `auditenv.analyze` on the 
   relabel + permute keeps the oracle reward).
 - Dev split (micro P/R/F1, mean return): oracle 1.0/1.0/1.0, 1.000 · reconcile 1.0/1.0/1.0, 0.957 ·
   naive 0.18/0.73/0.29, −0.488 · random 0/0/0, −0.807 · flag-all 0/0/0, −1.000.
-- Reconcile stress test: 1 200 episodes, 0 imperfect, ≤ 30 steps → every error is findable in budget.
+- Reconcile stress test: 1 200 episodes, 0 imperfect, ≤ 32 steps → every error is findable in budget.
 - 12 attack tests from the case (silence, false accusations, duplicates, flag-all, step cost, guessed
   ids, bad evidence, wrong currency, resubmit, malformed input, timeout, tolerance) all pass.
 

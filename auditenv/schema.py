@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 # The four issue / finding types.
 ISSUE_TYPES: tuple[str, ...] = (
     "duplicate_invoice",
@@ -94,6 +96,9 @@ def validate_findings(obj: object, episode_id: str) -> str | None:
 
     if not isinstance(obj, dict):
         return "findings object must be a dict"
+    extra_top = set(obj) - {"episode_id", "findings"}
+    if extra_top:
+        return f"unknown top-level keys: {sorted(map(str, extra_top))[:5]}"
 
     # --- episode_id ---
     if obj.get("episode_id") != episode_id:
@@ -158,7 +163,7 @@ def _validate_one(f: object, index: int) -> str | None:
     currency = f.get("currency")
     if not isinstance(currency, str):
         return f"finding[{index}].currency: must be a string"
-    if len(currency) != 3 or not currency.isalpha() or currency != currency.upper():
+    if not re.fullmatch(r"[A-Z]{3}", currency):
         return f"finding[{index}].currency: must be 3 uppercase letters, got {currency!r}"
 
     # --- evidence_ids ---

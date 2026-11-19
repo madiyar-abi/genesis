@@ -151,3 +151,12 @@
 - Re-exported episodes/, regenerated trajectories/. Reconcile stress 1200 episodes still 0 imperfect (max 30 steps). New dev numbers in DESIGN/PITCH.
 - tests/test_hardening.py (5 regression tests). 187 tests, check ALL PASSED.
 - Assumption: I2 double-reporting (cutoff + fx on one booking) kept as designed (documented interacting scenario).
+
+## 2026-11-19 16:34 — lead
+- (16:30) Resumed after a usage-limit pause; second review subagent resumed and finished: 8 smaller confirmed defects, no blockers.
+- Fixed: server --episodes accepts configs/*.json per-episode lists (eval_example crashed before); validator rejects unknown top-level keys and non-ASCII currency (matches schemas/findings.schema.json);
+  docs no longer claim currency upper-casing; CONTRACT §4 specifies info (reset / train terminal / eval); DESIGN figures corrected (ledger 236–435, step threshold 66/52/43 steps for k=8/10/12, stress max 32 steps);
+  run.py --seeds=... with --config; README lists naive_reconcile, trajectories/, schemas/, hidden-list format; demo/DEMO wording on seed secrecy; I2 overlap justified in DESIGN.
+- Paired check strengthened: original oracle answer translated through provenance.id_map must stay a full answer; transform also permutes the FX table.
+- Assigned T30 (codex): analyze.py micro-averaged + rounded output.
+- 189 tests, check ALL PASSED.
