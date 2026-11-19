@@ -16,4 +16,9 @@
 - E4 done (subagent, reviewed: rendered PNG, no overlaps): scripts/chart.py → docs/baselines.svg from check --json,
   tests/test_chart.py; linked from PITCH slide 7. Episode counts read from configs/*.json (not in metrics JSON).
 
+## 2026-11-19 20:52 lead
+- H2 done: per-config steps over 300 seeds (stress configs from auditenv/fuzz.py): default reconcile max 33,
+  hard reconcile_hard max 58 (12 issues + 100 invoices), 0 imperfect, 0 truncated → ≤ 80 holds. Table in DESIGN §9.
+- Dispatched subagents: R3 sensitivity (scripts/sensitivity.py), E3b hard trajectories + CI badge.
+
 - 2026-11-19 20:55 codex — R2: all 15 isolated single-line mutants killed by the existing reward tests; the unmodified baseline, smoke tests, full check and 3,000-episode sweep passed. Used existing regression coverage because no mutant survived. Next: C3.

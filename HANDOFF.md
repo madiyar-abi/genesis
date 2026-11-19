@@ -31,7 +31,7 @@ message says a Google Doc — follow the latest, re-check the form before submit
 ## Status
 **Round 2 (agent polish run) in progress on `night/2026-11-19-r2`: goals in `night/ROUND2.md`, tasks in `night/TASKS.md`.**
 Round-2 done so far: P2 (check now also runs 20 paired checks on hard episodes with `reconcile_hard`);
-E4 (`scripts/chart.py` → `docs/baselines.svg`, the results-slide chart).
+E4 (`scripts/chart.py` → `docs/baselines.svg`, the results-slide chart); H2 (step-budget margin table in DESIGN §9: max 58/100).
 
 The official local check passed all 256 tests and all evaluation gates on Python 3.11.18. The final 0–999 sweep ran 3,000 episodes with zero problems. All 120 existing public train/dev files matched main byte for byte after the evidence fix.
 

@@ -250,6 +250,18 @@ the level is solvable from the records, not that a learning agent finds those ru
 Stress test of `reconcile_hard` (`auditenv.fuzz --stress reconcile_hard --seeds 0-299 --hard`, 1 200 hard
 episodes): 0 imperfect, max 58 steps, no truncation.
 
+**Step-budget margin** (same stress runs, 300 seeds per row, steps used of the 100-step budget):
+
+| policy · mode | config | median | p95 | max |
+|---|---|---|---|---|
+| reconcile · default | random mix | 22 | 26 | 28 |
+| reconcile · default | 12 issues, 100 invoices | 29 | 31 | 33 |
+| reconcile_hard · hard | random mix | 44 | 49 | 53 |
+| reconcile_hard · hard | 12 issues, 100 invoices | 50 | 56 | 58 |
+
+The heaviest hard episode leaves 42 % of the budget: a script needs ≤ 58 steps, a learning agent has room
+to explore.
+
 ### Edge cases (all tested)
 
 | case | behaviour | test |
