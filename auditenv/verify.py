@@ -4,7 +4,9 @@ Works only from the public tables plus the closed files (truth, provenance); it 
 reuse generator internals. For each episode it checks:
 1. structure: ids unique, counts, base-currency ledger, one-sided integer amounts;
 2. pre-injection books (provenance changes reverted): every journal balances and the books
-   follow the bookkeeping policy exactly -> zero discrepancies;
+   follow the bookkeeping policy exactly -> zero discrepancies; in both books every account is in the
+   published chart and allowed for its journal type, entities match the invoices, and unreferenced
+   payment remainders sit in 2900 at the payment-date rate;
 3. post-injection books: every journal still balances, and the set of discrepancies recomputed
    from the records equals the truth (type, affected_ids, amount) — nothing undeclared, nothing
    unsupported;
@@ -144,12 +146,9 @@ class Books:
             if posted != correct:
                 issues.append(("fx_error", (pid,), abs(posted - correct)))
             refs = pay["invoice_refs"] or []
-            if not refs:
-                unapplied = sum(r["credit_minor"] - r["debit_minor"] for r in rows if r["account"] == "2900")
-                if unapplied != correct:
-                    problems.append(f"payment {pid}: incorrect unapplied cash for unreferenced payment")
             if sum(r["amount_minor"] for r in refs) > max(pay["amount_minor"], 0):
                 problems.append(f"payment {pid}: refs exceed amount")
+            short = False
             for ref in refs:
                 inv = self.invoices.get(ref["invoice_id"])
                 if inv is None:
@@ -159,9 +158,16 @@ class Books:
                 credit = sum(r["credit_minor"] - r["debit_minor"] for r in rows
                              if r["account"] == "1200" and r["invoice_id"] == inv["invoice_id"])
                 if credit < expected:
+                    short = True
                     issues.append(("payment_allocation", tuple(sorted((inv["invoice_id"], pid))), expected - credit))
                 elif credit > expected:
                     problems.append(f"payment {pid} over-allocated to {inv['invoice_id']}")
+            # the unreferenced remainder is Cr 2900 at the payment-date rate; an allocation shortfall adds to it
+            rest = pay["amount_minor"] - sum(r["amount_minor"] for r in refs)
+            rest = self.conv(rest, pay["currency"], pay["timestamp"])
+            unapplied = sum(r["credit_minor"] - r["debit_minor"] for r in rows if r["account"] == "2900")
+            if unapplied != rest and not (short and unapplied > rest):
+                problems.append(f"payment {pid}: incorrect unapplied cash for {'' if refs else 'un'}referenced payment")
             ar_ids = {r["invoice_id"] for r in rows if r["account"] == "1200"}
             if not ar_ids <= {r["invoice_id"] for r in refs}:
                 problems.append(f"payment {pid} credits an invoice it does not reference")
@@ -215,6 +221,38 @@ def _structure(ep: dict) -> list[str]:
             problems.append(f"ledger row {r['row_id']} references unknown payment {r['payment_id']}")
     if not 200 <= len(t["ledger"]) <= 2000 or not 20 <= actual_docs <= 200:
         problems.append("episode size outside 200-2000 rows / 20-200 documents")
+    return problems
+
+
+PAYMENT_ACCOUNTS = ("1000", "1200", "2900", "7900")
+
+
+def _ledger_policy(tables: dict, accounts: dict) -> list[str]:
+    """Account usage of the published policy.ledger: chart of accounts, accounts per journal type, entities."""
+    problems = []
+    invoices = {i["invoice_id"]: i for i in tables["invoices"]}
+    pay_entities = defaultdict(set)
+    for r in tables["ledger"]:
+        rid, acc, iid, pid = r["row_id"], r["account"], r["invoice_id"], r["payment_id"]
+        if acc not in accounts:
+            problems.append(f"ledger row {rid}: unknown account {acc}")
+            continue
+        if pid:
+            if acc not in PAYMENT_ACCOUNTS:
+                problems.append(f"ledger row {rid}: account {acc} not allowed in payment journal")
+            elif acc != "1200":
+                pay_entities[pid].add(r["entity_id"])
+        elif iid:
+            if acc not in ("1200", "4000"):
+                problems.append(f"ledger row {rid}: account {acc} not allowed in invoice journal")
+        elif r["entity_id"] is not None or not ((acc.startswith("6") and r["debit_minor"])
+                                                 or (acc == "1000" and r["credit_minor"])):
+            problems.append(f"ledger row {rid}: not an expense journal posting (Dr 6xxx / Cr 1000, no ids)")
+        if (acc == "1200" or not pid) and iid in invoices and r["entity_id"] != invoices[iid]["entity_id"]:
+            problems.append(f"ledger row {rid}: entity differs from invoice {iid}")
+    for pid, entities in pay_entities.items():
+        if len(entities) > 1:
+            problems.append(f"payment {pid}: cash, unapplied and FX rows name different entities")
     return problems
 
 
@@ -306,13 +344,15 @@ def verify_episode(ep: dict) -> list[str]:
     m, t = ep["manifest"], ep["tables"]
     if ep["truth"].get("episode_id") != m["episode_id"]:
         problems.append("truth episode_id differs from manifest")
+    accounts = ep["policy"]["ledger"]["accounts"]
     # pre-injection: correct books
-    pre_issues, pre_problems = Books(m, revert(ep)).discrepancies()
-    problems += [f"pre-injection: {p}" for p in pre_problems]
+    pre_tables = revert(ep)
+    pre_issues, pre_problems = Books(m, pre_tables).discrepancies()
+    problems += [f"pre-injection: {p}" for p in pre_problems + _ledger_policy(pre_tables, accounts)]
     problems += [f"pre-injection discrepancy {i}" for i in pre_issues]
     # post-injection: declared discrepancies == recomputed discrepancies
     issues, post_problems = Books(m, t).discrepancies()
-    problems += [f"post-injection: {p}" for p in post_problems]
+    problems += [f"post-injection: {p}" for p in post_problems + _ledger_policy(t, accounts)]
     found = sorted(issues)
     declared = sorted((i["type"], tuple(i["affected_ids"]), i["expected_amount_minor"])
                       for i in ep["truth"]["issues"])

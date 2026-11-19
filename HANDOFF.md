@@ -28,6 +28,10 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 8 in progress · 20 November 2026
+
+Branch `night/2026-11-20-r8`, tasks in `night/TASKS.md`. The verifier now enforces the published ledger policy's account usage. On clean seed 0 it used to accept a payment's 2900 remainder or 7900 row moved to revenue, an expense booked to an unknown account, and an invoice journal re-tagged to another customer (`REVIEW.md` → "Round 8"). `tests/test_ledger_policy.py` covers these tampers. The official check, `verify --seeds 0-199` (600/600) and both seed sweeps pass. Workers are adding independent sweeps of ledger accounts and timestamps.
+
 ## Round 7 complete · 20 November 2026
 
 All seven tasks passed on `night/2026-11-20-r7`. The verifier now checks the signed unapplied-cash posting (account 2900) for an unidentified receipt or refund; on clean seed 7, moving such a receipt to revenue used to pass. A new test confirms every payment receivables posting names the customer of the invoice it settles: 0 mismatches across 200 heavy episodes (5,148 postings).

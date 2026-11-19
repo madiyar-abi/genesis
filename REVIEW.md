@@ -111,3 +111,7 @@ invalid submission, −1, logged (CONTRACT updated).
 
 - On clean seed 7, moving the unidentified receipt BNK-775392 from unapplied cash to sales revenue preserved journal balance and passed verification. The verifier now checks the signed payment-date amount in account 2900 for payments without invoice references. The regression covers both a foreign-currency receipt and a foreign-currency refund reclassified to FX gain or loss.
 - A private grading key on the recording machine changed the hard reconciliation F1 shown in the check tab. Both recording tabs and the slide reproduction command now select the public companies.
+
+## Round 8 jury review
+
+- On clean seed 0 the verifier accepted five ledger tampers that break the published `policy.ledger`. It accepted moving payment L02594's 2900 remainder (a payment with invoice refs) or the 7900 row L02583 to revenue 4000. It also accepted booking an expense to an unknown account 9999 or to 4000, and re-tagging an invoice journal with another customer's entity. The round-7 check of the 2900 amount covered only payments without invoice refs. The verifier now checks account usage in both the reconstructed and the published books: the chart of accounts, the accounts allowed per journal type, the entity on invoice and receivables rows, and the 2900 remainder at the payment-date rate for every payment. `tests/test_ledger_policy.py` covers the five tampers plus three variants.
