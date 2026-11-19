@@ -28,6 +28,10 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 7 in progress
+
+The seed-2003 demo rehearsal passed. Both recording tabs now use public companies even on a private grading machine. Worker assignments and the verifier regression are in `night/TASKS.md`.
+
 ## Round 6 complete · 20 November 2026
 
 All seven tasks passed on `night/2026-11-20-r6`. The verifier rejects out-of-period postings in the public and reconstructed ledgers, duplicate dated FX rates, and FX evidence identifiers that disagree with the date or currency pair. The independent sweep checked 52,901 FX rows across 200 heavy episodes.

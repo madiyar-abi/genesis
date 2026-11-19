@@ -1,0 +1,2 @@
+2026-11-20 00:52 lead — Round 7 uses the user-specified 18:00 local freeze. Assigned four independent worker checks and reproduced an unidentified receipt booked to revenue on clean seed 7.
+2026-11-20 00:52 lead — T6: rehearsed all five prompts and verified four findings and 0.958 return. A dummy grader key changed hard F1 from 0.752 to 0.732. Both recording commands now select public companies. Next: verifier and pitch.

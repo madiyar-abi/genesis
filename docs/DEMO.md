@@ -1,6 +1,6 @@
 # Demo video script (2 min 40 s)
 
-Before recording, open two terminal tabs in the repository root with Python 3.11 and `uv` installed. In tab A run `uv run python -m auditenv.check`. Wait for `ALL CHECKS PASSED` and leave the results on screen. In tab B run the public example below and leave it at the first `[enter]` prompt. Removing the grader key from this command's environment reproduces the public example if the recording machine also runs private evaluations.
+Before recording, open two terminal tabs in the repository root with Python 3.11 and `uv` installed. In tab A run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. Wait for `ALL CHECKS PASSED` and leave the results on screen. In tab B run the public example below and leave it at the first `[enter]` prompt. Both commands use the public companies even when the recording machine has a private grader key.
 
 ```bash
 env -u AUDITENV_SECRET uv run python -m auditenv.demo --seed 2003 --pause
