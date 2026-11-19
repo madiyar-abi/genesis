@@ -29,6 +29,8 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] Doc link submitted in the personal account on the site
 
 ## Status
+**Round 2 (agent polish run) in progress on `night/2026-11-19-r2`: goals in `night/ROUND2.md`, tasks in `night/TASKS.md`.**
+
 The official local check passed all 256 tests and all evaluation gates on Python 3.11.18. The final 0–999 sweep ran 3,000 episodes with zero problems. All 120 existing public train/dev files matched main byte for byte after the evidence fix.
 
 GitHub Actions built the Docker image and passed the offline container check on the implementation commit. The manual run also exercises the two pinned Python patch versions. [Extended matrix and job results](https://github.com/madiyar-abi/genesis/actions/runs/44551717103)
