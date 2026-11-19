@@ -101,3 +101,9 @@
 ## 2026-11-19 21:46 lead
 - Merged codex M1 (reviewed). Review fix: the excluded-identifier table printed every raw id value (2 661 lines for
   50 seeds); now lists only values with support >= min_support and prints the total count (215 lines).
+
+## 2026-11-19 21:47 lead
+- Decision: skip H1 (expert difficulty) and E5 (rule-search baseline), marked [!]. Reason: SPEC §10 scores
+  correctness of env/grader, not difficulty ("Высокая награда oracle сама по себе не даёт баллов за сложность";
+  "недоказанные улучшения обучения баллов не дают"); H1 would add a third generator path (high risk to the
+  verified data), E5 could read as model training. Time goes to the jury-style review findings instead.

@@ -106,8 +106,8 @@ Workers: touch ONLY the files listed for your task.
   (`grep` it)
 
 ## Block 4 — optional (only if 1–3 done)
-- [ ] H1 (lead) "expert" difficulty (opt-in) — accept: new check gates, default episodes byte-identical
-- [ ] E5 (lead) Rule-search baseline — last, skip if short on time
+- [!] H1 (lead) SKIPPED (see LOG 22:0x) "expert" difficulty (opt-in) — accept: new check gates, default episodes byte-identical
+- [!] E5 (lead) SKIPPED (see LOG) Rule-search baseline — last, skip if short on time
 
 ## Jury materials (last)
 - [x] J1 (lead) `docs/DEMO.md` — demo-video script: 2–3 min, numbered steps, exact commands, what to say, which
