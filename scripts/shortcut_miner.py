@@ -13,7 +13,7 @@ Labels per issue type T:
   evidence           -- invoice/payment: its doc_id, ledger row: its row_id, is in a T evidence set
 For each (table, feature, value) with support >= --min-support records: precision = P(label | value),
 lift = precision / base rate of that table. Values with precision > 0.5 are flagged; exit 1 if any
-(unless --report-only).
+(unless --report-only). Raw per-episode identifier values are listed separately from these metrics.
 """
 
 from __future__ import annotations
@@ -38,6 +38,7 @@ CONFIGS = {"random_mix": {}, "heavy": HEAVY}
 LABELINGS = ("affected", "evidence")
 TABLES = ("ledger", "invoices", "payments")
 FLAG = 0.5
+RAW_ID_FEATURES = {"entity_id", "counterparty_id", "customer_id", "invoice_id", "payment_id", "row_id", "doc_id"}
 
 
 def shape(s) -> str:
@@ -209,16 +210,24 @@ def mine(seeds: list[int], hard: bool = False, configs: dict | None = None, min_
                                 base_pos[(labeling, t, table)] += 1
                                 pos.update((labeling, t) + k for k in keys)
 
+    excluded = []
+    eligible = []
+    for (table, feat, val), n in total.items():
+        if val is not None and feat.partition("@acct")[0] in RAW_ID_FEATURES:
+            excluded.append({"table": table, "feature": feat, "value": str(val), "support": n})
+        elif n >= min_support:
+            eligible.append((table, feat, val, n))
+    excluded.sort(key=lambda c: (c["table"], c["feature"], c["value"]))
+
     result = {"episodes": episodes, "seeds": len(seeds), "hard": hard, "configs": list((configs or CONFIGS)),
-              "min_support": min_support, "records": dict(base_n), "labelings": {}, "flagged": []}
+              "min_support": min_support, "records": dict(base_n), "labelings": {}, "flagged": [],
+              "excluded": excluded}
     for labeling in LABELINGS:
         per_type = {}
         for t in ISSUE_TYPES:
             base = {tb_: base_pos[(labeling, t, tb_)] / base_n[tb_] if base_n[tb_] else 0.0 for tb_ in TABLES}
             cands = []
-            for (table, feat, val), n in total.items():
-                if n < min_support:
-                    continue
+            for table, feat, val, n in eligible:
                 p = pos[(labeling, t, table, feat, val)] / n
                 if p == 0:
                     continue
@@ -256,6 +265,10 @@ def markdown(r: dict, seconds: float) -> str:
                 out.append(f"| {c['table']} | {c['feature']} | {c['value']} | {c['support']} | {c['positives']} | "
                            f"{c['precision']:.3f}{mark} | {c['lift']:.1f} |")
     out += ["", f"Flagged values: {len(r['flagged'])}"]
+    out += ["", "## Excluded: per-episode random identifiers", "", f"Excluded values: {len(r['excluded'])}", "",
+            "| table | feature | value | support |", "|---|---|---|---|"]
+    for c in r["excluded"]:
+        out.append(f"| {c['table']} | {c['feature']} | {c['value']} | {c['support']} |")
     return "\n".join(out)
 
 

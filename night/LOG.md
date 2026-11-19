@@ -74,3 +74,6 @@
 ## 2026-11-19 21:37 lead
 - C2/P1/E2 marked done after review. E2 timing table pasted into DESIGN §9 (scripts/bench.py output).
 - Committed scripts/shortcut_miner.py + test (D4 still open: leak fixes next).
+
+## 2026-11-19 21:44 codex
+- M1 done: raw non-null ID values are listed once per table, feature and value in Markdown and JSON, outside the precision rankings and flags. Null stays eligible as a missing-reference signal, and identifier shapes and suffixes stay eligible. Added miner, bench, sensitivity and chart Makefile targets. Targeted tests (3) and make dry run passed. Seeds 0–199 covered 400 episodes, with 9,718 excluded values and no entity_id flags. Official check passed (277 tests and all gates); fuzz passed (3,000 episodes, zero problems). Next: idle unless the lead adds another codex task.
