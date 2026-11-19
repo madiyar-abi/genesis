@@ -30,7 +30,7 @@ message says a Google Doc — follow the latest, re-check the form before submit
 
 ## Round 3 · 19 November 2026
 
-Demo rehearsal complete. Follow `docs/DEMO.md` for the 2:40 video.
+Demo rehearsal complete. Follow `docs/DEMO.md` for the 2:40 video. The ten-slide outline in `docs/PITCH.md` is verified against the same demo and the measured results.
 
 Branch `night/2026-11-19-r3`. The round freeze is 22 November at 18:00 local time. Round 2 is in main. The verifier now rejects a truth amount denominated in the wrong currency. Run `uv run python -m unittest tests.test_verify` for all six verifier tests. Jury map, demo and pitch checks are tracked in `night/TASKS.md`.
 
