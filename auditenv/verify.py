@@ -101,6 +101,9 @@ class Books:
             if ar["debit_minor"] != correct:
                 issues.append(("fx_error", (iid,), abs(ar["debit_minor"] - correct)))
         for iid, inv in self.invoices.items():
+            for n, line in enumerate(inv["line_items"], start=1):
+                if line["amount_minor"] != line["quantity"] * line["unit_price_minor"]:
+                    problems.append(f"invoice {iid} line {n} amount != quantity times unit price")
             if sum(li["amount_minor"] for li in inv["line_items"]) != inv["total_minor"]:
                 problems.append(f"invoice {iid} total != line items")
             if self.in_period(inv["issued_at"]) and iid not in booked:

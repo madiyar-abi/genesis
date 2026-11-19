@@ -1,0 +1,1 @@
+2026-11-19 23:39 lead — T8: seed 7 failed the new line-extension test before the fix. All seven verifier tests pass. Confirmed the public split and pitch defects in REVIEW.md. Worker wrappers entered the main checkout; attached worker branches in their named worktrees to preserve isolation. Next: indexed split verification.

@@ -28,6 +28,10 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 4 in progress
+
+Branch `night/2026-11-19-r4`. The verifier checks each invoice line against quantity times unit price. Run `uv run python -m unittest tests.test_verify`. Remaining assignments are in `night/TASKS.md`. Freeze is 22 November at 18:00 Astana.
+
 ## Round 3 complete · 19 November 2026
 
 Demo rehearsal complete. Follow `docs/DEMO.md` for the 2:40 video. The ten-slide outline in `docs/PITCH.md` is verified against the same demo and the measured results.
