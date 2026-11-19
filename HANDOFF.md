@@ -4,7 +4,7 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Last updated:** 2026-11-18 · by: Claude (setup) · branch: `main`
+**Last updated:** 2026-11-19 13:40 · by: Claude (setup) · branch: `night/2026-11-19`
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
@@ -29,9 +29,10 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] Doc link submitted in the personal account on the site
 
 ## Status
-Setup is done, no product code yet. Waiting for the case — published on the
-hackathon site on 2026-11-19 at 12:00; it goes into `night/SPEC.md` and the
-agent run starts from there.
+Case received (FinTech: RL environment for AI financial audit) → `night/SPEC.md`
+(PDF: `night/case.pdf`). Agent run started on `night/2026-11-19`; no product
+code yet. Note: the PDF's deadline is 2026-11-22 23:59 Astana, the organizer
+chat said 22:00 — we plan for 22:00.
 
 ## Done
 - Repo connected to https://github.com/madiyar-abi/genesis, `.gitignore` for
@@ -43,7 +44,7 @@ agent run starts from there.
   Plus accounts), each in its own worktree and branch. Rehearsed end-to-end.
 
 ## In progress
-- Nothing — waiting for the case (2026-11-19, 12:00).
+- Agent run (lead Claude + workers gemini, codex) planning `night/TASKS.md` from the spec.
 
 ## Left to do
 - Full task list with acceptance checks: `night/TASKS.md` (created when the spec arrives).
