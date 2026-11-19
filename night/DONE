@@ -1,4 +1,0 @@
-Round 2 done 2026-11-19 22:29 (lead). All tasks in night/TASKS.md are [x] except H1/E5 ([!], skipped on purpose).
-Verified at this commit: auditenv.check exit 0 (283 tests, all gates), fuzz 0-999 and --hard 0-199 PASSED,
-verify 600/600 + train/dev/hard dirs valid, sync_docs --check ok, golden 80/80, mutate 15/15, attack 0 violations,
-trajectories reproduce byte-for-byte, CI green on the night branch.
