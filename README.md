@@ -78,6 +78,27 @@ uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval
 Policies: `random`, `reconcile`, `flag_all`, `oracle` (grader-side, reads truth — reward ceiling only).
 Each trajectory line: `episode_id, step, action, observation, reward, terminated, truncated`.
 
+### Plugging in your own policy (organisers' baselines)
+
+Any object with `reset(first_observation)` and `act(observation) -> action` works:
+
+```python
+from auditenv.env import AuditEnv
+from auditenv.run import run_episode
+
+class MyPolicy:
+    def reset(self, first_observation): self.ep = first_observation["manifest"]["episode_id"]
+    def act(self, observation):
+        return {"type": "submit", "findings": {"episode_id": self.ep, "findings": []}}
+
+traj = run_episode(AuditEnv(), MyPolicy(), seed=2001, config={"mode": "train"})
+print(traj[-1]["reward"])
+```
+
+A policy in another language talks to `python -m auditenv.server` over JSON lines (below).
+The four baseline adapters live in `auditenv/policies/` (`random_explorer.py`, `reconcile.py`,
+`flag_all.py`, `oracle.py`; plus `naive_reconcile.py`).
+
 ### Out-of-process evaluation (closed run)
 
 ```bash
