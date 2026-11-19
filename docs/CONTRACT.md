@@ -84,7 +84,9 @@ set's records (plus the manifest).
 Interacting scenarios: `I1` = foreign-currency payment at the period boundary that is
 partially allocated (`payment_allocation`) **and** converted at the wrong date (`fx_error`
 on the payment). `I2` = next-period foreign invoice booked in the period (`period_cutoff`)
-at the booking-date rate (`fx_error` on the invoice).
+and converted using the booking-date rate or an earlier fallback rate (1, 2, or 4 days before
+booking when the rate difference at the booking date is below the minimum threshold; `fx_error`
+on the invoice).
 
 ## 4. Environment API (`auditenv/env.py`)
 ```python

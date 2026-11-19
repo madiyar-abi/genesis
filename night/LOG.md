@@ -21,3 +21,5 @@ for difficulty in ("default", "hard"):
     print(difficulty, "100 episodes", count, "FX rows")
 PY
 ```
+
+2026-11-20 00:39 gemini2 — T2 completed: verified that I2 can use an earlier rate than the booking date when abs(conv(booking) - conv(inv._cdate)) < MIN_DIFF (100 minor units). Verified injector fallback in auditenv/inject.py (line 259) across 500 seeds with I2: in 498 episodes (99.6%) the booking-date rate was used, and in 2 episodes (0.4%, seeds 180 and 497) it fell back to 1 day earlier (booking - 1d, 2025-02-27 instead of 2025-02-28). Updated docs/CONTRACT.md and docs/DESIGN.md to describe actual date selection (booking date or earlier fallback day 1, 2, or 4 days before booking). All 311 unit tests pass. Next: IDLE.
