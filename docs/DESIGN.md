@@ -63,7 +63,8 @@ brute-forced from the id nor the episode regenerated from the open-source code. 
 
 **Interacting scenarios** (each yields two truth issues computed after both changes):
 - `I1` — foreign-currency payment late on the last day: partially allocated **and** its cash
-  converted at the next day's rate (the date shown in the bank's timezone).
+  converted at another day's rate: the date shown in the bank's timezone, usually the next day
+  (two or three days later, or the day before, when the next day's rate would not change the amount).
 - `I2` — next-period foreign invoice backdated into the period **and** converted using the rate
   of the booking date or an earlier fallback day (1, 2, or 4 days earlier when the booking-date conversion
   differs from the correct invoice value by less than 10 base-currency minor units; period_cutoff + fx_error on the same invoice).
@@ -185,7 +186,8 @@ plain-hash `episode_id` (now HMAC + grader key in the RNG); a crash/overrun on n
 I1 payment, a timestamp-mismatch shortcut for cutoff, a telltale hour on duplicate copies (removed,
 measured with the shortcut's precision: 1.00 → undefined / 0.09 / 0.02); evidence sets that did not
 contain the FX rate or the invoice document; skipping hidden episodes in server mode (now graded as
-abandoned); config spelling changing the company; a rare injector crash; < 20 documents in tiny configs.
+abandoned, including the ones never reset before close or EOF); config spelling changing the company;
+a rare injector crash; < 20 documents in tiny configs.
 
 The verifier found one real generator bug during development (two retainer invoices could get
 the same ISO-week label → an undeclared duplicate in clean books); it is fixed and covered by tests.
@@ -206,16 +208,17 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 | policy | seeds | P | R | F1 | return | steps | time s | exp. return* |
 |---|---|---|---|---|---|---|---|---|
 | random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.004 | −0.807 |
-| naive reconciliation | 2000–2009 | 0.169 | 0.700 | 0.273 | −0.506 | 17.2 | 0.004 | −0.210 |
-| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.957 | 22.5 | 0.004 | 0.957 |
+| naive reconciliation | 2000–2009 | 0.169 | 0.700 | 0.273 | −0.506 | 17.2 | 0.004 | −0.539 |
+| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.957 | 22.5 | 0.005 | 0.957 |
 | flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.003 | −1.000 |
 | oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.003 | 1.000 |
 
 Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30 truth issues).
 P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode. Timing is a snapshot of the measurement host. CI compares deterministic cells and checks that times are finite and nonnegative.
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
-expected amount, FP by the claimed amount; reported separately, the shared reward is unchanged.
-Other gates in the same run: 355 unit tests pass; verifier 200/200 episodes valid (600/600 with
+expected amount, FP by the claimed amount but at least the mean expected amount (a zero claim is no free
+accusation); reported separately, the shared reward is unchanged.
+Other gates in the same run: 359 unit tests pass; verifier 200/200 episodes valid (600/600 with
 `auditenv.verify --seeds 0-199`); 20/20 paired checks on default and 20/20 on hard episodes; out-of-process run leaks nothing.
 
 Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200
@@ -268,8 +271,8 @@ and checks that every credit note is in the period and after its booking.
 | policy | P | R | F1 | return | steps | exp. return* |
 |---|---|---|---|---|---|---|
 | random explorer (seeded) | 0.000 | 0.000 | 0.000 | −0.806 | 33.1 | −0.806 |
-| naive reconciliation | 0.105 | 0.630 | 0.181 | −0.711 | 33.4 | −0.565 |
-| reconciliation (default rules) | 0.651 | 0.891 | 0.752 | 0.288 | 43.2 | 0.103 |
+| naive reconciliation | 0.105 | 0.630 | 0.181 | −0.711 | 33.4 | −0.752 |
+| reconciliation (default rules) | 0.651 | 0.891 | 0.752 | 0.288 | 43.2 | 0.078 |
 | reconciliation + hard rules (`reconcile_hard`) | 1.000 | 1.000 | 1.000 | 0.916 | 43.2 | 0.916 |
 | flag-everything attack | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | −1.000 |
 | oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 1.000 |

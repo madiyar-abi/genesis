@@ -19,7 +19,7 @@ If you need something not described here, choose the simplest option and log it.
 
 ## 2. Public tables (what the agent may read)
 `manifest` (in the first observation):
-`{schema_version, episode_id, base_currency, period_start, period_end, timezone,
+`{schema_version, generator_version, episode_id, base_currency, period_start, period_end, timezone,
   counts: {ledger, invoices, payments, fx, documents}, rounding: "ROUND_HALF_UP",
   amount_exponents: {CUR: exp}}` — `period_start/end` are dates `YYYY-MM-DD`
 (inclusive), `timezone` is a fixed offset like `+05:00`.
@@ -115,7 +115,7 @@ Step observation: `{step, steps_remaining, result, error}` — `error` is null o
 `{code, message}`; `result` holds only what was requested.
 
 Actions (`type` + params):
-- `{"type":"list_records","table":T,"cursor":null|str,"limit":int}` → `{rows, next_cursor, total}`, max 50 rows (larger limit is clamped), cursor opaque & stable.
+- `{"type":"list_records","table":T,"cursor":null|str,"limit":int}` → `{rows, next_cursor, total}`, max 50 rows (larger limit is clamped), cursor stable (`table:offset`; a hand-written offset only pages the same public table).
   `invoices` rows in listings omit `line_items`.
 - `{"type":"get_record","table":T,"id":str}` → `{record}`
 - `{"type":"get_document","doc_id":str}` → `{kind: "invoice"|"payment", document}` (full record)
