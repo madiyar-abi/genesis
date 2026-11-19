@@ -13,3 +13,7 @@
 - T2 done: bounded decimal calculator. Targeted and full unittest runs passed.
 - Assumptions: whitespace may surround expressions; unary signs preserve literal digits, and binary operations use precision 28.
 - Next: T4 metrics.
+
+## 2026-11-19 13:41 — codex
+- T4 done: P/R/F1 and six-place terminal reward. Ten targeted tests and the full suite passed.
+- Next: T11 once lead marks T7 done. T18 is independent.
