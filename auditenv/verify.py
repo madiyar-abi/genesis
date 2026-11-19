@@ -16,6 +16,7 @@ reuse generator internals. For each episode it checks:
 from __future__ import annotations
 
 import copy
+import os
 from collections import defaultdict
 from datetime import date
 
@@ -232,8 +233,26 @@ def main(argv=None) -> int:
 
     ap = argparse.ArgumentParser(description="verify generated episodes")
     ap.add_argument("--seeds", default="0-199")
+    ap.add_argument("--dir", default=None,
+                    help="verify every episode under this directory (e.g. episodes/dev)")
     args = ap.parse_args(argv)
     bad = 0
+
+    if args.dir:
+        from .load import load_episode
+
+        for entry in sorted(os.listdir(args.dir)):
+            ep_path = os.path.join(args.dir, entry)
+            if not os.path.isdir(ep_path) or not os.path.isdir(os.path.join(ep_path, "public")):
+                continue
+            ep = load_episode(ep_path)
+            probs = verify_episode(ep)
+            if probs:
+                bad += 1
+                print(f"{entry}: {probs[:3]}")
+        print(f"episodes with problems: {bad}")
+        return 1 if bad else 0
+
     for seed in parse_seeds(args.seeds):
         for cfg in (None, {"errors": {}}, {"errors": {"duplicate_invoice": 2, "payment_allocation": 2, "fx_error": 2,
                                                        "period_cutoff": 2}, "interacting": {"I1": 1, "I2": 1}}):

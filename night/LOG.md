@@ -125,3 +125,9 @@
 ## 2026-11-19 14:02 — lead
 - Merged gemini T16: configs/{train,dev,eval_example}.json (config_version 1.0), auditenv/export.py, episodes/{train,dev} (10+10, 1.8 MB). Check uses configs/dev.json now: reconcile F1 1.000 / return 0.958; naive F1 0.325; random −0.614; flag-all −1.000; oracle 1.000.
 - T27 done: trajectories/train_{reconcile,random,naive_reconcile}.jsonl (train split, mode train, 3.6 MB) + tests/test_trajectory_files.py.
+
+## 2026-11-19 14:09 — gemini
+- T28 done: auditenv/load.py (load_episode: inverse of export — CSV empty cell → None, debit_minor/credit_minor → int, rate stays string), auditenv/verify.py main() updated with --dir option.
+- tests/test_load.py: 6 tests — roundtrip for dev and train (loaded == generate minus task key), verify_episode on all loaded episodes, --dir CLI exits 0.
+- All 181 tests pass. `uv run python -m auditenv.verify --dir episodes/dev` exits 0.
+- Next: no open gemini tasks remaining.
