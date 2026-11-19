@@ -8,7 +8,7 @@ contract, actions, findings format or the shared reward (`matcher.py`, `metrics.
 Workers: touch ONLY the files listed for your task.
 
 ## Block 1 — reward / contract / isolation
-- [ ] R2 (codex) Mutation testing of the reward: new `scripts/mutate_reward.py` applies ~15 single-line source
+- [x] R2 (codex) Mutation testing of the reward: new `scripts/mutate_reward.py` applies ~15 single-line source
   mutations, one at a time, to an in-memory copy of `auditenv/matcher.py` and `auditenv/metrics.py` (e.g. flip
   `<=`/`<`, change tolerance constant, drop a check in `_checks`, swap precision/recall, remove dedup, change step
   cost), writes the mutated module to a temp dir copy of the package (never edit the real files), runs
@@ -18,7 +18,7 @@ Workers: touch ONLY the files listed for your task.
   tests/test_reward_attacks.py, tests/test_mutate_reward.py (smoke test: the script's mutant list is non-empty and
   every mutation pattern matches the source exactly once) — accept: `uv run python scripts/mutate_reward.py` exit 0,
   all mutants killed; `uv run python -m unittest tests.test_mutate_reward tests.test_reward_attacks` green
-- [ ] C3 (codex) Injectable clock for the 60 s limit: `AuditEnv(clock=time.monotonic)` — optional constructor
+- [x] C3 (codex) Injectable clock for the 60 s limit: `AuditEnv(clock=time.monotonic)` — optional constructor
   argument, default unchanged; replace the three `time.monotonic()` calls in `auditenv/env.py` with `self._clock()`.
   New `tests/test_clock.py` with a fake clock: (a) a step at elapsed 59.9 s works, (b) the first step after 60.0+ s
   returns error code `time_limit`, truncated=True, terminated=False, empty-answer grade in train mode, (c) the step
@@ -61,7 +61,7 @@ Workers: touch ONLY the files listed for your task.
   lead pastes the table into DESIGN — files: scripts/bench.py, tests/test_bench.py (smoke test running a tiny
   subset via a function call, < 10 s) — accept: `uv run python scripts/bench.py` prints the table, exit 0;
   `uv run python -m unittest tests.test_bench` green
-- [ ] E3a (codex) Makefile targets `fuzz` (`uv run python -m auditenv.fuzz --seeds 0-999`), `stress`
+- [x] E3a (codex) Makefile targets `fuzz` (`uv run python -m auditenv.fuzz --seeds 0-999`), `stress`
   (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299` and the hard variant `--hard --stress
   reconcile_hard --seeds 0-299` if `--hard` supports it — check `auditenv/fuzz.py`), `attack`
   (`uv run python -m auditenv.attack`), `golden` (`uv run python scripts/golden.py --check`), `mutate`
