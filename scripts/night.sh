@@ -84,7 +84,10 @@ IDLE_MAX="${IDLE_MAX:-1200}"                             # cap for the idle back
 NEXT_SLEEP="${NEXT_SLEEP:-15}"                           # pause between normal runs
 AGY_TURN_TIMEOUT="${AGY_TURN_TIMEOUT:-7200s}"            # agy turn cap (e.g. stuck waiting for a login)
 
-cd "$(dirname "$0")/.." || exit 1
+# Work in the git worktree of the current directory (the marathon starts workers from
+# their own worktrees with one shared script path); fall back to the script's repo.
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || ROOT="$(dirname "$0")/.."
+cd "$ROOT" || exit 1
 mkdir -p .night-logs night
 
 # Keep the Mac awake for as long as this script runs.
