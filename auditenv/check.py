@@ -196,17 +196,21 @@ def run_paired(n: int = 20, hard: bool = False) -> bool:
                 failures.append((seed, "transform", f"{table} row order was not shuffled"))
             by_id = {r[key]: r for r in transformed}
             for old, new_key in zip(originals, expected):
-                new = by_id[new_key]
-                links = [(old[field], new[field]) for field in secondary]
-                if table == "payments":
-                    old_refs, new_refs = old["invoice_refs"], new["invoice_refs"]
-                    if (old_refs is None) != (new_refs is None) or len(old_refs or []) != len(new_refs or []):
-                        failures.append((seed, "transform", "payment invoice references changed"))
-                        break
-                    links.extend((a["invoice_id"], b["invoice_id"]) for a, b in zip(old_refs or [], new_refs or []))
-                if any((value is not None and value not in id_map) or id_map.get(value) != target
-                       for value, target in links):
-                    failures.append((seed, "transform", f"{table} contains an incorrectly translated reference"))
+                expected_row = dict(old)
+                expected_row[key] = new_key
+                try:
+                    for field in secondary:
+                        if old[field] is not None:
+                            expected_row[field] = id_map[old[field]]
+                    if table == "payments" and old["invoice_refs"] is not None:
+                        expected_row["invoice_refs"] = [
+                            {**ref, "invoice_id": id_map[ref["invoice_id"]]} for ref in old["invoice_refs"]
+                        ]
+                except KeyError as missing:
+                    failures.append((seed, "transform", f"{table} missing ID mapping for {missing}"))
+                    break
+                if json.dumps(expected_row, sort_keys=True) != json.dumps(by_id[new_key], sort_keys=True):
+                    failures.append((seed, "transform", f"{table} row {new_key} changed beyond ID translation"))
                     break
 
         # Untranslated dirty findings must earn zero TP against the transformed truth

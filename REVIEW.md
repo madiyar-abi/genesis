@@ -180,3 +180,7 @@ A failed reset installed the requested configuration before the generator
 validated its error counts. On an existing evaluation episode, the next step
 then used the rejected budget and mode. The regression takes an inspection,
 attempts the reset, continues inspecting and submits in the original episode.
+
+The paired check originally passed both a clean and a dirty episode when the
+test transform replaced every invoice due date with its issue date. It now
+compares the complete public rows after translating the expected ID fields.

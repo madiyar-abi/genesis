@@ -7,4 +7,4 @@
 - [x] T5 (lead) Verify committed export directories independently — files: night/LOG.md — accept: verify --dir succeeds for train, dev and hard.
 - [x] T8 (lead) Preserve active episode settings after rejected resets — files: auditenv/env.py, reset regression tests — accept: rejected config preserves eval isolation and remaining budget.
 - [x] T6 (lead) Rehearse the numbered recording script — files: docs/DEMO.md, auditenv/demo.py, tests/test_demo.py — accept: reproduce the payment evidence, four matches and closed return with the printed commands.
-- [ ] T7 (lead) Verify slide outline and submission handoff — files: docs/PITCH.md, README.md, HANDOFF.md, auditenv/check.py, tests/test_paired_transform.py — accept: current metrics match slides, official check and SPEC review pass.
+- [x] T7 (lead) Verify slide outline and submission handoff — files: docs/PITCH.md, README.md, HANDOFF.md, auditenv/check.py, tests/test_paired_transform.py — accept: current metrics match slides, official check and SPEC review pass.

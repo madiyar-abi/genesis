@@ -2,3 +2,4 @@
 2026-11-20 04:48 lead T8. A failed reset now preserves the active episode’s evaluation mode and budget. The regression failed on the old code and all 33 environment tests passed after the fix.
 2026-11-20 04:48 lead T6. The rehearsed demo labels each amount in USD minor units. PAY-136430 shows $2.86 and $3,513.31. Four findings matched after 21 inspections and the closed return was 0.958.
 2026-11-20 04:48 lead T5. The DeepSeek launcher exited with a configuration error, so the lead ran auditenv.verify --dir for each committed split. All 10 train, 10 dev and 20 hard companies passed.
+2026-11-20 04:48 lead T7. The paired gate now compares complete translated public rows. A due-date mutation that previously passed is caught on both clean and dirty episodes. Both 20-pair suites passed and all three documentation tables matched current metrics. The submitter still needs the recording, credits, slide export and jury access.

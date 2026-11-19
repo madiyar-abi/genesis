@@ -40,6 +40,8 @@ Branch `night/2026-11-20-r12`. See `night/TASKS.md` for remaining work.
 
 - T5. The DeepSeek launcher exited with a configuration error, so the lead ran auditenv.verify --dir for each committed split. All 10 train, 10 dev and 20 hard companies passed.
 
+- T7. The paired gate now compares complete translated public rows. A due-date mutation that previously passed is caught on both clean and dirty episodes. Both 20-pair suites passed and all three documentation tables matched current metrics. The submitter still needs the recording, credits, slide export and jury access.
+
 ## Round 11 complete · 20 November 2026
 
 Work is on `night/2026-11-20-r11`. See `night/TASKS.md` for ownership and
