@@ -22,3 +22,8 @@
 - T18 done: Python 3.11 slim Dockerfile and build-context exclusions. Task grep checks and full unittest suite passed.
 - Assumptions: T18 can proceed while T11 waits for T7. The image runs the stdlib check entry point directly. Docker execution deferred because Docker is unavailable locally and T17 owns the check module.
 - Next: T11 after T7 is checked on the lead branch, with integrated acceptance once the T13 runner is available.
+## 2026-11-19 13:41 — gemini
+- T3 done: auditenv/schema.py (validate_findings, normalize_finding) + tests/test_schema.py (42 tests, all pass).
+- Constants: ISSUE_TYPES (4 types), MAX_FINDINGS=30, MAX_EVIDENCE=10, MAX_EXPLANATION=1000, MAX_AFFECTED=10.
+- Assumption: affected_ids containing non-string integers are rejected (spec says non-empty strings).
+- Next: T12 (after T8) or T16 (after T9) — both blocked; will IDLE until dependencies met.
