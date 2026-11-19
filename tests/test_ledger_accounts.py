@@ -92,7 +92,8 @@ def check_ledger_accounts(ep: dict) -> tuple[list[str], dict[str, int]]:
                 counts["check_d_credit"] += 1
             else:
                 problems.append(
-                    f"Row {row_id}: expense row has invalid account/amounts (account={acc!r}, debit={debit}, credit={credit})"
+                    f"Row {row_id}: expense row has invalid account/amounts "
+                    f"(account={acc!r}, debit={debit}, credit={credit})"
                 )
 
     return problems, counts
@@ -162,7 +163,8 @@ class LedgerAccountsTest(unittest.TestCase):
         expense_row = next(
             r
             for r in tampered["tables"]["ledger"]
-            if r.get("invoice_id") is None and r.get("payment_id") is None and r.get("account") in EXPENSE_DEBIT_ACCOUNTS
+            if r.get("invoice_id") is None and r.get("payment_id") is None
+            and r.get("account") in EXPENSE_DEBIT_ACCOUNTS
         )
         row_id = expense_row["row_id"]
         expense_row["account"] = "9999"
