@@ -17,7 +17,7 @@ MODELS=""
 ACCOUNTS="default"
 SLOTS=""
 usage() {
-  echo "usage: $0 [--role lead|worker] [--name NAME] [--engine claude|agy|codex] [--until HH:MM|\"YYYY-MM-DD HH:MM\"]"
+  echo "usage: $0 [--role lead|worker] [--name NAME] [--engine claude|agy|codex|deepseek] [--until HH:MM|\"YYYY-MM-DD HH:MM\"]"
   echo "          [--branch night/YYYY-MM-DD] [--model \"A,B\"] [--accounts \"default,DIR\"] [--workers \"gemini,codex\"]"
   echo "          [--slots \"engine|account|model;engine|account|model\"]   (overrides --engine/--model/--accounts)"
   exit 2
@@ -42,7 +42,7 @@ case "$ROLE" in lead|worker) ;; *) usage ;; esac
 
 # Build SLOTS from --engine/--accounts/--model when --slots is not given.
 if [ -z "$SLOTS" ]; then
-  case "$ENGINE" in claude|agy|codex) ;; *) usage ;; esac
+  case "$ENGINE" in claude|agy|codex|deepseek) ;; *) usage ;; esac
   # agy default: strongest model first, fallback with its own quota second.
   [ "$ENGINE" = agy ] && [ -z "$MODELS" ] && MODELS="Claude Opus 4.6 (Thinking),Gemini 3.8 Flash (High)"
   [ "$ENGINE" = claude ] && ACCOUNTS="default"
@@ -59,7 +59,7 @@ N_SLOTS=$(echo "$SLOTS" | awk -F';' '{print NF}')
 slot_spec()  { echo "$SLOTS" | cut -d';' -f"$1"; }
 slot_field() { slot_spec "$1" | cut -d'|' -f"$2"; }
 for k in $(seq 1 "$N_SLOTS"); do
-  case "$(slot_field "$k" 1)" in claude|agy|codex) ;; *) echo "bad slot: $(slot_spec "$k")"; usage ;; esac
+  case "$(slot_field "$k" 1)" in claude|agy|codex|deepseek) ;; *) echo "bad slot: $(slot_spec "$k")"; usage ;; esac
 done
 
 slot=1
@@ -173,6 +173,10 @@ run_engine() {
       [ -n "$sid" ] && set -- "$@" "$sid"
       set -- "$@" "$prompt"
       if [ -n "$home" ]; then CODEX_HOME="$home" "$CODEX_BIN" "$@"; else "$CODEX_BIN" "$@"; fi ;;
+    deepseek)
+      DEEPSEEK_BIN="${DEEPSEEK_BIN:-$(dirname "$0")/deepseek_worker.py}"
+      [ -n "$model" ] && set -- --model "$model"
+      python3 "$DEEPSEEK_BIN" -p "$prompt" "$@" --output-format json ;;
   esac
 }
 
@@ -224,6 +228,8 @@ while [ "$(now)" -lt "$DEADLINE" ]; do
       [ -n "$cid" ] && echo "$cid" > "$SESSION_FILE"
       # "type":"error" alone can be a warning (e.g. resumed with another model): the turn must complete.
       { [ "$rc" -ne 0 ] || grep -q '"type": *"turn\.failed"' "$out" || ! grep -q '"type": *"turn\.completed"' "$out"; } && failed=1 ;;
+    deepseek)
+      { [ "$rc" -ne 0 ] || ! grep -q '"status": *"SUCCESS"' "$out"; } && failed=1 ;;
   esac
 
   if [ "$failed" -eq 1 ] && grep -qiE 'usage limit|hit your limit|limit reached|rate.?limit|429|overloaded|quota|resource.?exhausted|resets|try again at|authentication required|not logged in' "$out"; then

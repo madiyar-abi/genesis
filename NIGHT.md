@@ -23,6 +23,8 @@ and branch (`night/<date>-<name>`); use exactly those names.
     separate weekly pools per account: Gemini models and Claude/GPT models (Opus
     4.6 burns the small Claude/GPT pool in minutes) — so run gemini on Flash.
     Worktree `../genesis-gemini`.
+  - **deepseek** — DeepSeek API worker (`--engine deepseek`), model `deepseek-v4.1-flash`
+    via ReformBoss API (`https://api.reformboss.com/v1`). Worktree `../genesis-deepseek`.
   - **codex** — Codex CLI (`--engine codex`), 2 ChatGPT Plus accounts
     (`~/.codex-acc1`, `~/.codex-acc2`), `gpt-6.2-astra` → `gpt-6.2-sol`.
     Worktree `../genesis-codex`. Don't run it while Codex is in the lead
@@ -45,7 +47,7 @@ and branch (`night/<date>-<name>`); use exactly those names.
 1. First run: read `night/SPEC.md`. Write `night/TASKS.md`: small tasks (≤ ~1h
    each), each with the files it touches and a concrete acceptance check.
    If the prompt lists running workers, tag with a worker's name (e.g.
-   `(gemini)`, `(codex)`) the tasks that are small, self-contained, touch files
+   `(gemini)`, `(deepseek)`, `(codex)`) the tasks that are small, self-contained, touch files
    no other owner's task touches, and have a mechanical check (a test, a
    command). Give each worker its own area of files. Everything else is `(lead)`.
    Always end TASKS.md with two `(lead)` tasks for the jury materials (humans
@@ -103,7 +105,7 @@ next round. The round's goal is in `night/ROUND.md` (read it first).
      findings with evidence in `REVIEW.md` → "Round N".
   3. Write `night/TASKS.md`: 3–8 tasks with the highest jury value per hour
      (real defects first, then evidence/tests, then docs accuracy). Small,
-     safe, each with a mechanical check. Grunt work → `(gemini)`.
+     safe, each with a mechanical check. Grunt work → `(gemini)`, `(deepseek)`.
   4. Do them, keep `auditenv.check` green after every commit, sync doc numbers
      (`scripts/sync_docs.py`), update HANDOFF, then `night/DONE`.
   5. Nothing with real jury value left? Log "no valuable improvement found"
