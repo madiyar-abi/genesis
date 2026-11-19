@@ -86,3 +86,10 @@ invalid submission, −1, logged (CONTRACT updated).
 - On heavy seed 5, changing one truth currency to a different denomination left the verifier green. It now checks the currency against the base currency, as required for ledger misstatements. A separate allocation-evidence test was nested under the module entry point and escaped discovery. Both checks now run in the official suite.
 - The jury map described the closed grader transport as a socket. The implementation uses JSON lines over subprocess stdin/stdout.
 - The pitch formula abbreviated the chargeable inspections as steps. The seed-2003 demo takes 22 actions including submission and charges 21 inspections.
+
+## Round 4 jury review
+
+- Seed 7 produced an invoice whose quantity could be doubled without triggering a verifier error. Line totals previously checked only their sum against the document total.
+- The same seed advertised 68 documents. Substituting 20 passed the verifier because it read the size bound from the manifest.
+- An empty directory or an indexed export with an episode folder removed could pass the directory verifier. The reported denominator counted only discovered episodes.
+- With a grader key set, the pitch's public demo command could change the company and reported score.

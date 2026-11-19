@@ -16,9 +16,11 @@ reuse generator internals. For each episode it checks:
 from __future__ import annotations
 
 import copy
-import os
+import csv
+import json
 from collections import defaultdict
 from datetime import date
+from pathlib import Path
 
 from .money import convert, local_date, parse_offset
 
@@ -101,6 +103,9 @@ class Books:
             if ar["debit_minor"] != correct:
                 issues.append(("fx_error", (iid,), abs(ar["debit_minor"] - correct)))
         for iid, inv in self.invoices.items():
+            for n, line in enumerate(inv["line_items"], start=1):
+                if line["amount_minor"] != line["quantity"] * line["unit_price_minor"]:
+                    problems.append(f"invoice {iid} line {n} amount != quantity times unit price")
             if sum(li["amount_minor"] for li in inv["line_items"]) != inv["total_minor"]:
                 problems.append(f"invoice {iid} total != line items")
             if self.in_period(inv["issued_at"]) and iid not in booked:
@@ -177,6 +182,9 @@ def _structure(ep: dict) -> list[str]:
     for name in ("ledger", "invoices", "payments", "fx"):
         if m["counts"][name] != len(t[name]):
             problems.append(f"manifest count mismatch for {name}")
+    actual_docs = len(t["invoices"]) + len(t["payments"])
+    if m["counts"].get("documents") != actual_docs:
+        problems.append("manifest count mismatch for documents")
     ids = [r["row_id"] for r in t["ledger"]] + [d["doc_id"] for d in t["invoices"] + t["payments"]]
     if len(ids) != len(set(ids)):
         problems.append("duplicate row_id/doc_id")
@@ -188,7 +196,7 @@ def _structure(ep: dict) -> list[str]:
         if r["currency"] != m["base_currency"] or type(d) is not int or type(c) is not int or (d > 0) == (c > 0) \
                 or d < 0 or c < 0:
             problems.append(f"bad ledger row {r['row_id']}")
-    if not 200 <= len(t["ledger"]) <= 2000 or not 20 <= m["counts"]["documents"] <= 200:
+    if not 200 <= len(t["ledger"]) <= 2000 or not 20 <= actual_docs <= 200:
         problems.append("episode size outside 200-2000 rows / 20-200 documents")
     return problems
 
@@ -321,6 +329,49 @@ def verify_episode(ep: dict) -> list[str]:
     return problems
 
 
+def _verify_directory(root: Path) -> int:
+    from .load import load_episode
+
+    index = root / "index.json"
+    indexed = index.exists()
+    try:
+        entries = {p.name for p in root.iterdir() if p.is_dir() and (p / "public").is_dir()}
+        if indexed:
+            records = json.loads(index.read_text(encoding="utf-8"))
+            if not isinstance(records, list) or not records:
+                raise ValueError("expected a nonempty episode list")
+            expected = set()
+            for record in records:
+                name = record.get("episode_id") if isinstance(record, dict) else None
+                if not isinstance(name, str) or not name or name in expected:
+                    raise ValueError(f"invalid or duplicate episode_id {name!r}")
+                expected.add(name)
+            if entries != expected:
+                raise ValueError(f"missing episodes {sorted(expected - entries)}, "
+                                 f"unlisted episodes {sorted(entries - expected)}")
+    except (OSError, ValueError) as exc:
+        print(f"{index}: {exc}")
+        return 1
+
+    if not entries:
+        print(f"{root}: no episodes found")
+        return 1
+    bad = 0
+    for name in sorted(entries):
+        try:
+            ep = load_episode(root / name)
+            problems = verify_episode(ep)
+            if indexed and ep["episode_id"] != name:
+                problems.append(f"manifest episode_id differs from directory {name}")
+        except (OSError, ValueError, KeyError, TypeError, AttributeError, IndexError, ArithmeticError, csv.Error) as exc:
+            problems = [str(exc)]
+        if problems:
+            bad += 1
+            print(f"{name}: {problems[:3]}")
+    print(f"{len(entries) - bad}/{len(entries)} episodes valid; episodes with problems: {bad}")
+    return 1 if bad else 0
+
+
 def main(argv=None) -> int:
     import argparse
 
@@ -334,21 +385,8 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     bad = total = 0
 
-    if args.dir:
-        from .load import load_episode
-
-        for entry in sorted(os.listdir(args.dir)):
-            ep_path = os.path.join(args.dir, entry)
-            if not os.path.isdir(ep_path) or not os.path.isdir(os.path.join(ep_path, "public")):
-                continue
-            ep = load_episode(ep_path)
-            total += 1
-            probs = verify_episode(ep)
-            if probs:
-                bad += 1
-                print(f"{entry}: {probs[:3]}")
-        print(f"{total - bad}/{total} episodes valid; episodes with problems: {bad}")
-        return 1 if bad else 0
+    if args.dir is not None:
+        return _verify_directory(Path(args.dir))
 
     for seed in parse_seeds(args.seeds):
         for cfg in (None, {"errors": {}}, {"errors": {"duplicate_invoice": 2, "payment_allocation": 2, "fx_error": 2,

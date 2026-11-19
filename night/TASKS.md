@@ -1,5 +1,10 @@
-# Round 3
-- [x] T1 (lead) Verify truth currency and restore discovery of the allocation evidence regression — files: auditenv/verify.py, tests/test_verify.py — accept: changed-denomination truth fails, generated episodes verify.
-- [x] T2 (gemini) Correct the jury verification map's references and measured counts, including the transport description — files: docs/CHECKS.md — accept: named tests exist and listed commands support the claims.
-- [x] T3 (lead) Rehearse and correct the timed demo script — files: docs/DEMO.md — accept: exact commands run and show the narrated results in a 2–3 minute walkthrough.
-- [x] T4 (lead) Verify pitch sequence and claims — files: docs/PITCH.md — accept: slide headings follow the jury narrative and measured claims agree with current output.
+# Round 4
+
+- [x] T1 (gemini1) Reject incorrect combined document counts and apply size checks to actual records in _structure — files: auditenv/verify.py (only _structure), tests/test_manifest_counts.py — accept: seed 7 with documents=20 fails and original passes.
+- [x] T2 (lead) Make verify --dir reject empty and incomplete indexed splits and report unreadable episode files — files: auditenv/verify.py (CLI only), tests/test_verify_dir.py — accept: invalid splits exit nonzero and train/dev/hard pass.
+- [x] T3 (gemini2) Check all three public exports against fresh output recursively and record reproduction commands in the log — files: night/LOG.md — accept: 3 identical directories.
+- [x] T4 (gemini3) Check committed trajectories against fresh runner output, document any timing fields and reproducibility evidence — files: night/LOG.md — accept: compare every JSONL step on each split and record results.
+- [x] T5 (deepseek) Independently verify all 80 golden hashes and reward mutation checks on this branch — files: night/LOG.md — accept: both scripts pass and record counts.
+- [x] T8 (lead) Verify quantity times unit price on each invoice line — files: auditenv/verify.py (Books), tests/test_verify.py — accept: seed 7 clean invoice with doubled quantity is rejected.
+- [x] T6 (lead) Rehearse the demo and verify timing cues and output — files: docs/DEMO.md — accept: five sections show scripted seed results.
+- [x] T7 (lead) Check pitch against current metrics and update inaccurate claims — files: docs/PITCH.md — accept: slide narrative and measured claims verified.

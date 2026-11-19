@@ -13,7 +13,7 @@
 
 ## 3. Live demo
 
-- Run `uv run python -m auditenv.demo --seed 2003`. Follow the scripted policy as it pages through ledger entries and submits four findings.
+- Run `env -u AUDITENV_SECRET uv run python -m auditenv.demo --seed 2003`. Follow the scripted policy as it pages through ledger entries and submits four findings.
 - Show the training result. All four findings match. After 21 inspection steps, the return is 0.958.
 - Show the closed run. Over 22 actions including submission, the policy receives only zero rewards and ends with empty info. The separate grader records four true positives and zero false positives or misses.
 
@@ -28,7 +28,7 @@
 
 - Python 3.11 and its standard library implement a JSON reset/step interface. The policy and closed grader communicate across processes.
 - The policy can list up to 50 records per page, retrieve a record or document, and calculate with decimals. Submission ends the episode.
-- The environment enforces a 100-action budget including submission and a 60-second time limit.
+- The default limits are a 100-action budget including submission and a 60-second time limit.
 - For private evaluation, a grader-held secret keys episode generation and the public episode identifier.
 
 ## 6. How the grader scores an answer

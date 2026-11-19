@@ -22,6 +22,13 @@ class VerifyTest(unittest.TestCase):
         rev["credit_minor"] += 500
         self.assertTrue(any("truth mismatch" in p for p in verify_episode(bad)))
 
+    def test_detects_inconsistent_invoice_line_amount(self):
+        ep = generate(7, {"errors": {}})
+        invoice = ep["tables"]["invoices"][0]
+        invoice["line_items"][0]["quantity"] *= 2
+        expected = f"invoice {invoice['invoice_id']} line 1 amount != quantity times unit price"
+        self.assertIn(f"post-injection: {expected}", verify_episode(ep))
+
     def test_detects_unbalanced_journal(self):
         bad = copy.deepcopy(generate(4, {"errors": {}}))
         next(r for r in bad["tables"]["ledger"] if r["account"] == "1000" and r["debit_minor"] > 0)["debit_minor"] += 1
