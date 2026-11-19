@@ -6,4 +6,4 @@
 - [ ] T4 (deepseek) Audit the jury evidence map against discovered tests — files: docs/CHECKS.md — accept: resolve each referenced test and correct stale mappings, run referenced verifier test module.
 - [ ] T5 (lead) Reject unidentified receipts and refunds posted to the wrong account — files: auditenv/verify.py, tests/test_verify.py, REVIEW.md — accept: regression fails before and passes after, full check and seed sweep green.
 - [x] T6 (lead) Rehearse the numbered 2–3 minute video script — files: docs/DEMO.md — accept: public seed 2003 walkthrough matches each shown result.
-- [ ] T7 (lead) Check slide outline against integrated metrics — files: docs/PITCH.md — accept: ten slides with matched results and accurate reproduction commands.
+- [x] T7 (lead) Check slide outline against integrated metrics — files: docs/PITCH.md — accept: ten slides with matched results and accurate reproduction commands.

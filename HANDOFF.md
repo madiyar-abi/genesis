@@ -30,7 +30,7 @@ message says a Google Doc — follow the latest, re-check the form before submit
 
 ## Round 7 in progress
 
-The seed-2003 demo rehearsal passed. Both recording tabs now use public companies even on a private grading machine. Worker assignments and the verifier regression are in `night/TASKS.md`.
+The seed-2003 demo rehearsal passed. Both recording tabs now use public companies even on a private grading machine. Slide 7 now reports false positives and misses alongside the investigation cost. Worker assignments and the verifier regression are in `night/TASKS.md`.
 
 ## Round 6 complete · 20 November 2026
 

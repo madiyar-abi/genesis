@@ -53,11 +53,11 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 | reconcile (default) | hard | 0.651 | 0.891 | 0.752 | 0.288 |
 | oracle (grader-side) | hard | 1.000 | 1.000 | 1.000 | 1.000 |
 
-- On hard episodes, the default reconciliation policy misses retyped duplicates and flags legitimate reissues. Accounting for line normalization and credit notes restores F1 to 1.000 on this split.
+- Both reconciliation policies averaged 43.2 actions on hard episodes. The default rules produced 22 false positives and missed five findings. With line normalization and credit-note handling, the policy found all 46 issues with zero false positives.
 
 ## 8. How the jury can reproduce the checks
 
-- Run `uv run python -m auditenv.check` for tests, independent verification, baseline comparisons, paired episodes, and the closed-process check.
+- Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` for tests, independent verification, baseline comparisons, paired episodes, and the closed-process check.
 - Paired checks cover 20 default and 20 hard episodes. They replay actions and compare oracle results after IDs and row order change.
 - A separate mutation test, `uv run python scripts/mutate_reward.py`, caught 15 of 15 deliberately introduced matcher and reward changes.
 
