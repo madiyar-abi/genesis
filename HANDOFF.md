@@ -45,7 +45,7 @@ Round-2 results (each with its command; numbers from the current code):
   (`scripts/golden.py --check`, `tests/test_golden.py`).
 - Engineering: H2 step-budget table (max 57/100), E2 timing (`scripts/bench.py`, DESIGN §9), E3 hard trajectories
   (`configs/train_hard.json`, `trajectories/train_hard_*`), make targets, CI badge, E4 chart `docs/baselines.svg`.
-- Check: `uv run python -m auditenv.check` → 282 tests, all gates PASS (≈ 24 s); fuzz 0–999 → 3 000 episodes, 0 problems.
+- Check: `uv run python -m auditenv.check` → 283 tests, all gates PASS (≈ 24 s); fuzz 0–999 → 3 000 episodes, 0 problems.
 
 GitHub Actions built the Docker image and passed the offline container check on the implementation commit. The manual run also exercises the two pinned Python patch versions. [Extended matrix and job results](https://github.com/madiyar-abi/genesis/actions/runs/44551717103)
 

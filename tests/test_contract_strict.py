@@ -14,12 +14,23 @@ class StrictInputTests(unittest.TestCase):
         env.reset(3, {})
         for action in ({"type": "list_records", "table": "ledger", "extra": 1},
                        {"type": "get_document", "doc_id": "X", "table": "ledger"},
-                       {"type": "calculator", "expression": "1+1", "precision": 9},
-                       {"type": "submit", "findings": {"episode_id": env.episode_id, "findings": []}, "x": 1}):
+                       {"type": "calculator", "expression": "1+1", "precision": 9}):
             obs, reward, term, trunc, info = env.step(action)
             self.assertEqual(obs["error"]["code"], "bad_params", action)
             self.assertFalse(term or trunc)
-        self.assertEqual(obs["step"], 4)
+        self.assertEqual(obs["step"], 3)
+
+    def test_submit_with_unknown_parameters_still_ends_the_episode_as_invalid(self):
+        env = AuditEnv()
+        _, info = env.reset(3, {"mode": "train"})
+        obs, reward, term, trunc, info = env.step(
+            {"type": "submit", "findings": {"episode_id": info["episode_id"], "findings": []}, "x": 1})
+        self.assertTrue(term)
+        self.assertFalse(trunc)
+        self.assertEqual(reward, -1.0)
+        self.assertEqual(obs["error"]["code"], "invalid_findings")
+        self.assertIn("unknown parameters for submit", obs["error"]["message"])
+        self.assertFalse(env.grader_log[-1]["valid"])
 
     def test_exotic_finding_keys_are_an_invalid_submission_not_a_crash(self):
         env = AuditEnv()

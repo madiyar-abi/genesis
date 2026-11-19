@@ -122,3 +122,8 @@
   longer int()-coerces seeds; README/CONTRACT/load.py doc fixes; test counts 282 everywhere. New
   tests/test_contract_strict.py. check exit 0 (282 tests), golden unchanged, sync_docs ok.
 - Assumption: rejecting time_limit_s=inf is fine (the case fixes a 60 s limit; nobody needs to disable it).
+
+## 2026-11-19 22:01 lead
+- Final SPEC pass found a conflict in my R2-3 fix: SPEC §04 "submit завершает эпизод" — a submit with extra action
+  keys was a non-terminating bad_params. Now it terminates as an invalid submission (−1, reason kept, logged).
+  Test added; CONTRACT/REVIEW updated; test counts 283. check exit 0.

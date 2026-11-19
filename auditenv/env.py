@@ -107,11 +107,12 @@ class AuditEnv:
             try:
                 kind = action.get("type") if isinstance(action, dict) else None
                 extra = set(action) - ACTION_KEYS[kind] if kind in ACTION_KEYS else set()
-                if extra:
-                    raise ToolError("bad_params", f"unknown parameters for {kind}: {sorted(map(str, extra))[:5]}"[:160])
-                if kind == "submit":
+                bad = f"unknown parameters for {kind}: {sorted(map(str, extra))[:5]}"[:160] if extra else None
+                if bad and kind != "submit":
+                    raise ToolError("bad_params", bad)
+                if kind == "submit":  # submit always ends the episode; a malformed one is an invalid submission
                     terminated = True
-                    res = self._finish(action.get("findings"), self._steps - 1, "submit")
+                    res = self._finish(action.get("findings"), self._steps - 1, "submit", error=bad)
                     if self._cfg["mode"] == "train":
                         reward, info = res["reward"], public_summary(res)
                         result = {"submitted": True, "accepted": res["valid"]}
@@ -137,8 +138,10 @@ class AuditEnv:
         return obs, reward, terminated, truncated, info
 
     # ------------------------------------------------------------------ internals
-    def _finish(self, submission, inspection_steps: int, how: str) -> dict:
-        res = grade(self._ep["truth"], submission, self.episode_id, inspection_steps)
+    def _finish(self, submission, inspection_steps: int, how: str, error: str | None = None) -> dict:
+        res = grade(self._ep["truth"], None if error else submission, self.episode_id, inspection_steps)
+        if error:  # grade(None) is the invalid-submission result; keep the real reason
+            res["error"] = error
         # experimental materiality-weighted reward: grader-side only, reported next to the shared one
         res["experimental_reward"] = experimental_reward(
             res, self._ep["truth"], submission["findings"] if res["valid"] else [])

@@ -71,7 +71,7 @@ Chart for this slide: `docs/baselines.svg` (mean return per baseline, dev vs har
   (`reconcile_hard`) 1.0 · 0.916; oracle 1.0 → harder, still solvable.
 
 ## 8. Reproducibility and tests
-- 282 unit tests incl. a 20 314-action fuzz test and `tests/test_jury.py` (the jury checklist as tests);
+- 283 unit tests incl. a 20 314-action fuzz test and `tests/test_jury.py` (the jury checklist as tests);
   80 golden hashes catch any generator drift.
 - Verifier 600/600 generated + 40/40 exported episodes; seed sweep 3 000 default + 600 hard episodes:
   0 exceptions, 0 verifier problems, oracle 1.0 everywhere, flag-all negative on all.

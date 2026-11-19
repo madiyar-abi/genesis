@@ -69,7 +69,8 @@ Independent read-only review against SPEC §09/§10 (agent). An own checker re-d
 - **R2-2 (medium, fixed):** `AUDITENV_SECRET=x auditenv.check` failed 46 fixture tests; the unit-test gate now runs
   with the public key and says so.
 - **R2-3 (low-medium, fixed):** unknown action parameters were silently ignored although `schemas/action.schema.json`
-  forbids them; now `bad_params`, step consumed (CONTRACT updated).
+  forbids them; now `bad_params`, step consumed; a `submit` with extra parameters still terminates (SPEC §04) as an
+invalid submission, −1, logged (CONTRACT updated).
 - **R2-4 (low, fixed):** in-process findings with non-string keys crashed grading (episode ended ungraded);
   `schema.validate_findings` now never raises — an invalid submission, −1, logged.
 - **R2-5 (low, fixed):** `reset` coerced `seed=1.5/True/"7"` (the server used `int()`), accepted NaN/inf time limits,
