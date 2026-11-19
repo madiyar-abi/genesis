@@ -58,3 +58,13 @@
 - R3 done (subagent, reviewed): scripts/sensitivity.py re-grades each baseline episode with the real matcher, step
   cost 0.001/0.002/0.005 and tolerance 0/0.1%/1% patched in a context manager (default re-grade == env reward,
   asserted). Ranking unchanged on dev and hard. Table in DESIGN §6. Shared reward untouched.
+
+## 2026-11-19 21:37 lead
+- Merged codex (R2, C3, E3a) and gemini (C2, P1, E2); reviewed diffs. LOG conflicts resolved keeping all entries
+  in time order. Review fix on C2: `for line in inp` read a whole over-long line into memory before rejecting it;
+  now `_lines()` reads with readline(MAX_LINE + 1) and drains the rest in bounded chunks (new test). check exit 0
+  (276 tests, 23.7 s), golden 80/80, mutate 15/15 killed.
+- D4 miner results (subagent): real hard-mode leak — re-typed description style (all caps / lower / "name - REF")
+  only appears on duplicate copies (precision 1.000). Weaker default-mode signals: entity+currency+total pair
+  (0.996, duplicate definition itself, no near-miss decoys in default), I1 always on the last day (fx_error 0.70),
+  large 2900 amounts (0.745). Fixing the hard leak first (lead).

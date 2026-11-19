@@ -95,6 +95,24 @@ class ServerTest(unittest.TestCase):
         self.assertIn("observation", lines[2])
         self.assertIn("info", lines[2])
 
+    def test_oversized_line_is_read_in_bounded_chunks(self):
+        class Tracking(io.BytesIO):
+            biggest = 0
+
+            def readline(self, size=-1):
+                line = super().readline(size)
+                Tracking.biggest = max(Tracking.biggest, len(line))
+                return line
+
+        reset_cmd = json.dumps({"cmd": "reset", "seed": 0, "config": {}}).encode("utf-8") + b"\n"
+        inp = Tracking(b"y" * (5 * MAX_LINE) + b"\n" + reset_cmd)
+        out = io.BytesIO()
+        serve(inp, out)
+        lines = [json.loads(line) for line in out.getvalue().splitlines() if line]
+        self.assertEqual(lines[0], {"error": "request too large"})
+        self.assertIn("observation", lines[1])
+        self.assertLessEqual(Tracking.biggest, MAX_LINE + 1)
+
     def test_in_process_string_io(self):
         too_large = "x" * (MAX_LINE + 10) + "\n"
         reset_cmd = json.dumps({"cmd": "reset", "seed": 0, "config": {}}) + "\n"

@@ -26,6 +26,28 @@ from .env import AuditEnv
 from .run import load_episodes
 
 MAX_LINE: int = 1 << 20  # 1 MiB
+TOO_LARGE = object()
+
+
+def _lines(inp):
+    """Request lines, reading at most MAX_LINE + 1 bytes/chars at a time: an over-long line is drained in
+    bounded chunks and yielded as TOO_LARGE, so memory stays bounded whatever the client sends."""
+    if not hasattr(inp, "readline"):
+        yield from inp
+        return
+    while True:
+        line = inp.readline(MAX_LINE + 1)
+        if not line:
+            return
+        nl = b"\n" if isinstance(line, bytes) else "\n"
+        if len(line) > MAX_LINE:
+            while not line.endswith(nl):
+                line = inp.readline(MAX_LINE)
+                if not line:
+                    break
+            yield TOO_LARGE
+        else:
+            yield line
 
 
 def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dict]] | None = None) -> None:
@@ -49,7 +71,10 @@ def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dic
             out.write(data.encode("utf-8"))
         out.flush()
 
-    for line in inp:
+    for line in _lines(inp):
+        if line is TOO_LARGE:
+            send_resp({"error": "request too large"})
+            continue
         if isinstance(line, bytes):
             if len(line) > MAX_LINE:
                 send_resp({"error": "request too large"})
