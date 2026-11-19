@@ -154,3 +154,17 @@ different configurations. The trajectory runner already retains both entries.
 The committed-trajectory test checked row structure and budgets, but did not
 compare a saved observation or terminal reward with replaying its recorded action.
 Round 11 adds that comparison to the offline check.
+
+A temporary copy of train_reconcile.jsonl with its final reward changed to
+0.12345 passed the original structural test. Replay checks the recorded value.
+
+DESIGN §10 overstated the advantage of a complete answer at 60 inspections.
+Using auditenv.metrics.prf1 and terminal_reward, eight immediate matches out
+of nine earn 0.882353, above the full answer's 0.880000. Seven out of eight
+earn 0.866667. The updated worked example gives the crossover explicitly.
+
+Replaying the saved actions exposed an artifact defect. Reconcile enriches invoice
+dictionaries when it opens their documents. The runner retained the original
+observation objects, so serialization after the episode retroactively added line
+items to some earlier invoice-list results. The environment returns those list
+results without line items. The comparison must include every observation field.
