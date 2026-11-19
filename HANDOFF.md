@@ -34,6 +34,8 @@ Branch `night/2026-11-20-r10`, tasks in `night/TASKS.md`. `reset` now rejects `e
 
 The Round 10 docs audit corrected hard-mode ledger targets, credit-note eligibility and the evidence required for a partial allocation. Reproduction cases are in REVIEW.md.
 
+The reproducible configuration sweep passed 3,000 cases, including 1,186 hard cases. Replay case N with `uv run python -m auditenv.fuzz --configs 1 --start N`.
+
 ## Round 9 · 20 November 2026
 
 Branch `night/2026-11-20-r9`, tasks in `night/TASKS.md`. A read-only red-team pass on contract, isolation, reward and reproducibility found nothing that leaks truth or beats the oracle, and three smaller defects, now fixed test-first (`REVIEW.md` → "Round 9"):
