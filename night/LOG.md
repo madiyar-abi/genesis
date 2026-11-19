@@ -35,3 +35,9 @@
 - Assumptions: expense journals carry no ids (schema has no journal id) → grouped by timestamp in checks;
   period window for documents = prior 35 days .. next 7 days; FX table covers period −60 .. +15 days, only foreign→base pairs.
 - Next: T6 matcher, T7 env (lead).
+
+## 2026-11-19 13:55 — gemini
+- T12 done: auditenv/policies/reconcile.py (reconcile_findings, Reconcile policy) + tests/test_reconcile.py (all pass).
+- Reconcile baseline: pages ledger, invoices, payments, fx (max 50 rows/page); fetches line_items for duplicate candidates via get_document; rule-based detection for duplicate_invoice, period_cutoff, fx_error, payment_allocation.
+- Results on dev seeds 2000–2009: Mean F1 = 1.000, 0 error steps (0.00%), ~22 steps/episode.
+- Next: T16 episode export (after T9).
