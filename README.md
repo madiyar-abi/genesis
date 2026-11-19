@@ -193,7 +193,14 @@ uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299   # every error 
 uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json  # failure analysis
 uv run python -m auditenv.demo                       # narrated demo (see docs/DEMO.md)
 uv run python -m auditenv.export --config configs/dev.json --out episodes/dev       # re-export files
-make check | make test | make verify
+uv run python scripts/mutate_reward.py               # 15 one-line mutants of matcher/reward, all must be caught
+uv run python scripts/sensitivity.py                 # baseline ranking under other step costs / tolerances
+uv run python scripts/shortcut_miner.py --report-only  # single-feature data-leak search (add --hard)
+uv run python scripts/golden.py --check              # 80 golden hashes: generator drift detector
+uv run python scripts/bench.py                       # timing benchmark
+uv run python scripts/chart.py                       # docs/baselines.svg from the check --json output
+make check | make test | make verify | make fuzz | make stress | make attack | make golden | make mutate
+make miner | make bench | make sensitivity | make chart
 ```
 
 ## Repository layout
@@ -208,6 +215,7 @@ make check | make test | make verify
 | `auditenv/transform.py` | benign transformation (new ids, permuted rows) |
 | `auditenv/server.py`, `client.py` | out-of-process environment/grader |
 | `auditenv/policies/` | baselines: random explorer, naive reconcile, reconcile, reconcile_hard, flag-all, oracle |
+| `scripts/` | round-2 tools: mutation testing, sensitivity, shortcut miner, golden hashes, benchmark, chart, doc sync |
 | `auditenv/run.py`, `check.py` | runner/trajectories, single check command |
 | `auditenv/fuzz.py`, `analyze.py` | seed sweep + stress test, measured failure analysis |
 | `auditenv/export.py`, `load.py`, `demo.py` | episode files on disk and back, narrated demo |
