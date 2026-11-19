@@ -16,3 +16,9 @@
 2026-11-20 03:52 lead — T8: Published the sweep, verified the jury-map references, synced docs with the integrated 366-test check, corrected remaining-work instructions.
 2026-11-20 03:52 lead — T9: Rehearsed seed 2003 including five pauses and verified the walkthrough figures and baseline tab against the integrated check. Existing script matches.
 2026-11-20 03:52 lead — T10: Traced pitch figures to check, analyze, demo, config sweep and 15/15 reward mutants. Added config sweep to slide 8; team names remain human input.
+2026-11-20 03:53 lead — T7: Independent lead verification already ran the exact assigned command; accepted its output directly. DeepSeek had no round branch at fetch. Command: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 1000-1999 --hard. Wall time 3:12.99, exit 0.
+hard mode, seeds 1000-1999: 3000 episodes (1988 dirty, 1012 clean) in 192.9 s
+  episodes with a problem (exception / verifier / oracle): 0
+  random explorer reward > 0: 246/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+  flag-all reward < 0: 3000/3000
+FUZZ PASSED

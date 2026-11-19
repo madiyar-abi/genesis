@@ -48,6 +48,8 @@ Record the seed-2003 walkthrough in docs/DEMO.md: 21 inspections, four matched f
 
 The ten-slide outline includes the 3,000-case configuration result. Add confirmed names and contributions to slide 10 before exporting.
 
+The independent hard-mode sweep covered 3,000 episodes on seeds 1000–1999. No verifier, generation or oracle problems occurred.
+
 ## Round 9 · 20 November 2026
 
 Branch `night/2026-11-20-r9`, tasks in `night/TASKS.md`. A read-only red-team pass on contract, isolation, reward and reproducibility found nothing that leaks truth or beats the oracle, and three smaller defects, now fixed test-first (`REVIEW.md` → "Round 9"):
