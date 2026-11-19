@@ -20,7 +20,7 @@ Press Enter for section 2. Scroll up to steps 1–2 to show the two 50-row ledge
 
 ### 3. Check the explanation against the books (1:05–1:30)
 
-Press Enter for section 3. Point to the first two `cause` lines under the matched issues.
+Press Enter for section 3. Point to the two I1 findings. The FX error is 286 USD minor units and the allocation error is 351,331. Scroll to their two `cause` lines.
 
 > “Now we can see the grader’s records. Part of that payment went to unapplied cash. The cash entry also used the October 1 rate for a September 30 transaction. These are two distinct errors on one payment. The independent verifier reconstructs the clean books and checks which discrepancies the recorded changes introduce.”
 
