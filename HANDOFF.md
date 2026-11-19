@@ -4,7 +4,7 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Last updated:** 2026-11-19 13:40 · by: Claude (setup) · branch: `night/2026-11-19`
+**Last updated:** 2026-11-19 · by: Claude (night lead) · branch: `night/2026-11-19`
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
@@ -29,33 +29,43 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] Doc link submitted in the personal account on the site
 
 ## Status
-Case received (FinTech: RL environment for AI financial audit) → `night/SPEC.md`
-(PDF: `night/case.pdf`). Agent run started on `night/2026-11-19`; no product
-code yet. Note: the PDF's deadline is 2026-11-22 23:59 Astana, the organizer
-chat said 22:00 — we plan for 22:00.
+Core environment works end-to-end and passes the single check command
+(`uv run python -m auditenv.check` → ALL CHECKS PASSED, ~6 s). Night run (lead Claude +
+workers gemini, codex) continues on `night/2026-11-19`; task list: `night/TASKS.md`.
 
 ## Done
-- Repo connected to https://github.com/madiyar-abi/genesis, `.gitignore` for
-  personal/editor files, `README.md`, `CLAUDE.md` (agent rules).
-- Overnight autonomous run: `NIGHT.md` (protocol) + `scripts/night.sh`
-  (watchdog: retries hourly on usage limits, stops at 07:00) — merged via PR #1.
-- Team for the night: lead = Claude Code; workers = `gemini` (Antigravity CLI,
-  3 Google accounts, Opus 4.6 → Gemini Flash) and `codex` (Codex CLI, 2 ChatGPT
-  Plus accounts), each in its own worktree and branch. Rehearsed end-to-end.
+- Generator (`auditenv/generator.py`, `inject.py`): hidden company history → correct double-entry
+  ledger → 4 error types (duplicate_invoice, payment_allocation, fx_error, period_cutoff) +
+  2 interacting scenarios (I1, I2) + clean companies + distractors; truth + provenance.
+- Env (`auditenv/env.py`): JSON `reset/step`, 5 tools, 50-row pages, 100-step limit, 60 s limit,
+  train/eval modes. Matcher + reward (`matcher.py`, `metrics.py`, `schema.py`, `calculator.py`).
+- Independent verifier (`verify.py`), benign transform for paired checks (`transform.py`),
+  out-of-process server/client (`server.py`, `client.py`), runner + trajectories (`run.py`),
+  baselines random / flag-all / oracle (`policies/`), check command (`check.py`), Dockerfile.
+- 154 unit tests (`tests/`), incl. all SPEC §05 attack properties.
 
 ## In progress
-- Agent run (lead Claude + workers gemini, codex) planning `night/TASKS.md` from the spec.
+- gemini: T12 reconcile baseline, T16 episode export + configs. codex: T23 failure analysis.
+- lead: design note, README, demo script, pitch outline (T19–T22).
 
 ## Left to do
-- Full task list with acceptance checks: `night/TASKS.md` (created when the spec arrives).
-- Fill the `[TODO]` sections in `CLAUDE.md` once the stack is chosen.
+- See `night/TASKS.md` (unchecked items).
+- Fill the `[TODO]` sections in `CLAUDE.md` (stack now chosen: Python 3.11 stdlib, unittest, uv).
 
 ## Decisions & assumptions
 - Work goes through branches + PRs into `main`; nobody pushes to `main` directly.
 - Night agent never asks questions; every assumption it makes is logged in `night/LOG.md`.
+- Interfaces are fixed in `docs/CONTRACT.md` (ledger in base currency only; truth amounts are
+  ledger misstatements in base currency; evidence ids = doc_id / row_id).
+- Stdlib only, zero runtime dependencies; tests use `unittest`.
 
 ## How to run
-- [TODO: install / dev / test commands — mirror of CLAUDE.md once known.]
+```bash
+uv run python -m auditenv.check                       # everything (tests, verifier, baselines, paired, remote)
+uv run python -m unittest discover -s tests -t .      # unit tests only
+uv run python -m auditenv.verify --seeds 0-199        # data/truth verifier
+uv run python -m auditenv.run --policy oracle --seeds 2000-2009 --out /tmp/traj.jsonl
+```
 
 ## How to continue (process for the next person)
 1. `git pull` → read this file → open `night/TASKS.md`.

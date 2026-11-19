@@ -57,14 +57,15 @@ If you need something not described here, choose the simplest option and log it.
   date in `[period_start, period_end]`.
 
 ## 3. Error types (closed files: `truth.json`)
-Truth issue: `{issue_id, type, affected_ids, expected_amount_minor, currency, evidence_sets}`.
+Truth issue: `{issue_id, type, scenario, affected_ids, expected_amount_minor, currency, evidence_sets}`
+(`scenario` = "single" | "I1" | "I2").
 `expected_amount_minor` = the misstatement in the ledger, **base currency**, positive int.
 `currency` = base currency. `affected_ids` canonical = sorted list of strings.
 `evidence_sets` = list of acceptable sets (lists) of `doc_id`/`row_id`.
 
 | type | affected_ids | amount | evidence (any one full set) |
 |---|---|---|---|
-| `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the duplicate | [both invoice doc_ids] or [both AR row_ids] |
+| `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the later-issued copy | [both invoice doc_ids] or [both AR row_ids] |
 | `payment_allocation` | [invoice_id, payment_id] | `convert(ref.amount, rate(inv date))` − AR credit actually posted | [payment doc_id, the 2900 row_id] |
 | `fx_error` | [invoice_id] or [payment_id] | abs(posted − correct) of the AR (resp. cash) row | [doc_id, that row_id] |
 | `period_cutoff` | [invoice_id] | AR debit posted for an invoice dated outside the period | [invoice doc_id, AR row_id] |
@@ -93,12 +94,14 @@ Actions (`type` + params):
 - `{"type":"list_records","table":T,"cursor":null|str,"limit":int}` → `{rows, next_cursor, total}`, max 50 rows (larger limit is clamped), cursor opaque & stable.
   `invoices` rows in listings omit `line_items`.
 - `{"type":"get_record","table":T,"id":str}` → `{record}`
-- `{"type":"get_document","doc_id":str}` → `{document}` (full invoice or payment)
+- `{"type":"get_document","doc_id":str}` → `{kind: "invoice"|"payment", document}` (full record)
 - `{"type":"calculator","expression":str}` → `{value: str}`
 - `{"type":"submit","findings":{episode_id, findings:[...]}}` → terminates.
 
 Errors (unknown action/table/id, bad params) consume a step; codes:
-`unknown_action, bad_params, unknown_table, not_found, calc_error, episode_over`.
+`unknown_action, bad_params, unknown_table, not_found, calc_error, episode_over`, plus
+`time_limit` (wall-clock limit hit → truncated) and `invalid_findings` (train mode only; in eval
+the policy just sees `{"submitted": true}`).
 Step 100 without submit → `truncated=true`, empty findings are graded.
 Reward is 0.0 on every non-terminal step. Terminal reward is returned to the policy
 only in `mode="train"`; in `"eval"` it is 0.0 and the result goes to the grader log only.

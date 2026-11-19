@@ -36,6 +36,37 @@
   period window for documents = prior 35 days .. next 7 days; FX table covers period −60 .. +15 days, only foreign→base pairs.
 - Next: T6 matcher, T7 env (lead).
 
+## 2026-11-19 13:48 — codex
+- T11 done: RandomExplorer and FlagAll. Five seeds each via run_episode produced repeatable trajectories and negative mean FlagAll reward. Targeted tests and full available suite passed.
+- Assumptions: policies reserve the final available step for submit; FlagAll keeps paging after reaching the findings cap, uses base currency at a naive 1:1, and takes absolute payment amounts to satisfy the nonnegative claim schema.
+- Next: rerun the full suite after the lead publishes T7 tests. No other codex tasks are open.
+
+## 2026-11-19 13:50 — lead
+- T6/T7 code in (matcher.py, env.py) + oracle + run.py; end-to-end oracle = 1.0. Tests for T6/T7 and T15 being written by subagents.
+- T8/T9/T10 done: transform.py (relabel all ids, permute rows; truth/provenance remapped), verify.py (independent verifier:
+  revert provenance → zero discrepancies; post-injection discrepancies recomputed from records == truth; evidence coverage).
+  `uv run python -m auditenv.verify --seeds 0-199` → 0 problems on 600 episodes.
+- Bug found by the verifier and fixed: retainer labels used ISO week → two invoices could get the same label (false duplicate in clean books). Now labelled by service-week dates.
+- Fix: duplicate copy is always issued strictly after the original; truth amount = later copy's AR debit (documented in policy + CONTRACT).
+- Next: T13 tests, T14 server, T17 check command.
+
+## 2026-11-19 13:52 — lead
+- T6/T7/T13/T14/T15 done. Subagent-written tests reviewed: tests/test_matcher.py (33), tests/test_env.py (30),
+  tests/test_reward_attacks.py (12, all SPEC §05 properties over 12 seeds); plus tests/test_run.py, tests/test_server.py.
+  Full suite: 150 tests OK in ~4 s.
+- T14: auditenv/server.py (JSON-lines stdio; --episodes hidden list → client seeds ignored; --grader-log JSONL) + client.py (RemoteEnv).
+- Env config validation tightened (bool max_steps, time_limit_s type). CONTRACT updated (error codes time_limit/invalid_findings, get_document kind, scenario key).
+- Known design limit (for DESIGN.md): with 12 issues, missing one finding at 0 steps (0.913) beats full answer after 60 steps (0.88) — step cost vs F1 granularity.
+- Next: merge workers, T17 check command.
+
+## 2026-11-19 13:54 — lead
+- Merged codex T11 (random explorer, flag-all). Reviewed: observation-only, deterministic per seed.
+- T17 done: auditenv/check.py + Makefile. `uv run python -m auditenv.check` → ALL CHECKS PASSED (~6 s):
+  tests, verifier (200 episodes), baselines on dev (micro P/R/F1), 20 paired checks, out-of-process eval.
+- run.py: --config now reads the per-episode format `{episodes:[{seed, config}]}` (T16 spec updated accordingly).
+- Assumption: check uses a built-in fallback dev list until configs/dev.json exists.
+- Next: T19–T22 docs; merge gemini T12/T16 and codex T23 when pushed.
+
 ## 2026-11-19 13:55 — gemini
 - T12 done: auditenv/policies/reconcile.py (reconcile_findings, Reconcile policy) + tests/test_reconcile.py (all pass).
 - Reconcile baseline: pages ledger, invoices, payments, fx (max 50 rows/page); fetches line_items for duplicate candidates via get_document; rule-based detection for duplicate_invoice, period_cutoff, fx_error, payment_allocation.

@@ -52,11 +52,16 @@ def _wrong_date(st, correct: date, local_ts: str, amount: int, cur: str) -> date
 # ---------------------------------------------------------------- single errors
 def duplicate_invoice(st, scenario="single") -> bool:
     cands = [i for i in st.invoices if st.in_period(i["_cdate"]) and _booked(st, i) and _free(st, i["invoice_id"])
-             and i["_cdate"] + timedelta(days=3) <= st.pe]
+             and i["_cdate"] + timedelta(days=4) <= st.pe]
     if not cands:
         return False
     orig = st.rng.choice(cands)
-    dup = st.new_invoice(_entity(st, orig["entity_id"]), orig["_cdate"] + timedelta(days=st.rng.randint(0, 3)),
+    d = orig["_cdate"] + timedelta(days=st.rng.randint(0, 3))
+    hour = st.rng.randint(max(orig["_dt"].hour + 1, 8), 22) if d == orig["_cdate"] and orig["_dt"].hour < 22 else None
+    if d == orig["_cdate"] and hour is None:
+        d += timedelta(days=1)
+    # the duplicate is always issued strictly after the original (truth amount = later copy)
+    dup = st.new_invoice(_entity(st, orig["entity_id"]), d, hour=hour,
                          items=copy.deepcopy(orig["line_items"]), currency=orig["currency"])
     jid = st.book_invoice(dup)
     st.touched.update({orig["invoice_id"], dup["invoice_id"]})

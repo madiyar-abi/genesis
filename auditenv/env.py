@@ -49,8 +49,11 @@ class AuditEnv:
         cfg = {**DEFAULTS, **config}
         if cfg["mode"] not in ("train", "eval"):
             raise ValueError("mode must be 'train' or 'eval'")
-        if not (isinstance(cfg["max_steps"], int) and 1 <= cfg["max_steps"] <= 100):
+        if isinstance(cfg["max_steps"], bool) or not (isinstance(cfg["max_steps"], int) and 1 <= cfg["max_steps"] <= 100):
             raise ValueError("max_steps must be an int in [1, 100]")
+        tl = cfg["time_limit_s"]
+        if isinstance(tl, bool) or not isinstance(tl, (int, float)) or tl < 0:
+            raise ValueError("time_limit_s must be a non-negative number")
         self._cfg = cfg
         self._ep = generate(seed, config)
         t = self._ep["tables"]

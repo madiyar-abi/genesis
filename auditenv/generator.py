@@ -296,8 +296,9 @@ def build_history(st: State) -> None:
         ent = rng.choice(st.entities)
         unit = max(1, round(rng.uniform(400, 1500) / USD_VALUE[ent["currency"]])) * 10 ** EXPONENT[ent["currency"]]
         for week in range(4):
-            d = st.ps + timedelta(days=week * 7 + rng.randint(0, 2))
-            label = f"Support retainer, week {d.isocalendar()[1]} {d.year}"
+            start = st.ps + timedelta(days=week * 7)
+            d = start + timedelta(days=rng.randint(0, 2))
+            label = f"Support retainer, service week {start.isoformat()} to {(start + timedelta(days=6)).isoformat()}"
             st.new_invoice(ent, d, items=[{"description": label, "quantity": 1,
                                            "unit_price_minor": unit, "amount_minor": unit}])
         # timezone boundary: in-period in company tz although the local date says next period
@@ -495,7 +496,9 @@ def policy_for(st: State) -> dict:
             "expense": "Dr 6xxx / Cr 1000",
         },
         "findings": {
-            "amount": "misstatement in the ledger, base currency minor units, positive",
+            "amount": "misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the "
+                      "AR debit of the later-issued copy; fx_error: abs(posted - correct); period_cutoff: the AR "
+                      "debit posted; payment_allocation: expected AR credit for the ref - AR credit posted",
             "tolerance": "abs(claimed - expected) <= max(1, expected // 1000)",
             "affected_ids": {"duplicate_invoice": "[original_invoice_id, duplicate_invoice_id]",
                              "payment_allocation": "[invoice_id, payment_id]",
