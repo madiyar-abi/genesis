@@ -4,7 +4,7 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Last updated:** 2026-11-19 · audit/handoff-validation, based on main at 9c4089b.
+**19 November 2026 · Khasuetolog** implemented R1, C1, D1, D3, P3 and E1 in commit `66a3504` on `audit/handoff-validation`. The six results and reproduction commands are below. [PR #11 into main](https://github.com/madiyar-abi/genesis/pull/11)
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
@@ -29,10 +29,9 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] Doc link submitted in the personal account on the site
 
 ## Status
-**Ready for submission (code side).** Jury-style review done (`REVIEW.md`: 7 findings, all fixed).
-`uv run python -m auditenv.check` → ALL CHECKS PASSED, 256 tests (dev table, hard-mode table and gates).
-Docker image built and run with `--network none` in GitHub Actions (`.github/workflows/check.yml`, green on every push).
-Seed sweep: 3 000 default + 600 hard episodes, 0 problems. Docs (README, DESIGN, PITCH, DEMO) match the check output.
+The official local check passed all 256 tests and all evaluation gates on Python 3.11.18. The final 0–999 sweep ran 3,000 episodes with zero problems. All 120 existing public train/dev files matched main byte for byte after the evidence fix.
+
+GitHub Actions built the Docker image and passed the offline container check on the implementation commit. The manual run also exercises the two pinned Python patch versions. [Extended matrix and job results](https://github.com/madiyar-abi/genesis/actions/runs/44551717103)
 
 ## Six handoff improvements
 
@@ -64,14 +63,11 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 - Jury review (`REVIEW.md`): self-sufficient `payment_allocation` evidence (episodes re-exported), `tests/test_jury.py`
   (jury checklist as 33 tests), `auditenv.fuzz` (seed sweep + `--stress`), CI with Docker, verify totals, docs pass.
 
-## In progress
-- Six handoff improvements implemented on the feature branch. All of `night/TASKS.md` is [x]; all `REVIEW.md` findings fixed.
+## Remaining work before submission
 
-## Left to do (humans)
-- Record the demo video following `docs/DEMO.md` (`uv run python -m auditenv.demo --pause`).
-- Build slides from `docs/PITCH.md`; fill in the Team slide.
-- Make the repo public (only the owner `madiyar-abi` can) before submitting.
-- Submission checklist above ("Deadline & submission").
+- **Engineering:** review and merge PR #11 into main after the checks pass. Review the D1 before/after example in `REVIEW.md`. The first scheduled nightly run can be checked after merge. [PR checks](https://github.com/madiyar-abi/genesis/pull/11/checks)
+- **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md`, including the Team slide.
+- **Access and submission:** the repository owner arranges jury access. The team checks the repo, video and presentation links, adds them to the Google Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 
 ## Decisions & assumptions
 - Hidden evaluation: set `AUDITENV_SECRET` in the grader process only (keys generator RNG + HMAC episode_id).
