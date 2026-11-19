@@ -110,3 +110,9 @@
 - T26 done: NaiveReconcile uses only table listings. Seeds 2000–2009: FPs on 10/10 clean distractor episodes, mean dirty F1 0.431414 vs Reconcile 1.000000 (one error of each type plus I1 and I2). Determinism and full suite passed.
 - Assumptions: skip FX checks if the written-date rate is absent; flag later equal-total bookings against the first; cap findings at 30. The policy is available directly through run_episode.
 - Also verified T23 with Reconcile after T12 landed. Next: no open codex tasks.
+
+## 2026-11-19 14:00 — lead
+- Merged codex T26 (NaiveReconcile): dev micro-F1 0.195 vs Reconcile 1.000; I1 recall 0.0 — distractors/timezones defeat naive rules.
+- auditenv/demo.py (narrated 5-section demo) + docs/DEMO.md (T21 draft) + docs/PITCH.md (T22 draft). Numbers from check/analyze output.
+- Added T27 (lead) trajectories after T16.
+- Next: wait for gemini T16 (export/configs), then refresh numbers in DESIGN/PITCH/DEMO, final SPEC pass.
