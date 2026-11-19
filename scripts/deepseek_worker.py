@@ -10,10 +10,8 @@ import time
 import argparse
 import subprocess
 from pathlib import Path
-from openai import OpenAI
 
 DEFAULT_BASE_URL = os.environ.get("DEEPSEEK_BASE_URL", "https://api.reformboss.com/v1")
-DEFAULT_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "sk-1acfb1049625af6b99b05a511bc8929beb5cd966b6395aec")
 DEFAULT_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4.1-flash")
 
 SYSTEM_PROMPT = """You are an autonomous coding worker named 'deepseek' in an active software project.
@@ -170,11 +168,15 @@ def main():
     parser.add_argument("-p", "--prompt", required=True, help="Task prompt")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Model name")
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL, help="Base API URL")
-    parser.add_argument("--api-key", default=DEFAULT_API_KEY, help="API Key")
+    parser.add_argument("--api-key", default=os.environ.get("DEEPSEEK_API_KEY"), help="Defaults to DEEPSEEK_API_KEY")
     parser.add_argument("--max-turns", type=int, default=25, help="Max tool turn iterations")
     parser.add_argument("--output-format", default="json", choices=["json", "text"], help="Output format")
     args = parser.parse_args()
 
+    if not args.api_key or not args.api_key.strip():
+        parser.error("set DEEPSEEK_API_KEY or supply --api-key")
+
+    from openai import OpenAI
     client = OpenAI(base_url=args.base_url, api_key=args.api_key)
 
     messages = [
