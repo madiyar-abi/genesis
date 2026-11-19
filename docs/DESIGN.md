@@ -277,6 +277,18 @@ the level is solvable from the records, not that a learning agent finds those ru
 Stress test of `reconcile_hard` (`auditenv.fuzz --stress reconcile_hard --seeds 0-299 --hard`, 1 200 hard
 episodes): 0 imperfect, max 58 steps, no truncation.
 
+**Timing** (`uv run python scripts/bench.py`, median of 3, Python 3.11.14, Apple-silicon Mac, one core):
+
+| operation | workload | time |
+|---|---|---|
+| `generate()` default | 100 seeds | 0.28 s (2.8 ms / episode) |
+| `generate()` hard | 100 seeds | 0.98 s (9.8 ms / episode) |
+| `auditenv.verify` | 300 episodes | 1.69 s (5.6 ms / episode) |
+| one full episode, any baseline | dev / hard | 3–5 ms / 9–12 ms |
+| `auditenv.check` (everything) | — | ≈ 24 s |
+
+An episode costs milliseconds against the 60 s limit, so the limit only binds the agent's own thinking time.
+
 **Step-budget margin** (same stress runs, 300 seeds per row, steps used of the 100-step budget):
 
 | policy · mode | config | median | p95 | max |

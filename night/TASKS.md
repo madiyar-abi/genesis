@@ -25,7 +25,7 @@ Workers: touch ONLY the files listed for your task.
   after that returns `episode_over`, (d) a custom `time_limit_s` in config is honoured, (e) eval mode: no reward/info
   leak on time limit (info == {} and reward == 0.0). No sleeping in tests — files: auditenv/env.py, tests/test_clock.py
   — accept: `uv run python -m unittest tests.test_clock tests.test_env` green; `uv run python -m auditenv.check` exit 0
-- [ ] C2 (gemini) Bound request size and bad bytes in `auditenv/server.py`: read stdin as bytes (`sys.stdin.buffer`),
+- [x] C2 (gemini) Bound request size and bad bytes in `auditenv/server.py`: read stdin as bytes (`sys.stdin.buffer`),
   reject any request line longer than 1 MiB (constant `MAX_LINE = 1 << 20`) with `{"error": "request too large"}`
   without parsing it, decode UTF-8 strictly and answer `{"error": "invalid utf-8"}` on failure; the server keeps
   serving after either error (next valid request works). Keep the JSON-lines protocol and all existing responses
@@ -35,7 +35,7 @@ Workers: touch ONLY the files listed for your task.
   `uv run python -m unittest tests.test_server` green; `uv run python -m auditenv.check` exit 0 (remote gate passes)
 
 ## Block 2 — reproducibility / data
-- [ ] P1 (gemini) Golden hashes: new `scripts/golden.py` computes sha256 of `json.dumps(generate(seed, config),
+- [x] P1 (gemini) Golden hashes: new `scripts/golden.py` computes sha256 of `json.dumps(generate(seed, config),
   sort_keys=True, separators=(",", ":"))` for seeds 0–19 × configs [default `{}`, `{"errors": {}}`,
   `{"difficulty": "hard"}`, `{"transform_seed": 7}`] (80 hashes) and writes `tests/golden_hashes.json`
   (`{"<config-json>|<seed>": "<hex>"}`); `--check` mode compares and exits 1 on drift. New `tests/test_golden.py`
@@ -54,7 +54,7 @@ Workers: touch ONLY the files listed for your task.
   docs/DESIGN.md (+ inject/verify if changed) — accept: verify 0 problems, decision in DESIGN
 
 ## Block 3 — measured design / engineering
-- [ ] E2 (gemini) Timing benchmark: new `scripts/bench.py` measures wall time (time.perf_counter, median of 3) of
+- [x] E2 (gemini) Timing benchmark: new `scripts/bench.py` measures wall time (time.perf_counter, median of 3) of
   (a) `generate()` for seeds 0–99 default and hard, (b) one full episode per policy (`auditenv.run` APIs) on
   `configs/dev.json` and `configs/eval_hard.json`, (c) `auditenv.verify` over seeds 0–99; prints a markdown table
   and with `--json PATH` writes the numbers; prints Python version and `platform.platform()`. Do NOT edit docs — the
@@ -77,6 +77,33 @@ Workers: touch ONLY the files listed for your task.
 - [x] E4 (lead) Stdlib SVG chart of baseline returns (dev vs hard) for the pitch: `scripts/chart.py` →
   `docs/baselines.svg` from `check --json` — files: scripts/chart.py, docs/baselines.svg, docs/PITCH.md — accept:
   SVG renders, numbers match check
+
+## Block 3b — added by the lead after the first merge (21:50)
+- [ ] M1 (codex) Shortcut-miner noise filter + make targets: in `scripts/shortcut_miner.py` exclude from FLAGGING (still
+  report them in a separate "excluded: per-episode random identifiers" list) every feature whose value is a raw
+  per-episode random identifier (entity_id, counterparty/customer ids, invoice/payment/row id values themselves —
+  NOT id format/length/prefix features, those stay flagged) since such values cannot transfer between episodes;
+  print how many values were excluded. Add Makefile targets `miner` (`uv run python scripts/shortcut_miner.py
+  --report-only`), `bench` (`uv run python scripts/bench.py`), `sensitivity` (`uv run python scripts/sensitivity.py`),
+  `chart` (`uv run python -m auditenv.check --json /tmp/auditenv-metrics.json && uv run python scripts/chart.py`),
+  update `.PHONY`. Do not change labels, other features or the 0.5 threshold — files: scripts/shortcut_miner.py,
+  tests/test_shortcut_miner.py (test: an entity_id feature is never flagged), Makefile — accept: `uv run python -m
+  unittest tests.test_shortcut_miner` green; `uv run python scripts/shortcut_miner.py --seeds 0-199 --report-only`
+  shows no `entity_id` value among flagged items; `make -n miner bench sensitivity chart` prints the commands
+- [ ] G1 (gemini) `docs/CHECKS.md` — jury criteria map. One section per criterion of `night/SPEC.md` §10 (Контракт и
+  изоляция 25, Данные и эталон 25, Надёжность награды 25, Воспроизводимость и обобщение 15, Инженерия и объяснение 10).
+  For each: a table "what the jury checks → where it lives (file / test name) → command to see it → measured result".
+  Find the tests with `grep -n "def test" tests/test_jury.py tests/test_env.py tests/test_reward_attacks.py
+  tests/test_verify.py tests/test_hardening.py tests/test_clock.py tests/test_server.py tests/test_golden.py` and
+  the gates in `auditenv/check.py`. Measured results ONLY as pass counts copied from real output you ran (e.g.
+  "20/20 pairs pass", "600/600 episodes valid", "15/15 mutants killed", "80 golden hashes match") — NO baseline
+  returns/F1 numbers (they are in README and change). Commands to run: `uv run python -m auditenv.check`,
+  `uv run python -m auditenv.verify --seeds 0-199`, `uv run python scripts/mutate_reward.py`,
+  `uv run python scripts/golden.py --check`, `uv run python -m auditenv.attack`, `uv run python -m unittest
+  tests.test_fuzz`. Engineering: one-command run, versioned configs (`configs/`), trajectory logs (`trajectories/`),
+  measured failure analysis (`auditenv.analyze`), honest limitations (`docs/DESIGN.md` §10). English, terse —
+  files: docs/CHECKS.md only — accept: every command in it exits 0 when run; every file/test name it cites exists
+  (`grep` it)
 
 ## Block 4 — optional (only if 1–3 done)
 - [ ] H1 (lead) "expert" difficulty (opt-in) — accept: new check gates, default episodes byte-identical
