@@ -8,7 +8,7 @@ contract, actions, findings format or the shared reward (`matcher.py`, `metrics.
 Workers: touch ONLY the files listed for your task.
 
 ## Block 1 — reward / contract / isolation
-- [ ] R2 (codex) Mutation testing of the reward: new `scripts/mutate_reward.py` applies ~15 single-line source
+- [x] R2 (codex) Mutation testing of the reward: new `scripts/mutate_reward.py` applies ~15 single-line source
   mutations, one at a time, to an in-memory copy of `auditenv/matcher.py` and `auditenv/metrics.py` (e.g. flip
   `<=`/`<`, change tolerance constant, drop a check in `_checks`, swap precision/recall, remove dedup, change step
   cost), writes the mutated module to a temp dir copy of the package (never edit the real files), runs
