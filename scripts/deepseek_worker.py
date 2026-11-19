@@ -155,11 +155,11 @@ def call_api_with_retry(client, model, messages, tools):
                 messages=messages,
                 tools=tools,
                 tool_choice="auto",
-                timeout=25.0
+                timeout=45.0
             )
         except Exception as e:
-            err = str(e)
-            if any(k in err for k in ["gateway_restarting", "500", "502", "503", "504", "bad_response_body", "Connection error", "timeout"]):
+            err = str(e).lower()
+            if any(k in err for k in ["gateway_restarting", "500", "502", "503", "504", "bad_response_body", "connection", "timeout", "timed out"]):
                 time.sleep(2 * (attempt + 1))
                 continue
             raise
