@@ -8,6 +8,8 @@
 3. four baseline policies on the dev split -> P / R / F1 / return / steps / time per policy
 4. 20 paired checks: seed+actions replay is exact; relabel+permute keeps the oracle answer and reward
 5. out-of-process eval run: rewards hidden from the policy, results only in the grader log
+6. hard mode (configs/eval_hard.json): verifier on hard episodes, baseline table, gates: oracle 1.0,
+   reconcile_hard (rules from the policy) solves it from the records, plain reconcile does not
 Exit code 0 only if every gate passes.
 """
 
@@ -72,11 +74,11 @@ def available_policies() -> list[str]:
             if importlib.util.find_spec(POLICIES[n][0]) is not None]
 
 
-def run_baselines(episodes) -> tuple[bool, dict]:
+def baseline_table(episodes, names) -> dict:
     env = AuditEnv()
     table = {}
     print(f"\n{'policy':<16} {'P':>6} {'R':>6} {'F1':>6} {'return':>8} {'steps':>6} {'time_s':>7} {'exp_ret*':>9}")
-    for name in available_policies():
+    for name in names:
         rows = []
         for seed, cfg in episodes:
             t0 = time.monotonic()
@@ -91,6 +93,11 @@ def run_baselines(episodes) -> tuple[bool, dict]:
         table[name] = {"precision": p, "recall": r, "f1": f1, "return": ret, "steps": steps, "time_s": secs,
                        "tp": tp, "fp": fp, "fn": fn, "experimental_return": exp}
         print(f"{name:<16} {p:6.3f} {r:6.3f} {f1:6.3f} {ret:8.3f} {steps:6.1f} {secs:7.3f} {exp:9.3f}")
+    return table
+
+
+def run_baselines(episodes) -> tuple[bool, dict]:
+    table = baseline_table(episodes, available_policies())
     print(f"(dev split, {len(episodes)} episodes; P/R/F1 micro-averaged; return/steps/time means; "
           "*exp_ret = experimental materiality-weighted reward, reported separately)\n")
     ok = _gate("oracle reaches the maximum reward", table["oracle"]["return"] == 1.0)
@@ -98,6 +105,33 @@ def run_baselines(episodes) -> tuple[bool, dict]:
                 f"mean return {table['flag_all']['return']:.3f}")
     if "random" in table:
         ok &= _gate("random explorer stays below oracle", table["random"]["return"] < table["oracle"]["return"])
+    return ok, table
+
+
+HARD_POLICIES = ("random", "naive_reconcile", "reconcile", "reconcile_hard", "flag_all", "oracle")
+
+
+def run_hard(n_verify: int) -> tuple[bool, dict]:
+    """Hard mode: the episodes stay valid, solvable from the records, and beat the default rules."""
+    bad = []
+    for seed in range(n_verify):
+        for cfg in ({"difficulty": "hard"}, {**HEAVY, "difficulty": "hard", "transform_seed": seed}):
+            probs = verify_episode(generate(seed, cfg))
+            if probs:
+                bad.append((seed, cfg, probs[:2]))
+    for b in bad[:5]:
+        print("   ", b)
+    ok = _gate("hard-mode verifier", not bad, f"{2 * n_verify - len(bad)}/{2 * n_verify} hard episodes valid")
+    path = os.path.join(ROOT, "configs", "eval_hard.json")
+    episodes = load_episodes(path)
+    table = baseline_table(episodes, HARD_POLICIES)
+    print(f"(hard mode, configs/eval_hard.json, {len(episodes)} episodes; same columns as above)\n")
+    ok &= _gate("hard: oracle reaches the maximum reward", table["oracle"]["return"] == 1.0)
+    ok &= _gate("hard: solvable from the records", table["reconcile_hard"]["f1"] >= 0.95,
+                f"reconcile_hard F1 {table['reconcile_hard']['f1']:.3f}")
+    ok &= _gate("hard: default rules no longer suffice", table["reconcile"]["f1"] <= 0.8,
+                f"reconcile F1 {table['reconcile']['f1']:.3f}")
+    ok &= _gate("hard: flag-all attack is penalised", table["flag_all"]["return"] < 0)
     return ok, table
 
 
@@ -176,9 +210,11 @@ def main(argv=None) -> int:
     ok &= base_ok
     ok &= run_paired(20)
     ok &= run_remote()
+    hard_ok, hard_table = run_hard(10 if args.quick else 25)
+    ok &= hard_ok
     if args.json:
         with open(args.json, "w") as fh:
-            json.dump({"dev": table}, fh, indent=2, sort_keys=True)
+            json.dump({"dev": table, "hard": hard_table}, fh, indent=2, sort_keys=True)
     print(f"\n{'ALL CHECKS PASSED' if ok else 'SOME CHECKS FAILED'} in {time.monotonic() - t0:.1f} s")
     return 0 if ok else 1
 
