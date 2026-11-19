@@ -34,6 +34,8 @@ Before sharing the repository, the credential owner must revoke the DeepSeek API
 
 The verifier rejects ledger postings that cite a missing payment or invoice, including balanced orphan journals. It also checks the truth episode ID and requires distinct issue IDs. Allocation evidence that cites a receivables posting must identify the payment and invoice on a positive credit.
 
+Paired checks now compare the public identifiers and row order in all four tables and reject untranslated dirty findings.
+
 Independent verification passed for all 200 transformed heavy episodes, covering 100 seeds in each difficulty. The reproduction command is in `night/LOG.md`.
 
 The rehearsed demo in `docs/DEMO.md` identifies the two amounts on the same payment for the recording.
