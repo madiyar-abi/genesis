@@ -81,3 +81,12 @@
   Check: reconcile micro-F1 1.000, return 0.956, 22.8 steps on dev — the books are solvable within budget from the records alone.
 - Added T26 (codex) NaiveReconcile to measure that distractors/timezones trip naive rules (honest difficulty evidence).
 - Next: T19 design note with measured numbers, T21/T22.
+## 2026-11-19 13:56 — codex
+- T24 done: six Draft 2020-12 JSON Schemas with stdlib smoke checks against generated manifests, truth and real environment trajectories. Full suite passed.
+- Assumptions: action schemas describe intended valid inputs; list cursor and limit are optional as in the environment, and the manifest includes the optional generator version. Episode-ID equality is enforced by the grader.
+- Next: T25 experimental reward.
+
+## 2026-11-19 13:57 — codex
+- T25 done: amount-weighted experimental terminal reward. Five targeted tests and full suite passed.
+- Assumptions: use the shared invalid-submission penalty and reward rounding. A zero weighted denominator receives F1=1 only when truth and findings are both empty.
+- Next: no open codex tasks.

@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit episode manifest",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "generator_version": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "episode_id": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "base_currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "timezone": {
+      "type": "string",
+      "pattern": "^[+-](?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+    },
+    "counts": {
+      "type": "object",
+      "properties": {
+        "ledger": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "invoices": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "payments": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fx": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "documents": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "ledger",
+        "invoices",
+        "payments",
+        "fx",
+        "documents"
+      ],
+      "additionalProperties": false
+    },
+    "rounding": {
+      "const": "ROUND_HALF_UP"
+    },
+    "amount_exponents": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Z]{3}$"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "episode_id",
+    "base_currency",
+    "period_start",
+    "period_end",
+    "timezone",
+    "counts",
+    "rounding",
+    "amount_exponents"
+  ],
+  "additionalProperties": false
+}

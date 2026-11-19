@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit findings submission",
+  "type": "object",
+  "properties": {
+    "episode_id": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Must equal the current episode ID."
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "duplicate_invoice",
+              "payment_allocation",
+              "fx_error",
+              "period_cutoff"
+            ]
+          },
+          "affected_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "minItems": 1,
+            "maxItems": 10
+          },
+          "claimed_amount_minor": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "maxItems": 10
+          },
+          "explanation": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "type",
+          "affected_ids",
+          "claimed_amount_minor",
+          "currency",
+          "evidence_ids"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 30
+    }
+  },
+  "required": [
+    "episode_id",
+    "findings"
+  ],
+  "additionalProperties": false
+}

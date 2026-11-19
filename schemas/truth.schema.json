@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Grader-only audit truth",
+  "type": "object",
+  "properties": {
+    "episode_id": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "type": {
+            "enum": [
+              "duplicate_invoice",
+              "payment_allocation",
+              "fx_error",
+              "period_cutoff"
+            ]
+          },
+          "scenario": {
+            "enum": [
+              "single",
+              "I1",
+              "I2"
+            ]
+          },
+          "affected_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "expected_amount_minor": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "evidence_sets": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "\\S"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "issue_id",
+          "type",
+          "scenario",
+          "affected_ids",
+          "expected_amount_minor",
+          "currency",
+          "evidence_sets"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "episode_id",
+    "issues"
+  ],
+  "additionalProperties": false
+}
