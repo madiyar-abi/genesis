@@ -46,6 +46,18 @@ episodes, seeds 9100–9119). Re-run the check before exporting the final slides
   flag-everything −1; clean company: silence 1.0, guessed ids −1.
 
 ## 7. Results
+
+| policy | split | P | R | F1 | return |
+|---|---|---|---|---|---|
+| oracle (grader-side) | dev | 1.000 | 1.000 | 1.000 | 1.000 |
+| reconcile (policy-aware) | dev | 1.000 | 1.000 | 1.000 | 0.957 |
+| naive reconcile | dev | 0.169 | 0.700 | 0.273 | −0.506 |
+| random explorer | dev | 0.000 | 0.000 | 0.000 | −0.807 |
+| flag-everything | dev | 0.000 | 0.000 | 0.000 | −1.000 |
+| reconcile_hard | hard | 1.000 | 1.000 | 1.000 | 0.917 |
+| reconcile (default) | hard | 0.471 | 0.870 | 0.611 | −0.095 |
+| oracle (grader-side) | hard | 1.000 | 1.000 | 1.000 | 1.000 |
+
 - Dev split (micro P/R/F1 · mean return): oracle 1.0/1.0/1.0 · 1.000; reconcile 1.0/1.0/1.0 · 0.957;
   naive 0.17/0.70/0.27 · −0.506; random 0/0/0 · −0.807; flag-all 0/0/0 · −1.000.
 - Naive rules: 103 false accusations (22 on clean books), allocation recall 1/8, I1 0/2 →
@@ -54,8 +66,8 @@ episodes, seeds 9100–9119). Re-run the check before exporting the final slides
   (`reconcile_hard`) 1.0 · 0.917; oracle 1.0 → harder, still solvable.
 
 ## 8. Reproducibility and tests
-- 231 unit tests incl. a 3 000-action fuzz test and `tests/test_jury.py` (the jury checklist as tests).
-- Verifier 600/600 generated + 20/20 exported episodes; seed sweep 3 000 default + 600 hard episodes:
+- 256 unit tests incl. a 20 314-action fuzz test and `tests/test_jury.py` (the jury checklist as tests).
+- Verifier 600/600 generated + 40/40 exported episodes; seed sweep 3 000 default + 600 hard episodes:
   0 exceptions, 0 verifier problems, oracle 1.0 everywhere, flag-all negative on all.
 - 20/20 paired checks: replay is byte-exact; relabel + permute keeps the oracle answer and reward.
 - Stress: 1 200 episodes (reconcile) and 1 200 hard (reconcile_hard): every error found within budget.

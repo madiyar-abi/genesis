@@ -7,10 +7,20 @@ Each property is checked over >= 10 seeds. Findings are built grader-side from e
 from __future__ import annotations
 
 import copy
+import json
+import os
 import random
+import tempfile
 import unittest
 from decimal import ROUND_HALF_UP, Decimal
 
+from auditenv.attack import (
+    MUTATION_FAMILIES,
+    MutationCandidate,
+    evaluate_mutation,
+    generate_mutations_for_episode,
+    run_attack_search,
+)
 from auditenv.env import AuditEnv
 from auditenv.matcher import tolerance
 from auditenv.policies.oracle import Oracle
@@ -460,6 +470,135 @@ class TestRewardAttacks(unittest.TestCase):
                     r, _, info, env = play(seed, DIRTY, edge)
                     self.assertEqual((info["tp"], info["fp"]), (len(issues(env)), 0))
                     self.assertEqual(r, 1.0)
+
+    # 13: HANDOFF R1 Automated Attack Search
+    def test_handoff_r1_automatic_attack_search(self):
+        result = run_attack_search()
+        self.assertTrue(result.passed, result.summary())
+        self.assertGreaterEqual(result.total_mutations, 10000)
+        self.assertEqual(result.total_violations, 0, [v.__dict__ for v in result.violations])
+        self.assertEqual(len(result.seeds_evaluated), 20)
+        self.assertGreaterEqual(len(result.clean_seeds), 4)
+        self.assertGreaterEqual(len(result.dirty_seeds), 10)
+        for fam in MUTATION_FAMILIES:
+            self.assertIn(fam, result.mutations_by_family)
+            self.assertGreater(result.mutations_by_family[fam], 0, f"family {fam} had no mutations")
+
+    # 14: HANDOFF R1 Attack Search Reproducibility
+    def test_handoff_r1_attack_search_reproducible(self):
+        r1 = run_attack_search()
+        r2 = run_attack_search()
+        self.assertEqual(r1.total_mutations, r2.total_mutations)
+        self.assertEqual(r1.total_violations, r2.total_violations)
+        self.assertEqual(r1.mutations_by_family, r2.mutations_by_family)
+        self.assertEqual(r1.seeds_evaluated, r2.seeds_evaluated)
+
+    # 15: HANDOFF R1 Invariant and Defect Checks
+    def test_handoff_r1_mutation_invariants_and_defect_checks(self):
+        env_dirty, obs_dirty = new_env(9014, DIRTY)
+        truth_dirty = env_dirty._ep["truth"]
+        ep_id_dirty = env_dirty.episode_id
+        rng = random.Random(42)
+        muts_dirty = generate_mutations_for_episode(env_dirty._ep, rng=rng, per_seed_target=100)
+        self.assertGreaterEqual(len(muts_dirty), 100)
+
+        honest_dirty = {"episode_id": ep_id_dirty, "findings": [from_issue(i) for i in truth_dirty["issues"]]}
+        for m in muts_dirty:
+            v = evaluate_mutation(m, truth_dirty, honest_dirty, False, 9014, ep_id_dirty)
+            self.assertIsNone(v, f"Violation on dirty seed: {v}")
+
+        env_clean, _ = new_env(9000, CLEAN)
+        truth_clean = env_clean._ep["truth"]
+        ep_id_clean = env_clean.episode_id
+        muts_clean = generate_mutations_for_episode(env_clean._ep, rng=rng, per_seed_target=100)
+        self.assertGreaterEqual(len(muts_clean), 100)
+
+        honest_clean = {"episode_id": ep_id_clean, "findings": []}
+        for m in muts_clean:
+            v = evaluate_mutation(m, truth_clean, honest_clean, True, 9000, ep_id_clean)
+            self.assertIsNone(v, f"Violation on clean seed: {v}")
+
+    # 16: HANDOFF R1 Empty Seed Selection Prevention
+    def test_handoff_r1_empty_seed_selection_prevented(self):
+        with self.assertRaises(ValueError):
+            run_attack_search(seeds=[99999])
+        with self.assertRaises(ValueError):
+            run_attack_search(seeds=[])
+
+    # 17: HANDOFF R1 Failure Report Artifact Regression Test with Simulated Violation
+    def test_handoff_r1_failure_report_artifact_on_simulated_violation(self):
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+            tmp_report_path = tmp.name
+
+        try:
+            # Simulate a violation: an honest variation that was maliciously corrupted to fail matching
+            def inject_bad_mutation(ep, rng):
+                truth = ep["truth"]
+                ep_id = ep["episode_id"]
+                iss = truth["issues"][0]
+                exp = iss["expected_amount_minor"]
+                tol = tolerance(exp)
+                # Over-tolerance amount falsely claimed as honest variation -> triggers honest_boundary_variation_rejected
+                bad_f = from_issue(iss, claimed_amount_minor=exp + tol + 9999)
+                return [
+                    MutationCandidate(
+                        family="amount_tolerance",
+                        name="simulated_flawed_honest_variation",
+                        submission={"episode_id": ep_id, "findings": [bad_f]},
+                        is_honest_variation=True,
+                        inspection_steps=0,
+                    )
+                ]
+
+            res = run_attack_search(
+                seeds=[9014],
+                min_mutations=1,
+                per_seed_target=5,
+                report_path=tmp_report_path,
+                _extra_mutations_factory=inject_bad_mutation,
+            )
+
+            self.assertFalse(res.passed)
+            self.assertGreaterEqual(res.total_violations, 1)
+            self.assertTrue(os.path.isfile(tmp_report_path))
+
+            with open(tmp_report_path) as fh:
+                data = json.load(fh)
+
+            self.assertFalse(data["passed"])
+            self.assertGreaterEqual(data["total_violations"], 1)
+            self.assertTrue(len(data["violations"]) >= 1)
+
+            # Verify complete reproducible record format of each violation
+            v = data["violations"][0]
+            required_keys = {
+                "seed",
+                "episode_id",
+                "config",
+                "is_clean",
+                "family",
+                "mutation_name",
+                "reason",
+                "honest_reward",
+                "attack_reward",
+                "inspection_steps",
+                "submission",
+                "result",
+            }
+            self.assertTrue(required_keys <= set(v.keys()), f"Missing keys in violation record: {required_keys - set(v.keys())}")
+            self.assertIsInstance(v["config"], dict)
+            self.assertIsInstance(v["submission"], dict)
+            self.assertIn("episode_id", v["submission"])
+            self.assertIn("findings", v["submission"])
+            self.assertIsInstance(v["result"], dict)
+            self.assertIn("tp", v["result"])
+            self.assertIn("fp", v["result"])
+            self.assertIn("reward", v["result"])
+            self.assertEqual(v["inspection_steps"], 0)
+
+        finally:
+            if os.path.exists(tmp_report_path):
+                os.remove(tmp_report_path)
 
 
 if __name__ == "__main__":

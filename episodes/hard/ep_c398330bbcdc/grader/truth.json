@@ -1,0 +1,102 @@
+{
+  "episode_id": "ep_c398330bbcdc",
+  "issues": [
+    {
+      "affected_ids": [
+        "2612-203547"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "DOC0054657",
+          "GL-005226"
+        ],
+        [
+          "DOC0054657",
+          "GL-005225"
+        ]
+      ],
+      "expected_amount_minor": 847573500,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "2612-333734",
+        "2612-990243"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "DOC0336641",
+          "DOC0411847",
+          "GL-004566",
+          "GL-004647"
+        ],
+        [
+          "DOC0336641",
+          "DOC0411847",
+          "GL-004567",
+          "GL-004647"
+        ],
+        [
+          "DOC0336641",
+          "DOC0411847",
+          "GL-004566",
+          "GL-004646"
+        ],
+        [
+          "DOC0336641",
+          "DOC0411847",
+          "GL-004567",
+          "GL-004646"
+        ]
+      ],
+      "expected_amount_minor": 58016800,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "2612-734863"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "2026-12-02:CHF:KZT",
+          "DOC0085887",
+          "GL-004261"
+        ],
+        [
+          "2026-12-02:CHF:KZT",
+          "DOC0085887",
+          "GL-004260"
+        ]
+      ],
+      "expected_amount_minor": 108173,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "2612-028619",
+        "PAY-542986"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "DOC0063006",
+          "DOC0837737",
+          "GL-005053"
+        ]
+      ],
+      "expected_amount_minor": 447670298,
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ]
+}

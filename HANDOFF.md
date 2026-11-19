@@ -4,7 +4,7 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Last updated:** 2026-11-19 · by: Chingiz (hinabaina) + Claude · branch: `main` (PR #7 merged: night run, hard mode, jury review)
+**19 November 2026 · Khasuetolog** implemented R1, C1, D1, D3, P3 and E1 in commit `66a3504` on `audit/handoff-validation`. The six results and reproduction commands are below. [PR #11 into main](https://github.com/madiyar-abi/genesis/pull/11)
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
@@ -29,10 +29,22 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] Doc link submitted in the personal account on the site
 
 ## Status
-**Ready for submission (code side).** Jury-style review done (`REVIEW.md`: 6 findings, all fixed).
-`uv run python -m auditenv.check` → ALL CHECKS PASSED, 231 tests, ~15 s (dev table, hard-mode table and gates).
-Docker image built and run with `--network none` in GitHub Actions (`.github/workflows/check.yml`, green on every push).
-Seed sweep: 3 000 default + 600 hard episodes, 0 problems. Docs (README, DESIGN, PITCH, DEMO) match the check output.
+The official local check passed all 256 tests and all evaluation gates on Python 3.11.18. The final 0–999 sweep ran 3,000 episodes with zero problems. All 120 existing public train/dev files matched main byte for byte after the evidence fix.
+
+GitHub Actions built the Docker image and passed the offline container check on the implementation commit. The manual run also exercises the two pinned Python patch versions. [Extended matrix and job results](https://github.com/madiyar-abi/genesis/actions/runs/44551717103)
+
+## Six handoff improvements
+
+Run these commands from the repository root with Python 3.11 (`uv run python`).
+
+| Item | Implementation and local acceptance |
+|---|---|
+| R1 | `-m auditenv.attack` graded 11,000 mutations, including 5 clean seeds among 20, with 0 violations. Failures save replay inputs in `attack_failures.json`. |
+| C1 | `-m tests.test_fuzz` validated 20,314 episode actions plus 205 post-terminal responses against the schema and strict JSON. Python 3.11.18, 10.898 s. |
+| D1 | `-m unittest tests.test_hardening.DuplicateEvidenceTest` checks both modes and four booking-row combinations. Seed 7, four inspections, the original incomplete answer fell from TP=1 / 0.992 to TP=0 / −1. Verifier: 600/600. |
+| D3 | `-m auditenv.verify --dir episodes/hard` verified 20/20. A fresh export from `configs/eval_hard.json` matched all 161 files. |
+| P3 | `.github/workflows/check.yml` schedules the 0–4999 sweep at 02:00 UTC on Python 3.11.17 and 3.11.18. The same matrix runs via workflow_dispatch. |
+| E1 | `-m auditenv.check --json /tmp/auditenv-metrics.json` then `scripts/sync_docs.py --check --json /tmp/auditenv-metrics.json` checks all three documents. Omit --check to refresh their tables. |
 
 ## Done
 - Generator (`auditenv/generator.py`, `inject.py`): hidden company history → correct double-entry
@@ -44,21 +56,18 @@ Seed sweep: 3 000 default + 600 hard episodes, 0 problems. Docs (README, DESIGN,
   server/client (`server.py`, `client.py`), runner (`run.py`), failure analysis (`analyze.py`),
   narrated demo (`demo.py`), exporter (`export.py`), check command (`check.py`), Dockerfile, JSON schemas (`schemas/`).
 - Baselines (`policies/`): random explorer, naive reconcile, reconcile, flag-all, oracle.
-- Data: `configs/{train,dev,eval_example}.json`, `episodes/{train,dev}` (10+10 exported),
+- Data: `configs/{train,dev,eval_example}.json`, `episodes/{train,dev,hard}` (10+10+20 exported),
   `trajectories/train_*.jsonl`.
 - Docs: `README.md`, `docs/CONTRACT.md`, `docs/DESIGN.md` (with measured results), `docs/DEMO.md`, `docs/PITCH.md`.
 - Hard mode (`difficulty: "hard"`, `configs/eval_hard.json`, `reconcile_hard`): reconcile F1 1.0 → 0.611, oracle 1.0.
 - Jury review (`REVIEW.md`): self-sufficient `payment_allocation` evidence (episodes re-exported), `tests/test_jury.py`
   (jury checklist as 33 tests), `auditenv.fuzz` (seed sweep + `--stress`), CI with Docker, verify totals, docs pass.
 
-## In progress
-- Nothing in code. All of `night/TASKS.md` is [x]; all `REVIEW.md` findings fixed.
+## Remaining work before submission
 
-## Left to do (humans)
-- Record the demo video following `docs/DEMO.md` (`uv run python -m auditenv.demo --pause`).
-- Build slides from `docs/PITCH.md`; fill in the Team slide.
-- Make the repo public (only the owner `madiyar-abi` can) before submitting.
-- Submission checklist above ("Deadline & submission").
+- **Engineering:** review and merge PR #11 into main after the checks pass. Review the D1 before/after example in `REVIEW.md`. The first scheduled nightly run can be checked after merge. [PR checks](https://github.com/madiyar-abi/genesis/pull/11/checks)
+- **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md`, including the Team slide.
+- **Access and submission:** the repository owner arranges jury access. The team checks the repo, video and presentation links, adds them to the Google Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 
 ## Decisions & assumptions
 - Hidden evaluation: set `AUDITENV_SECRET` in the grader process only (keys generator RNG + HMAC episode_id).
@@ -93,23 +102,23 @@ Columns: what to do · why (jury criterion) · start in · how to check · risk.
 **Reward reliability (25)**
 | # | what | why | start in | check | risk |
 |---|---|---|---|---|---|
-| R1 | Automatic attack search: mutate the oracle answer and silence (ids, amounts at/over tolerance, evidence padded to 10 ids, wrong types/currency, duplicates, order) and search for any submission that beats the honest answer or scores > 0 on clean books | proves "атакующие ответы" beyond the 12 hand-written attacks | new `auditenv/attack.py`, `matcher.py` | new test: 10 000 mutations on 20 seeds, 0 hits; add any hit to `tests/test_reward_attacks.py` | low — read-only search |
+| R1 ✓ | Automatic attack search: mutate the oracle answer and silence (ids, amounts at/over tolerance, evidence padded to 10 ids, wrong types/currency, duplicates, order) and search for any submission that beats the honest answer or scores > 0 on clean books | proves "атакующие ответы" beyond the 12 hand-written attacks | new `auditenv/attack.py`, `matcher.py` | new test: 10 000 mutations on 20 seeds, 0 hits; add any hit to `tests/test_reward_attacks.py` | low — read-only search |
 | R2 | Mutation testing of the reward: break `matcher._checks`, `tolerance`, `prf1` one line at a time and confirm a test fails each time | shows the reward tests actually bite | `matcher.py`, `metrics.py` | small script that patches and runs `tests.test_matcher tests.test_reward_attacks tests.test_jury` | low |
 | R3 | Sensitivity table: baseline ranking under step cost 0.001/0.002/0.005 and tolerance 0/0.1 %/1 % | the design choice is measured, not asserted | `analyze.py` (grader-side param), DESIGN §6 | ranking unchanged or documented | low; do not change the shared reward |
 
 **Contract and isolation (25)**
 | # | what | why | start in | check | risk |
 |---|---|---|---|---|---|
-| C1 | Property-based action fuzz (stdlib `random`): generate actions from the action schema plus mutations, assert every observation matches `schemas/observation.schema.json` and `json.dumps(obs, allow_nan=False)` works | covers the 20 contract checks more broadly than the current 3 000-action fuzz | `tests/test_fuzz.py`, `tests/test_schemas.py::_matches` | ≥ 20 000 actions, < 20 s | low |
+| C1 ✓ | Property-based action fuzz (stdlib `random`): generate actions from the action schema plus mutations, assert every observation matches `schemas/observation.schema.json` and `json.dumps(obs, allow_nan=False)` works | covers the 20 contract checks more broadly than the previous 3 000-action fuzz | `tests/test_fuzz.py`, `tests/test_schemas.py::_matches` | ≥ 20 000 actions, < 20 s | low |
 | C2 | Bound request/response size in `server.py`; test a 10 MB line and invalid UTF-8 → bounded error, server keeps serving | isolation of the closed run | `server.py`, `tests/test_server.py` | new tests | medium — do not change the JSON-lines protocol |
 | C3 | Injectable clock in `AuditEnv` to test the 60 s limit without sleeping, in-process and via the server | "лимит времени" tested deterministically | `env.py` (keep default `time.monotonic`) | new tests | low |
 
 **Data and truth (25)**
 | # | what | why | start in | check | risk |
 |---|---|---|---|---|---|
-| D1 | Duplicate evidence also contains the original's AR row (today it proves only the later copy is booked); check it in `verify._sufficient` | "независимая достаточность доказательств" | `inject.duplicate_invoice`, `verify._sufficient` | verify 600/600, fuzz green; re-export | medium — changes truth files → re-export, re-run docs numbers |
+| D1 ✓ | Duplicate evidence includes a booking row for each invoice (the previous version only proved the later copy was booked); check it in `verify._sufficient` | "независимая достаточность доказательств" | `inject.duplicate_invoice`, `verify._sufficient` | verify 600/600, fuzz green; re-export | medium — changes truth files → re-export, re-run docs numbers |
 | D2 | "Nothing allocated" allocation proven only by the 2900 row: decide whether evidence must show more, document the decision | same criterion | `inject.payment_allocation`, DESIGN §7 | as D1 | medium |
-| D3 | Export the hard split to `episodes/hard` and verify it with `verify --dir` | 20 more closed episodes for the jury | `export.py`, `configs/eval_hard.json` | `verify --dir episodes/hard` 20/20 | low |
+| D3 ✓ | Export the hard split to `episodes/hard` and verify it with `verify --dir` | 20 more closed episodes for the jury | `export.py`, `configs/eval_hard.json` | `verify --dir episodes/hard` 20/20 | low |
 | D4 | Shortcut miner: for each truth issue type, find any single column (hour, weekday, id format, amount pattern, row order) with precision > 0.5 on 1 000 seeds | each hit is a data leak (three were already removed, see LOG) | new script, `generator.py`/`inject.py` | miner reports no column > 0.5 | medium — a fix changes the generator |
 
 **Difficulty (part of data quality)**
@@ -123,12 +132,12 @@ Columns: what to do · why (jury criterion) · start in · how to check · risk.
 |---|---|---|---|---|---|
 | P1 | Golden hashes: sha256 of `generate(seed, config)` for ~50 seeds/configs in a committed file + test | catches any unintended generator drift | `tests/` | test fails on drift | low |
 | P2 | Paired checks for hard mode inside `auditenv.check`; transform also shuffles the FX table | "перестановка ID сохраняет ответ" for every mode | `check.run_paired`, `transform.py` | check gate | low |
-| P3 | CI matrix: two Python 3.11 patch versions, more seeds (`fuzz --seeds 0-4999`) on a nightly schedule | reproducibility evidence | `.github/workflows/check.yml` | green CI | low (Actions minutes of the repo owner) |
+| P3 ✓ | CI matrix: two Python 3.11 patch versions, more seeds (`fuzz --seeds 0-4999`) on a nightly schedule | reproducibility evidence | `.github/workflows/check.yml` | green CI | low (Actions minutes of the repo owner) |
 
 **Engineering and explanation (10)**
 | # | what | why | start in | check | risk |
 |---|---|---|---|---|---|
-| E1 | Docs from data: `check --json` → script rewrites the tables in README/DESIGN/PITCH; a test fails when docs drift | numbers always match | `check.py`, new `scripts/sync_docs.py` | test | low |
+| E1 ✓ | Docs from data: `check --json` → script rewrites the tables in README/DESIGN/PITCH; a test fails when docs drift | numbers always match | `check.py`, new `scripts/sync_docs.py` | test | low |
 | E2 | Timing benchmark (`check`, `fuzz`, one episode per policy) recorded in DESIGN | "измеренный разбор" | `fuzz.py` | numbers in DESIGN | low |
 | E3 | Hard-mode trajectories (`trajectories/train_hard_*.jsonl`), `make fuzz`/`make stress`, CI badge, Docker image pinned by digest | engineering polish | `run.py`, `Makefile`, README, `Dockerfile` | CI green | low |
 | E4 | Demo and pitch: asciinema/GIF of `auditenv.demo`, one chart of baseline returns (dev vs hard) for slide 7 | the video and slides score with humans | `docs/DEMO.md`, `docs/PITCH.md` | renders | low |

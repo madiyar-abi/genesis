@@ -49,8 +49,8 @@ class TestExport(unittest.TestCase):
             self.assertEqual(hashes1, hashes2, "Exported trees are not byte-identical")
 
     def test_all_episodes_pass_verifier(self):
-        """Every episode across train, dev, and eval_example passes the independent verifier."""
-        for split_file in ("train.json", "dev.json", "eval_example.json"):
+        """Every episode across train, dev, eval_example, and eval_hard passes the independent verifier."""
+        for split_file in ("train.json", "dev.json", "eval_example.json", "eval_hard.json"):
             cfg_path = os.path.join(ROOT, "configs", split_file)
             self.assertTrue(os.path.exists(cfg_path), f"Config file {cfg_path} missing")
             episodes = load_episodes(cfg_path)
@@ -59,6 +59,19 @@ class TestExport(unittest.TestCase):
                 ep = generate(seed, cfg)
                 problems = verify_episode(ep)
                 self.assertEqual(problems, [], f"{split_file} seed {seed} failed verifier: {problems}")
+
+    def test_hard_export_reexport_identity(self):
+        """D3: Exported episodes/hard matches a fresh export of configs/eval_hard.json byte-for-byte."""
+        hard_committed = os.path.join(ROOT, "episodes", "hard")
+        self.assertTrue(os.path.isdir(hard_committed), "episodes/hard missing")
+        config_path = os.path.join(ROOT, "configs", "eval_hard.json")
+        with tempfile.TemporaryDirectory() as tmp:
+            out = os.path.join(tmp, "hard")
+            export_split(config_path, out)
+            hashes_committed = _dir_tree_hashes(hard_committed)
+            hashes_fresh = _dir_tree_hashes(out)
+            self.assertEqual(len(hashes_committed), len(hashes_fresh))
+            self.assertEqual(hashes_committed, hashes_fresh, "Re-exported hard split is not byte-identical to committed")
 
     def test_exported_file_structure_and_csv_headers(self):
         """Exported directory contains all expected files with correct headers."""

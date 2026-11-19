@@ -230,8 +230,19 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
             a, b = sorted(ev_docs, key=lambda d: datetime_key(d["issued_at"]))
             same = (a["entity_id"], a["currency"], line_key(a["line_items"])) == \
                 (b["entity_id"], b["currency"], line_key(b["line_items"]))
-            got = next(r["debit_minor"] + r["credit_minor"] for r in ev_rows if r["invoice_id"] == b["invoice_id"])
-            ok = same and got == exp
+            bookings = {}
+            for doc in (a, b):
+                bookings[doc["invoice_id"]] = [
+                    row["debit_minor"] + row["credit_minor"] for row in ev_rows
+                    if row["invoice_id"] == doc["invoice_id"] and row["entity_id"] == doc["entity_id"]
+                    and row["payment_id"] is None and row["currency"] == books.base
+                    and books.in_period(row["timestamp"])
+                    and ((row["account"] == "1200" and row["debit_minor"] > 0 and row["credit_minor"] == 0)
+                         or (row["account"] == "4000" and row["credit_minor"] > 0 and row["debit_minor"] == 0))
+                ]
+            ok = (same and len(bookings) == 2 and set(bookings) == set(iss["affected_ids"])
+                  and datetime_key(a["issued_at"]) < datetime_key(b["issued_at"])
+                  and bool(bookings[a["invoice_id"]]) and exp in bookings[b["invoice_id"]])
         elif typ == "period_cutoff":
             inv = next(d for d in ev_docs if "invoice_id" in d)
             row = ev_rows[0]
@@ -293,8 +304,14 @@ def verify_episode(ep: dict) -> list[str]:
             row_ok = any(i in rows and (rows[i]["invoice_id"] in aff or rows[i]["payment_id"] in aff) for i in s)
             if not (doc_ok or iss["type"] == "duplicate_invoice") or not (row_ok or iss["type"] == "duplicate_invoice"):
                 problems.append(f"{iss['issue_id']}: evidence set does not cover the affected records")
-            if iss["type"] == "duplicate_invoice" and sum(i in docs for i in s) != 2:
-                problems.append(f"{iss['issue_id']}: duplicate evidence must show both documents")
+            if iss["type"] == "duplicate_invoice":
+                if sum(i in docs for i in s) != 2:
+                    problems.append(f"{iss['issue_id']}: duplicate evidence must show both documents")
+                row_invs = {rows[i]["invoice_id"] for i in s if i in rows
+                            and rows[i].get("payment_id") is None
+                            and rows[i].get("account") in ("1200", "4000")}
+                if row_invs != aff:
+                    problems.append(f"{iss['issue_id']}: duplicate evidence must show booking rows for both invoices")
             problems += [f"{iss['issue_id']}: {p}" for p in _sufficient(Books(m, t), iss, s, rows, docs)]
     return problems
 

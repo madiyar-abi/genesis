@@ -1,0 +1,229 @@
+{
+  "company": {
+    "bank_offset": "+09:00",
+    "base_currency": "USD",
+    "entities": 14,
+    "foreign_currencies": [
+      "CHF",
+      "EUR",
+      "GBP"
+    ],
+    "timezone": "-03:00"
+  },
+  "config": {
+    "difficulty": "hard",
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 0,
+      "payment_allocation": 0,
+      "period_cutoff": 0
+    },
+    "interacting": {
+      "I1": 1,
+      "I2": 0
+    },
+    "n_invoices": null
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 642205,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3402",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 208918,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": "2604-510057",
+              "payment_id": "BNK-894815",
+              "row_id": "R3401",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 432967,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3400",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 320,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3399",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 642205,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3402",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 641225,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": "2604-510057",
+              "payment_id": "BNK-894815",
+              "row_id": "R3401",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 980,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3399",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            }
+          ],
+          "journal": "pay:BNK-894815"
+        }
+      ],
+      "description": "payment BNK-894815 allocated partially to 2604-510057; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "I1",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 644733,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3402",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 208918,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": "2604-510057",
+              "payment_id": "BNK-894815",
+              "row_id": "R3401",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 432967,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3400",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 2848,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3399",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 642205,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3402",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 208918,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": "2604-510057",
+              "payment_id": "BNK-894815",
+              "row_id": "R3401",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 432967,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3400",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 320,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST91589",
+              "invoice_id": null,
+              "payment_id": "BNK-894815",
+              "row_id": "R3399",
+              "timestamp": "2026-04-30T21:18:00-03:00"
+            }
+          ],
+          "journal": "pay:BNK-894815"
+        }
+      ],
+      "description": "payment BNK-894815 cash converted with the 2026-05-01 rate instead of 2026-04-30",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "I1",
+      "type": "fx_error"
+    }
+  ],
+  "seed": 9105
+}

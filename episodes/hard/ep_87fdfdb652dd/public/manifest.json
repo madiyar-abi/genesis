@@ -1,0 +1,22 @@
+{
+  "amount_exponents": {
+    "EUR": 2,
+    "GBP": 2,
+    "JPY": 0
+  },
+  "base_currency": "EUR",
+  "counts": {
+    "documents": 120,
+    "fx": 212,
+    "invoices": 86,
+    "ledger": 1146,
+    "payments": 34
+  },
+  "episode_id": "ep_87fdfdb652dd",
+  "generator_version": "1.0.0",
+  "period_end": "2025-10-31",
+  "period_start": "2025-10-01",
+  "rounding": "ROUND_HALF_UP",
+  "schema_version": "1.0",
+  "timezone": "+05:30"
+}

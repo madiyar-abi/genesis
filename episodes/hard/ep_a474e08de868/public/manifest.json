@@ -1,0 +1,23 @@
+{
+  "amount_exponents": {
+    "EUR": 2,
+    "GBP": 2,
+    "JPY": 0,
+    "KZT": 2
+  },
+  "base_currency": "KZT",
+  "counts": {
+    "documents": 78,
+    "fx": 318,
+    "invoices": 54,
+    "ledger": 1194,
+    "payments": 24
+  },
+  "episode_id": "ep_a474e08de868",
+  "generator_version": "1.0.0",
+  "period_end": "2025-08-31",
+  "period_start": "2025-08-01",
+  "rounding": "ROUND_HALF_UP",
+  "schema_version": "1.0",
+  "timezone": "+05:00"
+}

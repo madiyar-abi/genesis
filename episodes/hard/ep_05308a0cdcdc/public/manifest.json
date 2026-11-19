@@ -1,0 +1,22 @@
+{
+  "amount_exponents": {
+    "CHF": 2,
+    "EUR": 2,
+    "USD": 2
+  },
+  "base_currency": "EUR",
+  "counts": {
+    "documents": 84,
+    "fx": 212,
+    "invoices": 56,
+    "ledger": 1335,
+    "payments": 28
+  },
+  "episode_id": "ep_05308a0cdcdc",
+  "generator_version": "1.0.0",
+  "period_end": "2026-08-31",
+  "period_start": "2026-08-01",
+  "rounding": "ROUND_HALF_UP",
+  "schema_version": "1.0",
+  "timezone": "+03:00"
+}

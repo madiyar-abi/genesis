@@ -1,0 +1,77 @@
+{
+  "company": {
+    "bank_offset": "+09:00",
+    "base_currency": "KZT",
+    "entities": 8,
+    "foreign_currencies": [
+      "CHF",
+      "EUR",
+      "GBP"
+    ],
+    "timezone": "+00:00"
+  },
+  "config": {
+    "difficulty": "hard",
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 0,
+      "payment_allocation": 0,
+      "period_cutoff": 0
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 1
+    },
+    "n_invoices": null
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 1831506678,
+              "entity_id": "E3429",
+              "invoice_id": "INV-495482",
+              "payment_id": null,
+              "row_id": "L02234",
+              "timestamp": "2026-01-31T18:59:00+00:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1831506678,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E3429",
+              "invoice_id": "INV-495482",
+              "payment_id": null,
+              "row_id": "L02237",
+              "timestamp": "2026-01-31T18:59:00+00:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-495482"
+        }
+      ],
+      "description": "invoice INV-495482 issued 2026-02-02 (outside the period) booked on 2026-01-31",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "I2",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [],
+      "description": "invoice INV-495482 converted with the 2026-01-31 rate instead of 2026-02-02",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "I2",
+      "type": "fx_error"
+    }
+  ],
+  "seed": 9106
+}

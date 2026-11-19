@@ -1,0 +1,267 @@
+{
+  "company": {
+    "bank_offset": "+05:00",
+    "base_currency": "EUR",
+    "entities": 17,
+    "foreign_currencies": [
+      "CHF",
+      "USD"
+    ],
+    "timezone": "+03:00"
+  },
+  "config": {
+    "difficulty": "hard",
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 1,
+      "fx_error": 0,
+      "payment_allocation": 0,
+      "period_cutoff": 0
+    },
+    "interacting": {
+      "I1": 1,
+      "I2": 0
+    },
+    "n_invoices": null
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1152126,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4040",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 608183,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2318",
+              "invoice_id": "2608-200033",
+              "payment_id": "BNK-725572",
+              "row_id": "R4039",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 543323,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4038",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 620,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4037",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1152126,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4040",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 1150953,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2318",
+              "invoice_id": "2608-200033",
+              "payment_id": "BNK-725572",
+              "row_id": "R4039",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 1173,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4037",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            }
+          ],
+          "journal": "pay:BNK-725572"
+        }
+      ],
+      "description": "payment BNK-725572 allocated partially to 2608-200033; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "I1",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1146617,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4040",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 608183,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2318",
+              "invoice_id": "2608-200033",
+              "payment_id": "BNK-725572",
+              "row_id": "R4039",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 543323,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4038",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 4889,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4037",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1152126,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4040",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 608183,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2318",
+              "invoice_id": "2608-200033",
+              "payment_id": "BNK-725572",
+              "row_id": "R4039",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 543323,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4038",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 620,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-2318",
+              "invoice_id": null,
+              "payment_id": "BNK-725572",
+              "row_id": "R4037",
+              "timestamp": "2026-08-31T23:18:00+03:00"
+            }
+          ],
+          "journal": "pay:BNK-725572"
+        }
+      ],
+      "description": "payment BNK-725572 cash converted with the 2026-09-01 rate instead of 2026-08-31",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "I1",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1024400,
+              "entity_id": "C-4311",
+              "invoice_id": "2608-016011",
+              "payment_id": null,
+              "row_id": "R2761",
+              "timestamp": "2026-08-02T12:16:00+03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1024400,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "C-4311",
+              "invoice_id": "2608-016011",
+              "payment_id": null,
+              "row_id": "R2760",
+              "timestamp": "2026-08-02T12:16:00+03:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2608-016011"
+        }
+      ],
+      "description": "invoice 2608-840787 entered a second time as 2608-016011 and booked again",
+      "documents_added": [
+        "DOC0048081"
+      ],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    }
+  ],
+  "seed": 9107
+}

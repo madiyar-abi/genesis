@@ -87,10 +87,19 @@ def duplicate_invoice(st, scenario="single") -> bool:
     jid = st.book_invoice(dup)
     st.touched.update({orig["invoice_id"], dup["invoice_id"]})
     ar = _row(st, jid, "1200")
+    rev = _row(st, jid, "4000")
+    orig_jid = "inv:" + orig["invoice_id"]
+    ar_orig = _row(st, orig_jid, "1200")
+    rev_orig = _row(st, orig_jid, "4000")
+    evidence = [
+        [("doc", orig["doc_id"]), ("doc", dup["doc_id"]), ("row", ar_orig["_k"]), ("row", ar["_k"])],
+        [("doc", orig["doc_id"]), ("doc", dup["doc_id"]), ("row", ar_orig["_k"]), ("row", rev["_k"])],
+        [("doc", orig["doc_id"]), ("doc", dup["doc_id"]), ("row", rev_orig["_k"]), ("row", ar["_k"])],
+        [("doc", orig["doc_id"]), ("doc", dup["doc_id"]), ("row", rev_orig["_k"]), ("row", rev["_k"])],
+    ]
     st.record({"type": "duplicate_invoice", "scenario": scenario,
                "affected_ids": [orig["invoice_id"], dup["invoice_id"]], "amount": ar["debit_minor"],
-               "evidence": [[("doc", orig["doc_id"]), ("doc", dup["doc_id"]), ("row", ar["_k"])],
-                            [("doc", orig["doc_id"]), ("doc", dup["doc_id"]), ("row", _row(st, jid, "4000")["_k"])]]},
+               "evidence": evidence},
               [{"journal": jid, "before": None, "after": st.snapshot(jid)}], [dup["doc_id"]],
               f"invoice {orig['invoice_id']} entered a second time as {dup['invoice_id']} and booked again")
     return True

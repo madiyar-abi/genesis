@@ -1,0 +1,238 @@
+{
+  "company": {
+    "bank_offset": "+05:00",
+    "base_currency": "KZT",
+    "entities": 9,
+    "foreign_currencies": [
+      "CHF",
+      "JPY"
+    ],
+    "timezone": "+05:30"
+  },
+  "config": {
+    "difficulty": "hard",
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 1,
+      "fx_error": 1,
+      "payment_allocation": 1,
+      "period_cutoff": 1
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 40
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 847573500,
+              "entity_id": "E7065",
+              "invoice_id": "2612-203547",
+              "payment_id": null,
+              "row_id": "GL-005226",
+              "timestamp": "2026-12-31T19:52:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 847573500,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E7065",
+              "invoice_id": "2612-203547",
+              "payment_id": null,
+              "row_id": "GL-005225",
+              "timestamp": "2026-12-31T19:52:00+05:30"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2612-203547"
+        }
+      ],
+      "description": "invoice 2612-203547 issued 2027-01-03 (outside the period) booked on 2026-12-31",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 58016800,
+              "entity_id": "E6755",
+              "invoice_id": "2612-990243",
+              "payment_id": null,
+              "row_id": "GL-004566",
+              "timestamp": "2026-12-11T17:04:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 58016800,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E6755",
+              "invoice_id": "2612-990243",
+              "payment_id": null,
+              "row_id": "GL-004567",
+              "timestamp": "2026-12-11T17:04:00+05:30"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2612-990243"
+        }
+      ],
+      "description": "invoice 2612-333734 entered a second time as 2612-990243 and booked again",
+      "documents_added": [
+        "DOC0411847"
+      ],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 1215722549,
+              "entity_id": "E8907",
+              "invoice_id": "2612-734863",
+              "payment_id": null,
+              "row_id": "GL-004261",
+              "timestamp": "2026-12-02T17:04:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1215722549,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E8907",
+              "invoice_id": "2612-734863",
+              "payment_id": null,
+              "row_id": "GL-004260",
+              "timestamp": "2026-12-02T17:04:00+05:30"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 1215614376,
+              "entity_id": "E8907",
+              "invoice_id": "2612-734863",
+              "payment_id": null,
+              "row_id": "GL-004261",
+              "timestamp": "2026-12-02T17:04:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1215614376,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E8907",
+              "invoice_id": "2612-734863",
+              "payment_id": null,
+              "row_id": "GL-004260",
+              "timestamp": "2026-12-02T17:04:00+05:30"
+            }
+          ],
+          "journal": "inv:2612-734863"
+        }
+      ],
+      "description": "invoice 2612-734863 converted with the 2026-12-03 rate instead of 2026-12-02",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 790144800,
+              "entity_id": "E7065",
+              "invoice_id": null,
+              "payment_id": "PAY-542986",
+              "row_id": "GL-005051",
+              "timestamp": "2026-12-26T11:13:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 342474502,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E7065",
+              "invoice_id": "2612-028619",
+              "payment_id": "PAY-542986",
+              "row_id": "GL-005053",
+              "timestamp": "2026-12-26T11:13:00+05:30"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 447670298,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E7065",
+              "invoice_id": null,
+              "payment_id": "PAY-542986",
+              "row_id": "GL-005052",
+              "timestamp": "2026-12-26T11:13:00+05:30"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 790144800,
+              "entity_id": "E7065",
+              "invoice_id": null,
+              "payment_id": "PAY-542986",
+              "row_id": "GL-005051",
+              "timestamp": "2026-12-26T11:13:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 790144800,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "E7065",
+              "invoice_id": "2612-028619",
+              "payment_id": "PAY-542986",
+              "row_id": "GL-005053",
+              "timestamp": "2026-12-26T11:13:00+05:30"
+            }
+          ],
+          "journal": "pay:PAY-542986"
+        }
+      ],
+      "description": "payment PAY-542986 allocated partially to 2612-028619; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 9114
+}

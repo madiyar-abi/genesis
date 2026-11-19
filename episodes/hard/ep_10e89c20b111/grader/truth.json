@@ -1,0 +1,86 @@
+{
+  "episode_id": "ep_10e89c20b111",
+  "issues": [
+    {
+      "affected_ids": [
+        "F0849842"
+      ],
+      "currency": "EUR",
+      "evidence_sets": [
+        [
+          "2026-06-01:USD:EUR",
+          "D-07aded",
+          "L02965"
+        ],
+        [
+          "2026-06-01:USD:EUR",
+          "D-07aded",
+          "L02964"
+        ]
+      ],
+      "expected_amount_minor": 1148,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "F0681845"
+      ],
+      "currency": "EUR",
+      "evidence_sets": [
+        [
+          "2026-06-24:JPY:EUR",
+          "D-0dab0d",
+          "L03902"
+        ],
+        [
+          "2026-06-24:JPY:EUR",
+          "D-0dab0d",
+          "L03901"
+        ]
+      ],
+      "expected_amount_minor": 13494,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "F0372188",
+        "RCPT0198436"
+      ],
+      "currency": "EUR",
+      "evidence_sets": [
+        [
+          "2026-06-05:JPY:EUR",
+          "D-0359a9",
+          "D-07151c",
+          "L03848"
+        ]
+      ],
+      "expected_amount_minor": 24132,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "affected_ids": [
+        "F0866394",
+        "RCPT0002523"
+      ],
+      "currency": "EUR",
+      "evidence_sets": [
+        [
+          "D-019d46",
+          "D-081d2d",
+          "L03413"
+        ]
+      ],
+      "expected_amount_minor": 53000,
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "episode_id": "ep_1f3d649c3e0e",
+  "issues": [
+    {
+      "affected_ids": [
+        "INV-274213",
+        "PAY-336558"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "DOC0104900",
+          "DOC0465749",
+          "R1819"
+        ]
+      ],
+      "expected_amount_minor": 200447,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "affected_ids": [
+        "INV-423385",
+        "PAY-477851"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "2025-12-25:KZT:USD",
+          "DOC0269996",
+          "DOC0861552",
+          "R1998"
+        ]
+      ],
+      "expected_amount_minor": 106558,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ]
+}

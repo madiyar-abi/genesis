@@ -1,4 +1,5 @@
 """Regression tests for the jury-style review findings."""
+import copy
 import json
 import os
 import tempfile
@@ -8,6 +9,7 @@ from unittest import mock
 from auditenv.client import RemoteEnv
 from auditenv.env import AuditEnv
 from auditenv.generator import generate
+from auditenv.matcher import grade
 from auditenv.verify import verify_episode
 
 
@@ -131,3 +133,194 @@ class AllocationEvidenceTest(unittest.TestCase):
                 self.assertTrue(any("does not reproduce" in p for p in verify_episode(ep)))
                 return
         self.fail("no partial allocation with a 2900 row found")
+
+
+class DuplicateEvidenceTest(unittest.TestCase):
+    """D1: duplicate_invoice evidence requires booking rows for both invoices plus both docs."""
+
+    def test_duplicate_evidence_sets_contain_all_four_alternatives(self):
+        """Positive test: default and hard episodes provide all 4 booking row combinations."""
+        for difficulty in ("default", "hard"):
+            cfg = {"errors": {"duplicate_invoice": 2}}
+            if difficulty == "hard":
+                cfg["difficulty"] = "hard"
+            for seed in range(20):
+                ep = generate(seed, cfg)
+                self.assertEqual(verify_episode(ep), [], (difficulty, seed))
+                rows = {r["row_id"]: r for r in ep["tables"]["ledger"]}
+                docs = {d["doc_id"]: d for d in ep["tables"]["invoices"]}
+                for iss in ep["truth"]["issues"]:
+                    if iss["type"] != "duplicate_invoice":
+                        continue
+                    self.assertEqual(len(iss["evidence_sets"]), 4, (difficulty, seed, iss["issue_id"]))
+                    inv_ids = sorted(iss["affected_ids"])
+                    for s in iss["evidence_sets"]:
+                        ev_docs = [docs[i] for i in s if i in docs]
+                        ev_rows = [rows[i] for i in s if i in rows]
+                        self.assertEqual(len(ev_docs), 2)
+                        self.assertEqual(len(ev_rows), 2)
+                        # Docs match affected_ids
+                        self.assertEqual(sorted(d["invoice_id"] for d in ev_docs), inv_ids)
+                        # Rows match affected_ids, are booking rows (payment_id is None, account 1200 or 4000)
+                        self.assertEqual(sorted(r["invoice_id"] for r in ev_rows), inv_ids)
+                        for r in ev_rows:
+                            self.assertIsNone(r.get("payment_id"))
+                            self.assertIn(r["account"], ("1200", "4000"))
+                        # Test each alternative independently matches with grade()
+                        sub = {"episode_id": ep["manifest"]["episode_id"],
+                               "findings": [{"type": "duplicate_invoice",
+                                             "affected_ids": inv_ids,
+                                             "claimed_amount_minor": iss["expected_amount_minor"],
+                                             "currency": iss["currency"],
+                                             "evidence_ids": list(s),
+                                             "explanation": "positive test"}]}
+                        res = grade(ep["truth"], sub, ep["manifest"]["episode_id"], 0)
+                        self.assertEqual(res["tp"], 1)
+                        self.assertEqual(res["fp"], 0)
+
+    def test_reproduce_incomplete_two_doc_copy_row_before_after(self):
+        """Reproduce the seed 7 gap: 2 docs + copy row only matched before D1, rejected after."""
+        for difficulty, orig_row, copy_row in [("default", "R390", "R445"), ("hard", "L00300", "L00362")]:
+            cfg = {"errors": {"duplicate_invoice": 1}}
+            if difficulty == "hard":
+                cfg["difficulty"] = "hard"
+            ep = generate(7, cfg)
+            iss = ep["truth"]["issues"][0]
+            orig_doc, dup_doc = [d["doc_id"] for d in sorted(
+                [i for i in ep["tables"]["invoices"] if i["invoice_id"] in iss["affected_ids"]],
+                key=lambda x: x["issued_at"]
+            )]
+
+            # Incomplete submission (the "before" pattern: 2 docs + copy row only)
+            incomplete_sub = {
+                "episode_id": ep["manifest"]["episode_id"],
+                "findings": [{
+                    "type": "duplicate_invoice",
+                    "affected_ids": sorted(iss["affected_ids"]),
+                    "claimed_amount_minor": iss["expected_amount_minor"],
+                    "currency": iss["currency"],
+                    "evidence_ids": [orig_doc, dup_doc, copy_row],
+                    "explanation": "incomplete before pattern",
+                }]
+            }
+            res_before = grade(ep["truth"], incomplete_sub, ep["manifest"]["episode_id"], 4)
+            self.assertEqual(res_before["tp"], 0, f"{difficulty} incomplete must not match")
+            self.assertEqual(res_before["fp"], 1)
+            self.assertEqual(res_before["fn"], 1)
+
+            # Complete submission (augmented with original invoice's booking row)
+            complete_sub = copy.deepcopy(incomplete_sub)
+            complete_sub["findings"][0]["evidence_ids"].append(orig_row)
+            res_after = grade(ep["truth"], complete_sub, ep["manifest"]["episode_id"], 4)
+            self.assertEqual(res_after["tp"], 1, f"{difficulty} complete must match")
+            self.assertEqual(res_after["fp"], 0)
+            self.assertEqual(res_after["fn"], 0)
+            self.assertEqual(res_after["reward"], 0.992)
+
+    def test_zero_and_reversed_postings_do_not_prove_a_duplicate(self):
+        from auditenv.verify import Books, _sufficient
+
+        for mode in ("default", "hard"):
+            ep = generate(7, {"difficulty": mode, "errors": {"duplicate_invoice": 1}})
+            tables = ep["tables"]
+            issue = ep["truth"]["issues"][0]
+            evidence = issue["evidence_sets"][0]
+            books = Books(ep["manifest"], tables)
+            docs = {d["doc_id"]: d for d in tables["invoices"]}
+            rows = {r["row_id"]: r for r in tables["ledger"]}
+            for row_id in (key for key in evidence if key in rows):
+                row = rows[row_id]
+                for debit, credit in ((0, 0), (row["credit_minor"], row["debit_minor"])):
+                    changed = dict(rows, **{row_id: dict(row, debit_minor=debit, credit_minor=credit)})
+                    self.assertTrue(_sufficient(books, issue, evidence, changed, docs))
+
+    def test_missing_evidence_rejected_default_and_hard(self):
+        """Missing original row, copy row, or document fails matching and verifier."""
+        for difficulty in ("default", "hard"):
+            cfg = {"errors": {"duplicate_invoice": 1}}
+            if difficulty == "hard":
+                cfg["difficulty"] = "hard"
+            ep = generate(7, cfg)
+            iss = ep["truth"]["issues"][0]
+            full_set = list(iss["evidence_sets"][0])  # 2 docs + 2 rows
+            rows = {r["row_id"]: r for r in ep["tables"]["ledger"]}
+            docs = {d["doc_id"]: d for d in ep["tables"]["invoices"]}
+
+            doc_ids = [i for i in full_set if i in docs]
+            row_ids = [i for i in full_set if i in rows]
+            self.assertEqual(len(doc_ids), 2)
+            self.assertEqual(len(row_ids), 2)
+
+            # Test 1: missing original row in submission
+            bad_sub = {
+                "episode_id": ep["manifest"]["episode_id"],
+                "findings": [{"type": "duplicate_invoice", "affected_ids": sorted(iss["affected_ids"]),
+                              "claimed_amount_minor": iss["expected_amount_minor"], "currency": iss["currency"],
+                              "evidence_ids": [doc_ids[0], doc_ids[1], row_ids[1]], "explanation": "missing orig"}]
+            }
+            self.assertEqual(grade(ep["truth"], bad_sub, ep["manifest"]["episode_id"], 0)["tp"], 0)
+
+            # Test 2: missing copy row in submission
+            bad_sub["findings"][0]["evidence_ids"] = [doc_ids[0], doc_ids[1], row_ids[0]]
+            self.assertEqual(grade(ep["truth"], bad_sub, ep["manifest"]["episode_id"], 0)["tp"], 0)
+
+            # Test 3: missing one doc in submission
+            bad_sub["findings"][0]["evidence_ids"] = [doc_ids[0], row_ids[0], row_ids[1]]
+            self.assertEqual(grade(ep["truth"], bad_sub, ep["manifest"]["episode_id"], 0)["tp"], 0)
+
+            # Test 4: verifier rejects episode truth if missing original row
+            bad_ep = copy.deepcopy(ep)
+            bad_ep["truth"]["issues"][0]["evidence_sets"] = [[doc_ids[0], doc_ids[1], row_ids[1]]]
+            problems = verify_episode(bad_ep)
+            self.assertTrue(any("booking rows for both invoices" in p or "missing a record" in p for p in problems))
+
+            # Test 5: verifier rejects episode truth if missing one doc
+            bad_ep2 = copy.deepcopy(ep)
+            bad_ep2["truth"]["issues"][0]["evidence_sets"] = [[doc_ids[0], row_ids[0], row_ids[1]]]
+            problems2 = verify_episode(bad_ep2)
+            self.assertTrue(any("both documents" in p or "missing a record" in p for p in problems2))
+
+    def test_substituted_evidence_rejected_default_and_hard(self):
+        """Substituted rows (unrelated invoice, duplicate copy row, cash row, payment row) fail."""
+        for difficulty in ("default", "hard"):
+            cfg = {"errors": {"duplicate_invoice": 1}}
+            if difficulty == "hard":
+                cfg["difficulty"] = "hard"
+            ep = generate(7, cfg)
+            iss = ep["truth"]["issues"][0]
+            full_set = list(iss["evidence_sets"][0])
+            rows = {r["row_id"]: r for r in ep["tables"]["ledger"]}
+            docs = {d["doc_id"]: d for d in ep["tables"]["invoices"]}
+
+            doc_ids = [i for i in full_set if i in docs]
+            row_ids = [i for i in full_set if i in rows]
+
+            # Find unrelated invoice row
+            unrelated_row = next(r["row_id"] for r in ep["tables"]["ledger"]
+                                 if r["invoice_id"] and r["invoice_id"] not in iss["affected_ids"]
+                                 and r["account"] == "1200")
+            # Find cash row
+            cash_row = next(r["row_id"] for r in ep["tables"]["ledger"] if r["account"] == "1000")
+
+            def check_bad_set(bad_set, desc):
+                sub = {
+                    "episode_id": ep["manifest"]["episode_id"],
+                    "findings": [{"type": "duplicate_invoice", "affected_ids": sorted(iss["affected_ids"]),
+                                  "claimed_amount_minor": iss["expected_amount_minor"], "currency": iss["currency"],
+                                  "evidence_ids": bad_set, "explanation": desc}]
+                }
+                res = grade(ep["truth"], sub, ep["manifest"]["episode_id"], 0)
+                self.assertEqual(res["tp"], 0, f"Matcher should reject {desc}")
+                bad_ep = copy.deepcopy(ep)
+                bad_ep["truth"]["issues"][0]["evidence_sets"] = [bad_set]
+                probs = verify_episode(bad_ep)
+                self.assertTrue(len(probs) > 0, f"Verifier should reject {desc}")
+
+            # Sub 1: unrelated invoice row instead of orig row
+            check_bad_set([doc_ids[0], doc_ids[1], unrelated_row, row_ids[1]], "unrelated invoice row")
+
+            # Sub 2: duplicated copy row instead of orig row
+            check_bad_set([doc_ids[0], doc_ids[1], row_ids[1], row_ids[1]], "duplicated copy row")
+
+            # Sub 3: cash row (account 1000) instead of orig row
+            check_bad_set([doc_ids[0], doc_ids[1], cash_row, row_ids[1]], "cash row (wrong account)")

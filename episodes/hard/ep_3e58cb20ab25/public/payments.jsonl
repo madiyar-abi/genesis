@@ -1,0 +1,26 @@
+{"amount_minor": 45600, "currency": "GBP", "doc_id": "D-0beec7", "invoice_refs": [{"amount_minor": 45600, "invoice_id": "INV-723140"}], "payment_id": "PAY-744762", "timestamp": "2025-07-02T20:36:00+05:30"}
+{"amount_minor": 1773500, "currency": "GBP", "doc_id": "D-0c8eab", "invoice_refs": [{"amount_minor": 1773500, "invoice_id": "INV-081357"}], "payment_id": "PAY-655004", "timestamp": "2025-07-04T15:47:00+05:30"}
+{"amount_minor": 651448, "currency": "USD", "doc_id": "D-080f36", "invoice_refs": [{"amount_minor": 651448, "invoice_id": "INV-157224"}], "payment_id": "PAY-218243", "timestamp": "2025-07-06T15:26:00+05:30"}
+{"amount_minor": 35642, "currency": "USD", "doc_id": "D-001f5f", "invoice_refs": [{"amount_minor": 35642, "invoice_id": "INV-560668"}], "payment_id": "PAY-216485", "timestamp": "2025-07-06T22:53:00+05:30"}
+{"amount_minor": 108947800, "currency": "KZT", "doc_id": "D-0b3bf1", "invoice_refs": null, "payment_id": "PAY-888705", "timestamp": "2025-07-07T01:18:00+05:30"}
+{"amount_minor": 2395300, "currency": "USD", "doc_id": "D-010418", "invoice_refs": [{"amount_minor": 2395300, "invoice_id": "INV-917560"}], "payment_id": "PAY-735383", "timestamp": "2025-07-08T22:28:00+05:30"}
+{"amount_minor": 2491361, "currency": "GBP", "doc_id": "D-0d840e", "invoice_refs": [{"amount_minor": 295800, "invoice_id": "INV-574699"}, {"amount_minor": 2195561, "invoice_id": "INV-429969"}], "payment_id": "PAY-141679", "timestamp": "2025-07-09T19:06:00+05:30"}
+{"amount_minor": 969900, "currency": "USD", "doc_id": "D-0d51c6", "invoice_refs": [{"amount_minor": 969900, "invoice_id": "INV-571083"}], "payment_id": "PAY-226719", "timestamp": "2025-07-10T16:17:00+05:30"}
+{"amount_minor": 269692, "currency": "USD", "doc_id": "D-0c6d6f", "invoice_refs": [{"amount_minor": 269692, "invoice_id": "INV-913900"}], "payment_id": "PAY-672881", "timestamp": "2025-07-10T17:13:00+05:30"}
+{"amount_minor": 158649, "currency": "GBP", "doc_id": "D-03015b", "invoice_refs": [{"amount_minor": 158649, "invoice_id": "INV-311742"}], "payment_id": "PAY-614080", "timestamp": "2025-07-10T20:41:00+05:30"}
+{"amount_minor": 118600, "currency": "USD", "doc_id": "D-0da5e3", "invoice_refs": null, "payment_id": "PAY-552454", "timestamp": "2025-07-14T12:35:00+05:30"}
+{"amount_minor": 1083934, "currency": "USD", "doc_id": "D-0370ad", "invoice_refs": [{"amount_minor": 1083934, "invoice_id": "INV-498032"}], "payment_id": "PAY-024537", "timestamp": "2025-07-14T18:57:00+05:30"}
+{"amount_minor": 79458, "currency": "USD", "doc_id": "D-084a96", "invoice_refs": [{"amount_minor": 79458, "invoice_id": "INV-560668"}], "payment_id": "PAY-818815", "timestamp": "2025-07-21T15:46:00+05:30"}
+{"amount_minor": 1838224, "currency": "USD", "doc_id": "D-09b825", "invoice_refs": [{"amount_minor": 1838224, "invoice_id": "INV-910837"}], "payment_id": "PAY-547183", "timestamp": "2025-07-24T16:10:00+05:30"}
+{"amount_minor": 536700, "currency": "GBP", "doc_id": "D-0eea8e", "invoice_refs": [{"amount_minor": 536700, "invoice_id": "INV-131860"}], "payment_id": "PAY-666704", "timestamp": "2025-07-26T02:49:00+05:30"}
+{"amount_minor": 115100, "currency": "USD", "doc_id": "D-097461", "invoice_refs": [{"amount_minor": 115100, "invoice_id": "INV-229063"}], "payment_id": "PAY-130879", "timestamp": "2025-07-26T17:08:00+05:30"}
+{"amount_minor": 225000, "currency": "GBP", "doc_id": "D-0efd5d", "invoice_refs": [{"amount_minor": 225000, "invoice_id": "INV-792215"}], "payment_id": "PAY-213809", "timestamp": "2025-07-27T15:14:00+05:30"}
+{"amount_minor": 183200, "currency": "USD", "doc_id": "D-063aac", "invoice_refs": [{"amount_minor": 183200, "invoice_id": "INV-900807"}], "payment_id": "PAY-637198", "timestamp": "2025-07-27T17:30:00+05:30"}
+{"amount_minor": 941490, "currency": "USD", "doc_id": "D-0aa8a9", "invoice_refs": [{"amount_minor": 897700, "invoice_id": "INV-600779"}], "payment_id": "PAY-999014", "timestamp": "2025-07-27T18:28:00+05:30"}
+{"amount_minor": 595945, "currency": "GBP", "doc_id": "D-06f39c", "invoice_refs": [{"amount_minor": 583800, "invoice_id": "INV-231777"}], "payment_id": "PAY-262515", "timestamp": "2025-07-27T20:54:00+05:30"}
+{"amount_minor": 81338, "currency": "USD", "doc_id": "D-0e2cc1", "invoice_refs": [{"amount_minor": 81338, "invoice_id": "INV-980489"}], "payment_id": "PAY-497895", "timestamp": "2025-07-28T01:31:00+05:30"}
+{"amount_minor": 653007, "currency": "USD", "doc_id": "D-0b64f5", "invoice_refs": [{"amount_minor": 653007, "invoice_id": "INV-964393"}], "payment_id": "PAY-831553", "timestamp": "2025-07-28T02:01:00+05:30"}
+{"amount_minor": 505593, "currency": "USD", "doc_id": "D-099986", "invoice_refs": [{"amount_minor": 505593, "invoice_id": "INV-964393"}], "payment_id": "PAY-905185", "timestamp": "2025-07-28T15:56:00+05:30"}
+{"amount_minor": 1785718, "currency": "USD", "doc_id": "D-0e4e5f", "invoice_refs": [{"amount_minor": 1785718, "invoice_id": "INV-931625"}], "payment_id": "PAY-606901", "timestamp": "2025-07-29T14:09:00+05:30"}
+{"amount_minor": 1222600, "currency": "USD", "doc_id": "D-0bac0e", "invoice_refs": [{"amount_minor": 1222600, "invoice_id": "INV-202777"}], "payment_id": "PAY-525438", "timestamp": "2025-07-30T20:18:00+05:30"}
+{"amount_minor": -12145, "currency": "GBP", "doc_id": "D-06a44a", "invoice_refs": null, "payment_id": "PAY-138177", "timestamp": "2025-07-31T21:37:00+05:30"}

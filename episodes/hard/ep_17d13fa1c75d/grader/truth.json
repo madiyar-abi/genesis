@@ -1,0 +1,41 @@
+{
+  "episode_id": "ep_17d13fa1c75d",
+  "issues": [
+    {
+      "affected_ids": [
+        "2604-510057",
+        "BNK-894815"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "2026-04-02:GBP:USD",
+          "D-040f7b",
+          "D-099d94",
+          "R3401"
+        ]
+      ],
+      "expected_amount_minor": 432307,
+      "issue_id": "ISS-1",
+      "scenario": "I1",
+      "type": "payment_allocation"
+    },
+    {
+      "affected_ids": [
+        "BNK-894815"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "2026-04-30:GBP:USD",
+          "D-040f7b",
+          "R3402"
+        ]
+      ],
+      "expected_amount_minor": 2528,
+      "issue_id": "ISS-2",
+      "scenario": "I1",
+      "type": "fx_error"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "company": {
+    "bank_offset": "+00:00",
+    "base_currency": "EUR",
+    "entities": 9,
+    "foreign_currencies": [
+      "KZT",
+      "USD"
+    ],
+    "timezone": "-05:00"
+  },
+  "config": {
+    "difficulty": "hard",
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 0,
+      "payment_allocation": 0,
+      "period_cutoff": 0
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": null
+  },
+  "generator_version": "1.0.0",
+  "injections": [],
+  "seed": 9104
+}
