@@ -8,3 +8,9 @@
   invoice_refs carry explicit per-invoice amounts (remittance advice); evidence ids = doc_id / row_id;
   run deadline for this session 2026-11-20 09:00 (from the prompt, overrides NIGHT.md 07:00 default).
 - Next: T5 generator (lead).
+
+## 2026-11-19 13:41 — gemini
+- T3 done: auditenv/schema.py (validate_findings, normalize_finding) + tests/test_schema.py (42 tests, all pass).
+- Constants: ISSUE_TYPES (4 types), MAX_FINDINGS=30, MAX_EVIDENCE=10, MAX_EXPLANATION=1000, MAX_AFFECTED=10.
+- Assumption: affected_ids containing non-string integers are rejected (spec says non-empty strings).
+- Next: T12 (after T8) or T16 (after T9) — both blocked; will IDLE until dependencies met.
