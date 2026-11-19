@@ -21,3 +21,5 @@ for difficulty in ("default", "hard"):
     print(difficulty, "100 episodes", count, "FX rows")
 PY
 ```
+
+2026-11-20 00:39 gemini3 — T3: aligned README.md I2 description with inject.py rate fallback ('converted using the booking-date rate or an earlier fallback rate'); verified auditenv.check description against check.py gates (added naive reconciliation to dev baselines list and clarified paired replay policies reconcile_hard and random); verified split descriptions across configs/ (train, train_hard, dev, eval_example, eval_hard) and episodes/ (train, dev, hard public/grader splits). Ran auditenv.check and sync_docs.py --check: ALL CHECKS PASSED (311 unit tests, 0 failures), docs in sync. Next: IDLE.
