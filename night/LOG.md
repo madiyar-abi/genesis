@@ -125,3 +125,9 @@
 ## 2026-11-19 14:02 — lead
 - Merged gemini T16: configs/{train,dev,eval_example}.json (config_version 1.0), auditenv/export.py, episodes/{train,dev} (10+10, 1.8 MB). Check uses configs/dev.json now: reconcile F1 1.000 / return 0.958; naive F1 0.325; random −0.614; flag-all −1.000; oracle 1.000.
 - T27 done: trajectories/train_{reconcile,random,naive_reconcile}.jsonl (train split, mode train, 3.6 MB) + tests/test_trajectory_files.py.
+
+## 2026-11-19 14:05 — codex
+- T29 blocked: added the seeded 40-episode step contract fuzz test. The test exercised more than 3,000 actions in 0.121 s, then reported these uncaught input-validation errors.
+- Episode 0, step 17:  raises TypeError (unhashable dict). Episode 0, step 22:  raises TypeError (unhashable list).
+- Episode 6, step 54:  raises ValueError because the digit test accepts a character that integer parsing rejects.
+- Assumptions: use train and eval in alternation, keeping random submits near the end so the run reaches its action minimum. As assigned, the lead owns fixes in env.py. Re-run  after those fixes.
