@@ -7,4 +7,4 @@
 - [x] T5 (lead) Check public export integrity against all three versioned configs — files: night/LOG.md — accept: regenerate splits in a temporary directory and diff all files, log command and counts.
 - [x] T8 (lead) Snapshot transitions at collection time and regenerate the seven published trajectories — files: auditenv/run.py, tests/test_run.py, trajectories/ — accept: mutating-policy regression passes, every published observation equals raw replay, rewards and actions match prior artifacts.
 - [x] T6 (lead) Verify the numbered 2–3 minute demo script against the public recording command — files: docs/DEMO.md — accept: match IDs, amounts, steps and scores.
-- [ ] T7 (lead) Verify slide outline, run commands and metrics; sync jury documentation — files: docs/PITCH.md, docs/CHECKS.md, docs/DESIGN.md, README.md — accept: metrics sync passes and slide claims trace to measured results.
+- [x] T7 (lead) Verify slide outline, run commands and metrics; sync jury documentation — files: docs/PITCH.md, docs/CHECKS.md, docs/DESIGN.md, README.md — accept: metrics sync passes and slide claims trace to measured results.

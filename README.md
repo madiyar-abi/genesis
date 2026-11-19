@@ -218,6 +218,8 @@ make check                                           # run one target, or combin
 make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart  # preview commands
 ```
 
+To compare variants of the same seed, list each configuration as a separate episode in your config file. With `uv run python -m auditenv.analyze --config FILE --seeds N`, the failure report includes every entry for seed N.
+
 ## Repository layout
 
 | path | what |

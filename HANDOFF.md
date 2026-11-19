@@ -28,7 +28,7 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
-## Round 11 in progress · 20 November 2026
+## Round 11 complete · 20 November 2026
 
 Work is on `night/2026-11-20-r11`. See `night/TASKS.md` for ownership and
 `night/LOG.md` for verification. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`
@@ -48,6 +48,10 @@ and verifies the actions recorded in the seven published training trajectories.
 - T8. Snapshotting actions and observations fixed 40 stored invoice-list responses across three files. All 2,258 records now replay exactly. All seven files were regenerated; actions, rewards, IDs, step numbers and termination flags matched their earlier values. The mutating-policy regression and official check passed.
 
 - T2. The official suite now replays the seven published trajectory files against the train and hard-train configs and checks every reset and transition.
+
+- T7. Verified the pitch against measured results, including the archived 20,000-config sweep. The offline check passed 369 unit tests and both 20-pair replay suites. The README, pitch and design tables matched the official metrics.
+
+Next, record the demo and add the confirmed team credits before exporting the slides. The marathon handles CI and PR integration.
 
 ## Round 10 complete · 20 November 2026
 

@@ -290,10 +290,10 @@ episodes): 0 imperfect, max 57 steps, no truncation.
 
 | operation | workload | time |
 |---|---|---|
-| `generate()` default | 100 seeds | 0.249 s (2.49 ms / episode) |
-| `generate()` hard | 100 seeds | 0.867 s (8.67 ms / episode) |
-| `auditenv.verify` | 300 episodes | 1.652 s (5.51 ms / episode) |
-| one full episode, any baseline | dev / hard | 2.53–4.19 ms / 6.78–9.55 ms |
+| `generate()` default | 100 seeds | 0.266 s (2.66 ms / episode) |
+| `generate()` hard | 100 seeds | 0.953 s (9.53 ms / episode) |
+| `auditenv.verify` | 300 episodes | 1.783 s (5.94 ms / episode) |
+| one full episode, any baseline | dev / hard | 2.88–4.64 ms / 7.50–10.56 ms |
 
 The measured scripted policies finished both sampled companies within the 60 s episode limit.
 
