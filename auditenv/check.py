@@ -9,7 +9,8 @@
 4. 20 paired checks: seed+actions replay is exact; relabel+permute keeps the oracle answer and reward
 5. out-of-process eval run: rewards hidden from the policy, results only in the grader log
 6. hard mode (configs/eval_hard.json): verifier on hard episodes, baseline table, gates: oracle 1.0,
-   reconcile_hard (rules from the policy) solves it from the records, plain reconcile does not
+   reconcile_hard (rules from the policy) solves it from the records, plain reconcile does not;
+   20 more paired checks on hard episodes (replay with reconcile_hard/random, relabel/permute incl. FX rows)
 Exit code 0 only if every gate passes.
 """
 
@@ -140,12 +141,15 @@ def _digest(traj) -> str:
     return hashlib.sha256(json.dumps(traj, sort_keys=True).encode()).hexdigest()
 
 
-def run_paired(n: int = 20) -> bool:
+def run_paired(n: int = 20, hard: bool = False) -> bool:
     env = AuditEnv()
-    names = [p for p in ("reconcile", "random") if p in available_policies()]
+    rule = "reconcile_hard" if hard else "reconcile"
+    names = [rule, "random"] if hard else [p for p in (rule, "random") if p in available_policies()]
     failures = []
     for i in range(n):
         seed, cfg = 5000 + i, (HEAVY if i % 4 == 0 else ({"errors": {}} if i % 4 == 1 else None))
+        if hard:
+            seed, cfg = seed + 1000, {**(cfg or {}), "difficulty": "hard"}
         # (a) replay: same seed, config, version and actions -> identical records, transitions, rewards
         for name in names:
             t1 = run_episode(env, None, seed, cfg, policy_factory=lambda e: make_policy(name, e, 7))
@@ -170,16 +174,16 @@ def run_paired(n: int = 20) -> bool:
         m = grade(ep2["truth"], {"episode_id": ep2["episode_id"], "findings": moved}, ep2["episode_id"], 0)
         if m["fn"] or m["fp"]:
             failures.append((seed, "oracle", "translated answer no longer matches"))
-        if "reconcile" in names:
-            a = run_episode(env, None, seed, cfg, policy_factory=lambda e: make_policy("reconcile", e))[-1]["reward"]
-            b = run_episode(env, None, seed, t_cfg, policy_factory=lambda e: make_policy("reconcile", e))[-1]["reward"]
+        if rule in names:
+            a = run_episode(env, None, seed, cfg, policy_factory=lambda e: make_policy(rule, e))[-1]["reward"]
+            b = run_episode(env, None, seed, t_cfg, policy_factory=lambda e: make_policy(rule, e))[-1]["reward"]
             if a != b:
-                failures.append((seed, "reconcile", f"transform changed reward {a} -> {b}"))
+                failures.append((seed, rule, f"transform changed reward {a} -> {b}"))
     for f in failures[:5]:
         print("   ", f)
-    return _gate("paired checks (replay + relabel/permute)", not failures,
+    return _gate(f"paired checks{' (hard mode)' if hard else ''} (replay + relabel/permute)", not failures,
                  f"{n - len({f[0] for f in failures})}/{n} pairs pass; replay: {', '.join(names)}; relabel: "
-                 "translated oracle answer stays full, oracle/reconcile rewards unchanged")
+                 f"translated oracle answer stays full, oracle/{rule} rewards unchanged")
 
 
 def run_remote() -> bool:
@@ -222,6 +226,7 @@ def main(argv=None) -> int:
     ok &= run_remote()
     hard_ok, hard_table = run_hard(10 if args.quick else 25)
     ok &= hard_ok
+    ok &= run_paired(20, hard=True)
     if args.json:
         with open(args.json, "w") as fh:
             json.dump({"dev": table, "hard": hard_table}, fh, indent=2, sort_keys=True)

@@ -90,6 +90,17 @@ class HardModeTests(unittest.TestCase):
                                   policy_factory=lambda e: make_policy("reconcile_hard", e))[-1]["reward"]
             self.assertEqual(hard_rw, runs[0][-1]["reward"])
 
+    def test_check_runs_hard_paired_gate(self):
+        import contextlib
+        import io
+
+        from auditenv.check import run_paired
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertTrue(run_paired(2, hard=True))
+        self.assertIn("paired checks (hard mode)", out.getvalue())
+        self.assertIn("replay: reconcile_hard, random", out.getvalue())
+
     def test_env_accepts_difficulty_and_hides_nothing_new(self):
         env = AuditEnv()
         obs, _ = env.reset(5, {"difficulty": "hard", "mode": "eval"})

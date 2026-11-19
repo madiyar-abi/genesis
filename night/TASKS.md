@@ -43,7 +43,7 @@ Workers: touch ONLY the files listed for your task.
   generator change (and to re-export episodes). Use `from auditenv.generator import generate` — files:
   scripts/golden.py, tests/golden_hashes.json, tests/test_golden.py — accept: `uv run python -m unittest
   tests.test_golden` green and < 20 s; `uv run python scripts/golden.py --check` exit 0
-- [ ] P2 (lead) Paired checks for hard mode inside `auditenv.check` (seed replay + transform keeps oracle reward,
+- [x] P2 (lead) Paired checks for hard mode inside `auditenv.check` (seed replay + transform keeps oracle reward,
   hard config); confirm transform shuffles FX (it does) — files: auditenv/check.py, tests/ — accept: check prints the
   hard paired gate and exits 0
 - [ ] D4 (lead) Shortcut miner: new `scripts/shortcut_miner.py` — for each truth issue type, single-column predictors

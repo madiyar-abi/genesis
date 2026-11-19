@@ -92,7 +92,8 @@ Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs
 5. **Out-of-process eval run** — environment and grader in a subprocess; the policy sees no
    reward and no truth; results go only to the grader log.
 6. **Hard mode** — verifier on hard episodes, baselines on `configs/eval_hard.json`; gates: oracle 1.0,
-   `reconcile_hard` (the policy's hard rules) solves it from the records, plain `reconcile` does not.
+   `reconcile_hard` (the policy's hard rules) solves it from the records, plain `reconcile` does not;
+   20 more paired checks on hard episodes (replay with `reconcile_hard`, relabel + permute incl. FX rows).
 
 ## Using the environment
 
