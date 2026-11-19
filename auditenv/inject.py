@@ -250,7 +250,7 @@ def scenario_i1(st) -> None:
 
 
 def scenario_i2(st) -> None:
-    """Next-period foreign invoice backdated into the period and converted at the booking-date rate."""
+    """Next-period foreign invoice backdated into the period and converted at a rate from the booking date or earlier."""
     rng = st.rng
     ent = _foreign_entity(st)
     inv = st.new_invoice(ent, st.pe + timedelta(days=rng.randint(1, 3)))
