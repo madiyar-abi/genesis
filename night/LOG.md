@@ -17,3 +17,8 @@
 ## 2026-11-19 13:41 — codex
 - T4 done: P/R/F1 and six-place terminal reward. Ten targeted tests and the full suite passed.
 - Next: T11 once lead marks T7 done. T18 is independent.
+
+## 2026-11-19 13:41 — codex
+- T18 done: Python 3.11 slim Dockerfile and build-context exclusions. Task grep checks and full unittest suite passed.
+- Assumptions: T18 can proceed while T11 waits for T7. The image runs the stdlib check entry point directly. Docker execution deferred because Docker is unavailable locally and T17 owns the check module.
+- Next: T11 after T7 is checked on the lead branch, with integrated acceptance once the T13 runner is available.
