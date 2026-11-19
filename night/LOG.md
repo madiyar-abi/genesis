@@ -13,3 +13,4 @@
 2026-11-20 03:51 lead — T3: Reproduced ledger and credit-note edge cases on seeds 3 and 4, corrected config, evidence, lifecycle and Make examples. Official check passed in 63.0 s; measured tables matched.
 2026-11-20 03:51 lead — T1: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000: 3,000 cases (1,186 hard), 132.9 s, 0 problems, max 56 steps. Six focused tests passed, full check green.
 2026-11-20 03:52 lead — T11: Audit follow-up. Both misplaced count groups previously passed the new test inputs without raising. Scoped validation to each group; seven strict tests pass. Regenerated train/dev/hard exports and all seven trajectories, git diff empty, golden 80/80. Integrated gate: 366 tests pass.
+2026-11-20 03:52 lead — T8: Published the sweep, verified the jury-map references, synced docs with the integrated 366-test check, corrected remaining-work instructions.

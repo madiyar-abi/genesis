@@ -201,6 +201,7 @@ uv run python -m tests.test_fuzz                     # action count and runtime
 uv run python -m auditenv.check --json /tmp/auditenv-metrics.json
 uv run python scripts/sync_docs.py --check --json /tmp/auditenv-metrics.json  # omit --check to update
 uv run python -m auditenv.fuzz --seeds 0-999         # seed sweep: 3 000 episodes end to end
+uv run python -m auditenv.fuzz --configs 3000        # sample valid parameter combinations (add --start N to replay from case N)
 uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299   # every error findable in budget?
 uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json  # failure analysis
 uv run python -m auditenv.demo                       # narrated demo (see docs/DEMO.md)
@@ -231,7 +232,7 @@ make -n check test verify fuzz stress attack golden mutate miner bench sensitivi
 | `auditenv/policies/` | baselines: random explorer, naive reconcile, reconcile, reconcile_hard, flag-all, oracle |
 | `scripts/` | round-2 tools: mutation testing, sensitivity, shortcut miner, golden hashes, benchmark, chart, doc sync |
 | `auditenv/run.py`, `check.py` | runner/trajectories, single check command |
-| `auditenv/fuzz.py`, `analyze.py` | seed sweep + stress test, measured failure analysis |
+| `auditenv/fuzz.py`, `analyze.py` | seed and configuration sweeps, policy stress tests, measured failure analysis |
 | `auditenv/export.py`, `load.py`, `demo.py` | episode files on disk and back, narrated demo |
 | `auditenv/experimental.py` | materiality-weighted reward, reported next to the shared one |
 | `schemas/` | JSON Schemas: action, observation, findings, manifest, truth, trajectory step |
