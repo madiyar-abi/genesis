@@ -104,7 +104,10 @@ Grader secret: if the env var `AUDITENV_SECRET` is set (grader process only), it
 generator RNG and the HMAC `episode_id`, so a policy cannot recover the seed or regenerate the
 episode. Unset = public, reproducible train/dev episodes.
 
-First observation: `{task, manifest, policy, tools, steps_remaining}`.
+First observation: `{task, manifest, policy, tools, steps_remaining}`; reset `info` =
+`{episode_id, mode, max_steps}`. Step `info` is `{}` except on the terminal step in `mode="train"`:
+`{valid, tp, fp, fn, precision, recall, f1, reward, inspection_steps}` (counts only, no truth content);
+in `mode="eval"` it is always `{}`.
 Step observation: `{step, steps_remaining, result, error}` — `error` is null or
 `{code, message}`; `result` holds only what was requested.
 
@@ -136,7 +139,9 @@ types, `affected_ids` non-empty list of non-empty strings (≤ 10), amount int �
 Invalid structure → episode ends, reward −1, error recorded in the grader log.
 
 ## 6. Matching & reward (`auditenv/matcher.py`, `auditenv/metrics.py`)
-- Normalise: strip ids, dedupe + sort affected_ids, uppercase currency.
+- Normalise: strip ids, dedupe + sort affected_ids and evidence_ids (ids are case-sensitive;
+  currency must be exactly `[A-Z]{3}` or the submission is invalid). Top-level keys other than
+  `episode_id` and `findings` are invalid.
 - TP iff type equal, normalised affected_ids equal, currency equal,
   `abs(claimed − expected) <= max(1, expected // 1000)`, and `set(evidence_ids)`
   ⊇ some evidence set.

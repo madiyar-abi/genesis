@@ -72,7 +72,7 @@ def main(argv=None) -> int:
     h("1. A synthetic company: reset(seed, config) -> first observation", pause)
     obs, info = env.reset(seed, CFG)
     m = obs["manifest"]
-    print(f"episode_id   {m['episode_id']}   (hash of seed+config+version; the seed stays hidden)")
+    print(f"episode_id   {m['episode_id']}   (HMAC of seed+config+version; with the grader key set, the seed cannot be recovered)")
     print(f"company      base {m['base_currency']}, timezone {m['timezone']}, "
           f"period {m['period_start']} .. {m['period_end']}")
     print(f"records      {m['counts']['ledger']} ledger rows, {m['counts']['invoices']} invoices, "

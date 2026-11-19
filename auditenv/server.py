@@ -10,7 +10,9 @@ Requests:  {"cmd": "reset", "seed": int, "config": {...}}   (seed/config ignored
            {"cmd": "close"}
 Responses: {"observation", "info"} | {"observation", "reward", "terminated", "truncated", "info"}
            | {"error": "..."}
-With --episodes FILE (`{"seeds": [...], "config": {...}}`, kept secret from the agent),
+With --episodes FILE (kept secret from the agent) — either the configs/*.json format
+`{"episodes": [{"seed": int, "config": {...}}, ...]}` (per-episode configs, e.g. 5 clean + 5 interacting)
+or `{"seeds": [...], "config": {...}}` —
 every reset loads the next hidden episode; after the last one reset returns {"error": "no more episodes"}.
 """
 
@@ -21,11 +23,12 @@ import json
 import sys
 
 from .env import AuditEnv
+from .run import load_episodes
 
 
-def serve(inp, out, grader_log: str | None, episodes: dict | None) -> None:
+def serve(inp, out, grader_log: str | None, episodes: list[tuple[int, dict]] | None) -> None:
     env = AuditEnv()
-    queue = list(episodes["seeds"]) if episodes else None
+    queue = list(episodes) if episodes is not None else None
     logged = 0
 
     def flush_log():
@@ -52,8 +55,8 @@ def serve(inp, out, grader_log: str | None, episodes: dict | None) -> None:
                         out.write(json.dumps(resp) + "\n")
                         out.flush()
                         continue
-                    seed, config = queue.pop(0), dict(episodes.get("config", {}))
-                    config.setdefault("mode", "eval")
+                    seed, config = queue.pop(0)
+                    config = {**config, "mode": config.get("mode", "eval")}
                 else:
                     seed, config = int(req["seed"]), req.get("config") or {}
                 obs, info = env.reset(seed, config)
@@ -80,10 +83,7 @@ def main(argv=None) -> int:
     ap.add_argument("--grader-log", help="append grading results here (JSONL)")
     ap.add_argument("--episodes", help="hidden episode list {seeds, config}; resets ignore client seeds")
     args = ap.parse_args(argv)
-    episodes = None
-    if args.episodes:
-        with open(args.episodes) as fh:
-            episodes = json.load(fh)
+    episodes = load_episodes(args.episodes) if args.episodes else None
     serve(sys.stdin, sys.stdout, args.grader_log, episodes)
     return 0
 

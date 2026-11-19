@@ -64,6 +64,23 @@ class HardeningTest(unittest.TestCase):
             self.assertEqual([r["end"] for r in recs], ["abandoned"] * 3)
             self.assertTrue(all(r["reward"] < 0 for r in recs))
 
+    def test_validator_matches_published_schema(self):
+        from auditenv.schema import validate_findings
+        f = {"type": "fx_error", "affected_ids": ["X"], "claimed_amount_minor": 1, "currency": "USD",
+             "evidence_ids": []}
+        self.assertIsNone(validate_findings({"episode_id": "e", "findings": [f]}, "e"))
+        self.assertIsNotNone(validate_findings({"episode_id": "e", "findings": [f], "extra": 1}, "e"))
+        for cur in ("ÄÖÜ", "ＵＳＤ", "usd", "US1"):
+            self.assertIsNotNone(validate_findings({"episode_id": "e", "findings": [{**f, "currency": cur}]}, "e"))
+
+    def test_server_accepts_config_episode_lists(self):
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        with tempfile.TemporaryDirectory() as d:
+            log = os.path.join(d, "g.jsonl")
+            with RemoteEnv(grader_log=log, episodes=os.path.join(root, "configs", "eval_example.json")) as env:
+                obs, info = env.reset()
+                self.assertEqual(info["mode"], "eval")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -53,7 +53,7 @@ def transform(episode: dict, transform_seed: int) -> dict:
                 break
     out = copy.deepcopy(episode)
     out["tables"] = _remap(t, mapping)
-    for table in ("ledger", "invoices", "payments"):
+    for table in ("ledger", "invoices", "payments", "fx"):
         rng.shuffle(out["tables"][table])
     truth = _remap(episode["truth"], mapping)
     for iss in truth["issues"]:
@@ -62,4 +62,5 @@ def transform(episode: dict, transform_seed: int) -> dict:
     out["truth"] = truth
     out["provenance"] = _remap(episode["provenance"], mapping)
     out["provenance"]["transform_seed"] = transform_seed
+    out["provenance"]["id_map"] = mapping  # grader-only: old id -> new id (paired checks)
     return out
