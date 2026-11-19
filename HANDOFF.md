@@ -28,6 +28,10 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 3 · 19 November 2026
+
+Branch `night/2026-11-19-r3`. The round freeze is 22 November at 18:00 local time. Round 2 is in main. The verifier now rejects a truth amount denominated in the wrong currency. Run `uv run python -m unittest tests.test_verify` for all six verifier tests. Jury map, demo and pitch checks are tracked in `night/TASKS.md`.
+
 ## Status
 **Round 2 (agent polish run) on `night/2026-11-19-r2` is DONE (`night/DONE`): all planned ideas done except the
 optional H1/E5 (skipped on purpose, see `night/LOG.md`), plus fixes from an independent jury-style review
@@ -83,7 +87,7 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 
 ## Remaining work before submission
 
-- **Engineering:** open and merge the PR `night/2026-11-19-r2` → `main` after CI passes (PR #11 is already merged). The first scheduled nightly CI run can be checked after merge.
+- **Engineering:** review the round-3 branch and CI before integration (round 2 is merged). The first scheduled nightly CI run can be checked after merge.
 - **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md` (chart: `docs/baselines.svg`), including the Team slide.
 - **Access and submission:** the repository owner arranges jury access. The team checks the repo, video and presentation links, adds them to the Google Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 

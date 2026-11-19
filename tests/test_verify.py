@@ -27,6 +27,13 @@ class VerifyTest(unittest.TestCase):
         next(r for r in bad["tables"]["ledger"] if r["account"] == "1000" and r["debit_minor"] > 0)["debit_minor"] += 1
         self.assertTrue(any("unbalanced" in p for p in verify_episode(bad)))
 
+    def test_truth_currency_must_match_ledger_currency(self):
+        ep = generate(5, HEAVY)
+        ep["truth"]["issues"][0]["currency"] = (
+            "USD" if ep["manifest"]["base_currency"] != "USD" else "EUR"
+        )
+        self.assertTrue(any("currency" in problem for problem in verify_episode(ep)))
+
     def test_detects_wrong_truth(self):
         ep = generate(5, HEAVY)
         dropped = copy.deepcopy(ep)
@@ -38,10 +45,6 @@ class VerifyTest(unittest.TestCase):
         bad_evidence = copy.deepcopy(ep)
         bad_evidence["truth"]["issues"][0]["evidence_sets"] = [["NOPE-1"]]
         self.assertTrue(verify_episode(bad_evidence))
-
-
-if __name__ == "__main__":
-    unittest.main()
 
     def test_nothing_allocated_evidence_must_cover_the_whole_ref(self):
         """D2: the 2900 row is the positive evidence for 'nothing allocated'; for a base-currency payment it
@@ -64,3 +67,7 @@ if __name__ == "__main__":
             self.assertTrue(_sufficient(Books(m, t), iss, s, short, docs))
             checked += 1
         self.assertGreater(checked, 0)
+
+
+if __name__ == "__main__":
+    unittest.main()
