@@ -69,6 +69,27 @@ class HardModeTests(unittest.TestCase):
                                                 generate(s, HARD_DUPS)["tables"]))["tp"] for s in range(10))
         self.assertLess(plain_tp, 30)
 
+    def test_replay_and_transform_invariance(self):
+        import hashlib
+        import json
+
+        from auditenv.run import make_policy, run_episode
+        env = AuditEnv()
+        cfg = {"difficulty": "hard", "errors": {"duplicate_invoice": 2, "payment_allocation": 1}, "interacting": {"I1": 1}}
+        digest = lambda t: hashlib.sha256(json.dumps(t, sort_keys=True).encode()).hexdigest()
+        for seed in (21, 22, 23):
+            runs = [run_episode(env, None, seed, cfg, policy_factory=lambda e: make_policy("reconcile_hard", e, 3))
+                    for _ in range(2)]
+            self.assertEqual(digest(runs[0]), digest(runs[1]))
+            base = run_episode(env, None, seed, cfg, policy_factory=lambda e: make_policy("oracle", e))[-1]["reward"]
+            moved = run_episode(env, None, seed, {**cfg, "transform_seed": 9},
+                                policy_factory=lambda e: make_policy("oracle", e))[-1]["reward"]
+            self.assertEqual(base, moved)
+            self.assertEqual(verify_episode(env._ep), [])
+            hard_rw = run_episode(env, None, seed, {**cfg, "transform_seed": 9},
+                                  policy_factory=lambda e: make_policy("reconcile_hard", e))[-1]["reward"]
+            self.assertEqual(hard_rw, runs[0][-1]["reward"])
+
     def test_env_accepts_difficulty_and_hides_nothing_new(self):
         env = AuditEnv()
         obs, _ = env.reset(5, {"difficulty": "hard", "mode": "eval"})

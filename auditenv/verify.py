@@ -252,8 +252,8 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
             row = ev_rows[0]
             if row["account"] == "1200":
                 ok = expected - row["credit_minor"] == exp
-            else:  # 2900 row: shows the shortfall moved to unapplied cash; expected credit must exceed exp
-                ok = row["account"] == "2900" and row["payment_id"] == pay["payment_id"] and 0 < exp <= expected
+            else:  # 2900 row: nothing was allocated, the whole ref went to unapplied cash -> amount = expected
+                ok = row["account"] == "2900" and row["payment_id"] == pay["payment_id"] and exp == expected
         return [] if ok else [f"evidence set {s} does not reproduce the amount"]
     except (KeyError, StopIteration, ValueError, IndexError):
         return [f"evidence set {s} is missing a record needed to reproduce the amount"]
@@ -310,7 +310,7 @@ def main(argv=None) -> int:
     ap.add_argument("--dir", default=None,
                     help="verify every episode under this directory (e.g. episodes/dev)")
     args = ap.parse_args(argv)
-    bad = 0
+    bad = total = 0
 
     if args.dir:
         from .load import load_episode
@@ -320,21 +320,23 @@ def main(argv=None) -> int:
             if not os.path.isdir(ep_path) or not os.path.isdir(os.path.join(ep_path, "public")):
                 continue
             ep = load_episode(ep_path)
+            total += 1
             probs = verify_episode(ep)
             if probs:
                 bad += 1
                 print(f"{entry}: {probs[:3]}")
-        print(f"episodes with problems: {bad}")
+        print(f"{total - bad}/{total} episodes valid; episodes with problems: {bad}")
         return 1 if bad else 0
 
     for seed in parse_seeds(args.seeds):
         for cfg in (None, {"errors": {}}, {"errors": {"duplicate_invoice": 2, "payment_allocation": 2, "fx_error": 2,
                                                        "period_cutoff": 2}, "interacting": {"I1": 1, "I2": 1}}):
+            total += 1
             probs = verify_episode(generate(seed, cfg))
             if probs:
                 bad += 1
                 print(seed, cfg, probs[:3])
-    print("episodes with problems:", bad)
+    print(f"{total - bad}/{total} episodes valid; episodes with problems: {bad}")
     return 1 if bad else 0
 
 

@@ -74,7 +74,7 @@ Truth issue: `{issue_id, type, scenario, affected_ids, expected_amount_minor, cu
 "Same line items" = equal as a multiset of `(description, quantity, unit_price_minor, amount_minor)`
 with descriptions compared lower-case, letters and digits only (order, case and punctuation ignored).
 In default mode copies are exact; in hard mode half of them are re-typed.
-| `payment_allocation` | [invoice_id, payment_id] | `convert(ref.amount, rate(inv date))` − AR credit actually posted | payment doc_id + invoice doc_id + the 2900 row_id (or the AR credit row_id) + the invoice-date fx_id if foreign |
+| `payment_allocation` | [invoice_id, payment_id] | `convert(ref.amount, rate(inv date))` − AR credit actually posted | payment doc_id + invoice doc_id + the AR credit row_id of that invoice in the payment (if nothing was allocated to it: the 2900 row_id) + the invoice-date fx_id if foreign |
 | `fx_error` | [invoice_id] or [payment_id] | abs(posted − correct) of the AR (resp. cash) row | doc_id + that row_id (invoice: AR or revenue row) + the fx_id of the correct date |
 | `period_cutoff` | [invoice_id] | AR debit posted for an invoice dated outside the period | invoice doc_id + AR (or revenue) row_id |
 

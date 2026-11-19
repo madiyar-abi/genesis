@@ -67,3 +67,50 @@ class HardeningTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AllocationEvidenceTest(unittest.TestCase):
+    """REVIEW.md #1: every payment_allocation evidence set must reproduce the amount on its own."""
+
+    CFG = {"errors": {"payment_allocation": 3}, "interacting": {"I1": 1}}
+
+    def test_partial_allocation_needs_the_posted_ar_credit(self):
+        seen_partial = seen_full = 0
+        for seed in range(40):
+            ep = generate(seed, self.CFG)
+            rows = {r["row_id"]: r for r in ep["tables"]["ledger"]}
+            for iss in ep["truth"]["issues"]:
+                if iss["type"] != "payment_allocation":
+                    continue
+                accounts = {rows[i]["account"] for s in iss["evidence_sets"] for i in s if i in rows}
+                inv_id, pay_id = sorted(iss["affected_ids"], key=lambda i: i not in {r["invoice_id"] for r in
+                                                                                      ep["tables"]["invoices"]})
+                posted = any(r["account"] == "1200" and r["payment_id"] == pay_id and r["invoice_id"] == inv_id
+                             for r in ep["tables"]["ledger"])
+                if posted:  # partial: only the AR-row set reproduces expected - posted
+                    seen_partial += 1
+                    self.assertEqual(accounts, {"1200"}, (seed, iss["issue_id"]))
+                else:
+                    seen_full += 1
+                    self.assertEqual(accounts, {"2900"}, (seed, iss["issue_id"]))
+            self.assertEqual(verify_episode(ep), [], seed)
+        self.assertGreater(seen_partial, 10)
+        self.assertGreater(seen_full, 10)
+
+    def test_verifier_rejects_an_insufficient_2900_set(self):
+        for seed in range(40):
+            ep = generate(seed, self.CFG)
+            rows = {r["row_id"]: r for r in ep["tables"]["ledger"]}
+            for iss in ep["truth"]["issues"]:
+                s = iss["evidence_sets"][0]
+                if iss["type"] != "payment_allocation" or not any(rows.get(i, {}).get("account") == "1200" for i in s):
+                    continue
+                pay_id = next(i for i in iss["affected_ids"] if i in {p["payment_id"] for p in ep["tables"]["payments"]})
+                unapplied = next((r["row_id"] for r in ep["tables"]["ledger"]
+                                  if r["account"] == "2900" and r["payment_id"] == pay_id), None)
+                if unapplied is None:
+                    continue
+                iss["evidence_sets"] = [[unapplied if rows.get(i, {}).get("account") == "1200" else i for i in s]]
+                self.assertTrue(any("does not reproduce" in p for p in verify_episode(ep)))
+                return
+        self.fail("no partial allocation with a 2900 row found")

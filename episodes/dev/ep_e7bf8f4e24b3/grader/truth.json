@@ -74,12 +74,6 @@
       "evidence_sets": [
         [
           "2026-02-28:GBP:KZT",
-          "GL-000430",
-          "bf623cbe",
-          "c9aeab00"
-        ],
-        [
-          "2026-02-28:GBP:KZT",
           "GL-000429",
           "bf623cbe",
           "c9aeab00"
@@ -97,11 +91,6 @@
       ],
       "currency": "KZT",
       "evidence_sets": [
-        [
-          "GL-000552",
-          "a70b33ae",
-          "a7c93435"
-        ],
         [
           "GL-000551",
           "a70b33ae",

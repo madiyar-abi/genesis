@@ -160,3 +160,11 @@
   reproduce the amount (849/1200 sampled 2900-sets were partial); verifier check for 2900 sets was too weak.
 - Other findings: Docker never run, verify CLI has no totals, hard mode not in replay/transform tests, test gaps, PITCH/DESIGN
   structure. All in REVIEW.md.
+
+## 2026-11-19 15:40 — hinabaina + Claude (jury-review, phase 2)
+- #1 fixed: payment_allocation evidence — partial → AR-credit set only; nothing allocated → 2900 set; verifier: 2900 set must
+  equal the full expected credit. Old dev export failed the new verifier (3/10 episodes) → re-exported train/dev, regenerated
+  trajectories (only the policy text changed; naive_reconcile lost 2 TPs that only matched the insufficient set).
+  Regression tests fail on the old verifier. New dev naive: 0.169/0.700/0.273, −0.506; hard naive 0.093/0.543/0.159, −0.747.
+- #2: GitHub Actions workflow (docker build + run --network none; plain Python check + verifier). #3 verify totals. #4 hard replay/transform test.
+- check: ALL CHECKS PASSED, 196 tests, 11.5 s.

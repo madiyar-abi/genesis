@@ -185,9 +185,12 @@ def payment_allocation(st, pay=None, partial=None, scenario="single") -> bool:
     st.rebalance(jid)
     st.touched.update({pay["payment_id"], inv["invoice_id"]})
     extra = [_fx(st, inv["_cdate"], cur)] if cur != st.base else []
-    evidence = [[("doc", pay["doc_id"]), ("doc", inv["doc_id"]), ("row", unapplied["_k"])] + extra]
+    # the set must reproduce the amount on its own: a partial allocation needs the AR credit actually
+    # posted; with nothing allocated the 2900 row shows where the money went (posted AR credit = 0)
     if partial:
-        evidence.append([("doc", pay["doc_id"]), ("doc", inv["doc_id"]), ("row", ar["_k"])] + extra)
+        evidence = [[("doc", pay["doc_id"]), ("doc", inv["doc_id"]), ("row", ar["_k"])] + extra]
+    else:
+        evidence = [[("doc", pay["doc_id"]), ("doc", inv["doc_id"]), ("row", unapplied["_k"])] + extra]
     st.record({"type": "payment_allocation", "scenario": scenario,
                "affected_ids": [inv["invoice_id"], pay["payment_id"]], "amount": posted_before - new_credit,
                "evidence": evidence},
