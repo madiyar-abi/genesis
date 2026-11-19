@@ -2,6 +2,8 @@
 
     uv run python -m auditenv.fuzz --seeds 0-999            # default difficulty
     uv run python -m auditenv.fuzz --seeds 0-199 --hard     # hard mode
+    uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299        # solvability stress test
+    uv run python -m auditenv.fuzz --stress reconcile_hard --seeds 0-299 --hard
 
 Per episode: generation and the verifier raise nothing and find no problem (balanced journals
 before/after, truth == recomputed discrepancies, every evidence set sufficient); the oracle reaches
@@ -55,12 +57,41 @@ def sweep(seeds: list[int], hard: bool = False) -> dict:
             "random_positive": random_pos, "random_positive_dirty": random_pos_dirty, "flag_all_negative": flag_neg}
 
 
+STRESS = {"random_mix": {}, "clean": {"errors": {}}, "12_issues": {"errors": {t: 3 for t in ISSUE_TYPES}},
+          "12_issues_100_invoices": {"errors": {t: 3 for t in ISSUE_TYPES}, "n_invoices": 100}}
+
+
+def stress(policy: str, seeds: list[int], hard: bool = False) -> dict:
+    """Is every truth issue findable from the records within the budget? Run a rule policy everywhere."""
+    env = AuditEnv()
+    imperfect, max_steps, truncated, n = [], 0, 0, 0
+    for seed in seeds:
+        for name, base in STRESS.items():
+            cfg = {**base, "difficulty": "hard"} if hard else dict(base)
+            traj = run_episode(env, None, seed, cfg, policy_factory=lambda e: make_policy(policy, e, seed))
+            n += 1
+            max_steps = max(max_steps, traj[-1]["step"])
+            truncated += traj[-1]["truncated"]
+            if env.result["f1"] < 1.0:
+                imperfect.append((seed, name, env.result["tp"], env.result["fp"], env.result["fn"]))
+    return {"episodes": n, "imperfect": imperfect, "max_steps": max_steps, "truncated": truncated}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--seeds", default="0-999")
     ap.add_argument("--hard", action="store_true", help="difficulty: hard")
+    ap.add_argument("--stress", metavar="POLICY", help="stress test a rule policy instead of the sweep")
     args = ap.parse_args(argv)
     t0 = time.monotonic()
+    if args.stress:
+        r = stress(args.stress, parse_seeds(args.seeds), args.hard)
+        for p in r["imperfect"][:20]:
+            print("   ", p)
+        print(f"{args.stress} on {r['episodes']} {'hard' if args.hard else 'default'} episodes (seeds {args.seeds} x "
+              f"{', '.join(STRESS)}): imperfect {len(r['imperfect'])}, max steps {r['max_steps']}, "
+              f"truncated {r['truncated']} ({time.monotonic() - t0:.1f} s)")
+        return 0 if not r["imperfect"] and not r["truncated"] else 1
     r = sweep(parse_seeds(args.seeds), args.hard)
     for p in r["problems"][:20]:
         print("   ", p)

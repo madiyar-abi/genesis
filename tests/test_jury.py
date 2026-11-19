@@ -326,5 +326,48 @@ class DataTests(unittest.TestCase):
         self.assertGreaterEqual(clean, 4)
 
 
+class EdgeCaseDataTests(unittest.TestCase):
+    """Jury 2: the hard bookkeeping cases occur and are booked correctly (verifier: 0 discrepancies)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.eps = [generate(s, CLEAN) for s in range(60)]
+
+    def _with(self, pred):
+        hits = [ep for ep in self.eps if pred(ep)]
+        self.assertTrue(hits)
+        for ep in hits:
+            self.assertEqual(ep["truth"]["issues"], [])
+            pre, problems = Books(ep["manifest"], ep["tables"]).discrepancies()
+            self.assertEqual((pre, problems), ([], []), ep["episode_id"])
+        return hits
+
+    def test_zero_exponent_currency(self):
+        hits = self._with(lambda ep: "JPY" in {i["currency"] for i in ep["tables"]["invoices"]})
+        for ep in hits:
+            self.assertEqual(ep["manifest"]["amount_exponents"]["JPY"], 0)
+
+    def test_refunds_split_multi_invoice_and_unidentified_payments(self):
+        self._with(lambda ep: any(p["amount_minor"] < 0 for p in ep["tables"]["payments"]))
+        self._with(lambda ep: any(p["invoice_refs"] is None for p in ep["tables"]["payments"]))
+        self._with(lambda ep: any(len(p["invoice_refs"] or []) > 1 for p in ep["tables"]["payments"]))
+        refs = lambda ep: [r["invoice_id"] for p in ep["tables"]["payments"] for r in p["invoice_refs"] or []]
+        self._with(lambda ep: len(refs(ep)) > len(set(refs(ep))))  # an invoice paid in several payments
+
+    def test_midnight_documents_use_the_company_timezone(self):
+        from datetime import date as _date
+
+        def crossing(ep):
+            books = Books(ep["manifest"], ep["tables"])
+            for inv in ep["tables"]["invoices"]:
+                written = _date.fromisoformat(inv["issued_at"][:10])
+                if written != books.cdate(inv["issued_at"]) and (books.in_period(inv["issued_at"])
+                                                                  != (books.ps <= written <= books.pe)):
+                    return True
+            return False
+
+        self._with(crossing)
+
+
 if __name__ == "__main__":
     unittest.main()

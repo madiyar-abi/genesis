@@ -183,3 +183,10 @@
   (it submitted nothing — the correct answer), 0 on dirty; flag-all < 0 on 3000/3000.
 - Hard, seeds 0-199 = 600 episodes (395 dirty): 0 problems; random > 0 on 50/600, 0 on dirty; flag-all < 0 on 600/600.
 - tests/test_fuzz_sweep.py (clean sweep + a corrupted ledger is reported); CI runs both sweeps.
+
+## 2026-11-19 16:50 — hinabaina + Claude (jury-review, phase 5)
+- README: why/how, error table, reward, results table, all commands (verify --dir, fuzz, stress, analyze, demo, export), layout, license.
+- DESIGN: §0 key decisions, worked examples per type/scenario from real dev episodes (amounts recomputed), seeds column,
+  edge-case table, seed sweep + reproducible stress (`auditenv.fuzz --stress`), naive numbers after the evidence fix.
+- PITCH: 10 slides in the requested order. DEMO: 15 s check, hard table, optional test_jury step; `demo --pause` and `--seed 2005` run.
+- tests: EdgeCaseDataTests (JPY, refunds, unidentified, multi-invoice, split payments, midnight documents). 231 tests, check PASSED 14.9 s.

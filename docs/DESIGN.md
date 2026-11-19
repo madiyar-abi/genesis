@@ -5,6 +5,18 @@ read-only investigation tools, hidden misstatements with recorded causes, and a 
 matcher + terminal reward. Interfaces: [`CONTRACT.md`](CONTRACT.md). Numbers below come from
 `uv run python -m auditenv.check` and `uv run python -m auditenv.analyze` (see "Results").
 
+## 0. Key decisions and why
+
+| decision | why |
+|---|---|
+| Generate a consistent hidden history first, book it correctly, then inject errors as recorded changes | the truth is a real, causal ledger misstatement that an independent verifier can recompute; nothing is a "suspicious row" |
+| Integer minor units, decimal-string rates, `Decimal` + ROUND_HALF_UP | no float drift; every amount is exactly reproducible from the records |
+| Five narrow read-only tools, 50-row pages, 100 steps, 60 s | the agent must investigate; no shell/SQL/files means no way around the tools; step cost rewards efficiency |
+| Truth and provenance live only in the grader (eval mode, out-of-process server, HMAC ids + grader secret) | the jury can run closed evaluations; a policy cannot read or regenerate the answer |
+| One published matcher with explicit tolerance and tie rule, evidence required | the reward cannot be gamed by guessing ids, flagging everything or writing a persuasive story |
+| Standard library only, one check command, Docker | the jury runs everything offline with one command |
+| Opt-in hard level instead of changing the default | default numbers stay comparable; hard mode shows the environment can be made harder than a rule script |
+
 ## 1. Episode lifecycle
 
 ```
@@ -57,6 +69,17 @@ brute-forced from the id nor the episode regenerated from the open-source code. 
 
 Every type is independently configurable (`errors: {type: count}`), injectors never touch an
 already-affected document, and amounts are the real ledger misstatement — not a "suspicious row".
+
+### Worked examples (real dev episodes; reproduce with `generate(seed, config)` from `configs/dev.json`)
+
+| type | episode (seed) | what the records show | truth amount |
+|---|---|---|---|
+| `duplicate_invoice` | `ep_14eca11ac929` (2003), base USD, tz +05:00 | `INV-112285` (issued 09-07) and `INV-726919` (09-09): same customer `CUST07389`, USD 18 760.00, identical line items; both booked, `R1350` is the AR debit of the later copy | 1 876 000 (the later copy's AR debit) |
+| `payment_allocation` | `ep_14eca11ac929` (2003) | `PAY-874814` remits KZT 3 454 497.00 for `INV-677785`; the ledger credits nothing to its AR, `R1509` puts the money in 2900. Expected AR credit = KZT amount × 0.00192618 (rate of the invoice date 09-10) | 665 398 |
+| `fx_error` | `ep_7f8a101fa36a` (2005), base KZT | `F0926539` is USD 14 007.00 issued 09-12; AR row `R944` = 698 834 443, correct = 14 007.00 × 494.388 (rate `2026-09-12:USD:KZT`) = 692 489 272 | 6 345 171 |
+| `period_cutoff` | `ep_d671645ebdd1` (2002), period 2026-03 | `INV-142472` is issued 2026-04-04 (next period) but its AR row `GL-000311` is dated 03-29 | 638 435 000 (the AR debit posted) |
+| `I1` | `ep_d671645ebdd1` (2002), base KZT | `PAY-827484` (EUR 9 610.00, 03-31 23:38 bank time) pays `INV-589644` in full; AR credit `GL-000333` = 218 992 539 instead of 9 610.00 × 509.208 = 489 348 888 → allocation 270 356 349; the cash row `GL-000332` = 486 321 738 instead of 9 610.00 × 504.218 (03-31) = 484 553 498 → fx 1 768 240 | two issues |
+| `I2` | `ep_14eca11ac929` (2003) | `INV-358266` (GBP 4 275.00) is issued 2026-10-01, booked 09-29 (`R1520`) → cutoff 526 744; and converted at a wrong rate: correct 4 275.00 × 1.24037 = 530 258 → fx 3 514 | two issues |
 
 ## 4. Clean cases and distractors
 
@@ -147,37 +170,44 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 
 `uv run python -m auditenv.check` (dev split; P/R/F1 micro-averaged; return, steps, time = means):
 
-| policy | P | R | F1 | return | steps | time s | exp. return* |
-|---|---|---|---|---|---|---|---|
-| random explorer (seeded) | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.004 | −0.807 |
-| naive reconciliation | 0.177 | 0.733 | 0.286 | −0.488 | 17.2 | 0.004 | −0.207 |
-| reconciliation (policy-aware) | 1.000 | 1.000 | 1.000 | 0.957 | 22.5 | 0.004 | 0.957 |
-| flag-everything attack | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.003 | −1.000 |
-| oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.003 | 1.000 |
+| policy | seeds | P | R | F1 | return | steps | time s | exp. return* |
+|---|---|---|---|---|---|---|---|---|
+| random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.004 | −0.807 |
+| naive reconciliation | 2000–2009 | 0.169 | 0.700 | 0.273 | −0.506 | 17.2 | 0.004 | −0.210 |
+| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.957 | 22.5 | 0.004 | 0.957 |
+| flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.003 | −1.000 |
+| oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.003 | 1.000 |
 
 Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30 truth issues).
 P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode.
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount; reported separately, the shared reward is unchanged.
-Other gates in the same run: 193 unit tests pass; verifier 200/200 episodes valid (600/600 with
+Other gates in the same run: 231 unit tests pass; verifier 200/200 episodes valid (600/600 with
 `auditenv.verify --seeds 0-199`); 20/20 paired checks; out-of-process run leaks nothing.
 
-Reconcile stress test: 1 200 episodes (300 seeds × default / clean / 12-issue / 12-issue with
-100 invoices): **0 imperfect episodes**, max 30 steps, no truncation — every truth issue can be
-found from the records within the budget.
+Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200
+episodes (300 seeds × random mix / clean / 12 issues / 12 issues with 100 invoices): **0 imperfect
+episodes**, max 33 steps, no truncation — every truth issue can be found from the records within the budget.
+
+**Seed sweep** (`uv run python -m auditenv.fuzz --seeds 0-999`; generate → verifier → oracle, random
+explorer and flag-everything through the env, 3 configs per seed): 3 000 episodes (1 989 dirty, 1 011
+clean) in 45 s — 0 exceptions, 0 verifier problems, oracle 1.0 on every episode; the random explorer
+scores > 0 on 245 episodes, all clean books where it submitted nothing (the correct answer), never on
+dirty books; flag-everything is negative on 3 000/3 000. Hard mode, seeds 0–199: 600 episodes, 0 problems,
+random > 0 only on 50 clean episodes, flag-everything negative on 600/600. CI runs both sweeps.
 
 **Measured failure analysis** (`uv run python -m auditenv.analyze --policy <p> --config configs/dev.json`):
 
 | | duplicate | allocation | fx | cutoff | I1 | I2 | FP |
 |---|---|---|---|---|---|---|---|
-| naive reconciliation, recall | 7/7 | 2/8 | 6/8 | 7/7 | 0/2 | 2/2 | 102 |
+| naive reconciliation, recall | 7/7 | 1/8 | 6/8 | 7/7 | 0/2 | 2/2 | 103 |
 | reconciliation, recall | 7/7 | 8/8 | 8/8 | 7/7 | 2/2 | 2/2 | 0 |
 
-Where the naive rules fail (102 FPs: 27 allocation, 30 duplicate, 27 fx, 18 cutoff; 22 of them
+Where the naive rules fail (103 FPs: 28 allocation, 30 duplicate, 27 fx, 18 cutoff; 22 of them
 on the 2 clean companies):
 - *allocation*: every 2900 credit is flagged → overpayments and refunds become false accusations;
   the truth amount is the AR shortfall, not the 2900 credit, and the evidence needs the invoice
-  document → allocation recall 2/8, I1 recall 0/2;
+  document → allocation recall 1/8, I1 recall 0/2;
 - *duplicate*: same entity + amount ignores line items → weekly retainers are flagged;
 - *fx / cutoff*: the date written in the timestamp is used instead of the company-timezone date →
   midnight documents get the wrong rate or the wrong period.
@@ -205,7 +235,7 @@ and checks that every credit note is in the period and after its booking.
 | policy | P | R | F1 | return | steps | exp. return* |
 |---|---|---|---|---|---|---|
 | random explorer (seeded) | 0.000 | 0.000 | 0.000 | −0.806 | 33.1 | −0.806 |
-| naive reconciliation | 0.101 | 0.587 | 0.172 | −0.727 | 33.2 | −0.633 |
+| naive reconciliation | 0.093 | 0.543 | 0.159 | −0.747 | 33.2 | −0.656 |
 | reconciliation (default rules) | 0.471 | 0.870 | 0.611 | −0.095 | 42.6 | −0.341 |
 | reconciliation + hard rules (`reconcile_hard`) | 1.000 | 1.000 | 1.000 | 0.917 | 42.6 | 0.917 |
 | flag-everything attack | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | −1.000 |
@@ -217,8 +247,24 @@ default `reconcile` F1 ≤ 0.8; flag-everything < 0. Failure analysis of the def
 copies missed), all other types 100 %; 45 false positives, all `no_matching_issue` — the credit-note
 reissues flagged as duplicates. `reconcile_hard` is the same script plus the two policy rules: it shows
 the level is solvable from the records, not that a learning agent finds those rules.
-Stress test of `reconcile_hard` (1 200 hard episodes: 300 seeds × default / clean / 12-issue / 12-issue
-with 100 invoices): 0 imperfect, max 58 steps, no truncation.
+Stress test of `reconcile_hard` (`auditenv.fuzz --stress reconcile_hard --seeds 0-299 --hard`, 1 200 hard
+episodes): 0 imperfect, max 58 steps, no truncation.
+
+### Edge cases (all tested)
+
+| case | behaviour | test |
+|---|---|---|
+| clean books, empty answer | F1 = 1, reward = 1 − 0.002·steps | `test_jury.RewardTests`, `test_metrics` |
+| clean books, any finding | F1 = 0, reward < 0 | `test_reward_attacks` |
+| invalid submission (structure, limits, wrong episode_id) | episode ends, reward −1, bounded error message | `test_env`, `test_jury.ContractTests` |
+| the 100th action is not a submit / 60 s elapsed | `truncated`, empty answer graded | `test_env`, `test_jury` |
+| the 100th action is the submit | it is a submit (`terminated`) | `test_env.test_submit_on_last_step_is_submit` |
+| action after the end, resubmission | `episode_over`, nothing changes, the first grade stays | `test_jury` |
+| malformed actions (None, lists, nested dicts, huge strings, unicode digits in cursors) | bounded error, step consumed, never an exception | `test_fuzz` (3 000 actions) |
+| cursor exactly at the end / past the end | empty page / `bad_params` | `test_jury` |
+| JPY (exponent 0), refunds (negative payment), multi-invoice and split payments, overpayments, unidentified receipts | correct postings, verifier finds 0 discrepancies | `test_jury.EdgeCaseDataTests`, seed sweep |
+| documents near midnight in other timezones | period and rate date decided in the company timezone | `test_jury.EdgeCaseDataTests`, naive baseline FPs |
+| same finding twice | one TP + one FP | `test_matcher`, `test_jury` |
 
 ## 10. Honest limitations
 

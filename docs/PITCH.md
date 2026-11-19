@@ -1,66 +1,71 @@
-# Pitch outline (one heading = one slide)
+# Pitch outline (one heading = one slide, 10 slides)
 
-Numbers come from `uv run python -m auditenv.check` / `auditenv.analyze` on the dev split
-(10 episodes, seeds 2000–2009) unless stated otherwise. Re-run before the final slides.
+Numbers come from `uv run python -m auditenv.check`, `auditenv.analyze`, `auditenv.fuzz` and
+`auditenv.demo` on the committed code (dev split = 10 episodes, seeds 2000–2009; hard split = 20
+episodes, seeds 9100–9119). Re-run the check before exporting the final slides.
 
-## 1. Problem
-- AI auditors need practice on books with known, verifiable errors — real ledgers can't be shared
+## 1. Problem: why an RL environment for audit
+- AI auditors need practice on books with known, verifiable errors; real ledgers can't be shared
   and have no answer key.
-- Reward functions for audit are easy to game: flag everything, guess ids, write a persuasive story.
-- RL needs thousands of reproducible episodes with a grader that can't leak the answer.
+- Audit rewards are easy to game: flag everything, guess ids, write a persuasive story.
+- RL needs thousands of reproducible episodes and a grader that cannot leak the answer.
 
 ## 2. Solution: auditenv
-- Reproducible RL environment: synthetic company → correct double-entry books → injected errors
-  with a recorded cause.
-- Agent reads records only through 5 narrow tools (`reset/step`, JSON, 100 steps, 50 rows/page).
-- Published matcher + terminal reward `clip(2·F1 − 1 − 0.002·steps, −1, 1)`; findings need the
-  right type, ids, amount, currency **and** evidence.
-- Python 3.11 standard library, zero dependencies, one check command, Dockerfile.
+- Synthetic company → correct double-entry books → errors injected as recorded changes → truth with evidence.
+- The agent investigates only through 5 read-only tools and submits findings with evidence.
+- One published matcher and reward; closed evaluation in a separate process.
+- Python 3.11 standard library, zero dependencies, one check command, Docker (built and run in CI).
 
-## 3. Live demo
-- `uv run python -m auditenv.check` → all gates pass in ~11 s.
-- `uv run python -m auditenv.demo` → company → investigation → findings → reward 0.958.
-- Same books, other answers: silence −1, guessed ids −1, repeated answer 0.33, flag-everything −1.
-- Closed run in a separate process: the policy sees reward 0, the grader log has the score.
+## 3. Architecture
+- `generator` (history → ledger → inject → render) → `env` (reset/step, tools, limits, train/eval) →
+  `matcher` (validate → normalise → one-to-one match → reward).
+- Independent `verify` (revert the recorded changes → 0 discrepancies; re-apply → exactly the truth),
+  `transform` (new ids + permuted rows), `server`/`client` (grader in another process).
+- Truth and provenance are grader-only; `episode_id` is an HMAC; a grader-only key makes hidden seeds unrecoverable.
 
-## 4. What's hard in the data
-- 4 independently configurable error types: duplicate invoice, missing/partial payment allocation,
-  wrong FX date, period cutoff; 2 interacting scenarios (partial foreign payment at the period end;
-  backdated foreign invoice at the wrong rate).
+## 4. Generator: 4 errors, 2 interacting scenarios, clean books
+- Duplicate invoice · missing/partial payment allocation · wrong FX date · period cutoff — each
+  configurable by count; I1 (late partial foreign payment) and I2 (backdated foreign invoice at the wrong rate).
 - Clean companies plus legitimate look-alikes: split/partial payments, refunds, unidentified receipts,
   weekly retainers with equal amounts, documents near midnight in other timezones.
-- Ids, id formats, order, amounts, 6 currencies (incl. 0-decimal JPY) and 8 timezones vary per episode.
-- Naive reconciliation: micro-F1 0.286, 102 false positives (22 on clean books), 0/2 on the interacting
-  payment case; policy-aware reconciliation: F1 1.0 → solvable from the evidence, not by shortcuts.
-- Hard mode (opt-in): legitimate cancel-and-reissue with a credit note, re-typed duplicates, 3× larger
-  ledger → the same rule script drops to F1 0.611 (45 false accusations), oracle stays 1.0.
+- 6 currencies (incl. 0-decimal JPY), 8 timezones, randomised id formats, order and amounts.
+- Opt-in hard mode: credit-note reissues, re-typed duplicates, 3× larger ledger.
 
-## 5. How it works
-- `generator` (history → ledger → inject → render) · `env` (tools, limits, modes) ·
-  `matcher` (validate → normalise → one-to-one match → reward) · `verify` · `transform` · `server`.
-- Truth + provenance are grader-only files; `eval` mode and the out-of-process server keep reward
-  and diagnostics away from the policy; a grader-only key (`AUDITENV_SECRET`) makes hidden seeds unrecoverable.
-- Independent verifier: revert the recorded changes → 0 discrepancies; re-apply → exactly the
-  declared ones, recomputed from public records.
+## 5. Environment and contract (live demo here)
+- `reset(seed, config) → (obs, info)`, `step(action) → (obs, reward, terminated, truncated, info)`, JSON only.
+- `list_records` (≤ 50 rows, stable cursors), `get_record`, `get_document`, `calculator` (decimal
+  arithmetic only), `submit`. 100 steps incl. submit, 60 s; every error costs a step.
+- Demo: `uv run python -m auditenv.demo` → company → investigation → 4 findings → reward 0.958;
+  the closed run: policy sees reward 0 and empty info, the grader log has the score.
 
-## 6. Results
-- Checks: 193 unit tests (incl. a 3 000-action fuzz test); verifier 600/600 episodes valid; 20/20 paired checks (replay exact;
-  relabel + permute keeps the oracle reward).
-- Dev split (micro P/R/F1, mean return): oracle 1.0/1.0/1.0, 1.000 · reconcile 1.0/1.0/1.0, 0.957 ·
-  naive 0.18/0.73/0.29, −0.488 · random 0/0/0, −0.807 · flag-all 0/0/0, −1.000.
-- Hard split (20 episodes, micro P/R/F1, mean return): oracle 1.0/1.0/1.0, 1.000 · reconcile_hard
-  1.0/1.0/1.0, 0.917 · reconcile 0.47/0.87/0.61, −0.095 · naive 0.10/0.59/0.17, −0.727 · random −0.806 · flag-all −1.000.
-- Stress tests: 1 200 default episodes (reconcile) and 1 200 hard episodes (reconcile_hard), 0 imperfect,
-  no truncation → every error is findable in budget.
-- 12 attack tests from the case (silence, false accusations, duplicates, flag-all, step cost, guessed
-  ids, bad evidence, wrong currency, resubmit, malformed input, timeout, tolerance) all pass.
+## 6. Reward and matcher
+- TP = type + canonical ids + currency + amount within max(1, 0.1 %) + one complete evidence set;
+  one-to-one matching; repeats are FP.
+- `reward = clip(2·F1 − 1 − 0.002·steps, −1, 1)`; invalid submission −1; F1 = 1 for silence on clean books.
+- Same books, other answers (demo): silence −1, guessed ids −1, answer repeated twice 0.33,
+  flag-everything −1; clean company: silence 1.0, guessed ids −1.
 
-## 7. What's next
-- More error families (payables, accruals, tax) and near-duplicate documents.
-- Difficulty curriculum: bigger ledgers, more distractors, tighter budgets.
-- Train a small local model against the environment and report a held-out comparison.
-- Honest limits: synthetic data, receivables only, fixed UTC offsets, public generator needs secret seeds.
+## 7. Results
+- Dev split (micro P/R/F1 · mean return): oracle 1.0/1.0/1.0 · 1.000; reconcile 1.0/1.0/1.0 · 0.957;
+  naive 0.17/0.70/0.27 · −0.506; random 0/0/0 · −0.807; flag-all 0/0/0 · −1.000.
+- Naive rules: 103 false accusations (22 on clean books), allocation recall 1/8, I1 0/2 →
+  distractors and timezones defeat shortcuts.
+- Hard split: reconcile drops to 0.47/0.87/0.61 · −0.095 (45 false accusations); with the two policy rules
+  (`reconcile_hard`) 1.0 · 0.917; oracle 1.0 → harder, still solvable.
 
-## 8. Team
+## 8. Reproducibility and tests
+- 231 unit tests incl. a 3 000-action fuzz test and `tests/test_jury.py` (the jury checklist as tests).
+- Verifier 600/600 generated + 20/20 exported episodes; seed sweep 3 000 default + 600 hard episodes:
+  0 exceptions, 0 verifier problems, oracle 1.0 everywhere, flag-all negative on all.
+- 20/20 paired checks: replay is byte-exact; relabel + permute keeps the oracle answer and reward.
+- Stress: 1 200 episodes (reconcile) and 1 200 hard (reconcile_hard): every error found within budget.
+
+## 9. Team
 - [names, roles — fill in]
-- Built in 3.5 days for the Genesis Hackathon 2026, FinTech case.
+- Built for the Genesis Hackathon 2026, FinTech case.
+
+## 10. Q&A (backup)
+- Limits: synthetic data, receivables only, fixed UTC offsets, no trained model; hidden runs need `AUDITENV_SECRET`.
+- Next: payables/accruals/tax, near-duplicates with changed amounts, difficulty curriculum, a small
+  local model trained against the environment with a held-out comparison.
+- Links: repo README (one command), `docs/DESIGN.md` (results, examples, limitations), `REVIEW.md`.
