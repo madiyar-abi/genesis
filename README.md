@@ -30,17 +30,18 @@ git clone https://github.com/madiyar-abi/genesis.git && cd genesis
 uv run python -m auditenv.check        # the single official check (exit code 0 = pass)
 ```
 
-No `uv`? Any Python 3.11 works the same: `python3.11 -m auditenv.check` from the repo root.
+No `uv`? Any Python 3.11 works the same (standard library only, zero dependencies to install): `python3.11 -m auditenv.check` from the repo root.
 
 ### Container
 
 ```bash
 docker build -t auditenv .
-docker run --rm --network none auditenv            # runs python -m auditenv.check
+docker run --rm --network none auditenv            # runs python -m auditenv.check offline
 ```
 
 The container path is exercised on every push by `.github/workflows/check.yml` (build, run without
-network, plus the verifier and the seed sweep on plain Python 3.11).
+network, plus the verifier and the seed sweep on plain Python 3.11). Any check or test command can
+likewise run inside the offline container (e.g. `docker run --rm --network none auditenv python -m unittest discover -s tests -t .`).
 
 ## Errors the agent must find
 
@@ -113,7 +114,7 @@ obs, reward, terminated, truncated, info = env.step(
 print(reward, info)   # train mode: terminal reward + P/R/F1 counts (no truth content)
 ```
 
-(Run from the repo root, e.g. in `uv run python`; elsewhere set `PYTHONPATH` to the repo.)
+(Run from the repo root, e.g. in `uv run python` or `python3.11`; elsewhere set `PYTHONPATH` to the repo root.)
 
 Actions: `list_records(table, cursor, limit≤50)`, `get_record(table, id)`, `get_document(doc_id)`,
 `calculator(expression)`, `submit(findings)`. Full interface: [`docs/CONTRACT.md`](docs/CONTRACT.md).
@@ -183,14 +184,17 @@ the client cannot choose seeds, rewards are 0.0 and results are written only to 
 
 ### Other commands
 
+All commands run fully offline without network access or GPU. Without `uv`, run `python3.11` from the repo root instead of `uv run python`.
+
 ```bash
 uv run python -m unittest discover -s tests -t .     # tests only
 uv run python -m unittest tests.test_env             # one module
-uv run python -m auditenv.verify --seeds 0-199       # verifier on 600 episodes
-uv run python -m auditenv.verify --dir episodes/dev  # verifier on the exported files
+uv run python -m auditenv.verify --seeds 0-199       # verifier on 600 generated episodes
+uv run python -m auditenv.verify --dir episodes/train  # verifier on exported splits (40 episodes)
+uv run python -m auditenv.verify --dir episodes/dev
+uv run python -m auditenv.verify --dir episodes/hard
 uv run python -m auditenv.attack                     # 11,000 mutations on 20 fixed public seeds
 uv run python -m tests.test_fuzz                     # action count and runtime
-uv run python -m auditenv.verify --dir episodes/hard
 uv run python -m auditenv.check --json /tmp/auditenv-metrics.json
 uv run python scripts/sync_docs.py --check --json /tmp/auditenv-metrics.json  # omit --check to update
 uv run python -m auditenv.fuzz --seeds 0-999         # seed sweep: 3 000 episodes end to end
