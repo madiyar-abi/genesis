@@ -28,6 +28,12 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 12 · in progress
+
+Branch `night/2026-11-20-r12`. See `night/TASKS.md` for remaining work.
+
+- T1. The verifier previously accepted 3-1 after checking zero episodes. Five command entry points now reject reversed ranges. Ordered and repeated seeds still work. The focused tests and official check passed.
+
 ## Round 11 complete · 20 November 2026
 
 Work is on `night/2026-11-20-r11`. See `night/TASKS.md` for ownership and

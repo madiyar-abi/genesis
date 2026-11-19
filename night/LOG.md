@@ -1,0 +1,1 @@
+2026-11-20 04:48 lead T1. The verifier previously accepted 3-1 after checking zero episodes. Five command entry points now reject reversed ranges. Ordered and repeated seeds still work. The focused tests and official check passed.
