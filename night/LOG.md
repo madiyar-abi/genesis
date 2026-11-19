@@ -68,3 +68,7 @@
   only appears on duplicate copies (precision 1.000). Weaker default-mode signals: entity+currency+total pair
   (0.996, duplicate definition itself, no near-miss decoys in default), I1 always on the last day (fx_error 0.70),
   large 2900 amounts (0.745). Fixing the hard leak first (lead).
+
+## 2026-11-19 21:37 lead
+- C2/P1/E2 marked done after review. E2 timing table pasted into DESIGN §9 (scripts/bench.py output).
+- Committed scripts/shortcut_miner.py + test (D4 still open: leak fixes next).
