@@ -1,0 +1,29 @@
+{"amount_minor": 1564650, "currency": "EUR", "doc_id": "D-01b9a9", "invoice_refs": [{"amount_minor": 1564650, "invoice_id": "F0085672"}], "payment_id": "RCPT0953667", "timestamp": "2026-06-05T06:43:00-05:00"}
+{"amount_minor": 215480, "currency": "JPY", "doc_id": "D-05b80e", "invoice_refs": [{"amount_minor": 207892, "invoice_id": "F0548189"}], "payment_id": "RCPT0389936", "timestamp": "2026-06-06T11:16:00-05:00"}
+{"amount_minor": 1274450, "currency": "EUR", "doc_id": "D-0856cc", "invoice_refs": [{"amount_minor": 1274450, "invoice_id": "F0085672"}], "payment_id": "RCPT0779871", "timestamp": "2026-06-06T14:50:00-05:00"}
+{"amount_minor": 616237, "currency": "USD", "doc_id": "D-079ca8", "invoice_refs": [{"amount_minor": 616237, "invoice_id": "F0593673"}], "payment_id": "RCPT0588010", "timestamp": "2026-06-09T15:23:00-05:00"}
+{"amount_minor": 1395800, "currency": "EUR", "doc_id": "D-06db34", "invoice_refs": [{"amount_minor": 1395800, "invoice_id": "F0772717"}], "payment_id": "RCPT0504230", "timestamp": "2026-06-10T08:26:00-05:00"}
+{"amount_minor": 772320, "currency": "JPY", "doc_id": "D-0e9684", "invoice_refs": [{"amount_minor": 772320, "invoice_id": "F0157397"}], "payment_id": "RCPT0778489", "timestamp": "2026-06-11T04:22:00-05:00"}
+{"amount_minor": 53000, "currency": "EUR", "doc_id": "D-019d46", "invoice_refs": [{"amount_minor": 53000, "invoice_id": "F0866394"}], "payment_id": "RCPT0002523", "timestamp": "2026-06-13T16:07:00-05:00"}
+{"amount_minor": 950451, "currency": "JPY", "doc_id": "D-0bd9ab", "invoice_refs": [{"amount_minor": 950451, "invoice_id": "F0377489"}], "payment_id": "RCPT0123223", "timestamp": "2026-06-14T02:33:00-05:00"}
+{"amount_minor": -7588, "currency": "JPY", "doc_id": "D-0ee55e", "invoice_refs": null, "payment_id": "RCPT0778284", "timestamp": "2026-06-15T07:06:00-05:00"}
+{"amount_minor": 192917, "currency": "EUR", "doc_id": "D-0add4a", "invoice_refs": [{"amount_minor": 192917, "invoice_id": "F0761743"}], "payment_id": "RCPT0534512", "timestamp": "2026-06-15T14:21:00-05:00"}
+{"amount_minor": 359200, "currency": "EUR", "doc_id": "D-014a46", "invoice_refs": [{"amount_minor": 359200, "invoice_id": "F0550893"}], "payment_id": "RCPT0825283", "timestamp": "2026-06-17T17:53:00-05:00"}
+{"amount_minor": 1023100, "currency": "USD", "doc_id": "D-092c86", "invoice_refs": [{"amount_minor": 1023100, "invoice_id": "F0849842"}], "payment_id": "RCPT0681452", "timestamp": "2026-06-18T17:17:00-05:00"}
+{"amount_minor": 922098, "currency": "EUR", "doc_id": "D-09bff4", "invoice_refs": [{"amount_minor": 882100, "invoice_id": "F0781575"}], "payment_id": "RCPT0843766", "timestamp": "2026-06-19T13:22:00-05:00"}
+{"amount_minor": 2807727, "currency": "JPY", "doc_id": "D-096795", "invoice_refs": [{"amount_minor": 2807727, "invoice_id": "F0637103"}], "payment_id": "RCPT0612084", "timestamp": "2026-06-20T10:29:00-05:00"}
+{"amount_minor": -39998, "currency": "EUR", "doc_id": "D-04c2b7", "invoice_refs": null, "payment_id": "RCPT0675357", "timestamp": "2026-06-21T04:07:00-05:00"}
+{"amount_minor": 563500, "currency": "EUR", "doc_id": "D-01dbf1", "invoice_refs": [{"amount_minor": 563500, "invoice_id": "F0484417"}], "payment_id": "RCPT0041811", "timestamp": "2026-06-21T08:36:00-05:00"}
+{"amount_minor": 2729200, "currency": "EUR", "doc_id": "D-0ab823", "invoice_refs": [{"amount_minor": 2729200, "invoice_id": "F0093487"}], "payment_id": "RCPT0523123", "timestamp": "2026-06-21T09:40:00-05:00"}
+{"amount_minor": 97200, "currency": "EUR", "doc_id": "D-0afbcb", "invoice_refs": null, "payment_id": "RCPT0007669", "timestamp": "2026-06-22T03:52:00-05:00"}
+{"amount_minor": 801163, "currency": "USD", "doc_id": "D-09ab27", "invoice_refs": [{"amount_minor": 801163, "invoice_id": "F0593673"}], "payment_id": "RCPT0038630", "timestamp": "2026-06-22T17:41:00-05:00"}
+{"amount_minor": 65350, "currency": "JPY", "doc_id": "D-07151c", "invoice_refs": [{"amount_minor": 65350, "invoice_id": "F0372188"}], "payment_id": "RCPT0198436", "timestamp": "2026-06-23T04:01:00-05:00"}
+{"amount_minor": 2679381, "currency": "JPY", "doc_id": "D-0b2d92", "invoice_refs": [{"amount_minor": 2566829, "invoice_id": "F0503361"}], "payment_id": "RCPT0940162", "timestamp": "2026-06-24T09:58:00-05:00"}
+{"amount_minor": 918400, "currency": "EUR", "doc_id": "D-06e462", "invoice_refs": [{"amount_minor": 918400, "invoice_id": "F0449691"}], "payment_id": "RCPT0379955", "timestamp": "2026-06-25T11:13:00-05:00"}
+{"amount_minor": 118674, "currency": "JPY", "doc_id": "D-02f888", "invoice_refs": null, "payment_id": "RCPT0704083", "timestamp": "2026-06-25T16:04:00-05:00"}
+{"amount_minor": 207892, "currency": "JPY", "doc_id": "D-0582dd", "invoice_refs": [{"amount_minor": 207892, "invoice_id": "F0715375"}], "payment_id": "RCPT0906569", "timestamp": "2026-06-26T14:26:00-05:00"}
+{"amount_minor": -112552, "currency": "JPY", "doc_id": "D-04fefe", "invoice_refs": null, "payment_id": "RCPT0630854", "timestamp": "2026-06-27T02:52:00-05:00"}
+{"amount_minor": 1081100, "currency": "EUR", "doc_id": "D-056565", "invoice_refs": [{"amount_minor": 1081100, "invoice_id": "F0376028"}], "payment_id": "RCPT0255542", "timestamp": "2026-06-27T12:07:00-05:00"}
+{"amount_minor": 1980047, "currency": "USD", "doc_id": "D-07b8c7", "invoice_refs": [{"amount_minor": 1943600, "invoice_id": "F0986954"}], "payment_id": "RCPT0851749", "timestamp": "2026-06-27T12:32:00-05:00"}
+{"amount_minor": 2090871, "currency": "JPY", "doc_id": "D-0585df", "invoice_refs": [{"amount_minor": 2090871, "invoice_id": "F0328197"}], "payment_id": "RCPT0909424", "timestamp": "2026-06-28T03:44:00-05:00"}
+{"amount_minor": 207892, "currency": "JPY", "doc_id": "D-030684", "invoice_refs": [{"amount_minor": 207892, "invoice_id": "F0931716"}], "payment_id": "RCPT0241602", "timestamp": "2026-06-29T02:20:00-05:00"}

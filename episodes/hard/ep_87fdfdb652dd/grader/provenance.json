@@ -1,0 +1,250 @@
+{
+  "company": {
+    "bank_offset": "+00:00",
+    "base_currency": "EUR",
+    "entities": 8,
+    "foreign_currencies": [
+      "GBP",
+      "JPY"
+    ],
+    "timezone": "+05:30"
+  },
+  "config": {
+    "difficulty": "hard",
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 2,
+      "fx_error": 0,
+      "payment_allocation": 1,
+      "period_cutoff": 1
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 75
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 799124,
+              "entity_id": "CUST92298",
+              "invoice_id": "INV-094699",
+              "payment_id": null,
+              "row_id": "GL-003066",
+              "timestamp": "2025-10-30T22:21:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 799124,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "CUST92298",
+              "invoice_id": "INV-094699",
+              "payment_id": null,
+              "row_id": "GL-003065",
+              "timestamp": "2025-10-30T22:21:00+05:30"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-094699"
+        }
+      ],
+      "description": "invoice INV-094699 issued 2025-11-06 (outside the period) booked on 2025-10-30",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 704800,
+              "entity_id": "CUST92949",
+              "invoice_id": "INV-927532",
+              "payment_id": null,
+              "row_id": "GL-002694",
+              "timestamp": "2025-10-20T23:47:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 704800,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "CUST92949",
+              "invoice_id": "INV-927532",
+              "payment_id": null,
+              "row_id": "GL-002695",
+              "timestamp": "2025-10-20T23:47:00+05:30"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-927532"
+        }
+      ],
+      "description": "invoice INV-840151 entered a second time as INV-927532 and booked again",
+      "documents_added": [
+        "ffa73a07"
+      ],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 121285,
+              "entity_id": "CUST31216",
+              "invoice_id": "INV-417418",
+              "payment_id": null,
+              "row_id": "GL-002516",
+              "timestamp": "2025-10-15T13:44:00+05:30"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 121285,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "CUST31216",
+              "invoice_id": "INV-417418",
+              "payment_id": null,
+              "row_id": "GL-002515",
+              "timestamp": "2025-10-15T13:44:00+05:30"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-417418"
+        }
+      ],
+      "description": "invoice INV-919656 entered a second time as INV-417418 and booked again",
+      "documents_added": [
+        "753557a5"
+      ],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1941241,
+              "entity_id": "CUST77586",
+              "invoice_id": null,
+              "payment_id": "BNK-869911",
+              "row_id": "GL-003069",
+              "timestamp": "2025-10-30T23:37:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 1091282,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "CUST77586",
+              "invoice_id": "INV-430219",
+              "payment_id": "BNK-869911",
+              "row_id": "GL-003068",
+              "timestamp": "2025-10-30T23:37:00+05:30"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 874241,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "CUST77586",
+              "invoice_id": null,
+              "payment_id": "BNK-869911",
+              "row_id": "GL-003067",
+              "timestamp": "2025-10-30T23:37:00+05:30"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 24282,
+              "entity_id": "CUST77586",
+              "invoice_id": null,
+              "payment_id": "BNK-869911",
+              "row_id": "GL-003070",
+              "timestamp": "2025-10-30T23:37:00+05:30"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1941241,
+              "entity_id": "CUST77586",
+              "invoice_id": null,
+              "payment_id": "BNK-869911",
+              "row_id": "GL-003069",
+              "timestamp": "2025-10-30T23:37:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 1091282,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "CUST77586",
+              "invoice_id": "INV-430219",
+              "payment_id": "BNK-869911",
+              "row_id": "GL-003068",
+              "timestamp": "2025-10-30T23:37:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 892589,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "CUST77586",
+              "invoice_id": "INV-680404",
+              "payment_id": "BNK-869911",
+              "row_id": "pre-203",
+              "timestamp": "2025-10-30T23:37:00+05:30"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 42630,
+              "entity_id": "CUST77586",
+              "invoice_id": null,
+              "payment_id": "BNK-869911",
+              "row_id": "GL-003070",
+              "timestamp": "2025-10-30T23:37:00+05:30"
+            }
+          ],
+          "journal": "pay:BNK-869911"
+        }
+      ],
+      "description": "payment BNK-869911 allocated nothing to INV-680404; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 9119
+}

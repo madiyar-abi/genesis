@@ -1,0 +1,173 @@
+{
+  "company": {
+    "bank_offset": "+05:00",
+    "base_currency": "USD",
+    "entities": 17,
+    "foreign_currencies": [
+      "CHF",
+      "KZT"
+    ],
+    "timezone": "+05:30"
+  },
+  "config": {
+    "difficulty": "hard",
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 0,
+      "payment_allocation": 2,
+      "period_cutoff": 0
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 45
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 341961,
+              "entity_id": "C-1175",
+              "invoice_id": null,
+              "payment_id": "PAY-336558",
+              "row_id": "R1821",
+              "timestamp": "2026-01-13T21:08:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 141514,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-1175",
+              "invoice_id": "INV-274213",
+              "payment_id": "PAY-336558",
+              "row_id": "R1819",
+              "timestamp": "2026-01-13T21:08:00+05:30"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 200447,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-1175",
+              "invoice_id": null,
+              "payment_id": "PAY-336558",
+              "row_id": "R1820",
+              "timestamp": "2026-01-13T21:08:00+05:30"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 341961,
+              "entity_id": "C-1175",
+              "invoice_id": null,
+              "payment_id": "PAY-336558",
+              "row_id": "R1821",
+              "timestamp": "2026-01-13T21:08:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 341961,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-1175",
+              "invoice_id": "INV-274213",
+              "payment_id": "PAY-336558",
+              "row_id": "R1819",
+              "timestamp": "2026-01-13T21:08:00+05:30"
+            }
+          ],
+          "journal": "pay:PAY-336558"
+        }
+      ],
+      "description": "payment PAY-336558 allocated partially to INV-274213; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 110540,
+              "entity_id": "C-4538",
+              "invoice_id": null,
+              "payment_id": "PAY-477851",
+              "row_id": "R1997",
+              "timestamp": "2026-01-18T20:29:00+05:30"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 110540,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-4538",
+              "invoice_id": null,
+              "payment_id": "PAY-477851",
+              "row_id": "R1998",
+              "timestamp": "2026-01-18T20:29:00+05:30"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 110540,
+              "entity_id": "C-4538",
+              "invoice_id": null,
+              "payment_id": "PAY-477851",
+              "row_id": "R1997",
+              "timestamp": "2026-01-18T20:29:00+05:30"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 106558,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-4538",
+              "invoice_id": "INV-423385",
+              "payment_id": "PAY-477851",
+              "row_id": "pre-123",
+              "timestamp": "2026-01-18T20:29:00+05:30"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 3982,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-4538",
+              "invoice_id": null,
+              "payment_id": "PAY-477851",
+              "row_id": "pre-124",
+              "timestamp": "2026-01-18T20:29:00+05:30"
+            }
+          ],
+          "journal": "pay:PAY-477851"
+        }
+      ],
+      "description": "payment PAY-477851 allocated nothing to INV-423385; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 9111
+}

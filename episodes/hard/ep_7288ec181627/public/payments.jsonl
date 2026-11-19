@@ -1,0 +1,26 @@
+{"amount_minor": 1548406, "currency": "USD", "doc_id": "75ac4fa4", "invoice_refs": [{"amount_minor": 1548406, "invoice_id": "INV-046880"}], "payment_id": "BNK-718048", "timestamp": "2025-03-04T02:31:00+00:00"}
+{"amount_minor": 243270, "currency": "USD", "doc_id": "844e02b4", "invoice_refs": [{"amount_minor": 243270, "invoice_id": "INV-440025"}], "payment_id": "BNK-382108", "timestamp": "2025-03-04T04:43:00+00:00"}
+{"amount_minor": 671000, "currency": "EUR", "doc_id": "ad3dff7c", "invoice_refs": [{"amount_minor": 671000, "invoice_id": "INV-754059"}], "payment_id": "BNK-945010", "timestamp": "2025-03-13T22:06:00+00:00"}
+{"amount_minor": 329300, "currency": "USD", "doc_id": "e28e5c80", "invoice_refs": [{"amount_minor": 329300, "invoice_id": "INV-960871"}], "payment_id": "BNK-524821", "timestamp": "2025-03-14T02:31:00+00:00"}
+{"amount_minor": 856238638, "currency": "KZT", "doc_id": "328b9316", "invoice_refs": [{"amount_minor": 843186500, "invoice_id": "INV-775811"}], "payment_id": "BNK-881799", "timestamp": "2025-03-14T16:34:00+00:00"}
+{"amount_minor": 159400, "currency": "EUR", "doc_id": "585329ca", "invoice_refs": null, "payment_id": "BNK-527814", "timestamp": "2025-03-18T18:48:00+00:00"}
+{"amount_minor": 82002, "currency": "USD", "doc_id": "13430d12", "invoice_refs": [{"amount_minor": 79100, "invoice_id": "INV-799886"}], "payment_id": "BNK-290756", "timestamp": "2025-03-19T22:41:00+00:00"}
+{"amount_minor": 1646577, "currency": "EUR", "doc_id": "dbbf51a1", "invoice_refs": [{"amount_minor": 1216477, "invoice_id": "INV-156212"}, {"amount_minor": 430100, "invoice_id": "INV-246620"}], "payment_id": "BNK-466049", "timestamp": "2025-03-20T03:11:00+00:00"}
+{"amount_minor": 559017, "currency": "EUR", "doc_id": "b96ff40f", "invoice_refs": [{"amount_minor": 559017, "invoice_id": "INV-180634"}], "payment_id": "BNK-190683", "timestamp": "2025-03-21T02:52:00+00:00"}
+{"amount_minor": -13052138, "currency": "KZT", "doc_id": "fe63040d", "invoice_refs": null, "payment_id": "BNK-559275", "timestamp": "2025-03-21T15:17:00+00:00"}
+{"amount_minor": 79100, "currency": "USD", "doc_id": "fa0c7b5a", "invoice_refs": [{"amount_minor": 79100, "invoice_id": "INV-493438"}], "payment_id": "BNK-486207", "timestamp": "2025-03-21T15:27:00+00:00"}
+{"amount_minor": 2064969, "currency": "USD", "doc_id": "df930769", "invoice_refs": [{"amount_minor": 1410200, "invoice_id": "INV-667228"}, {"amount_minor": 654769, "invoice_id": "INV-028294"}], "payment_id": "BNK-873224", "timestamp": "2025-03-22T03:27:00+00:00"}
+{"amount_minor": 630831, "currency": "USD", "doc_id": "f343f4de", "invoice_refs": [{"amount_minor": 630831, "invoice_id": "INV-028294"}], "payment_id": "BNK-314016", "timestamp": "2025-03-22T23:54:00+00:00"}
+{"amount_minor": 215200, "currency": "EUR", "doc_id": "cdbc55bc", "invoice_refs": null, "payment_id": "BNK-432981", "timestamp": "2025-03-26T15:54:00+00:00"}
+{"amount_minor": -2902, "currency": "USD", "doc_id": "ed069883", "invoice_refs": null, "payment_id": "BNK-794088", "timestamp": "2025-03-28T02:42:00+00:00"}
+{"amount_minor": 158200, "currency": "EUR", "doc_id": "f94a5816", "invoice_refs": [{"amount_minor": 158200, "invoice_id": "INV-522092"}], "payment_id": "BNK-326685", "timestamp": "2025-03-29T02:32:00+00:00"}
+{"amount_minor": 588041, "currency": "EUR", "doc_id": "c63083b1", "invoice_refs": [{"amount_minor": 588041, "invoice_id": "INV-154947"}], "payment_id": "BNK-754864", "timestamp": "2025-03-29T03:04:00+00:00"}
+{"amount_minor": 2080200, "currency": "USD", "doc_id": "3fef94fa", "invoice_refs": [{"amount_minor": 2080200, "invoice_id": "INV-655177"}], "payment_id": "BNK-351366", "timestamp": "2025-03-29T05:13:00+00:00"}
+{"amount_minor": 1368900, "currency": "EUR", "doc_id": "78f2d0c9", "invoice_refs": [{"amount_minor": 1368900, "invoice_id": "INV-335199"}], "payment_id": "BNK-607317", "timestamp": "2025-03-29T16:39:00+00:00"}
+{"amount_minor": 356505, "currency": "USD", "doc_id": "a8269da8", "invoice_refs": [{"amount_minor": 356505, "invoice_id": "INV-898717"}], "payment_id": "BNK-302859", "timestamp": "2025-03-29T19:32:00+00:00"}
+{"amount_minor": 196991, "currency": "EUR", "doc_id": "00bc48ae", "invoice_refs": [{"amount_minor": 196991, "invoice_id": "INV-902012"}], "payment_id": "BNK-574307", "timestamp": "2025-03-30T00:53:00+00:00"}
+{"amount_minor": 658759, "currency": "EUR", "doc_id": "86004beb", "invoice_refs": [{"amount_minor": 658759, "invoice_id": "INV-154947"}], "payment_id": "BNK-475221", "timestamp": "2025-03-30T13:32:00+00:00"}
+{"amount_minor": 228940, "currency": "EUR", "doc_id": "d9ab2d0a", "invoice_refs": [{"amount_minor": 225000, "invoice_id": "INV-811607"}], "payment_id": "BNK-010192", "timestamp": "2025-03-30T23:40:00+00:00"}
+{"amount_minor": 242880, "currency": "EUR", "doc_id": "02e4c04c", "invoice_refs": [{"amount_minor": 242880, "invoice_id": "INV-618009"}], "payment_id": "BNK-095192", "timestamp": "2025-03-31T16:39:00+00:00"}
+{"amount_minor": 635637, "currency": "USD", "doc_id": "b5342bb0", "invoice_refs": [{"amount_minor": 629200, "invoice_id": "INV-604265"}], "payment_id": "BNK-525449", "timestamp": "2025-03-31T19:01:00+00:00"}
+{"amount_minor": 531606600, "currency": "KZT", "doc_id": "288d1230", "invoice_refs": [{"amount_minor": 531606600, "invoice_id": "INV-602879"}], "payment_id": "BNK-176570", "timestamp": "2025-04-01T03:24:00+00:00"}

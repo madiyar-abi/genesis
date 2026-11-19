@@ -1,0 +1,67 @@
+{
+  "episode_id": "ep_0da0d88b0e63",
+  "issues": [
+    {
+      "affected_ids": [
+        "2609-509846"
+      ],
+      "currency": "EUR",
+      "evidence_sets": [
+        [
+          "DOC0836067",
+          "R4586"
+        ],
+        [
+          "DOC0836067",
+          "R4585"
+        ]
+      ],
+      "expected_amount_minor": 1590600,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "2609-525763"
+      ],
+      "currency": "EUR",
+      "evidence_sets": [
+        [
+          "DOC0691331",
+          "R4622"
+        ],
+        [
+          "DOC0691331",
+          "R4621"
+        ]
+      ],
+      "expected_amount_minor": 858300,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "2609-708333"
+      ],
+      "currency": "EUR",
+      "evidence_sets": [
+        [
+          "2026-09-01:JPY:EUR",
+          "DOC0456184",
+          "R3299"
+        ],
+        [
+          "2026-09-01:JPY:EUR",
+          "DOC0456184",
+          "R3298"
+        ]
+      ],
+      "expected_amount_minor": 4111,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    }
+  ]
+}

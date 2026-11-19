@@ -4,6 +4,8 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"  # Nightly at 02:00 UTC
 
 jobs:
   docker:
@@ -27,7 +29,9 @@ jobs:
         with:
           python-version: "3.11"
       - name: Single check
-        run: python -m auditenv.check
+        run: python -m auditenv.check --json /tmp/check.json
+      - name: Check documentation drift
+        run: python scripts/sync_docs.py --check --json /tmp/check.json
       - name: Verifier on 600 episodes and on the exported splits
         run: |
           python -m auditenv.verify --seeds 0-199
@@ -37,3 +41,21 @@ jobs:
         run: |
           python -m auditenv.fuzz --seeds 0-999
           python -m auditenv.fuzz --seeds 0-199 --hard
+
+  matrix-fuzz:
+    # P3: Nightly and manual matrix fuzz across Python 3.11 patch versions on ubuntu-24.04
+    name: "Matrix fuzz 0-4999 (py${{ matrix.python-version }})"
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11.17", "3.11.18"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Seed sweep (5 000 seeds default)
+        run: python -m auditenv.fuzz --seeds 0-4999

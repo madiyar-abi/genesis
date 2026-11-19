@@ -1,0 +1,137 @@
+{
+  "company": {
+    "bank_offset": "+00:00",
+    "base_currency": "USD",
+    "entities": 10,
+    "foreign_currencies": [
+      "CHF",
+      "GBP",
+      "KZT"
+    ],
+    "timezone": "-03:00"
+  },
+  "config": {
+    "difficulty": "hard",
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 1,
+      "payment_allocation": 0,
+      "period_cutoff": 0
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 1
+    },
+    "n_invoices": null
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 898262,
+              "entity_id": "CUST13201",
+              "invoice_id": "INV-618956",
+              "payment_id": null,
+              "row_id": "R4330",
+              "timestamp": "2026-09-29T13:55:00-03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 898262,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST13201",
+              "invoice_id": "INV-618956",
+              "payment_id": null,
+              "row_id": "R4329",
+              "timestamp": "2026-09-29T13:55:00-03:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-618956"
+        }
+      ],
+      "description": "invoice INV-618956 issued 2026-10-01 (outside the period) booked on 2026-09-29",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "I2",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [],
+      "description": "invoice INV-618956 converted with the 2026-09-29 rate instead of 2026-10-01",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "I2",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 847432,
+              "entity_id": "CUST35241",
+              "invoice_id": "INV-770076",
+              "payment_id": null,
+              "row_id": "R4138",
+              "timestamp": "2026-09-25T11:34:00-03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 847432,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST35241",
+              "invoice_id": "INV-770076",
+              "payment_id": null,
+              "row_id": "R4139",
+              "timestamp": "2026-09-25T11:34:00-03:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 857728,
+              "entity_id": "CUST35241",
+              "invoice_id": "INV-770076",
+              "payment_id": null,
+              "row_id": "R4138",
+              "timestamp": "2026-09-25T11:34:00-03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 857728,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST35241",
+              "invoice_id": "INV-770076",
+              "payment_id": null,
+              "row_id": "R4139",
+              "timestamp": "2026-09-25T11:34:00-03:00"
+            }
+          ],
+          "journal": "inv:INV-770076"
+        }
+      ],
+      "description": "invoice INV-770076 converted with the 2026-10-02 rate instead of 2026-09-25",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    }
+  ],
+  "seed": 9108
+}

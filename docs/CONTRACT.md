@@ -69,7 +69,7 @@ Truth issue: `{issue_id, type, scenario, affected_ids, expected_amount_minor, cu
 
 | type | affected_ids | amount | evidence (any one full set) |
 |---|---|---|---|
-| `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the later-issued copy | both invoice doc_ids + the later copy's AR (or revenue) row_id |
+| `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the later-issued copy | both invoice doc_ids + the original's and later copy's AR (or revenue) row_ids |
 
 "Same line items" = equal as a multiset of `(description, quantity, unit_price_minor, amount_minor)`
 with descriptions compared lower-case, letters and digits only (order, case and punctuation ignored).

@@ -1,0 +1,86 @@
+{
+  "episode_id": "ep_86e909d9fe59",
+  "issues": [
+    {
+      "affected_ids": [
+        "F0601647",
+        "F0655595"
+      ],
+      "currency": "GBP",
+      "evidence_sets": [
+        [
+          "9b7cb182",
+          "GL-005135",
+          "GL-005194",
+          "b1a4e051"
+        ],
+        [
+          "9b7cb182",
+          "GL-005135",
+          "GL-005195",
+          "b1a4e051"
+        ],
+        [
+          "9b7cb182",
+          "GL-005134",
+          "GL-005194",
+          "b1a4e051"
+        ],
+        [
+          "9b7cb182",
+          "GL-005134",
+          "GL-005195",
+          "b1a4e051"
+        ]
+      ],
+      "expected_amount_minor": 365383,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "F0013836"
+      ],
+      "currency": "GBP",
+      "evidence_sets": [
+        [
+          "2026-09-04:CHF:GBP",
+          "GL-005095",
+          "ff590c17"
+        ],
+        [
+          "2026-09-04:CHF:GBP",
+          "GL-005094",
+          "ff590c17"
+        ]
+      ],
+      "expected_amount_minor": 15708,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "F0265813"
+      ],
+      "currency": "GBP",
+      "evidence_sets": [
+        [
+          "2026-09-05:CHF:GBP",
+          "GL-005127",
+          "de245a4b"
+        ],
+        [
+          "2026-09-05:CHF:GBP",
+          "GL-005126",
+          "de245a4b"
+        ]
+      ],
+      "expected_amount_minor": 1644,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    }
+  ]
+}

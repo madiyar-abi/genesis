@@ -52,9 +52,14 @@ def _findings(manifest: dict, tables: dict[str, list[dict]]) -> Iterator[dict]:
         group = (invoice["entity_id"], currency, total)
         first = first_by_amount.setdefault(group, invoice)
         if first is not invoice:
+            first_row = receivables.get(first["invoice_id"])
+            evidence = [first["doc_id"], invoice["doc_id"]]
+            if first_row:
+                evidence.append(first_row["row_id"])
+            evidence.append(row["row_id"])
             yield finding(
                 "duplicate_invoice", [first["invoice_id"], invoice_id], debit,
-                [first["doc_id"], invoice["doc_id"], row["row_id"]],
+                evidence,
             )
 
         written_date = invoice["issued_at"][:10]

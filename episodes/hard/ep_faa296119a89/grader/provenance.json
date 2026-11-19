@@ -1,0 +1,273 @@
+{
+  "company": {
+    "bank_offset": "-03:00",
+    "base_currency": "KZT",
+    "entities": 12,
+    "foreign_currencies": [
+      "GBP",
+      "USD"
+    ],
+    "timezone": "+05:00"
+  },
+  "config": {
+    "difficulty": "hard",
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 0,
+      "payment_allocation": 0,
+      "period_cutoff": 0
+    },
+    "interacting": {
+      "I1": 1,
+      "I2": 1
+    },
+    "n_invoices": null
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 979841775,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04323",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 723684909,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-4917",
+              "invoice_id": "SI-2025-821250",
+              "payment_id": "PAY-298852",
+              "row_id": "L04322",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 260016509,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04321",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 3859643,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04324",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 979841775,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04323",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 985095606,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-4917",
+              "invoice_id": "SI-2025-821250",
+              "payment_id": "PAY-298852",
+              "row_id": "L04322",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 5253831,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04324",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            }
+          ],
+          "journal": "pay:PAY-298852"
+        }
+      ],
+      "description": "payment PAY-298852 allocated partially to SI-2025-821250; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "I1",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 978626947,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04323",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 723684909,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-4917",
+              "invoice_id": "SI-2025-821250",
+              "payment_id": "PAY-298852",
+              "row_id": "L04322",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 260016509,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04321",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 5074471,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04324",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 979841775,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04323",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 723684909,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-4917",
+              "invoice_id": "SI-2025-821250",
+              "payment_id": "PAY-298852",
+              "row_id": "L04322",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 260016509,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04321",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 3859643,
+              "entity_id": "C-4917",
+              "invoice_id": null,
+              "payment_id": "PAY-298852",
+              "row_id": "L04324",
+              "timestamp": "2025-11-30T18:17:00+05:00"
+            }
+          ],
+          "journal": "pay:PAY-298852"
+        }
+      ],
+      "description": "payment PAY-298852 cash converted with the 2025-12-01 rate instead of 2025-11-30",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "I1",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "KZT",
+              "debit_minor": 257453465,
+              "entity_id": "C-5924",
+              "invoice_id": "SI-2025-748877",
+              "payment_id": null,
+              "row_id": "L04293",
+              "timestamp": "2025-11-30T14:15:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 257453465,
+              "currency": "KZT",
+              "debit_minor": 0,
+              "entity_id": "C-5924",
+              "invoice_id": "SI-2025-748877",
+              "payment_id": null,
+              "row_id": "L04294",
+              "timestamp": "2025-11-30T14:15:00+05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:SI-2025-748877"
+        }
+      ],
+      "description": "invoice SI-2025-748877 issued 2025-12-01 (outside the period) booked on 2025-11-30",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "I2",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [],
+      "description": "invoice SI-2025-748877 converted with the 2025-11-30 rate instead of 2025-12-01",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "I2",
+      "type": "fx_error"
+    }
+  ],
+  "seed": 9109
+}

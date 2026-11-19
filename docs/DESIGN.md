@@ -56,7 +56,7 @@ brute-forced from the id nor the episode regenerated from the open-source code. 
 
 | type | causal change | expected amount (base currency) | evidence (any one full set) |
 |---|---|---|---|
-| `duplicate_invoice` | a second invoice document with identical entity, currency and line items, issued strictly later, booked again | AR debit of the later copy | both invoice docs + the later copy's AR (or revenue) row |
+| `duplicate_invoice` | a second invoice document with identical entity, currency and line items, issued strictly later, booked again | AR debit of the later copy | both invoice docs + one positive booking row for each invoice (AR debit or revenue credit) |
 | `payment_allocation` | remittance says the payment covers an invoice, the ledger credits only part (or none) of it to AR; the rest lands in 2900 | expected AR credit − posted AR credit | payment doc + invoice doc + 2900 row (or AR row) + invoice-date FX rate if foreign |
 | `fx_error` | invoice or payment converted at the rate of a wrong date (the document's own local/UTC date, or ±1..7 days); difference ≥ 10 minor units | abs(posted − correct) | doc + AR/revenue row (invoice) or cash row (payment) + the correct-date FX rate |
 | `period_cutoff` | invoice issued in the next period (backdated to the period end) or in the previous period, booked in this period | AR debit posted | invoice doc + AR (or revenue) row |
@@ -74,7 +74,7 @@ already-affected document, and amounts are the real ledger misstatement — not 
 
 | type | episode (seed) | what the records show | truth amount |
 |---|---|---|---|
-| `duplicate_invoice` | `ep_14eca11ac929` (2003), base USD, tz +05:00 | `INV-112285` (issued 09-07) and `INV-726919` (09-09): same customer `CUST07389`, USD 18 760.00, identical line items; both booked, `R1350` is the AR debit of the later copy | 1 876 000 (the later copy's AR debit) |
+| `duplicate_invoice` | `ep_14eca11ac929` (2003), base USD, tz +05:00 | `INV-112285` (issued 09-07) and `INV-726919` (09-09): same customer `CUST07389`, USD 18 760.00, identical line items; original AR debit `R1344`, later copy AR debit `R1350` | 1 876 000 (the later copy's AR debit) |
 | `payment_allocation` | `ep_14eca11ac929` (2003) | `PAY-874814` remits KZT 3 454 497.00 for `INV-677785`; the ledger credits nothing to its AR, `R1509` puts the money in 2900. Expected AR credit = KZT amount × 0.00192618 (rate of the invoice date 09-10) | 665 398 |
 | `fx_error` | `ep_7f8a101fa36a` (2005), base KZT | `F0926539` is USD 14 007.00 issued 09-12; AR row `R944` = 698 834 443, correct = 14 007.00 × 494.388 (rate `2026-09-12:USD:KZT`) = 692 489 272 | 6 345 171 |
 | `period_cutoff` | `ep_d671645ebdd1` (2002), period 2026-03 | `INV-142472` is issued 2026-04-04 (next period) but its AR row `GL-000311` is dated 03-29 | 638 435 000 (the AR debit posted) |
@@ -148,7 +148,7 @@ Independent of the generator, from the public tables and closed files only:
 
 A jury-style review (separate agent, before submission) found and we fixed: seed recovery from a
 plain-hash `episode_id` (now HMAC + grader key in the RNG); a crash/overrun on non-string `table`
-(now a bounded error, 100-step cap holds — plus a 3 000-action fuzz test); a telltale timezone on the
+(now a bounded error, 100-step cap holds — plus a 20 314-action fuzz test); a telltale timezone on the
 I1 payment, a timestamp-mismatch shortcut for cutoff, a telltale hour on duplicate copies (removed,
 measured with the shortcut's precision: 1.00 → undefined / 0.09 / 0.02); evidence sets that did not
 contain the FX rate or the invoice document; skipping hidden episodes in server mode (now graded as
@@ -172,17 +172,17 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 
 | policy | seeds | P | R | F1 | return | steps | time s | exp. return* |
 |---|---|---|---|---|---|---|---|---|
-| random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.004 | −0.807 |
-| naive reconciliation | 2000–2009 | 0.169 | 0.700 | 0.273 | −0.506 | 17.2 | 0.004 | −0.210 |
-| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.957 | 22.5 | 0.004 | 0.957 |
-| flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.003 | −1.000 |
-| oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.003 | 1.000 |
+| random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.047 | −0.807 |
+| naive reconciliation | 2000–2009 | 0.169 | 0.700 | 0.273 | −0.506 | 17.2 | 0.048 | −0.210 |
+| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.957 | 22.5 | 0.041 | 0.957 |
+| flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.035 | −1.000 |
+| oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.031 | 1.000 |
 
 Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30 truth issues).
-P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode.
+P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode. Timing is a snapshot of the measurement host. CI compares deterministic cells and checks that times are finite and nonnegative.
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount; reported separately, the shared reward is unchanged.
-Other gates in the same run: 231 unit tests pass; verifier 200/200 episodes valid (600/600 with
+Other gates in the same run: 256 unit tests pass; verifier 200/200 episodes valid (600/600 with
 `auditenv.verify --seeds 0-199`); 20/20 paired checks; out-of-process run leaks nothing.
 
 Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200
@@ -191,7 +191,7 @@ episodes**, max 33 steps, no truncation — every truth issue can be found from 
 
 **Seed sweep** (`uv run python -m auditenv.fuzz --seeds 0-999`; generate → verifier → oracle, random
 explorer and flag-everything through the env, 3 configs per seed): 3 000 episodes (1 989 dirty, 1 011
-clean) in 45 s — 0 exceptions, 0 verifier problems, oracle 1.0 on every episode; the random explorer
+clean) — 0 exceptions, 0 verifier problems, oracle 1.0 on every episode; the random explorer
 scores > 0 on 245 episodes, all clean books where it submitted nothing (the correct answer), never on
 dirty books; flag-everything is negative on 3 000/3 000. Hard mode, seeds 0–199: 600 episodes, 0 problems,
 random > 0 only on 50 clean episodes, flag-everything negative on 600/600. CI runs both sweeps.
@@ -260,7 +260,7 @@ episodes): 0 imperfect, max 58 steps, no truncation.
 | the 100th action is not a submit / 60 s elapsed | `truncated`, empty answer graded | `test_env`, `test_jury` |
 | the 100th action is the submit | it is a submit (`terminated`) | `test_env.test_submit_on_last_step_is_submit` |
 | action after the end, resubmission | `episode_over`, nothing changes, the first grade stays | `test_jury` |
-| malformed actions (None, lists, nested dicts, huge strings, unicode digits in cursors) | bounded error, step consumed, never an exception | `test_fuzz` (3 000 actions) |
+| malformed actions (None, lists, nested dicts, huge strings, unicode digits in cursors) | bounded error, step consumed, never an exception | `test_fuzz` (20 314 actions) |
 | cursor exactly at the end / past the end | empty page / `bad_params` | `test_jury` |
 | JPY (exponent 0), refunds (negative payment), multi-invoice and split payments, overpayments, unidentified receipts | correct postings, verifier finds 0 discrepancies | `test_jury.EdgeCaseDataTests`, seed sweep |
 | documents near midnight in other timezones | period and rate date decided in the company timezone | `test_jury.EdgeCaseDataTests`, naive baseline FPs |

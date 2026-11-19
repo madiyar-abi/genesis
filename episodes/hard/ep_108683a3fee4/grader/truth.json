@@ -1,0 +1,82 @@
+{
+  "episode_id": "ep_108683a3fee4",
+  "issues": [
+    {
+      "affected_ids": [
+        "SI-2025-876297"
+      ],
+      "currency": "GBP",
+      "evidence_sets": [
+        [
+          "D-07f508",
+          "GL-005586"
+        ],
+        [
+          "D-07f508",
+          "GL-005587"
+        ]
+      ],
+      "expected_amount_minor": 391800,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "SI-2025-903663"
+      ],
+      "currency": "GBP",
+      "evidence_sets": [
+        [
+          "D-069401",
+          "GL-005603"
+        ],
+        [
+          "D-069401",
+          "GL-005602"
+        ]
+      ],
+      "expected_amount_minor": 1158479,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "RCPT0518393",
+        "SI-2025-685342"
+      ],
+      "currency": "GBP",
+      "evidence_sets": [
+        [
+          "2025-08-16:CHF:GBP",
+          "D-03f95a",
+          "D-0c386b",
+          "GL-005550"
+        ]
+      ],
+      "expected_amount_minor": 226436,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "affected_ids": [
+        "RCPT0952238",
+        "SI-2025-926590"
+      ],
+      "currency": "GBP",
+      "evidence_sets": [
+        [
+          "D-05b101",
+          "D-06c3f2",
+          "GL-005451"
+        ]
+      ],
+      "expected_amount_minor": 295302,
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ]
+}

@@ -220,3 +220,14 @@ Left for humans: merge the PR stack into main, make the repo public (owner), rec
 - Verified now: 190 tests OK; auditenv.check ALL PASSED; verifier 0 problems on 600 generated + 20 on-disk episodes.
 - Left for humans (HANDOFF): demo video (docs/DEMO.md), slides (docs/PITCH.md, team slide), PR night/2026-11-19 → main, repo access, Google Doc submission.
 - Created night/DONE.
+
+## 2026-11-19 — six handoff improvements, audit/handoff-validation
+
+- Starting point 9c4089b: 233 tests, 103.6 s on Python 3.11.18. The two copies of the case PDF matched by SHA-256.
+- R1 uses public eval_example seeds and the shared grader at equal inspection cost. Normalization, permutations, alternative evidence and in-tolerance amounts may tie. 11,000 mutations, five clean companies out of twenty, zero violations.
+- C1 uses random seed 20261119, the published schemas, strict JSON and the normal step API. The standalone measurement included 20,314 in-episode actions and 205 post-terminal calls in 10.898 s on Python 3.11.18.
+- D1 reproduced in both modes on seed 7. Accept either AR debit or revenue credit independently for original and copy, in base currency, with positive booking direction. The policy-aware reconciler already cited both rows. Updated the naive baseline, the independent verifier and the truth exporter. All 120 original public train/dev files are byte-identical to main; regenerating train/dev and the three trajectories reproduced the current files.
+- D3 exports only the 20 public configurations in eval_hard. All 161 files matched a fresh export. Verifier passed 600/600 generated and 20/20 on-disk hard episodes.
+- P3 pins 3.11.17 and 3.11.18 on ubuntu-24.04 for scheduled/manual extended fuzz. Push/PR retain the offline Docker check. A scheduled event runs from the default branch after merge.
+- E1 refreshes measured tables from check --json; --check checks stable metrics and verifies timing cells contain finite nonnegative snapshots. Existing prose stays outside the generated table ranges.
+- Final local acceptance: 256 tests, all official gates passed (234.6 s). Seed sweep 0–999: 3,000 episodes in 457.8 s, zero problems. Flag-all was negative on all 3,000; random scored positive only on 245 clean episodes.

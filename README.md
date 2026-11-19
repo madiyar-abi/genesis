@@ -25,7 +25,7 @@ as recorded changes (before/after journals) and writes the truth with acceptable
 
 ```bash
 git clone https://github.com/madiyar-abi/genesis.git && cd genesis
-uv run python -m auditenv.check        # the single official check (≈ 15 s, exit code 0 = pass)
+uv run python -m auditenv.check        # the single official check (exit code 0 = pass)
 ```
 
 No `uv`? Any Python 3.11 works the same: `python3.11 -m auditenv.check` from the repo root.
@@ -169,6 +169,11 @@ uv run python -m unittest discover -s tests -t .     # tests only
 uv run python -m unittest tests.test_env             # one module
 uv run python -m auditenv.verify --seeds 0-199       # verifier on 600 episodes
 uv run python -m auditenv.verify --dir episodes/dev  # verifier on the exported files
+uv run python -m auditenv.attack                     # 11,000 mutations on 20 fixed public seeds
+uv run python -m tests.test_fuzz                     # action count and runtime
+uv run python -m auditenv.verify --dir episodes/hard
+uv run python -m auditenv.check --json /tmp/auditenv-metrics.json
+uv run python scripts/sync_docs.py --check --json /tmp/auditenv-metrics.json  # omit --check to update
 uv run python -m auditenv.fuzz --seeds 0-999         # seed sweep: 3 000 episodes end to end
 uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299   # every error findable in budget?
 uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json  # failure analysis
@@ -195,9 +200,9 @@ make check | make test | make verify
 | `auditenv/experimental.py` | materiality-weighted reward, reported next to the shared one |
 | `schemas/` | JSON Schemas: action, observation, findings, manifest, truth, trajectory step |
 | `configs/` | versioned episode lists: train (1000–1009), dev (2000–2009), eval_example (9000–9019), eval_hard (9100–9119) |
-| `episodes/` | exported 10 train + 10 dev episodes (`public/` for agents, `grader/` closed) |
+| `episodes/` | exported 10 train + 10 dev + 20 public hard episodes (`public/` for agents, `grader/` closed) |
 | `trajectories/` | training trajectories (JSONL) of reconcile, naive reconcile and random on the train split |
-| `tests/` | 231 unittest tests; `tests/test_jury.py` maps the jury checklist to tests |
+| `tests/` | 256 unittest tests; `tests/test_jury.py` maps the jury checklist to tests |
 | `docs/` | contract, design note, demo script, pitch outline; `REVIEW.md` — jury-style review log |
 
 ## Honest limitations

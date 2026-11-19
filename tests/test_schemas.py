@@ -1,6 +1,7 @@
 """Smoke checks for the published JSON Schemas using only the standard library."""
 
 import json
+import re
 from pathlib import Path
 import unittest
 
@@ -41,6 +42,13 @@ def _matches(value, schema, filename, schemas):
         return False
     if "enum" in schema and value not in schema["enum"]:
         return False
+    if isinstance(value, str):
+        if len(value) > schema.get("maxLength", len(value)) or ("pattern" in schema and not re.search(schema["pattern"], value)):
+            return False
+    if type(value) in (int, float) and not schema.get("minimum", value) <= value <= schema.get("maximum", value):
+        return False
+    if isinstance(value, list) and not schema.get("minItems", 0) <= len(value) <= schema.get("maxItems", len(value)):
+        return False
     if isinstance(value, list) and "items" in schema:
         return all(_matches(item, schema["items"], filename, schemas) for item in value)
     if isinstance(value, dict):
@@ -55,13 +63,18 @@ def _matches(value, schema, filename, schemas):
     return True
 
 
+def load_schemas():
+    """Load all JSON schemas from the repository schema directory."""
+    return {
+        path.name: json.loads(path.read_text(encoding="utf-8"))
+        for path in _SCHEMA_ROOT.glob("*.schema.json")
+    }
+
+
 class SchemaTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.schemas = {
-            path.name: json.loads(path.read_text(encoding="utf-8"))
-            for path in _SCHEMA_ROOT.glob("*.schema.json")
-        }
+        cls.schemas = load_schemas()
 
     def assertMatches(self, name, value):
         filename = f"{name}.schema.json"

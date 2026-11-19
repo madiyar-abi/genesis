@@ -1,0 +1,221 @@
+[
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {}
+    },
+    "episode_id": "ep_3e58cb20ab25",
+    "seed": 9100
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {}
+    },
+    "episode_id": "ep_a474e08de868",
+    "seed": 9101
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {}
+    },
+    "episode_id": "ep_b5b4000dc257",
+    "seed": 9102
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {}
+    },
+    "episode_id": "ep_099745f1e437",
+    "seed": 9103
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {}
+    },
+    "episode_id": "ep_7288ec181627",
+    "seed": 9104
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "interacting": {
+        "I1": 1
+      }
+    },
+    "episode_id": "ep_17d13fa1c75d",
+    "seed": 9105
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "interacting": {
+        "I2": 1
+      }
+    },
+    "episode_id": "ep_80c210480a64",
+    "seed": 9106
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "duplicate_invoice": 1
+      },
+      "interacting": {
+        "I1": 1
+      }
+    },
+    "episode_id": "ep_05308a0cdcdc",
+    "seed": 9107
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "fx_error": 1
+      },
+      "interacting": {
+        "I2": 1
+      }
+    },
+    "episode_id": "ep_d6af10cf0b3b",
+    "seed": 9108
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "interacting": {
+        "I1": 1,
+        "I2": 1
+      }
+    },
+    "episode_id": "ep_faa296119a89",
+    "seed": 9109
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "duplicate_invoice": 1,
+        "period_cutoff": 1
+      },
+      "n_invoices": 35
+    },
+    "episode_id": "ep_20a61a2e1116",
+    "seed": 9110
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "payment_allocation": 2
+      },
+      "n_invoices": 45
+    },
+    "episode_id": "ep_1f3d649c3e0e",
+    "seed": 9111
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "fx_error": 2,
+        "period_cutoff": 1
+      },
+      "n_invoices": 55
+    },
+    "episode_id": "ep_c772f8e508c4",
+    "seed": 9112
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "duplicate_invoice": 2,
+        "payment_allocation": 1
+      },
+      "n_invoices": 65
+    },
+    "episode_id": "ep_eb3c67dbecbc",
+    "seed": 9113
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "duplicate_invoice": 1,
+        "fx_error": 1,
+        "payment_allocation": 1,
+        "period_cutoff": 1
+      },
+      "n_invoices": 40
+    },
+    "episode_id": "ep_c398330bbcdc",
+    "seed": 9114
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "payment_allocation": 2,
+        "period_cutoff": 2
+      },
+      "n_invoices": 50
+    },
+    "episode_id": "ep_108683a3fee4",
+    "seed": 9115
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "duplicate_invoice": 1,
+        "fx_error": 2
+      },
+      "n_invoices": 60
+    },
+    "episode_id": "ep_86e909d9fe59",
+    "seed": 9116
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "fx_error": 1,
+        "period_cutoff": 2
+      },
+      "n_invoices": 70
+    },
+    "episode_id": "ep_0da0d88b0e63",
+    "seed": 9117
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "fx_error": 2,
+        "payment_allocation": 2
+      },
+      "n_invoices": 45
+    },
+    "episode_id": "ep_10e89c20b111",
+    "seed": 9118
+  },
+  {
+    "config": {
+      "difficulty": "hard",
+      "errors": {
+        "duplicate_invoice": 2,
+        "payment_allocation": 1,
+        "period_cutoff": 1
+      },
+      "n_invoices": 75
+    },
+    "episode_id": "ep_87fdfdb652dd",
+    "seed": 9119
+  }
+]
