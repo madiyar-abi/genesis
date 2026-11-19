@@ -265,9 +265,11 @@ def markdown(r: dict, seconds: float) -> str:
                 out.append(f"| {c['table']} | {c['feature']} | {c['value']} | {c['support']} | {c['positives']} | "
                            f"{c['precision']:.3f}{mark} | {c['lift']:.1f} |")
     out += ["", f"Flagged values: {len(r['flagged'])}"]
-    out += ["", "## Excluded: per-episode random identifiers", "", f"Excluded values: {len(r['excluded'])}", "",
+    shown = [c for c in r["excluded"] if c["support"] >= r["min_support"]]
+    out += ["", "## Excluded: per-episode random identifiers", "",
+            f"Excluded values: {len(r['excluded'])} (listed: {len(shown)} with support >= {r['min_support']})", "",
             "| table | feature | value | support |", "|---|---|---|---|"]
-    for c in r["excluded"]:
+    for c in shown:
         out.append(f"| {c['table']} | {c['feature']} | {c['value']} | {c['support']} |")
     return "\n".join(out)
 

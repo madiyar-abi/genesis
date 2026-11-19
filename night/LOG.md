@@ -97,3 +97,7 @@
   paired, stress max 57, miner). Numbers re-checked: demo rewards unchanged, fuzz 0-999 3 000 episodes 0 problems,
   mutate 15/15, verify train/dev/hard dirs valid. Will re-check once more before DONE.
 - Dispatched an independent jury-style review subagent (read-only) against SPEC §09/§10.
+
+## 2026-11-19 21:46 lead
+- Merged codex M1 (reviewed). Review fix: the excluded-identifier table printed every raw id value (2 661 lines for
+  50 seeds); now lists only values with support >= min_support and prints the total count (215 lines).
