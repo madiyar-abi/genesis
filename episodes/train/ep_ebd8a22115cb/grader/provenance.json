@@ -1,0 +1,331 @@
+{
+  "company": {
+    "bank_offset": "-03:00",
+    "base_currency": "USD",
+    "entities": 8,
+    "foreign_currencies": [
+      "CHF",
+      "GBP",
+      "KZT"
+    ],
+    "timezone": "+05:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 1,
+      "fx_error": 1,
+      "payment_allocation": 2,
+      "period_cutoff": 1
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 65
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 1181703,
+              "entity_id": "E7262",
+              "invoice_id": "2506-746663",
+              "payment_id": null,
+              "row_id": "R2786",
+              "timestamp": "2025-06-29T16:42:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1181703,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E7262",
+              "invoice_id": "2506-746663",
+              "payment_id": null,
+              "row_id": "R2785",
+              "timestamp": "2025-06-29T16:42:00+05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2506-746663"
+        }
+      ],
+      "description": "invoice 2506-746663 issued 2025-07-01 (outside the period) booked on 2025-06-29",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 1084534,
+              "entity_id": "E3867",
+              "invoice_id": "2506-027269",
+              "payment_id": null,
+              "row_id": "R2748",
+              "timestamp": "2025-06-27T00:00:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1084534,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E3867",
+              "invoice_id": "2506-027269",
+              "payment_id": null,
+              "row_id": "R2749",
+              "timestamp": "2025-06-27T00:00:00+05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2506-027269"
+        }
+      ],
+      "description": "invoice 2506-209594 entered a second time as 2506-027269 and booked again",
+      "documents_added": [
+        "D-05db8c"
+      ],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 195269,
+              "entity_id": "E8686",
+              "invoice_id": "2506-868718",
+              "payment_id": null,
+              "row_id": "R2732",
+              "timestamp": "2025-06-25T15:21:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 195269,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E8686",
+              "invoice_id": "2506-868718",
+              "payment_id": null,
+              "row_id": "R2731",
+              "timestamp": "2025-06-25T15:21:00+05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 195434,
+              "entity_id": "E8686",
+              "invoice_id": "2506-868718",
+              "payment_id": null,
+              "row_id": "R2732",
+              "timestamp": "2025-06-25T15:21:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 195434,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E8686",
+              "invoice_id": "2506-868718",
+              "payment_id": null,
+              "row_id": "R2731",
+              "timestamp": "2025-06-25T15:21:00+05:00"
+            }
+          ],
+          "journal": "inv:2506-868718"
+        }
+      ],
+      "description": "invoice 2506-868718 converted with the 2025-06-22 rate instead of 2025-06-25",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 3902206,
+              "entity_id": "E7262",
+              "invoice_id": null,
+              "payment_id": "BNK-522147",
+              "row_id": "R2655",
+              "timestamp": "2025-06-19T15:41:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 3094830,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E7262",
+              "invoice_id": "2506-536551",
+              "payment_id": "BNK-522147",
+              "row_id": "R2656",
+              "timestamp": "2025-06-19T15:41:00+05:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 831451,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E7262",
+              "invoice_id": null,
+              "payment_id": "BNK-522147",
+              "row_id": "R2654",
+              "timestamp": "2025-06-19T15:41:00+05:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 24075,
+              "entity_id": "E7262",
+              "invoice_id": null,
+              "payment_id": "BNK-522147",
+              "row_id": "R2657",
+              "timestamp": "2025-06-19T15:41:00+05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 3902206,
+              "entity_id": "E7262",
+              "invoice_id": null,
+              "payment_id": "BNK-522147",
+              "row_id": "R2655",
+              "timestamp": "2025-06-19T15:41:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 3094830,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E7262",
+              "invoice_id": "2506-536551",
+              "payment_id": "BNK-522147",
+              "row_id": "R2656",
+              "timestamp": "2025-06-19T15:41:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 839879,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E7262",
+              "invoice_id": "2506-701611",
+              "payment_id": "BNK-522147",
+              "row_id": "pre-154",
+              "timestamp": "2025-06-19T15:41:00+05:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 32503,
+              "entity_id": "E7262",
+              "invoice_id": null,
+              "payment_id": "BNK-522147",
+              "row_id": "R2657",
+              "timestamp": "2025-06-19T15:41:00+05:00"
+            }
+          ],
+          "journal": "pay:BNK-522147"
+        }
+      ],
+      "description": "payment BNK-522147 allocated nothing to 2506-701611; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 30500,
+              "entity_id": "E8713",
+              "invoice_id": null,
+              "payment_id": "BNK-744757",
+              "row_id": "R2714",
+              "timestamp": "2025-06-24T10:37:00+05:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 30500,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E8713",
+              "invoice_id": null,
+              "payment_id": "BNK-744757",
+              "row_id": "R2715",
+              "timestamp": "2025-06-24T10:37:00+05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 30500,
+              "entity_id": "E8713",
+              "invoice_id": null,
+              "payment_id": "BNK-744757",
+              "row_id": "R2714",
+              "timestamp": "2025-06-24T10:37:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 30500,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E8713",
+              "invoice_id": "2506-009491",
+              "payment_id": "BNK-744757",
+              "row_id": "pre-189",
+              "timestamp": "2025-06-24T10:37:00+05:00"
+            }
+          ],
+          "journal": "pay:BNK-744757"
+        }
+      ],
+      "description": "payment BNK-744757 allocated nothing to 2506-009491; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-5",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 1007
+}

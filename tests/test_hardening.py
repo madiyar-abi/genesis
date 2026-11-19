@@ -1,0 +1,69 @@
+"""Regression tests for the jury-style review findings."""
+import json
+import os
+import tempfile
+import unittest
+from unittest import mock
+
+from auditenv.client import RemoteEnv
+from auditenv.env import AuditEnv
+from auditenv.generator import generate
+from auditenv.verify import verify_episode
+
+
+def dumps(ep):
+    return json.dumps(ep, sort_keys=True)
+
+
+class HardeningTest(unittest.TestCase):
+    def test_secret_keys_episode_id_and_content(self):
+        public = generate(7345123, {"errors": {"fx_error": 1}})
+        with mock.patch.dict(os.environ, {"AUDITENV_SECRET": "grader-only-key"}):
+            hidden = generate(7345123, {"errors": {"fx_error": 1}})
+            again = generate(7345123, {"errors": {"fx_error": 1}})
+        self.assertNotEqual(public["episode_id"], hidden["episode_id"])
+        self.assertNotEqual(public["tables"]["ledger"], hidden["tables"]["ledger"])
+        self.assertEqual(dumps(hidden), dumps(again))  # still reproducible for the key holder
+        self.assertEqual(verify_episode(hidden), [])
+
+    def test_equivalent_configs_same_company(self):
+        a = generate(3, {"errors": {"fx_error": 1}})
+        b = generate(3, {"errors": {"fx_error": 1, "duplicate_invoice": 0}, "interacting": {}})
+        self.assertEqual(dumps(a), dumps(b))
+        self.assertEqual(dumps(generate(3, {})), dumps(generate(3, {"distractors": True})))
+
+    def test_crash_config_and_min_documents(self):
+        cfg = {"errors": {"duplicate_invoice": 9, "fx_error": 2}, "n_invoices": 10, "distractors": False}
+        self.assertEqual(verify_episode(generate(61, cfg)), [])
+        for seed in range(30):
+            ep = generate(seed, {"errors": {}, "n_invoices": 10, "distractors": False})
+            self.assertGreaterEqual(ep["manifest"]["counts"]["documents"], 20)
+
+    def test_malformed_table_never_crashes_or_overruns(self):
+        env = AuditEnv()
+        env.reset(1, {"errors": {}})
+        for i in range(100):
+            obs, r, term, trunc, info = env.step({"type": "list_records", "table": ["ledger"]})
+            self.assertEqual(obs["error"]["code"], "unknown_table")
+        self.assertTrue(trunc)
+        obs, r, term, trunc, info = env.step({"type": "submit", "findings": {}})
+        self.assertEqual(obs["error"]["code"], "episode_over")
+
+    def test_server_grades_abandoned_episodes(self):
+        with tempfile.TemporaryDirectory() as d:
+            log, hidden = os.path.join(d, "g.jsonl"), os.path.join(d, "h.json")
+            with open(hidden, "w") as fh:
+                json.dump({"seeds": [1, 2, 3], "config": {"errors": {"fx_error": 1}}}, fh)
+            with RemoteEnv(grader_log=log, episodes=hidden) as env:
+                env.reset()
+                env.step({"type": "list_records", "table": "ledger"})
+                env.reset()  # skip episode 1 mid-way
+                env.reset()  # skip episode 2 without a step; episode 3 left open at close
+            with open(log) as fh:
+                recs = [json.loads(line) for line in fh]
+            self.assertEqual([r["end"] for r in recs], ["abandoned"] * 3)
+            self.assertTrue(all(r["reward"] < 0 for r in recs))
+
+
+if __name__ == "__main__":
+    unittest.main()

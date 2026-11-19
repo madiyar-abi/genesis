@@ -1,0 +1,284 @@
+{
+  "company": {
+    "bank_offset": "+05:30",
+    "base_currency": "EUR",
+    "entities": 14,
+    "foreign_currencies": [
+      "CHF",
+      "USD"
+    ],
+    "timezone": "+00:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 0,
+      "fx_error": 2,
+      "payment_allocation": 1,
+      "period_cutoff": 2
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 55
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 435276,
+              "entity_id": "E5936",
+              "invoice_id": "2501-318646",
+              "payment_id": null,
+              "row_id": "R4665",
+              "timestamp": "2025-01-31T09:38:00+00:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 435276,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E5936",
+              "invoice_id": "2501-318646",
+              "payment_id": null,
+              "row_id": "R4666",
+              "timestamp": "2025-01-31T09:38:00+00:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2501-318646"
+        }
+      ],
+      "description": "invoice 2501-318646 issued 2025-02-01 (outside the period) booked on 2025-01-31",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 123900,
+              "entity_id": "E1188",
+              "invoice_id": "2501-756624",
+              "payment_id": null,
+              "row_id": "R4667",
+              "timestamp": "2025-01-31T10:26:00+00:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 123900,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E1188",
+              "invoice_id": "2501-756624",
+              "payment_id": null,
+              "row_id": "R4668",
+              "timestamp": "2025-01-31T10:26:00+00:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2501-756624"
+        }
+      ],
+      "description": "invoice 2501-756624 issued 2025-02-06 (outside the period) booked on 2025-01-31",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1072149,
+              "entity_id": "E6022",
+              "invoice_id": "2501-165700",
+              "payment_id": null,
+              "row_id": "R4658",
+              "timestamp": "2025-01-30T17:02:00+00:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1072149,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E6022",
+              "invoice_id": "2501-165700",
+              "payment_id": null,
+              "row_id": "R4659",
+              "timestamp": "2025-01-30T17:02:00+00:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 1080971,
+              "entity_id": "E6022",
+              "invoice_id": "2501-165700",
+              "payment_id": null,
+              "row_id": "R4658",
+              "timestamp": "2025-01-30T17:02:00+00:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1080971,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E6022",
+              "invoice_id": "2501-165700",
+              "payment_id": null,
+              "row_id": "R4659",
+              "timestamp": "2025-01-30T17:02:00+00:00"
+            }
+          ],
+          "journal": "inv:2501-165700"
+        }
+      ],
+      "description": "invoice 2501-165700 converted with the 2025-01-26 rate instead of 2025-01-28",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 307987,
+              "entity_id": "E5936",
+              "invoice_id": "2501-257831",
+              "payment_id": null,
+              "row_id": "R4477",
+              "timestamp": "2025-01-06T08:27:00+00:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 307987,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E5936",
+              "invoice_id": "2501-257831",
+              "payment_id": null,
+              "row_id": "R4476",
+              "timestamp": "2025-01-06T08:27:00+00:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 305440,
+              "entity_id": "E5936",
+              "invoice_id": "2501-257831",
+              "payment_id": null,
+              "row_id": "R4477",
+              "timestamp": "2025-01-06T08:27:00+00:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 305440,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E5936",
+              "invoice_id": "2501-257831",
+              "payment_id": null,
+              "row_id": "R4476",
+              "timestamp": "2025-01-06T08:27:00+00:00"
+            }
+          ],
+          "journal": "inv:2501-257831"
+        }
+      ],
+      "description": "invoice 2501-257831 converted with the 2025-01-13 rate instead of 2025-01-06",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 97000,
+              "entity_id": "E3638",
+              "invoice_id": null,
+              "payment_id": "PAY-808628",
+              "row_id": "R4621",
+              "timestamp": "2025-01-25T23:41:00+00:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 97000,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3638",
+              "invoice_id": null,
+              "payment_id": "PAY-808628",
+              "row_id": "R4620",
+              "timestamp": "2025-01-25T23:41:00+00:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 97000,
+              "entity_id": "E3638",
+              "invoice_id": null,
+              "payment_id": "PAY-808628",
+              "row_id": "R4621",
+              "timestamp": "2025-01-25T23:41:00+00:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 97000,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "E3638",
+              "invoice_id": "2501-516046",
+              "payment_id": "PAY-808628",
+              "row_id": "pre-168",
+              "timestamp": "2025-01-25T23:41:00+00:00"
+            }
+          ],
+          "journal": "pay:PAY-808628"
+        }
+      ],
+      "description": "payment PAY-808628 allocated nothing to 2501-516046; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-5",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 1006
+}

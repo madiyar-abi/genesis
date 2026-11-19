@@ -187,6 +187,54 @@ def revert(ep: dict) -> dict:
     return tables
 
 
+def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> list[str]:
+    """Recompute the declared amount from the evidence records alone (plus the manifest)."""
+    ev_rows = [rows[i] for i in s if i in rows]
+    ev_docs = [docs[i] for i in s if i in docs]
+    rates = {i: books.fx[tuple(i.split(":"))] for i in s if i.count(":") == 2 and tuple(i.split(":")) in books.fx}
+
+    def conv(amount, cur, ts):
+        if cur == books.base:
+            return amount
+        key = f"{books.cdate(ts).isoformat()}:{cur}:{books.base}"
+        if key not in rates:
+            raise KeyError(key)
+        return convert(amount, cur, books.base, rates[key])
+
+    typ, exp = iss["type"], iss["expected_amount_minor"]
+    try:
+        if typ == "duplicate_invoice":
+            a, b = sorted(ev_docs, key=lambda d: datetime_key(d["issued_at"]))
+            same = (a["entity_id"], a["currency"], a["line_items"]) == (b["entity_id"], b["currency"], b["line_items"])
+            got = next(r["debit_minor"] + r["credit_minor"] for r in ev_rows if r["invoice_id"] == b["invoice_id"])
+            ok = same and got == exp
+        elif typ == "period_cutoff":
+            inv = next(d for d in ev_docs if "invoice_id" in d)
+            row = ev_rows[0]
+            ok = (not books.in_period(inv["issued_at"]) and books.in_period(row["timestamp"])
+                  and row["debit_minor"] + row["credit_minor"] == exp)
+        elif typ == "fx_error":
+            doc, row = ev_docs[0], ev_rows[0]
+            if "invoice_id" in doc:
+                correct = conv(doc["total_minor"], doc["currency"], doc["issued_at"])
+            else:
+                correct = conv(doc["amount_minor"], doc["currency"], doc["timestamp"])
+            ok = abs(row["debit_minor"] + row["credit_minor"] - correct) == exp
+        else:  # payment_allocation
+            pay = next(d for d in ev_docs if "payment_id" in d)
+            inv = next(d for d in ev_docs if "invoice_id" in d and "payment_id" not in d)
+            ref = next(r for r in pay["invoice_refs"] if r["invoice_id"] == inv["invoice_id"])
+            expected = conv(ref["amount_minor"], pay["currency"], inv["issued_at"])
+            row = ev_rows[0]
+            if row["account"] == "1200":
+                ok = expected - row["credit_minor"] == exp
+            else:  # 2900 row: shows the shortfall moved to unapplied cash; expected credit must exceed exp
+                ok = row["account"] == "2900" and row["payment_id"] == pay["payment_id"] and 0 < exp <= expected
+        return [] if ok else [f"evidence set {s} does not reproduce the amount"]
+    except (KeyError, StopIteration, ValueError, IndexError):
+        return [f"evidence set {s} is missing a record needed to reproduce the amount"]
+
+
 def verify_episode(ep: dict) -> list[str]:
     problems = _structure(ep)
     m, t = ep["manifest"], ep["tables"]
@@ -205,12 +253,13 @@ def verify_episode(ep: dict) -> list[str]:
     # evidence
     rows = {r["row_id"]: r for r in t["ledger"]}
     docs = {d["doc_id"]: d for d in t["invoices"] + t["payments"]}
+    fx_ids = {r["fx_id"] for r in t["fx"]}
     for iss in ep["truth"]["issues"]:
         aff = set(iss["affected_ids"])
         if not iss["evidence_sets"]:
             problems.append(f"{iss['issue_id']}: no evidence set")
         for s in iss["evidence_sets"]:
-            if not set(s) <= rows.keys() | docs.keys():
+            if not set(s) <= rows.keys() | docs.keys() | fx_ids:
                 problems.append(f"{iss['issue_id']}: evidence id not in public tables")
                 continue
             if len(s) > 10:
@@ -220,8 +269,9 @@ def verify_episode(ep: dict) -> list[str]:
             row_ok = any(i in rows and (rows[i]["invoice_id"] in aff or rows[i]["payment_id"] in aff) for i in s)
             if not (doc_ok or iss["type"] == "duplicate_invoice") or not (row_ok or iss["type"] == "duplicate_invoice"):
                 problems.append(f"{iss['issue_id']}: evidence set does not cover the affected records")
-            if iss["type"] == "duplicate_invoice" and not (sum(i in docs for i in s) == 2 or sum(i in rows for i in s) == 2):
-                problems.append(f"{iss['issue_id']}: duplicate evidence must show both copies")
+            if iss["type"] == "duplicate_invoice" and sum(i in docs for i in s) != 2:
+                problems.append(f"{iss['issue_id']}: duplicate evidence must show both documents")
+            problems += [f"{iss['issue_id']}: {p}" for p in _sufficient(Books(m, t), iss, s, rows, docs)]
     return problems
 
 

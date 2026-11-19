@@ -136,3 +136,18 @@
 - Episode 0, step 17: {"type":"get_record","table":{"a":{"b":1}},"id":{"a":{"b":1}}} raises TypeError (unhashable dict). Episode 0, step 22: {"type":"get_record","table":[],"id":[]} raises TypeError (unhashable list).
 - Episode 6, step 54: {"type":"list_records","table":"ledger","cursor":"ledger:²","limit":200} raises ValueError because the digit test accepts a character that integer parsing rejects.
 - Assumptions: use train and eval in alternation, keeping random submits near the end so the run reaches its action minimum. As assigned, the lead owns fixes in env.py. Re-run `uv run python -m unittest tests.test_fuzz` after those fixes.
+
+## 2026-11-19 14:14 — lead
+- Merged gemini T28 (load.py, verify --dir, roundtrip tests) and codex T29 (fuzz test; it found the env crash below).
+- Jury-style review subagent: 10 confirmed defects, all fixed:
+  1 BLOCKER seed recoverable from sha256 episode_id → HMAC id + AUDITENV_SECRET keys generator RNG (grader-only);
+  2 non-string table crashed step & allowed >100 steps → isinstance checks, catch-all bounded error, ascii cursor digits;
+  3 I1 payment had a unique UTC offset (P=1.0 shortcut) → uses the bank offset, ordinary hours widened to 8–22;
+  4 evidence not self-sufficient → fx_id + invoice doc added; verifier now recomputes amounts from each evidence set alone;
+  5 cutoff timestamp-mismatch shortcut (P=1.0) → legit posting lag 1–3 days (P now 0.09);
+  6 duplicate telltale hour (P=1.0) → ordinary hour range (P 0.02);
+  7 _make_room off-by-one crash; 8 <20 documents in tiny configs → top-up to 22; 9 server: skipped hidden episodes ungraded → abandon() grades them;
+  10 equivalent configs gave different companies → gen_config normalisation.
+- Re-exported episodes/, regenerated trajectories/. Reconcile stress 1200 episodes still 0 imperfect (max 30 steps). New dev numbers in DESIGN/PITCH.
+- tests/test_hardening.py (5 regression tests). 187 tests, check ALL PASSED.
+- Assumption: I2 double-reporting (cutoff + fx on one booking) kept as designed (documented interacting scenario).

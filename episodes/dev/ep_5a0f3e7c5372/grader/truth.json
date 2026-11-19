@@ -1,0 +1,96 @@
+{
+  "episode_id": "ep_5a0f3e7c5372",
+  "issues": [
+    {
+      "affected_ids": [
+        "2501-141622",
+        "2501-263853"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "618b4534",
+          "722786a1",
+          "R842"
+        ],
+        [
+          "618b4534",
+          "722786a1",
+          "R841"
+        ]
+      ],
+      "expected_amount_minor": 92866,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "2501-581643",
+        "2501-921005"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "R871",
+          "c0437c50",
+          "c0f5de70"
+        ],
+        [
+          "R870",
+          "c0437c50",
+          "c0f5de70"
+        ]
+      ],
+      "expected_amount_minor": 1621341,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "2501-669652",
+        "2501-751062"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "61c2151a",
+          "994b89b2",
+          "R884"
+        ],
+        [
+          "61c2151a",
+          "994b89b2",
+          "R885"
+        ]
+      ],
+      "expected_amount_minor": 415479,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "2501-032651"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "2025-01-07:JPY:USD",
+          "6c95b394",
+          "R912"
+        ],
+        [
+          "2025-01-07:JPY:USD",
+          "6c95b394",
+          "R913"
+        ]
+      ],
+      "expected_amount_minor": 28,
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "fx_error"
+    }
+  ]
+}

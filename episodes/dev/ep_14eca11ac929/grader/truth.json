@@ -1,0 +1,89 @@
+{
+  "episode_id": "ep_14eca11ac929",
+  "issues": [
+    {
+      "affected_ids": [
+        "INV-358266"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "557c6646",
+          "R1520"
+        ],
+        [
+          "557c6646",
+          "R1521"
+        ]
+      ],
+      "expected_amount_minor": 526744,
+      "issue_id": "ISS-1",
+      "scenario": "I2",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "INV-358266"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "2026-10-01:GBP:USD",
+          "557c6646",
+          "R1520"
+        ],
+        [
+          "2026-10-01:GBP:USD",
+          "557c6646",
+          "R1521"
+        ]
+      ],
+      "expected_amount_minor": 3514,
+      "issue_id": "ISS-2",
+      "scenario": "I2",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "INV-112285",
+        "INV-726919"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "6c25e6dc",
+          "802da18b",
+          "R1350"
+        ],
+        [
+          "6c25e6dc",
+          "802da18b",
+          "R1351"
+        ]
+      ],
+      "expected_amount_minor": 1876000,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "INV-677785",
+        "PAY-874814"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "2026-09-10:KZT:USD",
+          "3d84e8de",
+          "R1509",
+          "a4e88373"
+        ]
+      ],
+      "expected_amount_minor": 665398,
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ]
+}

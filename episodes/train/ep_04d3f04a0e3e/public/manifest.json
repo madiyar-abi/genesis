@@ -1,0 +1,22 @@
+{
+  "amount_exponents": {
+    "JPY": 0,
+    "KZT": 2,
+    "USD": 2
+  },
+  "base_currency": "KZT",
+  "counts": {
+    "documents": 61,
+    "fx": 210,
+    "invoices": 43,
+    "ledger": 323,
+    "payments": 18
+  },
+  "episode_id": "ep_04d3f04a0e3e",
+  "generator_version": "1.0.0",
+  "period_end": "2026-11-30",
+  "period_start": "2026-11-01",
+  "rounding": "ROUND_HALF_UP",
+  "schema_version": "1.0",
+  "timezone": "+09:00"
+}

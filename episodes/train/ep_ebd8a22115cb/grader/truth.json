@@ -1,0 +1,107 @@
+{
+  "episode_id": "ep_ebd8a22115cb",
+  "issues": [
+    {
+      "affected_ids": [
+        "2506-746663"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "D-0e035c",
+          "R2786"
+        ],
+        [
+          "D-0e035c",
+          "R2785"
+        ]
+      ],
+      "expected_amount_minor": 1181703,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "2506-027269",
+        "2506-209594"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "D-05db8c",
+          "D-0d9371",
+          "R2748"
+        ],
+        [
+          "D-05db8c",
+          "D-0d9371",
+          "R2749"
+        ]
+      ],
+      "expected_amount_minor": 1084534,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "2506-868718"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "2025-06-25:CHF:USD",
+          "D-0b09cf",
+          "R2732"
+        ],
+        [
+          "2025-06-25:CHF:USD",
+          "D-0b09cf",
+          "R2731"
+        ]
+      ],
+      "expected_amount_minor": 165,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "2506-701611",
+        "BNK-522147"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "2025-05-12:KZT:USD",
+          "D-01dd10",
+          "D-065913",
+          "R2654"
+        ]
+      ],
+      "expected_amount_minor": 839879,
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "affected_ids": [
+        "2506-009491",
+        "BNK-744757"
+      ],
+      "currency": "USD",
+      "evidence_sets": [
+        [
+          "D-05b5e2",
+          "D-0d2f2d",
+          "R2715"
+        ]
+      ],
+      "expected_amount_minor": 30500,
+      "issue_id": "ISS-5",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ]
+}

@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import hmac
 import json
+import os
 import random
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
@@ -47,18 +49,41 @@ INVOICE_FIELDS = ("doc_id", "invoice_id", "entity_id", "issued_at", "due_at", "c
                   "total_minor", "line_items")
 PAYMENT_FIELDS = ("doc_id", "payment_id", "timestamp", "currency", "amount_minor", "invoice_refs")
 FX_FIELDS = ("fx_id", "date", "source_currency", "target_currency", "rate")
-# Config keys that change the generated company (others only change env behaviour).
-GEN_KEYS = ("errors", "interacting", "n_invoices", "distractors")
 
 
 def canonical(obj) -> str:
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
+def secret() -> str:
+    """Grader-only key. Unset (public train/dev) -> episodes are reproducible by anyone. For hidden
+    runs set AUDITENV_SECRET in the grader process only: without it the seed cannot be recovered
+    from episode_id and episodes cannot be regenerated, even with this open-source generator."""
+    return os.environ.get("AUDITENV_SECRET", "")
+
+
+def gen_config(config: dict) -> dict:
+    """Normalise the generation-relevant config (equal meaning -> equal company)."""
+    explicit = "errors" in config or "interacting" in config
+    given_e, given_i = config.get("errors") or {}, config.get("interacting") or {}
+    for key, val in list(given_e.items()) + list(given_i.items()):
+        if key not in ISSUE_TYPES + SCENARIOS or isinstance(val, bool) or not isinstance(val, int) or val < 0:
+            raise ValueError(f"bad error config entry {key!r}: {val!r}")
+    n = config.get("n_invoices")
+    if n is not None and (isinstance(n, bool) or not isinstance(n, int) or not 10 <= n <= 100):
+        raise ValueError("n_invoices must be an int in [10, 100] (keeps documents <= 200)")
+    return {
+        "errors": {t: given_e.get(t, 0) for t in ISSUE_TYPES} if explicit else None,
+        "interacting": {k: given_i.get(k, 0) for k in SCENARIOS} if explicit else None,
+        "n_invoices": n,
+        "distractors": bool(config.get("distractors", True)),
+    }
+
+
 def episode_id_for(seed: int, config: dict) -> str:
-    gen = {k: config.get(k) for k in GEN_KEYS + ("transform_seed",)}
-    digest = hashlib.sha256(f"{GENERATOR_VERSION}|{seed}|{canonical(gen)}".encode()).hexdigest()
-    return "ep_" + digest[:12]
+    msg = f"{GENERATOR_VERSION}|{seed}|{canonical(gen_config(config))}|{config.get('transform_seed')}"
+    key = (secret() or "auditenv-public").encode()
+    return "ep_" + hmac.new(key, msg.encode(), hashlib.sha256).hexdigest()[:12]
 
 
 def _month_end(d: date) -> date:
@@ -72,8 +97,8 @@ class State:
     def __init__(self, seed: int, config: dict):
         self.seed = seed
         self.config = config
-        gen = {k: config.get(k) for k in GEN_KEYS}
-        self.rng = random.Random(f"auditenv|{GENERATOR_VERSION}|{seed}|{canonical(gen)}")
+        self.gen = gen_config(config)
+        self.rng = random.Random(f"auditenv|{secret()}|{GENERATOR_VERSION}|{seed}|{canonical(self.gen)}")
         rng = self.rng
         self.base = rng.choice(BASES)
         pool = [c for c in USD_VALUE if c != self.base]
@@ -171,7 +196,7 @@ class State:
                     offset_min: int | None = None, currency: str | None = None) -> dict:
         rng = self.rng
         if hour is None:
-            hour = rng.choice((0, 23)) if rng.random() < 0.08 else rng.randint(8, 19)
+            hour = rng.choice((0, 23)) if rng.random() < 0.08 else rng.randint(8, 22)
         instant = self.at(d, hour, rng.randrange(60))
         off = ent["offset"] if offset_min is None else offset_min
         local = instant.astimezone(parse_offset(offset_str(off)))
@@ -190,7 +215,7 @@ class State:
                     hour: int | None = None, offset_min: int | None = None) -> dict:
         rng = self.rng
         if hour is None:
-            hour = rng.choice((0, 23)) if rng.random() < 0.08 else rng.randint(9, 17)
+            hour = rng.choice((0, 23)) if rng.random() < 0.08 else rng.randint(8, 22)
         instant = self.at(d, hour, rng.randrange(60))
         off = self.bank_offset if offset_min is None else offset_min
         pay = {
@@ -277,10 +302,10 @@ class State:
 
 # ---------------------------------------------------------------- history
 def build_history(st: State) -> None:
-    rng, cfg = st.rng, st.config
-    distractors = cfg.get("distractors", True)
+    rng = st.rng
+    distractors = st.gen["distractors"]
     st.entities = [st.new_entity() for _ in range(rng.randint(8, 18))]
-    n_inv = cfg.get("n_invoices") or rng.randint(30, 60)
+    n_inv = st.gen["n_invoices"] or rng.randint(30, 60)
     for _ in range(n_inv):
         u = rng.random()
         if u < 0.2:
@@ -312,9 +337,16 @@ def build_history(st: State) -> None:
 
     for inv in list(st.invoices):
         if st.in_period(inv["_cdate"]):
-            st.book_invoice(inv)
+            lag = rng.randint(1, 3) if rng.random() < 0.3 else 0  # legitimate posting lag inside the period
+            if lag and inv["_cdate"] + timedelta(days=lag) <= st.pe:
+                st.book_invoice(inv, dt=st.at(inv["_cdate"] + timedelta(days=lag), rng.randint(8, 22),
+                                              rng.randrange(60)))
+            else:
+                st.book_invoice(inv)
 
     _build_payments(st, distractors)
+    while len(st.invoices) + len(st.payments) < 22:  # keep >= 20 documents after any injection
+        st.book_invoice(st.new_invoice(rng.choice(st.entities), st.ps + timedelta(days=rng.randrange(st.ndays))))
     _build_expenses(st)
 
 
@@ -394,14 +426,9 @@ def _build_expenses(st: State) -> None:
 
 # ---------------------------------------------------------------- render
 def _plan(st: State) -> tuple[dict, dict]:
-    cfg, rng = st.config, st.rng
-    if "errors" in cfg or "interacting" in cfg:  # explicit plan; missing entries = 0
-        given_e, given_i = cfg.get("errors") or {}, cfg.get("interacting") or {}
-        for key, val in list(given_e.items()) + list(given_i.items()):
-            if key not in ISSUE_TYPES + SCENARIOS or isinstance(val, bool) or not isinstance(val, int) or val < 0:
-                raise ValueError(f"bad error config entry {key!r}: {val!r}")
-        errors = {t: given_e.get(t, 0) for t in ISSUE_TYPES}
-        inter = {s: given_i.get(s, 0) for s in SCENARIOS}
+    rng = st.rng
+    if st.gen["errors"] is not None:
+        errors, inter = dict(st.gen["errors"]), dict(st.gen["interacting"])
     else:
         errors = {t: rng.choice((0, 0, 1, 1, 2)) for t in ISSUE_TYPES}
         inter = {s: int(rng.random() < 0.3) for s in SCENARIOS}
@@ -432,7 +459,7 @@ def render(st: State, episode_id: str) -> dict:
 
     def ev_id(e):
         kind, val = e
-        return val if kind == "doc" else key_to_id[val]
+        return key_to_id[val] if kind == "row" else val  # "doc" -> doc_id, "fx" -> fx_id
 
     issues = []
     for iss in st.issues:
@@ -471,7 +498,7 @@ def render(st: State, episode_id: str) -> dict:
         "truth": {"episode_id": episode_id, "issues": issues},
         "provenance": {
             "generator_version": GENERATOR_VERSION, "seed": st.seed,
-            "config": {k: st.config.get(k) for k in GEN_KEYS if k in st.config},
+            "config": st.gen,
             "company": {"base_currency": st.base, "foreign_currencies": st.foreign, "timezone": st.tz_str,
                         "bank_offset": offset_str(st.bank_offset), "entities": len(st.entities)},
             "injections": injections,
@@ -508,7 +535,11 @@ def policy_for(st: State) -> dict:
                              "payment_allocation": "[invoice_id, payment_id]",
                              "fx_error": "[invoice_id] or [payment_id]",
                              "period_cutoff": "[invoice_id]"},
-            "evidence": "doc_id / row_id values; must include at least one full acceptable evidence set",
+            "evidence": "doc_id / row_id / fx_id values; must include at least one full acceptable evidence set: "
+                        "duplicate_invoice: both invoice docs + the later copy's AR (or revenue) row; "
+                        "payment_allocation: payment doc + invoice doc + the 2900 row (or the AR row) + the "
+                        "invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row "
+                        "+ the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row",
         },
     }
 
@@ -530,9 +561,6 @@ def generate(seed: int, config: dict | None = None) -> dict:
     from . import inject  # local import: inject uses State
 
     config = dict(config or {})
-    n = config.get("n_invoices")
-    if n is not None and (isinstance(n, bool) or not isinstance(n, int) or not 10 <= n <= 100):
-        raise ValueError("n_invoices must be an int in [10, 100] (keeps documents <= 200)")
     st = State(int(seed), config)
     build_history(st)
     errors, inter = _plan(st)

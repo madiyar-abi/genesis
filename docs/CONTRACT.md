@@ -61,14 +61,17 @@ Truth issue: `{issue_id, type, scenario, affected_ids, expected_amount_minor, cu
 (`scenario` = "single" | "I1" | "I2").
 `expected_amount_minor` = the misstatement in the ledger, **base currency**, positive int.
 `currency` = base currency. `affected_ids` canonical = sorted list of strings.
-`evidence_sets` = list of acceptable sets (lists) of `doc_id`/`row_id`.
+`evidence_sets` = list of acceptable sets (lists) of `doc_id` / `row_id` / `fx_id`.
 
 | type | affected_ids | amount | evidence (any one full set) |
 |---|---|---|---|
-| `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the later-issued copy | [both invoice doc_ids] or [both AR row_ids] |
-| `payment_allocation` | [invoice_id, payment_id] | `convert(ref.amount, rate(inv date))` − AR credit actually posted | [payment doc_id, the 2900 row_id] |
-| `fx_error` | [invoice_id] or [payment_id] | abs(posted − correct) of the AR (resp. cash) row | [doc_id, that row_id] |
-| `period_cutoff` | [invoice_id] | AR debit posted for an invoice dated outside the period | [invoice doc_id, AR row_id] |
+| `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the later-issued copy | both invoice doc_ids + the later copy's AR (or revenue) row_id |
+| `payment_allocation` | [invoice_id, payment_id] | `convert(ref.amount, rate(inv date))` − AR credit actually posted | payment doc_id + invoice doc_id + the 2900 row_id (or the AR credit row_id) + the invoice-date fx_id if foreign |
+| `fx_error` | [invoice_id] or [payment_id] | abs(posted − correct) of the AR (resp. cash) row | doc_id + that row_id (invoice: AR or revenue row) + the fx_id of the correct date |
+| `period_cutoff` | [invoice_id] | AR debit posted for an invoice dated outside the period | invoice doc_id + AR (or revenue) row_id |
+
+Every evidence set is sufficient on its own: `auditenv/verify.py` recomputes the amount from the
+set's records (plus the manifest).
 
 Interacting scenarios: `I1` = foreign-currency payment at the period boundary that is
 partially allocated (`payment_allocation`) **and** converted at the wrong date (`fx_error`
@@ -85,6 +88,10 @@ All values JSON-compatible. `config` keys (all optional): `mode` ("train" | "eva
 default "train"), `max_steps` (100), `time_limit_s` (60), `errors`
 (`{type: count}`), `interacting` (`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`
 (bool), `transform_seed` (int | null: benign relabel/permutation).
+
+Grader secret: if the env var `AUDITENV_SECRET` is set (grader process only), it keys both the
+generator RNG and the HMAC `episode_id`, so a policy cannot recover the seed or regenerate the
+episode. Unset = public, reproducible train/dev episodes.
 
 First observation: `{task, manifest, policy, tools, steps_remaining}`.
 Step observation: `{step, steps_remaining, result, error}` — `error` is null or

@@ -1,0 +1,186 @@
+{
+  "company": {
+    "bank_offset": "+09:00",
+    "base_currency": "USD",
+    "entities": 15,
+    "foreign_currencies": [
+      "GBP",
+      "JPY",
+      "KZT"
+    ],
+    "timezone": "+05:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 1,
+      "fx_error": 0,
+      "payment_allocation": 1,
+      "period_cutoff": 0
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 1
+    },
+    "n_invoices": null
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 526744,
+              "entity_id": "CUST52061",
+              "invoice_id": "INV-358266",
+              "payment_id": null,
+              "row_id": "R1520",
+              "timestamp": "2026-09-29T18:40:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 526744,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST52061",
+              "invoice_id": "INV-358266",
+              "payment_id": null,
+              "row_id": "R1521",
+              "timestamp": "2026-09-29T18:40:00+05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-358266"
+        }
+      ],
+      "description": "invoice INV-358266 issued 2026-10-01 (outside the period) booked on 2026-09-29",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "I2",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [],
+      "description": "invoice INV-358266 converted with the 2026-09-29 rate instead of 2026-10-01",
+      "documents_added": [],
+      "issue_id": "ISS-2",
+      "scenario": "I2",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 1876000,
+              "entity_id": "CUST07389",
+              "invoice_id": "INV-726919",
+              "payment_id": null,
+              "row_id": "R1350",
+              "timestamp": "2026-09-09T12:38:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1876000,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST07389",
+              "invoice_id": "INV-726919",
+              "payment_id": null,
+              "row_id": "R1351",
+              "timestamp": "2026-09-09T12:38:00+05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-726919"
+        }
+      ],
+      "description": "invoice INV-112285 entered a second time as INV-726919 and booked again",
+      "documents_added": [
+        "802da18b"
+      ],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 664096,
+              "entity_id": "CUST62660",
+              "invoice_id": null,
+              "payment_id": "PAY-874814",
+              "row_id": "R1510",
+              "timestamp": "2026-09-28T22:24:00+05:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 664096,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST62660",
+              "invoice_id": null,
+              "payment_id": "PAY-874814",
+              "row_id": "R1509",
+              "timestamp": "2026-09-28T22:24:00+05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 664096,
+              "entity_id": "CUST62660",
+              "invoice_id": null,
+              "payment_id": "PAY-874814",
+              "row_id": "R1510",
+              "timestamp": "2026-09-28T22:24:00+05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 665398,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "CUST62660",
+              "invoice_id": "INV-677785",
+              "payment_id": "PAY-874814",
+              "row_id": "pre-169",
+              "timestamp": "2026-09-28T22:24:00+05:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 1302,
+              "entity_id": "CUST62660",
+              "invoice_id": null,
+              "payment_id": "PAY-874814",
+              "row_id": "pre-170",
+              "timestamp": "2026-09-28T22:24:00+05:00"
+            }
+          ],
+          "journal": "pay:PAY-874814"
+        }
+      ],
+      "description": "payment PAY-874814 allocated nothing to INV-677785; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 2003
+}

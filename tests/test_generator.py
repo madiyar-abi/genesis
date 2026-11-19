@@ -69,7 +69,8 @@ class GeneratorTest(unittest.TestCase):
         for seed in range(40):
             ep = generate(seed, ALL)
             t = ep["tables"]
-            ids = {r["row_id"] for r in t["ledger"]} | {d["doc_id"] for d in t["invoices"] + t["payments"]}
+            ids = {r["row_id"] for r in t["ledger"]} | {d["doc_id"] for d in t["invoices"] + t["payments"]} \
+                | {r["fx_id"] for r in t["fx"]}
             for iss in ep["truth"]["issues"]:
                 self.assertGreater(iss["expected_amount_minor"], 0)
                 self.assertEqual(iss["currency"], ep["manifest"]["base_currency"])

@@ -1,0 +1,146 @@
+{
+  "company": {
+    "bank_offset": "+05:00",
+    "base_currency": "EUR",
+    "entities": 12,
+    "foreign_currencies": [
+      "CHF",
+      "JPY",
+      "USD"
+    ],
+    "timezone": "+03:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 2,
+      "fx_error": 0,
+      "payment_allocation": 0,
+      "period_cutoff": 1
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 40
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 557200,
+              "entity_id": "CUST11425",
+              "invoice_id": "INV-864795",
+              "payment_id": null,
+              "row_id": "GL-002858",
+              "timestamp": "2026-08-29T09:17:00+03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 557200,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "CUST11425",
+              "invoice_id": "INV-864795",
+              "payment_id": null,
+              "row_id": "GL-002857",
+              "timestamp": "2026-08-29T09:17:00+03:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-864795"
+        }
+      ],
+      "description": "invoice INV-864795 issued 2026-09-05 (outside the period) booked on 2026-08-29",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 167400,
+              "entity_id": "CUST79237",
+              "invoice_id": "INV-774993",
+              "payment_id": null,
+              "row_id": "GL-002795",
+              "timestamp": "2026-08-23T21:24:00+03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 167400,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "CUST79237",
+              "invoice_id": "INV-774993",
+              "payment_id": null,
+              "row_id": "GL-002796",
+              "timestamp": "2026-08-23T21:24:00+03:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-774993"
+        }
+      ],
+      "description": "invoice INV-380664 entered a second time as INV-774993 and booked again",
+      "documents_added": [
+        "D-055adc"
+      ],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "EUR",
+              "debit_minor": 705400,
+              "entity_id": "CUST32102",
+              "invoice_id": "INV-771947",
+              "payment_id": null,
+              "row_id": "GL-002654",
+              "timestamp": "2026-08-11T22:46:00+03:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 705400,
+              "currency": "EUR",
+              "debit_minor": 0,
+              "entity_id": "CUST32102",
+              "invoice_id": "INV-771947",
+              "payment_id": null,
+              "row_id": "GL-002655",
+              "timestamp": "2026-08-11T22:46:00+03:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:INV-771947"
+        }
+      ],
+      "description": "invoice INV-952176 entered a second time as INV-771947 and booked again",
+      "documents_added": [
+        "D-04b4b8"
+      ],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    }
+  ],
+  "seed": 2004
+}

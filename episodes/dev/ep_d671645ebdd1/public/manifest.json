@@ -1,0 +1,22 @@
+{
+  "amount_exponents": {
+    "EUR": 2,
+    "JPY": 0,
+    "KZT": 2
+  },
+  "base_currency": "KZT",
+  "counts": {
+    "documents": 72,
+    "fx": 212,
+    "invoices": 49,
+    "ledger": 305,
+    "payments": 23
+  },
+  "episode_id": "ep_d671645ebdd1",
+  "generator_version": "1.0.0",
+  "period_end": "2026-03-31",
+  "period_start": "2026-03-01",
+  "rounding": "ROUND_HALF_UP",
+  "schema_version": "1.0",
+  "timezone": "+00:00"
+}

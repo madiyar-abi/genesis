@@ -1,0 +1,117 @@
+{
+  "episode_id": "ep_e7bf8f4e24b3",
+  "issues": [
+    {
+      "affected_ids": [
+        "INV-291775"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "020b50ce",
+          "GL-000633"
+        ],
+        [
+          "020b50ce",
+          "GL-000632"
+        ]
+      ],
+      "expected_amount_minor": 1031778666,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "INV-155461"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "2026-03-21:CHF:KZT",
+          "4d157645",
+          "GL-000544"
+        ],
+        [
+          "2026-03-21:CHF:KZT",
+          "4d157645",
+          "GL-000543"
+        ]
+      ],
+      "expected_amount_minor": 646023,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "INV-782395"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "1ced2015",
+          "2026-03-27:CHF:KZT",
+          "GL-000577"
+        ],
+        [
+          "1ced2015",
+          "2026-03-27:CHF:KZT",
+          "GL-000578"
+        ]
+      ],
+      "expected_amount_minor": 1357492,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "INV-198981",
+        "RCPT0978245"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "2026-02-28:GBP:KZT",
+          "GL-000430",
+          "bf623cbe",
+          "c9aeab00"
+        ],
+        [
+          "2026-02-28:GBP:KZT",
+          "GL-000429",
+          "bf623cbe",
+          "c9aeab00"
+        ]
+      ],
+      "expected_amount_minor": 249162612,
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    },
+    {
+      "affected_ids": [
+        "INV-488937",
+        "RCPT0963841"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "GL-000552",
+          "a70b33ae",
+          "a7c93435"
+        ],
+        [
+          "GL-000551",
+          "a70b33ae",
+          "a7c93435"
+        ]
+      ],
+      "expected_amount_minor": 37339287,
+      "issue_id": "ISS-5",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ]
+}

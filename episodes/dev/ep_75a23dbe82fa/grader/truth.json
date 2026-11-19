@@ -1,0 +1,71 @@
+{
+  "episode_id": "ep_75a23dbe82fa",
+  "issues": [
+    {
+      "affected_ids": [
+        "INV-864795"
+      ],
+      "currency": "EUR",
+      "evidence_sets": [
+        [
+          "D-0bea89",
+          "GL-002858"
+        ],
+        [
+          "D-0bea89",
+          "GL-002857"
+        ]
+      ],
+      "expected_amount_minor": 557200,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "INV-380664",
+        "INV-774993"
+      ],
+      "currency": "EUR",
+      "evidence_sets": [
+        [
+          "D-055adc",
+          "D-0651f1",
+          "GL-002795"
+        ],
+        [
+          "D-055adc",
+          "D-0651f1",
+          "GL-002796"
+        ]
+      ],
+      "expected_amount_minor": 167400,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "INV-771947",
+        "INV-952176"
+      ],
+      "currency": "EUR",
+      "evidence_sets": [
+        [
+          "D-04b4b8",
+          "D-07f307",
+          "GL-002654"
+        ],
+        [
+          "D-04b4b8",
+          "D-07f307",
+          "GL-002655"
+        ]
+      ],
+      "expected_amount_minor": 705400,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    }
+  ]
+}

@@ -1,0 +1,208 @@
+{
+  "company": {
+    "bank_offset": "-05:00",
+    "base_currency": "USD",
+    "entities": 13,
+    "foreign_currencies": [
+      "EUR",
+      "GBP",
+      "JPY"
+    ],
+    "timezone": "+05:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 3,
+      "fx_error": 1,
+      "payment_allocation": 0,
+      "period_cutoff": 0
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 45
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 92866,
+              "entity_id": "C-8344",
+              "invoice_id": "2501-263853",
+              "payment_id": null,
+              "row_id": "R842",
+              "timestamp": "2025-01-04T21:05:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 92866,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-8344",
+              "invoice_id": "2501-263853",
+              "payment_id": null,
+              "row_id": "R841",
+              "timestamp": "2025-01-04T21:05:00+05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2501-263853"
+        }
+      ],
+      "description": "invoice 2501-141622 entered a second time as 2501-263853 and booked again",
+      "documents_added": [
+        "722786a1"
+      ],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 1621341,
+              "entity_id": "C-4920",
+              "invoice_id": "2501-921005",
+              "payment_id": null,
+              "row_id": "R871",
+              "timestamp": "2025-01-06T20:09:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 1621341,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-4920",
+              "invoice_id": "2501-921005",
+              "payment_id": null,
+              "row_id": "R870",
+              "timestamp": "2025-01-06T20:09:00+05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2501-921005"
+        }
+      ],
+      "description": "invoice 2501-581643 entered a second time as 2501-921005 and booked again",
+      "documents_added": [
+        "c0f5de70"
+      ],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 415479,
+              "entity_id": "C-8214",
+              "invoice_id": "2501-669652",
+              "payment_id": null,
+              "row_id": "R884",
+              "timestamp": "2025-01-07T22:11:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 415479,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-8214",
+              "invoice_id": "2501-669652",
+              "payment_id": null,
+              "row_id": "R885",
+              "timestamp": "2025-01-07T22:11:00+05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:2501-669652"
+        }
+      ],
+      "description": "invoice 2501-751062 entered a second time as 2501-669652 and booked again",
+      "documents_added": [
+        "994b89b2"
+      ],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 871653,
+              "entity_id": "C-8214",
+              "invoice_id": "2501-032651",
+              "payment_id": null,
+              "row_id": "R912",
+              "timestamp": "2025-01-10T10:27:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 871653,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-8214",
+              "invoice_id": "2501-032651",
+              "payment_id": null,
+              "row_id": "R913",
+              "timestamp": "2025-01-10T10:27:00+05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 871625,
+              "entity_id": "C-8214",
+              "invoice_id": "2501-032651",
+              "payment_id": null,
+              "row_id": "R912",
+              "timestamp": "2025-01-10T10:27:00+05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 871625,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-8214",
+              "invoice_id": "2501-032651",
+              "payment_id": null,
+              "row_id": "R913",
+              "timestamp": "2025-01-10T10:27:00+05:00"
+            }
+          ],
+          "journal": "inv:2501-032651"
+        }
+      ],
+      "description": "invoice 2501-032651 converted with the 2025-01-10 rate instead of 2025-01-07",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "fx_error"
+    }
+  ],
+  "seed": 2008
+}

@@ -30,7 +30,7 @@ message says a Google Doc — follow the latest, re-check the form before submit
 
 ## Status
 Environment is feature-complete for the case and passes the single check command
-(`uv run python -m auditenv.check` → ALL CHECKS PASSED, ~7 s, 175 tests). Jury materials are drafted
+(`uv run python -m auditenv.check` → ALL CHECKS PASSED, ~7 s, 187 tests). Jury materials are drafted
 (`docs/DESIGN.md`, `docs/DEMO.md`, `docs/PITCH.md`). Night run continues on `night/2026-11-19`
 with hardening (review, fuzzing, on-disk episode verification); task list: `night/TASKS.md`.
 
@@ -49,7 +49,7 @@ with hardening (review, fuzzing, on-disk episode verification); task list: `nigh
 - Docs: `README.md`, `docs/CONTRACT.md`, `docs/DESIGN.md` (with measured results), `docs/DEMO.md`, `docs/PITCH.md`.
 
 ## In progress
-- gemini T28 (load + verify exported episodes from disk), codex T29 (env fuzz test), lead: jury-style review.
+- Final SPEC pass and polishing (lead). Jury-style review done; all 10 confirmed findings fixed (see `night/LOG.md`).
 
 ## Left to do (humans)
 - Record the demo video following `docs/DEMO.md` (`uv run python -m auditenv.demo --pause`).
@@ -58,6 +58,8 @@ with hardening (review, fuzzing, on-disk episode verification); task list: `nigh
 - Submission checklist above ("Deadline & submission").
 
 ## Decisions & assumptions
+- Hidden evaluation: set `AUDITENV_SECRET` in the grader process only (keys generator RNG + HMAC episode_id).
+- After ANY generator change: re-export `episodes/` and regenerate `trajectories/` (tests/test_load.py fails otherwise).
 - Work goes through branches + PRs into `main`; nobody pushes to `main` directly.
 - Night agent never asks questions; every assumption it makes is logged in `night/LOG.md`.
 - Interfaces are fixed in `docs/CONTRACT.md` (ledger in base currency only; truth amounts are

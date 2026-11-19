@@ -54,7 +54,7 @@ def _findings(manifest: dict, tables: dict[str, list[dict]]) -> Iterator[dict]:
         if first is not invoice:
             yield finding(
                 "duplicate_invoice", [first["invoice_id"], invoice_id], debit,
-                [first["doc_id"], invoice["doc_id"]],
+                [first["doc_id"], invoice["doc_id"], row["row_id"]],
             )
 
         written_date = invoice["issued_at"][:10]
@@ -66,8 +66,9 @@ def _findings(manifest: dict, tables: dict[str, list[dict]]) -> Iterator[dict]:
         if currency != base and rate is not None:
             discrepancy = abs(debit - convert(total, currency, base, rate))
             if discrepancy:
-                yield finding("fx_error", [invoice_id], discrepancy, evidence)
+                yield finding("fx_error", [invoice_id], discrepancy, evidence + [f"{written_date}:{currency}:{base}"])
 
+    docs = {invoice["invoice_id"]: invoice["doc_id"] for invoice in tables["invoices"]}
     for payment in tables["payments"]:
         refs = payment["invoice_refs"]
         if refs:
@@ -75,7 +76,8 @@ def _findings(manifest: dict, tables: dict[str, list[dict]]) -> Iterator[dict]:
             for row in unapplied_credits.get(payment_id, ()):
                 yield finding(
                     "payment_allocation", [refs[0]["invoice_id"], payment_id],
-                    row["credit_minor"], [payment["doc_id"], row["row_id"]],
+                    row["credit_minor"],
+                    [payment["doc_id"], docs.get(refs[0]["invoice_id"], payment["doc_id"]), row["row_id"]],
                 )
 
 

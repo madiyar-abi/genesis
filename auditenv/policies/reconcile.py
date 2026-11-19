@@ -147,7 +147,7 @@ def reconcile_findings(manifest: dict, tables: dict) -> list[dict]:
             correct_ar = to_base(inv["total_minor"], inv["currency"], d_inv)
             diff = abs(ar_row["debit_minor"] - correct_ar)
             if diff > 0:
-                ev = [inv["doc_id"], ar_row["row_id"]]
+                ev = [inv["doc_id"], ar_row["row_id"], f"{d_inv.isoformat()}:{inv['currency']}:{base}"]
                 if rev_row:
                     ev.append(rev_row["row_id"])
                 findings.append({
@@ -178,7 +178,8 @@ def reconcile_findings(manifest: dict, tables: dict) -> list[dict]:
                         "affected_ids": [pay_id],
                         "claimed_amount_minor": diff,
                         "currency": base,
-                        "evidence_ids": [pay["doc_id"], cash_row["row_id"]],
+                        "evidence_ids": [pay["doc_id"], cash_row["row_id"],
+                                         f"{d_pay.isoformat()}:{pay['currency']}:{base}"],
                         "explanation": "payment cash converted with wrong FX rate date",
                     })
 
@@ -205,7 +206,9 @@ def reconcile_findings(manifest: dict, tables: dict) -> list[dict]:
             diff = expected_credit - posted_credit
             if diff > 0:
                 unapp_rows = [r for r in ledger_by_pay[pay_id] if r["account"] == "2900"]
-                ev = [pay["doc_id"]]
+                ev = [pay["doc_id"], ref_inv["doc_id"]]
+                if pay["currency"] != base:
+                    ev.append(f"{d_inv.isoformat()}:{pay['currency']}:{base}")
                 if unapp_rows:
                     ev.append(unapp_rows[0]["row_id"])
                 for r in ar_credits:

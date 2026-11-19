@@ -1,0 +1,238 @@
+{
+  "company": {
+    "bank_offset": "-03:00",
+    "base_currency": "USD",
+    "entities": 17,
+    "foreign_currencies": [
+      "EUR",
+      "GBP",
+      "KZT"
+    ],
+    "timezone": "-05:00"
+  },
+  "config": {
+    "distractors": true,
+    "errors": {
+      "duplicate_invoice": 1,
+      "fx_error": 1,
+      "payment_allocation": 1,
+      "period_cutoff": 1
+    },
+    "interacting": {
+      "I1": 0,
+      "I2": 0
+    },
+    "n_invoices": 60
+  },
+  "generator_version": "1.0.0",
+  "injections": [
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 2678608,
+              "entity_id": "E3383",
+              "invoice_id": "SI-2026-940599",
+              "payment_id": null,
+              "row_id": "L01836",
+              "timestamp": "2026-07-01T18:42:00-05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 2678608,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E3383",
+              "invoice_id": "SI-2026-940599",
+              "payment_id": null,
+              "row_id": "L01837",
+              "timestamp": "2026-07-01T18:42:00-05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:SI-2026-940599"
+        }
+      ],
+      "description": "invoice SI-2026-940599 issued 2026-06-25 (outside the period) booked on 2026-07-01",
+      "documents_added": [],
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 321700,
+              "entity_id": "E3289",
+              "invoice_id": "SI-2026-017435",
+              "payment_id": null,
+              "row_id": "L01893",
+              "timestamp": "2026-07-09T19:46:00-05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 321700,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E3289",
+              "invoice_id": "SI-2026-017435",
+              "payment_id": null,
+              "row_id": "L01892",
+              "timestamp": "2026-07-09T19:46:00-05:00"
+            }
+          ],
+          "before": null,
+          "journal": "inv:SI-2026-017435"
+        }
+      ],
+      "description": "invoice SI-2026-600965 entered a second time as SI-2026-017435 and booked again",
+      "documents_added": [
+        "D-0724c8"
+      ],
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 162244,
+              "entity_id": "E7123",
+              "invoice_id": "SI-2026-872448",
+              "payment_id": null,
+              "row_id": "L01946",
+              "timestamp": "2026-07-15T20:34:00-05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 162244,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E7123",
+              "invoice_id": "SI-2026-872448",
+              "payment_id": null,
+              "row_id": "L01947",
+              "timestamp": "2026-07-15T20:34:00-05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1200",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 161339,
+              "entity_id": "E7123",
+              "invoice_id": "SI-2026-872448",
+              "payment_id": null,
+              "row_id": "L01946",
+              "timestamp": "2026-07-15T20:34:00-05:00"
+            },
+            {
+              "account": "4000",
+              "credit_minor": 161339,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E7123",
+              "invoice_id": "SI-2026-872448",
+              "payment_id": null,
+              "row_id": "L01947",
+              "timestamp": "2026-07-15T20:34:00-05:00"
+            }
+          ],
+          "journal": "inv:SI-2026-872448"
+        }
+      ],
+      "description": "invoice SI-2026-872448 converted with the 2026-07-15 rate instead of 2026-07-14",
+      "documents_added": [],
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "changes": [
+        {
+          "after": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 152537,
+              "entity_id": "E3383",
+              "invoice_id": null,
+              "payment_id": "PAY-354859",
+              "row_id": "L01845",
+              "timestamp": "2026-07-02T17:31:00-05:00"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 152537,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E3383",
+              "invoice_id": null,
+              "payment_id": "PAY-354859",
+              "row_id": "L01844",
+              "timestamp": "2026-07-02T17:31:00-05:00"
+            }
+          ],
+          "before": [
+            {
+              "account": "1000",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 152537,
+              "entity_id": "E3383",
+              "invoice_id": null,
+              "payment_id": "PAY-354859",
+              "row_id": "L01845",
+              "timestamp": "2026-07-02T17:31:00-05:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 155754,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "E3383",
+              "invoice_id": "SI-2026-422744",
+              "payment_id": "PAY-354859",
+              "row_id": "pre-102",
+              "timestamp": "2026-07-02T17:31:00-05:00"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 0,
+              "currency": "USD",
+              "debit_minor": 3217,
+              "entity_id": "E3383",
+              "invoice_id": null,
+              "payment_id": "PAY-354859",
+              "row_id": "pre-103",
+              "timestamp": "2026-07-02T17:31:00-05:00"
+            }
+          ],
+          "journal": "pay:PAY-354859"
+        }
+      ],
+      "description": "payment PAY-354859 allocated nothing to SI-2026-422744; the rest went to unapplied cash",
+      "documents_added": [],
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "payment_allocation"
+    }
+  ],
+  "seed": 2006
+}

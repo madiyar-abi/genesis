@@ -1,0 +1,137 @@
+{
+  "episode_id": "ep_fcac4f8f1cea",
+  "issues": [
+    {
+      "affected_ids": [
+        "SI-2026-415853"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "DOC0281263",
+          "R4302"
+        ],
+        [
+          "DOC0281263",
+          "R4303"
+        ]
+      ],
+      "expected_amount_minor": 1014261100,
+      "issue_id": "ISS-1",
+      "scenario": "single",
+      "type": "period_cutoff"
+    },
+    {
+      "affected_ids": [
+        "SI-2026-046188",
+        "SI-2026-190605"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "DOC0446797",
+          "DOC0841938",
+          "R4051"
+        ],
+        [
+          "DOC0446797",
+          "DOC0841938",
+          "R4052"
+        ]
+      ],
+      "expected_amount_minor": 1082751300,
+      "issue_id": "ISS-2",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "SI-2026-565544",
+        "SI-2026-906284"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "DOC0576617",
+          "DOC0866523",
+          "R4001"
+        ],
+        [
+          "DOC0576617",
+          "DOC0866523",
+          "R4002"
+        ]
+      ],
+      "expected_amount_minor": 43152600,
+      "issue_id": "ISS-3",
+      "scenario": "single",
+      "type": "duplicate_invoice"
+    },
+    {
+      "affected_ids": [
+        "SI-2026-755890"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "2026-02-05:GBP:KZT",
+          "DOC0530293",
+          "R4049"
+        ],
+        [
+          "2026-02-05:GBP:KZT",
+          "DOC0530293",
+          "R4050"
+        ]
+      ],
+      "expected_amount_minor": 1225006,
+      "issue_id": "ISS-4",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "SI-2026-064433"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "2026-02-11:GBP:KZT",
+          "DOC0278127",
+          "R4095"
+        ],
+        [
+          "2026-02-11:GBP:KZT",
+          "DOC0278127",
+          "R4096"
+        ]
+      ],
+      "expected_amount_minor": 1566916,
+      "issue_id": "ISS-5",
+      "scenario": "single",
+      "type": "fx_error"
+    },
+    {
+      "affected_ids": [
+        "SI-2026-931954"
+      ],
+      "currency": "KZT",
+      "evidence_sets": [
+        [
+          "2026-02-05:GBP:KZT",
+          "DOC0821985",
+          "R4042"
+        ],
+        [
+          "2026-02-05:GBP:KZT",
+          "DOC0821985",
+          "R4041"
+        ]
+      ],
+      "expected_amount_minor": 79688,
+      "issue_id": "ISS-6",
+      "scenario": "single",
+      "type": "fx_error"
+    }
+  ]
+}

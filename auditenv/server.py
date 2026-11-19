@@ -44,6 +44,8 @@ def serve(inp, out, grader_log: str | None, episodes: dict | None) -> None:
             req = json.loads(line)
             cmd = req.get("cmd")
             if cmd == "reset":
+                env.abandon()
+                flush_log()
                 if queue is not None:
                     if not queue:
                         resp = {"error": "no more episodes"}
@@ -69,6 +71,7 @@ def serve(inp, out, grader_log: str | None, episodes: dict | None) -> None:
             resp = {"error": f"{type(e).__name__}: {str(e)[:160]}"}
         out.write(json.dumps(resp) + "\n")
         out.flush()
+    env.abandon()  # close / EOF with an open episode: graded as truncated, empty answer
     flush_log()
 
 
