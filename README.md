@@ -86,7 +86,8 @@ Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs
 1. **Unit tests** — `tests/` (env contract, matcher, reward attacks, generator, verifier, transform, server).
 2. **Data & truth verifier** — for generated episodes: every journal balances; with the recorded
    injections reverted the books contain zero discrepancies; after injection the discrepancies
-   recomputed independently from the public records equal `truth.json` (type, ids, amount);
+   recomputed independently from the public records equal `truth.json` (type, ids, amount); both
+   books follow the published posting policy (accounts per journal, entities, unapplied cash, dates);
    every evidence set exists and covers the affected records.
 3. **Baselines on the dev split** — random explorer, naive reconciliation, rule-based reconciliation, flag-everything
    attack, oracle → P / R / F1 / return / steps / time.

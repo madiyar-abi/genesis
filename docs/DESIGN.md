@@ -157,10 +157,15 @@ exact amounts; naive's false positives stay false positives at 1 %). The default
 ## 7. Verification of data and truth (`auditenv/verify.py`)
 
 Independent of the generator, from the public tables and closed files only:
-1. structure — unique ids, manifest counts, base-currency one-sided integer ledger rows, size limits;
+1. structure — unique ids, manifest counts, base-currency one-sided integer ledger rows, size limits; the
+   policy agrees with the manifest and with the contract's chart of accounts, exponents and rounding;
 2. **before the errors** — revert the provenance changes; every journal balances and the books
    have zero discrepancies (each in-period invoice booked once at the right rate, every payment
-   cash/AR/2900 line exact, no duplicates, nothing out of period);
+   cash/AR/2900 line exact, no duplicates, nothing out of period). In both books every account is
+   allowed for its journal type (invoice 1200/4000, payment 1000/1200/2900/7900, expense Dr 6xxx /
+   Cr 1000), entities match the invoices, payment rows carry the payment's instant, no invoice is
+   booked before its issue, and invoice refs are positive, unique, same-currency and issued before
+   the payment. Credit notes are accepted only where the hard-mode policy publishes the rule;
 3. **after the errors** — journals still balance and the discrepancies recomputed from the records
    are exactly the truth (type, ids, amount): nothing undeclared, nothing unsupported;
 4. **evidence** — every id exists in the public tables, each set covers the affected records, and
@@ -210,7 +215,7 @@ Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30
 P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode. Timing is a snapshot of the measurement host. CI compares deterministic cells and checks that times are finite and nonnegative.
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount; reported separately, the shared reward is unchanged.
-Other gates in the same run: 322 unit tests pass; verifier 200/200 episodes valid (600/600 with
+Other gates in the same run: 355 unit tests pass; verifier 200/200 episodes valid (600/600 with
 `auditenv.verify --seeds 0-199`); 20/20 paired checks on default and 20/20 on hard episodes; out-of-process run leaks nothing.
 
 Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200
@@ -326,13 +331,13 @@ to explore.
 - The generator is open and deterministic: hidden runs must set `AUDITENV_SECRET` in the grader
   process (otherwise, as for the public splits, anyone can regenerate an episode from its seed).
 - Shortcut miner (`uv run python scripts/shortcut_miner.py [--hard]`, 1 000 seeds): single observable
-  features that predict truth records with precision > 0.5. Fixed: re-typed descriptions marked hard-mode
-  duplicate copies (1.000 → 0.467: invoices and re-issues are now keyed in by hand too). Left, measured:
-  in default mode "same entity, currency and total exactly twice" finds duplicates (0.996) — it is the
-  duplicate definition, but default mode has no near-miss decoys (hard mode has: 0.360); I1 payments are
-  always on the last day, so a 2900/7900 row on the last day hints at fx_error (0.70) and a large 2900
-  amount at payment_allocation (0.75–0.78). Each hint names a record, not the claimed amount — scoring
-  still needs the reconciliation.
+  features that predict truth records with precision > 0.5 (16 flagged in default mode, 11 in hard mode).
+  Fixed: re-typed descriptions marked hard-mode duplicate copies (1.000 → 0.449 on 1 000 seeds, 0.467 on 500
+  seeds: invoices and re-issues are now keyed in by hand too). Left, measured: in default mode "same entity,
+  currency and total exactly twice" finds duplicates (0.996) — it is the duplicate definition, but default mode
+  has no near-miss decoys (hard mode has: 0.358); I1 payments are always on the last day, so a 2900/7900 row on
+  the last day hints at fx_error (0.70) and a large 2900 amount at payment_allocation (0.75–0.78). Each hint names
+  a record, not the claimed amount — scoring still needs the reconciliation.
 - Cutoff of a next-period invoice is booked *before* its issue instant; a policy can learn that
   direction-of-lag cue, but it is exactly the audit rule (document date outside the period).
 - The I1 payment is always on the last evening of the period (by the definition of the scenario);
@@ -341,7 +346,7 @@ to explore.
 - Default duplicates are exact copies; hard mode re-types the text, but changed amounts or quantities
   (a "near-duplicate" that is really a different sale) are not modelled.
 - Wall-clock truncation (60 s) is the only non-deterministic transition; it never triggers for the
-  baselines (≤ 0.01 s per episode).
+  baselines (≤ 0.012 s per episode).
 - Step cost vs F1 granularity: with 12 issues, skipping one finding at 0 steps (0.913) beats the full
   answer after 60 steps (0.880); with ≤ 10 issues the full answer always wins.
 - A policy-aware rule script solves the default distribution (F1 1.0); the same script gets F1 0.752 in
