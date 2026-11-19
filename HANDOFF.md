@@ -38,6 +38,8 @@ Branch `night/2026-11-20-r12`. See `night/TASKS.md` for remaining work.
 
 - T6. The rehearsed demo labels each amount in USD minor units. PAY-136430 shows $2.86 and $3,513.31. Four findings matched after 21 inspections and the closed return was 0.958.
 
+- T5. The DeepSeek launcher exited with a configuration error, so the lead ran auditenv.verify --dir for each committed split. All 10 train, 10 dev and 20 hard companies passed.
+
 ## Round 11 complete · 20 November 2026
 
 Work is on `night/2026-11-20-r11`. See `night/TASKS.md` for ownership and
