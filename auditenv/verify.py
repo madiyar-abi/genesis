@@ -144,6 +144,10 @@ class Books:
             if posted != correct:
                 issues.append(("fx_error", (pid,), abs(posted - correct)))
             refs = pay["invoice_refs"] or []
+            if not refs:
+                unapplied = sum(r["credit_minor"] - r["debit_minor"] for r in rows if r["account"] == "2900")
+                if unapplied != correct:
+                    problems.append(f"payment {pid}: incorrect unapplied cash for unreferenced payment")
             if sum(r["amount_minor"] for r in refs) > max(pay["amount_minor"], 0):
                 problems.append(f"payment {pid}: refs exceed amount")
             for ref in refs:

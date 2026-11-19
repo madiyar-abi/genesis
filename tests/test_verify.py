@@ -34,6 +34,21 @@ class VerifyTest(unittest.TestCase):
         next(r for r in bad["tables"]["ledger"] if r["account"] == "1000" and r["debit_minor"] > 0)["debit_minor"] += 1
         self.assertTrue(any("unbalanced" in p for p in verify_episode(bad)))
 
+    def test_unreferenced_payment_must_post_full_amount_to_unapplied_cash(self):
+        for seed, refund in ((3, False), (1, True)):
+            with self.subTest(seed=seed, refund=refund):
+                ep = generate(seed, {"errors": {}})
+                tables = ep["tables"]
+                pay = next(p for p in tables["payments"] if not p["invoice_refs"]
+                           and p["currency"] != ep["manifest"]["base_currency"]
+                           and (p["amount_minor"] < 0) == refund)
+                pid = pay["payment_id"]
+                row = next(r for r in tables["ledger"] if r["payment_id"] == pid and r["account"] == "2900")
+                # Reclassifying the posting as FX gain/loss preserves journal balance.
+                row["account"] = "7900"
+                problem = f"payment {pid}: incorrect unapplied cash for unreferenced payment"
+                self.assertCountEqual(verify_episode(ep), [f"pre-injection: {problem}", f"post-injection: {problem}"])
+
     def test_truth_currency_must_match_ledger_currency(self):
         ep = generate(5, HEAVY)
         ep["truth"]["issues"][0]["currency"] = (

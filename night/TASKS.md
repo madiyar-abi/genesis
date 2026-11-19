@@ -1,9 +1,9 @@
-# Round 6
+# Round 7
 
-- [x] T1 (gemini1) Reject out-of-period postings in public and reverted journals using company-local dates, including a revenue credit moved to 2099 on clean seed 0 — files: auditenv/verify.py, tests/test_posting_period.py — accept: corruption rejected, clean and boundary examples pass.
-- [x] T2 (gemini2) Check whether I2 can use an earlier rate than the booking date. Correct the scenario description and verify against injector fallback — files: docs/CONTRACT.md, docs/DESIGN.md — accept: both descriptions cover actual date selection.
-- [x] T3 (gemini3) Align README I2 example with the implemented rate fallback, verify README check command and split descriptions — files: README.md — accept: claims agree with inject.py and check.py.
-- [x] T4 (deepseek) Verify generated FX row IDs and uniqueness of date/source/target keys on 100 heavy seeds in each difficulty; log exact command and result — files: night/LOG.md — accept: 200 episodes checked and any exceptions identified.
-- [x] T5 (lead) Check public FX identity and reject ambiguous or incorrectly labelled rates — files: auditenv/verify.py (_structure only), tests/test_fx_identity.py — accept: label swap on a valid clean fixture is rejected and normal episodes pass.
-- [x] T6 (lead) Rehearse numbered demo and verify both terminal outputs — files: docs/DEMO.md — accept: five pauses and narrated numbers match public replay.
-- [x] T7 (lead) Correct pitch scenario and verify slide metrics — files: docs/PITCH.md — accept: ten slides, accurate I2 rate selection, synchronized measurements.
+- [x] T1 (gemini1) Cross-check the published chart against measured dev and hard tables and correct any discrepancy — files: docs/baselines.svg, scripts/chart.py — accept: regenerate chart from official check metrics and compare all plotted values.
+- [x] T2 (gemini2) Check payment posting entity identity in generated books — files: tests/test_payment_entities.py — accept: independently compare entity IDs on payment receivables postings with the invoices referenced by their payment documents across 100 heavy seeds per difficulty, record counts and a reproduction command in LOG.
+- [x] T3 (gemini3) Audit README offline reproduction instructions — files: README.md — accept: run documented local quick start and verify Docker instructions against Dockerfile and CI, correct stale directions.
+- [x] T4 (deepseek) Audit the jury evidence map against discovered tests — files: docs/CHECKS.md — accept: resolve each referenced test and correct stale mappings, run referenced verifier test module.
+- [x] T5 (lead) Reject unidentified receipts and refunds posted to the wrong account — files: auditenv/verify.py, tests/test_verify.py, REVIEW.md — accept: regression fails before and passes after, full check and seed sweep green.
+- [x] T6 (lead) Rehearse the numbered 2–3 minute video script — files: docs/DEMO.md — accept: public seed 2003 walkthrough matches each shown result.
+- [x] T7 (lead) Check slide outline against integrated metrics — files: docs/PITCH.md — accept: ten slides with matched results and accurate reproduction commands.
