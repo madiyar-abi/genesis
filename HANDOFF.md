@@ -28,9 +28,13 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
-## Round 4 in progress
+## Round 4 complete · 19 November 2026
 
-Branch `night/2026-11-19-r4`. The verifier checks each invoice line against quantity times unit price. Run `uv run python -m unittest tests.test_verify`. The split verifier cross-checks indexed episode directories and reports empty or unreadable exports. The five recording cues in `docs/DEMO.md` were rehearsed on public seed 2003. The pitch uses the same public demo command and its baseline tables match the check. All 323 export files matched fresh output across the three splits. The verifier now compares the manifest document count with the invoice and payment tables. All seven committed trajectories reproduced byte for byte. All 80 golden hashes matched and the test suite detected all 15 reward mutants. All eight tasks are checked off. Freeze is 22 November at 18:00 Astana.
+All eight tasks on `night/2026-11-19-r4` passed. The verifier now compares invoice lines with quantity times unit price, counts documents directly from the public tables, and rejects empty, unreadable or incomplete indexed exports. The demo and pitch reproduce the same public company even on a machine configured with a private grader key.
+
+Run `uv run python -m auditenv.check` from the repository root. All 295 tests passed. All 323 exported files and all 2,258 recorded trajectory steps reproduced byte for byte. Seed sweeps passed on 3,000 default and 600 hard episodes. All 80 golden hashes matched, reward tests caught all 15 mutants, and the 11,000 reward mutations produced zero violations. The shortcut miner still flags 16 default and 11 hard feature values. See the limitations in `docs/DESIGN.md` §10. [Python and offline Docker CI on the verified implementation](https://github.com/madiyar-abi/genesis/actions/runs/44591400232)
+
+The marathon handles branch integration. The team records the demo, supplies team names, exports the deck, arranges jury access and submits the three-link Google Doc. Engineering freeze is **22 November at 18:00 Astana**.
 
 ## Round 3 complete · 19 November 2026
 
@@ -93,7 +97,7 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 
 ## Remaining work before submission
 
-- **Engineering:** review the round-3 branch and CI before integration (round 2 is merged). The first scheduled nightly CI run can be checked after merge.
+- **Engineering:** round 3 is merged. Follow round-4 integration and CI. The first scheduled nightly CI run can be checked after merge.
 - **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md` (chart: `docs/baselines.svg`), including the Team slide.
 - **Access and submission:** the repository owner arranges jury access. The team checks the repo, video and presentation links, adds them to the Google Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 
