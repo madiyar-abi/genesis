@@ -85,3 +85,10 @@
   large 2900 → allocation 0.75–0.78) documented in DESIGN §10 instead of fixed — fixing them regenerates all default
   data and doc numbers for little gain (each hint names a record, the amount still needs reconciling).
 - tests/test_hardening seed-7 test now derives row ids from truth (hard ids moved), default ids still asserted.
+
+## 2026-11-19 21:46 lead
+- J1/J2 refreshed for round 2: DEMO (276 tests, hard paired checks, F1 0.75 in hard mode, optional mutation-test
+  step, wrap-up mentions miner + sensitivity), PITCH slides 6 and 8 (mutants, sensitivity, golden hashes, hard
+  paired, stress max 57, miner). Numbers re-checked: demo rewards unchanged, fuzz 0-999 3 000 episodes 0 problems,
+  mutate 15/15, verify train/dev/hard dirs valid. Will re-check once more before DONE.
+- Dispatched an independent jury-style review subagent (read-only) against SPEC §09/§10.

@@ -20,11 +20,11 @@ uv run python -m auditenv.check
 
 Show the `[PASS]` lines, the dev baseline table and the hard-mode table.
 
-> "This is the official check, one command. It runs 256 unit tests, an
+> "This is the official check, one command. It runs 276 unit tests, an
 > independent verifier that recomputes every hidden error from the records, the baseline
-> policies, twenty paired reproducibility checks, a closed run in a separate process and the hard
-> mode. The oracle reaches reward 1, the flag-everything attack gets −1, a rule script that is
-> perfect on the default books drops to F1 0.61 in hard mode."
+> policies, twenty paired reproducibility checks on default and twenty on hard episodes, a closed run
+> in a separate process and the hard mode. The oracle reaches reward 1, the flag-everything attack
+> gets −1, a rule script that is perfect on the default books drops to F1 0.75 in hard mode."
 
 Optional, if time allows (tests only, ~10 s):
 
@@ -33,6 +33,15 @@ uv run python -m unittest tests.test_jury -v 2>&1 | tail -5
 ```
 
 > "The jury's checklist is a test file: contract, leaks, reward, reproducibility, data."
+
+Optional (~40 s): the reward tests really bite —
+
+```bash
+uv run python scripts/mutate_reward.py | tail -3
+```
+
+> "We break the matcher and the reward one line at a time — fifteen mutants, a wider tolerance, a dropped
+> evidence check, swapped precision and recall. Every one is caught by the tests."
 
 **3. A company and the first observation (0:40–1:00)**
 
@@ -80,9 +89,11 @@ Point at the `payment_allocation` + `fx_error` pair on the same payment.
 
 **8. Wrap-up (2:40–3:00)** — show `docs/DESIGN.md` headings and the `configs/` + `episodes/` folders.
 
-> "Four error types, two interacting scenarios, clean companies and look-alike distractors; ten train
-> and ten dev episodes, trajectories, a seed sweep over three thousand episodes with zero problems,
-> and a design note with measured results and honest limitations. Run it yourself with one command."
+> "Four error types, two interacting scenarios, clean companies and look-alike distractors; ten train,
+> ten dev and twenty hard episodes, trajectories, a seed sweep over three thousand episodes with zero
+> problems, a shortcut miner that hunts for data leaks, and a design note with measured results —
+> including a sensitivity table showing the baseline ranking doesn't depend on our reward constants —
+> and honest limitations. Run it yourself with one command."
 
 ---
 

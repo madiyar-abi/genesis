@@ -110,8 +110,8 @@ Workers: touch ONLY the files listed for your task.
 - [ ] E5 (lead) Rule-search baseline — last, skip if short on time
 
 ## Jury materials (last)
-- [ ] J1 (lead) `docs/DEMO.md` — demo-video script: 2–3 min, numbered steps, exact commands, what to say, which
+- [x] J1 (lead) `docs/DEMO.md` — demo-video script: 2–3 min, numbered steps, exact commands, what to say, which
   result to show; refresh for round-2 features — files: docs/DEMO.md — accept: every command runs
-- [ ] J2 (lead) `docs/PITCH.md` — slide outline: problem → solution → live demo → how it works → results/metrics →
+- [x] J2 (lead) `docs/PITCH.md` — slide outline: problem → solution → live demo → how it works → results/metrics →
   what's next → team; ≤ 4 bullets per slide, facts from the code; refresh numbers — files: docs/PITCH.md — accept:
   numbers match check output (`scripts/sync_docs.py --check`)

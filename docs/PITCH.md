@@ -44,6 +44,8 @@ episodes, seeds 9100–9119). Re-run the check before exporting the final slides
 - `reward = clip(2·F1 − 1 − 0.002·steps, −1, 1)`; invalid submission −1; F1 = 1 for silence on clean books.
 - Same books, other answers (demo): silence −1, guessed ids −1, answer repeated twice 0.33,
   flag-everything −1; clean company: silence 1.0, guessed ids −1.
+- Tests bite: 15/15 one-line mutants of matcher/reward caught; baseline ranking unchanged for step cost
+  0.001–0.005 and tolerance 0–1 % (`scripts/mutate_reward.py`, `scripts/sensitivity.py`).
 
 ## 7. Results
 
@@ -69,11 +71,14 @@ Chart for this slide: `docs/baselines.svg` (mean return per baseline, dev vs har
   (`reconcile_hard`) 1.0 · 0.916; oracle 1.0 → harder, still solvable.
 
 ## 8. Reproducibility and tests
-- 256 unit tests incl. a 20 314-action fuzz test and `tests/test_jury.py` (the jury checklist as tests).
+- 276 unit tests incl. a 20 314-action fuzz test and `tests/test_jury.py` (the jury checklist as tests);
+  80 golden hashes catch any generator drift.
 - Verifier 600/600 generated + 40/40 exported episodes; seed sweep 3 000 default + 600 hard episodes:
   0 exceptions, 0 verifier problems, oracle 1.0 everywhere, flag-all negative on all.
-- 20/20 paired checks: replay is byte-exact; relabel + permute keeps the oracle answer and reward.
-- Stress: 1 200 episodes (reconcile) and 1 200 hard (reconcile_hard): every error found within budget.
+- 20/20 paired checks on default and 20/20 on hard episodes: replay is byte-exact; relabel + permute
+  keeps the oracle answer and reward.
+- Stress: 1 200 default + 1 200 hard episodes, every error found, max 57 of 100 steps; a shortcut
+  miner hunts single-feature leaks (one found in hard mode and fixed).
 
 ## 9. Team
 - [names, roles — fill in]
