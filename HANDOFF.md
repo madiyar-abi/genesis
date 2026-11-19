@@ -34,6 +34,8 @@ Before sharing the repository, the credential owner must revoke the DeepSeek API
 
 The verifier now checks the truth episode ID and requires distinct issue IDs. Allocation evidence that cites a receivables posting must identify the payment and invoice on a positive credit.
 
+Independent verification passed for all 200 transformed heavy episodes, covering 100 seeds in each difficulty. The reproduction command is in `night/LOG.md`.
+
 The rehearsed demo in `docs/DEMO.md` identifies the two amounts on the same payment for the recording.
 
 Branch `night/2026-11-20-r5`. The starting check passed 295 tests. Current work covers independent accounting verification and transformed-episode checks. See `night/TASKS.md` for ownership and acceptance checks. Use `uv run python -m auditenv.check` at the repo root. The engineering freeze is 22 November at 18:00 Astana.
