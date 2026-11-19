@@ -39,3 +39,6 @@ venv/
 
 # --- Night-run watchdog logs (local only) ---
 .night-logs/
+
+# --- Python packaging output ---
+*.egg-info/
