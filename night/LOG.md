@@ -75,3 +75,9 @@
 - T23 done: grader-side Markdown and JSON failure analysis. Oracle recalls every tested type and scenario with zero FPs; FlagAll records FPs. T7 environment and T11 baseline tests also passed.
 - Assumptions: recall is zero for groups with no issues, means are per episode, steps include submit, and explicit seeds must exist in the supplied config. Reconcile verification awaits T12.
 - Next: no open codex tasks.
+
+## 2026-11-19 13:56 — lead
+- Merged gemini T12 (Reconcile: obs-only, pages all tables + get_document for duplicate candidates) and codex T23 (analyze.py).
+  Check: reconcile micro-F1 1.000, return 0.956, 22.8 steps on dev — the books are solvable within budget from the records alone.
+- Added T26 (codex) NaiveReconcile to measure that distractors/timezones trip naive rules (honest difficulty evidence).
+- Next: T19 design note with measured numbers, T21/T22.
