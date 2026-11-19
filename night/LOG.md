@@ -1,0 +1,4 @@
+# Round 9 log
+
+2026-11-20 03:16 lead (Claude) — Started round 9 as first lead (no TASKS.md). Read SPEC §10, HANDOFF, REVIEW (rounds 1–8), archive r8. Official check in the main checkout: ALL CHECKS PASSED (32.8 s). Rounds 1–8 hardened the data verifier heavily, so this round targets what the jury touches first: README snippets and commands run as written (T3 gemini1, T5 gemini3), hash-randomisation independence (T4 gemini2), a long hard sweep (T6 deepseek), and an independent read-only red-team pass on contract/isolation/reward/reproducibility (T2 lead, subagent running). Assumption: workers gemini1–3 and deepseek are running per the prompt; deepseek's worktree exists at ../genesis-deepseek.
+2026-11-20 03:16 lead — T1 done: fresh clone of night/2026-11-20-r9 into /tmp/r9-clone, `env -u AUDITENV_SECRET uv run python -m auditenv.check` → "ALL CHECKS PASSED in 32.5 s", exit 0. Nothing in the check depends on untracked or ignored local files.
