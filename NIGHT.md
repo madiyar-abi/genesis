@@ -8,8 +8,13 @@ The prompt names the night branch (`night/<date>`) and, for a worker, its name
 and branch (`night/<date>-<name>`); use exactly those names.
 
 ## Team
-- **lead** — Claude Code (`--engine claude`), main checkout. Plans, does the hard
-  and cross-cutting work, reviews and merges the workers' commits.
+- **lead** — main checkout. Plans, does the hard and cross-cutting work, reviews
+  and merges the workers' commits. The lead *engine rotates* (`--slots`): Codex
+  (GPT-6.2 Astra → Sol, 2 ChatGPT accounts) first, Claude Code as fallback; on a
+  usage limit the watchdog hands the lead role to the next free slot and goes
+  back to Codex when its limit resets. A lead that starts after another engine
+  continues from `night/TASKS.md`, the end of `night/LOG.md` and `git status`
+  (finish or cleanly revert the previous lead's uncommitted change first).
 - Workers (optional, each in its own git worktree, own quota — they keep going
   while the lead waits out a limit; weaker than the lead: give them
   well-specified tasks):
@@ -17,7 +22,9 @@ and branch (`night/<date>-<name>`); use exactly those names.
     (`~/.agy-acc2`, `~/.agy-acc3`). Opus 4.6 (Thinking) → Gemini 3.8 Flash (High)
     on each account in turn. Worktree `../genesis-gemini`.
   - **codex** — Codex CLI (`--engine codex`), 2 ChatGPT Plus accounts
-    (`~/.codex-acc1`, `~/.codex-acc2`). Worktree `../genesis-codex`.
+    (`~/.codex-acc1`, `~/.codex-acc2`), `gpt-6.2-astra` → `gpt-6.2-sol`.
+    Worktree `../genesis-codex`. Don't run it while Codex is in the lead
+    slots — they share the same quota.
 
 ## Files (all tracked in git)
 - `night/SPEC.md` — the task spec. Source of truth. Never edit it.
@@ -49,10 +56,12 @@ and branch (`night/<date>-<name>`); use exactly those names.
    Commit + push TASKS.md first — the workers start from it.
 2. Work on the night branch (create from current HEAD if missing).
    Never commit to or push `main`. Never force-push.
-3. Execute with subagents (superpowers `subagent-driven-development` /
-   `dispatching-parallel-agents`): one subagent per task, independent tasks in
-   parallel (max 3 at once — they share the usage limit), then review each
-   result yourself before marking it done.
+3. If your tool has subagents (Claude Code: superpowers
+   `subagent-driven-development` / `dispatching-parallel-agents`), use one per
+   task, independent tasks in parallel (max 3 at once — they share the usage
+   limit), then review each result yourself before marking it done. Without
+   subagents, do the tasks one by one yourself. Grunt work (docs sweeps,
+   repetitive tests, data re-export checks) goes to the `gemini` worker.
 4. Test-first where the code is testable. Run the tests/build before every commit.
 5. After each finished task: update TASKS.md + LOG.md + HANDOFF.md, commit, `git push`.
 6. Every ~30 min: `git fetch`, merge each `origin/<night branch>-<worker name>`
@@ -97,15 +106,19 @@ every merge; features and polish come after. Keep README run steps true.
 ```bash
 # 1. put the spec into night/SPEC.md, commit it on the night branch, push
 B=night/$(date +%F)
-# 2. lead — detached, survives closing the terminal; Mac on the charger, lid open
-mkdir -p .night-logs && nohup scripts/night.sh --role lead --branch $B --workers "gemini,codex" \
-  --until 07:00 > .night-logs/lead.out 2>&1 &
-# 3. workers, each in its own worktree
-for w in gemini codex; do git worktree add --detach ../genesis-$w origin/$B && mkdir -p ../genesis-$w/.night-logs; done
+# 2. lead — detached, survives closing the terminal; Mac on the charger, lid open.
+#    Slots "engine|account|model" in preference order: Codex Astra/Sol on both accounts, Claude last.
+C1=$HOME/.codex-acc1; C2=$HOME/.codex-acc2
+mkdir -p .night-logs && nohup scripts/night.sh --role lead --branch $B --workers "gemini" --until 07:00 \
+  --slots "codex|$C1|gpt-6.2-astra;codex|$C1|gpt-6.2-sol;codex|$C2|gpt-6.2-astra;codex|$C2|gpt-6.2-sol;claude|default|" \
+  > .night-logs/lead.out 2>&1 &
+# 3. worker for grunt work, in its own worktree
+git worktree add --detach ../genesis-gemini origin/$B && mkdir -p ../genesis-gemini/.night-logs
 nohup ../genesis-gemini/scripts/night.sh --role worker --name gemini --engine agy --branch $B \
   --accounts "default,$HOME/.agy-acc2,$HOME/.agy-acc3" --until 07:00 > ../genesis-gemini/.night-logs/worker.out 2>&1 &
-nohup ../genesis-codex/scripts/night.sh --role worker --name codex --engine codex --branch $B \
-  --accounts "$HOME/.codex-acc1,$HOME/.codex-acc2" --until 07:00 > ../genesis-codex/.night-logs/worker.out 2>&1 &
+# optional (only if Codex is NOT in the lead slots): codex worker in ../genesis-codex
+#   ../genesis-codex/scripts/night.sh --role worker --name codex --engine codex --branch $B \
+#     --model "gpt-6.2-astra,gpt-6.2-sol" --accounts "$C1,$C2" --until 07:00
 # logins (one-time): agy: HOME=$HOME/.agy-accN ~/.gemini/bin/agy · codex: CODEX_HOME=$HOME/.codex-accN codex login --device-auth
 # watch:  tail -f .night-logs/lead.out ../genesis-*/.night-logs/worker.out
 # stop:   touch night/STOP ../genesis-*/night/STOP
