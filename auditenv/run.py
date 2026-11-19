@@ -58,27 +58,34 @@ def parse_seeds(text: str) -> list[int]:
     return seeds
 
 
+def load_episodes(path: str) -> list[tuple[int, dict]]:
+    """configs/*.json -> [(seed, config)]. Format: {config_version, split, episodes:[{seed, config}]}."""
+    with open(path) as fh:
+        spec = json.load(fh)
+    if "episodes" in spec:
+        return [(int(e["seed"]), dict(e.get("config") or {})) for e in spec["episodes"]]
+    return [(int(s), dict(spec.get("config") or {})) for s in spec["seeds"]]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--policy", choices=sorted(POLICIES), default="reconcile")
     ap.add_argument("--seeds", default="2000-2009", help="e.g. 2000-2009 or 1,2,3")
-    ap.add_argument("--config", help="configs/*.json (uses its seeds and config unless --seeds is given)")
+    ap.add_argument("--config", help="configs/*.json episode list (ignored if --seeds is given)")
     ap.add_argument("--mode", choices=("train", "eval"), default="train")
     ap.add_argument("--out", help="write trajectories.jsonl here")
     ap.add_argument("--policy-seed", type=int, default=0)
     args = ap.parse_args(argv)
-    config, seeds = {}, parse_seeds(args.seeds)
-    if args.config:
-        with open(args.config) as fh:
-            spec = json.load(fh)
-        config = spec.get("config", {})
-        if "--seeds" not in (argv if argv is not None else sys.argv):
-            seeds = spec["seeds"]
-    config = {**config, "mode": args.mode}
+    argv_list = argv if argv is not None else sys.argv
+    if args.config and "--seeds" not in argv_list:
+        episodes = load_episodes(args.config)
+    else:
+        episodes = [(s, {}) for s in parse_seeds(args.seeds)]
+    episodes = [(s, {**c, "mode": args.mode}) for s, c in episodes]
     env = AuditEnv()
     out = open(args.out, "w") if args.out else None
     print(f"{'episode':<16} {'P':>5} {'R':>5} {'F1':>5} {'return':>7} {'steps':>5} {'time_s':>6}")
-    for seed in seeds:
+    for seed, config in episodes:
         t0 = time.monotonic()
         traj = run_episode(env, None, seed, config,
                            policy_factory=lambda e, s=seed: make_policy(args.policy, e, args.policy_seed + s))

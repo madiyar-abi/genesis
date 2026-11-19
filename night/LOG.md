@@ -57,3 +57,11 @@
 - T11 done: RandomExplorer and FlagAll. Five seeds each via run_episode produced repeatable trajectories and negative mean FlagAll reward. Targeted tests and full available suite passed.
 - Assumptions: policies reserve the final available step for submit; FlagAll keeps paging after reaching the findings cap, uses base currency at a naive 1:1, and takes absolute payment amounts to satisfy the nonnegative claim schema.
 - Next: rerun the full suite after the lead publishes T7 tests. No other codex tasks are open.
+
+## 2026-11-19 13:54 — lead
+- Merged codex T11 (random explorer, flag-all). Reviewed: observation-only, deterministic per seed.
+- T17 done: auditenv/check.py + Makefile. `uv run python -m auditenv.check` → ALL CHECKS PASSED (~6 s):
+  tests, verifier (200 episodes), baselines on dev (micro P/R/F1), 20 paired checks, out-of-process eval.
+- run.py: --config now reads the per-episode format `{episodes:[{seed, config}]}` (T16 spec updated accordingly).
+- Assumption: check uses a built-in fallback dev list until configs/dev.json exists.
+- Next: T19–T22 docs; merge gemini T12/T16 and codex T23 when pushed.
