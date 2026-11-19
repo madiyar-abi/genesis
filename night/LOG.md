@@ -133,3 +133,8 @@
 - Verified that all commands in `docs/CHECKS.md` pass with exit code 0 (`auditenv.check`, `auditenv.verify --seeds 0-199`, `scripts/mutate_reward.py`, `scripts/golden.py --check`, `auditenv.attack`, `tests.test_fuzz`, etc.).
 - Verified that all 76 file and test method references exist in the repository via automated validation.
 - Next: check if any remaining tasks are tagged (gemini).
+
+## 2026-11-19 22:27 lead
+- Merged gemini G1 (docs/CHECKS.md). Reviewed: every cited file/Class::test exists (scripted scan), module test
+  counts match (env 32, jury 34, clock 2, load 9, hardening 14, reward_attacks 17); fixed one count (§10 has 11
+  limitation bullets, not 12). Linked from the README layout table.

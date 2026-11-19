@@ -232,7 +232,7 @@ make miner | make bench | make sensitivity | make chart
 | `episodes/` | exported 10 train + 10 dev + 20 public hard episodes (`public/` for agents, `grader/` closed) |
 | `trajectories/` | training trajectories (JSONL) of reconcile, naive reconcile and random on the train split, and the same three plus reconcile_hard on the hard train split (`train_hard_*`) |
 | `tests/` | 283 unittest tests; `tests/test_jury.py` maps the jury checklist to tests |
-| `docs/` | contract, design note, demo script, pitch outline; `REVIEW.md` — jury-style review log |
+| `docs/` | contract, design note, demo script, pitch outline, `CHECKS.md` (jury criteria → test → command → result); `REVIEW.md` — jury-style review log |
 
 ## Honest limitations
 
