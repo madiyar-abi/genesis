@@ -18,11 +18,8 @@ and branch (`night/<date>-<name>`); use exactly those names.
 - Workers (optional, each in its own git worktree, own quota — they keep going
   while the lead waits out a limit; weaker than the lead: give them
   well-specified tasks):
-  - **gemini** — Antigravity CLI (`--engine agy`), 3 Google accounts
-    (`~/.agy-acc2`, `~/.agy-acc3`), `Gemini 3.8 Flash (High)`. Antigravity has two
-    separate weekly pools per account: Gemini models and Claude/GPT models (Opus
-    4.6 burns the small Claude/GPT pool in minutes) — so run gemini on Flash.
-    Worktree `../genesis-gemini`.
+  - **gemini1, gemini2, gemini3** — 3 parallel Antigravity CLI workers (`--engine agy`), each pinned to its own Google account (`default`, `~/.agy-acc2`, `~/.agy-acc3`), running `Gemini 3.8 Flash (High)`.
+    Worktrees: `../genesis-gemini1`, `../genesis-gemini2`, `../genesis-gemini3`.
   - **deepseek** — DeepSeek API worker (`--engine deepseek`), model `deepseek-v4.1-flash`
     via ReformBoss API (`https://api.reformboss.com/v1`). Worktree `../genesis-deepseek`.
   - **codex** — Codex CLI (`--engine codex`), 2 ChatGPT Plus accounts
@@ -47,7 +44,7 @@ and branch (`night/<date>-<name>`); use exactly those names.
 1. First run: read `night/SPEC.md`. Write `night/TASKS.md`: small tasks (≤ ~1h
    each), each with the files it touches and a concrete acceptance check.
    If the prompt lists running workers, tag with a worker's name (e.g.
-   `(gemini)`, `(deepseek)`, `(codex)`) the tasks that are small, self-contained, touch files
+   `(gemini1)`, `(gemini2)`, `(gemini3)`, `(deepseek)`, `(codex)`) the tasks that are small, self-contained, touch files
    no other owner's task touches, and have a mechanical check (a test, a
    command). Give each worker its own area of files. Everything else is `(lead)`.
    Always end TASKS.md with two `(lead)` tasks for the jury materials (humans
@@ -65,7 +62,7 @@ and branch (`night/<date>-<name>`); use exactly those names.
    task, independent tasks in parallel (max 3 at once — they share the usage
    limit), then review each result yourself before marking it done. Without
    subagents, do the tasks one by one yourself. Grunt work (docs sweeps,
-   repetitive tests, data re-export checks) goes to the `gemini` worker.
+   repetitive tests, data re-export checks) goes to the parallel workers (`gemini1`, `gemini2`, `gemini3`, `deepseek`).
 4. Test-first where the code is testable. Run the tests/build before every commit.
 5. After each finished task: update TASKS.md + LOG.md + HANDOFF.md, commit, `git push`.
 6. Every ~30 min: `git fetch`, merge each `origin/<night branch>-<worker name>`
@@ -105,7 +102,7 @@ next round. The round's goal is in `night/ROUND.md` (read it first).
      findings with evidence in `REVIEW.md` → "Round N".
   3. Write `night/TASKS.md`: 3–8 tasks with the highest jury value per hour
      (real defects first, then evidence/tests, then docs accuracy). Small,
-     safe, each with a mechanical check. Grunt work → `(gemini)`, `(deepseek)`.
+     safe, each with a mechanical check. Grunt work → `(gemini1)`, `(gemini2)`, `(gemini3)`, `(deepseek)`.
   4. Do them, keep `auditenv.check` green after every commit, sync doc numbers
      (`scripts/sync_docs.py`), update HANDOFF, then `night/DONE`.
   5. Nothing with real jury value left? Log "no valuable improvement found"
