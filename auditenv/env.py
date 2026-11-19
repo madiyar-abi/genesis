@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import sys
 import time
 
 from . import calculator
@@ -60,7 +61,7 @@ class AuditEnv:
         if isinstance(cfg["max_steps"], bool) or not (isinstance(cfg["max_steps"], int) and 1 <= cfg["max_steps"] <= 100):
             raise ValueError("max_steps must be an int in [1, 100]")
         tl = cfg["time_limit_s"]
-        if isinstance(tl, bool) or not isinstance(tl, (int, float)) or not 0 <= tl < float("inf"):
+        if isinstance(tl, bool) or not isinstance(tl, (int, float)) or not 0 <= tl <= sys.float_info.max:
             raise ValueError("time_limit_s must be a finite non-negative number")
         self._cfg = cfg
         self._ep = generate(seed, config)

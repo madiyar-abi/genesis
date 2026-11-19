@@ -14,6 +14,7 @@ With --episodes FILE (kept secret from the agent) — either the configs/*.json 
 `{"episodes": [{"seed": int, "config": {...}}, ...]}` (per-episode configs, e.g. 5 clean + 5 interacting)
 or `{"seeds": [...], "config": {...}}` —
 every reset loads the next hidden episode; after the last one reset returns {"error": "no more episodes"}.
+On close or EOF the open episode and every hidden episode not yet reset are logged as abandoned (empty answer).
 """
 
 from __future__ import annotations
@@ -125,6 +126,9 @@ def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dic
             resp = {"error": f"{type(e).__name__}: {str(e)[:160]}"}
         send_resp(resp)
     env.abandon()  # close / EOF with an open episode: graded as truncated, empty answer
+    for seed, config in queue or ():  # hidden episodes never reset: graded the same way, so none is skipped
+        env.reset(seed, {**config, "mode": config.get("mode", "eval")})
+        env.abandon()
     flush_log()
 
 

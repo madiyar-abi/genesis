@@ -51,7 +51,7 @@ network, plus the verifier and the seed sweep on plain Python 3.11). To run just
 | `payment_allocation` | the remittance says a payment covers an invoice, the ledger credits less (or nothing) to its receivable; the rest sits in 2900 | expected AR credit − posted AR credit |
 | `fx_error` | an invoice or payment converted with the rate of a wrong date | abs(posted − correct) |
 | `period_cutoff` | an invoice issued outside the period booked inside it | AR debit posted |
-| `I1` (interacting) | foreign payment late on the last day: partially allocated **and** converted at the next day's rate | two issues |
+| `I1` (interacting) | foreign payment late on the last day: partially allocated **and** converted at another day's rate (usually the next day) | two issues |
 | `I2` (interacting) | next-period foreign invoice backdated into the period **and** converted using the booking-date rate or an earlier fallback rate | two issues |
 
 Clean companies (no errors) and legitimate look-alikes (split/partial payments, refunds,

@@ -28,6 +28,17 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 9 · 20 November 2026
+
+Branch `night/2026-11-20-r9`, tasks in `night/TASKS.md`. A read-only red-team pass on contract, isolation, reward and reproducibility found nothing that leaks truth or beats the oracle, and three smaller defects, now fixed test-first (`REVIEW.md` → "Round 9"):
+- A huge integer `time_limit_s` passed `reset` and made every `step` raise. `reset` now rejects it.
+- Closing the server session logged only the open hidden episode. Every hidden episode never reset is now logged as abandoned, so stopping early cannot shrink the grader log.
+- Zero-amount false positives cost nothing in the experimental materiality-weighted reward. A false positive now weighs at least the mean expected amount. The shared reward is unchanged.
+
+A hard-mode sweep over seeds 0–999 (3,000 episodes) found 0 problems. New tests: the README Python snippets run in the suite, and episodes plus a trajectory are identical under three `PYTHONHASHSEED` values. A fresh clone passes the official check, and all 19 README "Other commands" exit 0. `docs/CONTRACT.md` now lists `generator_version` and describes cursors as `table:offset`. Episodes, trajectories and the demo numbers are unchanged.
+
+Run `uv run python -m auditenv.check` from the repository root: 359 unit tests pass and all gates pass.
+
 ## Round 8 · 20 November 2026
 
 Branch `night/2026-11-20-r8`, tasks in `night/TASKS.md`. The verifier now enforces the published posting policy in both the reconstructed and the published books. It checks accounts per journal type, entities, the unapplied-cash remainder of every payment and the dates against documents. It also rejects invalid invoice refs, credit notes outside the hard-mode policy and inverted invoice journals. It selects evidence rows by role and requires the policy to agree with the manifest and the contract. A seed-0 probe and an independent red-team pass found these accepted tampers (`REVIEW.md` → "Round 8"). `tests/test_ledger_policy.py` and `tests/test_verify_redteam.py` cover them. Generator-side sweeps (`tests/test_ledger_accounts.py`, `tests/test_ledger_timestamps.py`) confirm the new invariants on 200 heavy episodes. Generated data is unchanged.

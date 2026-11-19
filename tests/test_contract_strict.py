@@ -47,7 +47,8 @@ class StrictInputTests(unittest.TestCase):
     def test_reset_rejects_loose_seeds_and_config_values(self):
         env = AuditEnv()
         for seed, cfg in ((1.5, {}), (True, {}), (None, {}), ("7", {}), (1, {"time_limit_s": float("nan")}),
-                          (1, {"time_limit_s": float("inf")}), (1, {"distractors": "no"}),
+                          (1, {"time_limit_s": float("inf")}), (1, {"time_limit_s": 10 ** 400}),
+                          (1, {"distractors": "no"}),
                           (1, {"transform_seed": 1.5}), (1, {"transform_seed": True})):
             with self.assertRaises(ValueError, msg=(seed, cfg)):
                 env.reset(seed, cfg)

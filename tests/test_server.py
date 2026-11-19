@@ -79,6 +79,21 @@ class ServerTest(unittest.TestCase):
             self.assertEqual(len(recs), 2)
             self.assertTrue(all("reward" in r and "f1" in r for r in recs))
 
+    def test_close_grades_every_unplayed_hidden_episode(self):
+        # Stopping early must not shrink the grader log: the open episode and every hidden episode
+        # never reset are logged as abandoned (empty answer), so an average over the log is not inflated.
+        with tempfile.TemporaryDirectory() as d:
+            log = os.path.join(d, "grader.jsonl")
+            for tail in ('{"cmd":"close"}\n', ""):  # explicit close and plain EOF
+                open(log, "w").close()
+                req = '{"cmd":"reset"}\n{"cmd":"step","action":{"type":"calculator","expression":"1"}}\n' + tail
+                serve(io.StringIO(req), io.StringIO(), log, [(1, CFG), (2, CFG), (3, {}), (4, {"errors": {}})])
+                with open(log) as fh:
+                    recs = [json.loads(line) for line in fh]
+                self.assertEqual([r["end"] for r in recs], ["abandoned"] * 4)
+                self.assertEqual([r["steps"] for r in recs], [1, 0, 0, 0])
+                self.assertEqual(len({r["episode_id"] for r in recs}), 4)
+
     def test_in_process_bytes_io(self):
         too_large = b"x" * (MAX_LINE + 10) + b"\n"
         bad_utf8 = b"\xff\xfe\xfa\n"

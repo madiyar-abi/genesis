@@ -69,6 +69,17 @@ class ExperimentalRewardTests(unittest.TestCase):
         self.assertEqual(larger_fp["reward"], original["reward"])
         self.assertEqual(experimental_reward(larger_fp, _TRUTH, findings), -0.02)
 
+    def test_zero_amount_junk_is_not_free(self):
+        # Red-team round 9: claimed_amount_minor 0 made false positives weightless (oracle + junk = 1.0).
+        # A false positive weighs at least the mean expected amount, so with every issue found the
+        # weighted F1 is never above the shared count-based F1.
+        for claimed in (0, 1, 499):
+            junk = [{**_ORACLE[0], "affected_ids": [f"J{k}"], "claimed_amount_minor": claimed} for k in range(3)]
+            findings = [*_ORACLE, *junk]
+            result = _grade(_TRUTH, findings)
+            self.assertLessEqual(experimental_reward(result, _TRUTH, findings), result["reward"])
+            self.assertLess(experimental_reward(result, _TRUTH, findings), 1.0)
+
     def test_invalid_submission_keeps_fixed_penalty(self):
         result = grade(_TRUTH, None, _EPISODE_ID, 0)
         self.assertEqual(experimental_reward(result, _TRUTH, []), -1.0)

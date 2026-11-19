@@ -1,1 +1,1 @@
-Round 8 done 2026-11-20 03:06: T1-T8 [x]; auditenv.check ALL CHECKS PASSED (355 tests); verify 600/600; fuzz 0-4999 0 problems.
+Round 9 done 2026-11-20 03:33: all 8 tasks [x], auditenv.check ALL CHECKS PASSED (359 tests), sync_docs clean, worker branches merged.

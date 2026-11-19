@@ -127,3 +127,12 @@ invalid submission, −1, logged (CONTRACT updated).
   - A payment row dated weeks after the payment passed, and so did an invoice booked before its issue date.
 
   Accepted and not changed: the verifier checks that each truth evidence set is sufficient, not that it is minimal. Malformed rates or currencies still raise an exception in `verify_episode`, which the directory verifier reports as a problem.
+
+## Round 9 jury review
+
+An independent read-only red-team pass covered contract, isolation, reward and reproducibility (not the verifier). It found nothing that leaks truth, beats the oracle or scores above 0 on clean books. It confirmed three defects, now fixed test-first:
+- `reset(0, {"time_limit_s": 10**400})` passed the finite check, and then every `step` raised `OverflowError`; over the server the episode could never end. `reset` now rejects any value above the largest float (`tests/test_contract_strict.py`).
+- Closing the server session (or EOF) logged only the open hidden episode as abandoned. The hidden episodes never reset were missing from the grader log, so a policy that stopped early shrank the denominator of any average over the log. They are now logged as abandoned with an empty answer (`tests/test_server.py::test_close_grades_every_unplayed_hidden_episode`).
+- The experimental materiality-weighted reward weighted a false positive by its claimed amount, so findings claiming 0 were free: the oracle answer plus 25 zero-amount junk findings scored 1.0 on seeds 5 and 2003 (shared reward −0.613 and −0.429). A false positive now weighs at least the mean expected amount, so with every issue found the weighted F1 never exceeds the shared F1 (`tests/test_experimental.py::test_zero_amount_junk_is_not_free`). Naive reconciliation's experimental return on dev moved from −0.210, better than its shared −0.506, to −0.539. The shared reward is unchanged.
+
+Checked and OK: identical episodes, observations and grader logs under `PYTHONHASHSEED` 0, 1, 12345 and 999 (now pinned by `tests/test_hashseed.py`); committed trajectories and exports regenerate byte for byte; transform keeps oracle and reconcile scores on 40 default and 40 hard seeds; type confusion (float, bool, string, negative amounts, lower-case currency) gives −1; id case, whitespace and duplicates follow the contract; eval mode returns 0.0 and `{}` on every terminal path; malformed server lines get bounded errors. The README Python snippets now run in the test suite (`tests/test_readme_snippets.py`), and a fresh clone passes the official check.

@@ -8,7 +8,7 @@ def experimental_reward(result: dict, truth: dict, findings: list) -> float:
     """Score findings by amount so material misstatements matter more.
 
     Reuse the grader's one-to-one matches. Matched and missed issues use their
-    expected amounts, and false positives use their claimed amounts. Pass the
+    expected amounts, and false positives use their claimed amounts, at least the mean expected amount. Pass the
     findings list in original submission order so the grader's labels index it.
     The score can be reported alongside the shared reward.
     """
@@ -21,8 +21,11 @@ def experimental_reward(result: dict, truth: dict, findings: list) -> float:
     }
     tp = sum(amounts[label["issue_id"]] for label in result["labels"] if label["tp"])
     fn = sum(amounts[missed["issue_id"]] for missed in result["missed"])
+    # A false positive weighs at least the mean expected amount: a zero or tiny claim is not a free accusation,
+    # and with every issue found the weighted F1 never exceeds the shared count-based F1.
+    floor = sum(amounts.values()) / len(amounts) if amounts else 0
     fp = sum(
-        findings[label["finding"]]["claimed_amount_minor"]
+        max(findings[label["finding"]]["claimed_amount_minor"], floor)
         for label in result["labels"] if not label["tp"]
     )
     denominator = 2 * tp + fn + fp
