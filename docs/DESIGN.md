@@ -175,7 +175,7 @@ step 3 by recomputing every discrepancy from the full ledger. We keep the set mi
 
 A jury-style review (separate agent, before submission) found and we fixed: seed recovery from a
 plain-hash `episode_id` (now HMAC + grader key in the RNG); a crash/overrun on non-string `table`
-(now a bounded error, 100-step cap holds — plus a 20 314-action fuzz test); a telltale timezone on the
+(now a bounded error, 100-step cap holds — plus a 20 312-action fuzz test); a telltale timezone on the
 I1 payment, a timestamp-mismatch shortcut for cutoff, a telltale hour on duplicate copies (removed,
 measured with the shortcut's precision: 1.00 → undefined / 0.09 / 0.02); evidence sets that did not
 contain the FX rate or the invoice document; skipping hidden episodes in server mode (now graded as

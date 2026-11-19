@@ -56,7 +56,7 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 | Item | Implementation and local acceptance |
 |---|---|
 | R1 | `-m auditenv.attack` graded 11,000 mutations, including 5 clean seeds among 20, with 0 violations. Failures save replay inputs in `attack_failures.json`. |
-| C1 | `-m tests.test_fuzz` validated 20,314 episode actions plus 205 post-terminal responses against the schema and strict JSON. Python 3.11.18, 10.898 s. |
+| C1 | `-m tests.test_fuzz` validated 20,312 episode actions plus 205 post-terminal responses (20,314 before the round-2 strict-input fix) against the schema and strict JSON. Python 3.11.18, 10.898 s. |
 | D1 | `-m unittest tests.test_hardening.DuplicateEvidenceTest` checks both modes and four booking-row combinations. Seed 7, four inspections, the original incomplete answer fell from TP=1 / 0.992 to TP=0 / −1. Verifier: 600/600. |
 | D3 | `-m auditenv.verify --dir episodes/hard` verified 20/20. A fresh export from `configs/eval_hard.json` matched all 161 files. |
 | P3 | `.github/workflows/check.yml` schedules the 0–4999 sweep at 02:00 UTC on Python 3.11.17 and 3.11.18. The same matrix runs via workflow_dispatch. |
