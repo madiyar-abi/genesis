@@ -21,3 +21,5 @@ for difficulty in ("default", "hard"):
     print(difficulty, "100 episodes", count, "FX rows")
 PY
 ```
+
+2026-11-20 00:41 gemini1 — T1 completed: updated Books.discrepancies in auditenv/verify.py to reject any out-of-period posting across all public and reverted ledger rows using company-local dates (self.in_period). Created tests/test_posting_period.py covering clean seed 0 pass, revenue credit moved to 2099 failure, expense/payment out-of-period failures, pre-injection out-of-period failure, and boundary timestamp checks in company local timezone (5/5 tests pass). All 316 unit tests and all check gates pass. Next: IDLE.
