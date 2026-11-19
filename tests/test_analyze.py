@@ -34,9 +34,8 @@ class AnalyzeTests(unittest.TestCase):
         })
         self.assertEqual(report["fp_total"], 0)
         self.assertEqual(report["fp_by_reason"], {})
-        self.assertEqual(report["mean"], {
-            "precision": 0.5, "recall": 0.5, "f1": 1.0, "return": 1.0, "steps": 1,
-        })
+        self.assertEqual(report["micro"], {"precision": 1.0, "recall": 1.0, "f1": 1.0})
+        self.assertEqual(report["mean"], {"return": 1.0, "steps": 1.0})
 
     def test_flag_all_counts_false_positive_reasons_and_missed_issues(self):
         report = analyze("flag_all", _EPISODES)
@@ -72,3 +71,21 @@ class AnalyzeTests(unittest.TestCase):
         self.assertEqual(stdout.getvalue(), markdown(report) + "\n")
         self.assertIn("| Scenario | TP | FN | Recall |", stdout.getvalue())
         self.assertEqual(report["by_scenario"]["I1"]["recall"], 0.0)
+
+    def test_dev_cli_reports_rounded_micro_metrics(self):
+        config = Path(__file__).resolve().parents[1] / "configs" / "dev.json"
+        cases = (("reconcile", (1.0, 1.0, 1.0)), ("naive_reconcile", (0.177, 0.733, 0.286)))
+        for policy, expected in cases:
+            with self.subTest(policy=policy), tempfile.TemporaryDirectory(dir=".") as tmp:
+                output = Path(tmp) / "report.json"
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    self.assertEqual(main([
+                        "--policy", policy, "--config", str(config), "--json", str(output),
+                    ]), 0)
+                report = json.loads(output.read_text(encoding="utf-8"))
+                self.assertEqual(report["micro"], dict(zip(("precision", "recall", "f1"), expected)))
+                self.assertIn("| P (micro) | R (micro) | F1 (micro) |", stdout.getvalue())
+                self.assertIn("| " + " | ".join(f"{value:.3f}" for value in expected) + " |",
+                              stdout.getvalue())
+                self.assertEqual(stdout.getvalue(), markdown(report) + "\n")

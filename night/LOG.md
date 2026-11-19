@@ -160,3 +160,6 @@
 - Paired check strengthened: original oracle answer translated through provenance.id_map must stay a full answer; transform also permutes the FX table.
 - Assigned T30 (codex): analyze.py micro-averaged + rounded output.
 - 189 tests, check ALL PASSED.
+## 2026-11-19 16:34 — codex
+- T30 done: failure analysis now pools TP/FP/FN via metrics.prf1. The dev CLI matches the check table for Reconcile (1.000/1.000/1.000) and NaiveReconcile (0.177/0.733/0.286). Targeted tests and the full project check passed.
+- Assumptions: JSON places pooled metrics under "micro" and keeps return/steps under "mean". JSON rounds numeric values to three decimals, and Markdown displays three decimal places.

@@ -7,6 +7,7 @@ from pathlib import Path
 from statistics import mean
 
 from .env import AuditEnv
+from .metrics import prf1
 from .run import POLICIES, make_policy, parse_seeds, run_episode
 from .schema import ISSUE_TYPES
 
@@ -22,7 +23,9 @@ def analyze(policy: str, episodes: list[tuple[int, dict]]) -> dict:
     by_type = {issue_type: {"tp": 0, "fn": 0} for issue_type in ISSUE_TYPES}
     by_scenario = {scenario: {"tp": 0, "fn": 0} for scenario in _SCENARIOS}
     fp_reasons = Counter()
-    scores = []
+    totals = Counter()
+    returns = []
+    steps = []
 
     for seed, config in episodes:
         trajectory = run_episode(
@@ -30,6 +33,7 @@ def analyze(policy: str, episodes: list[tuple[int, dict]]) -> dict:
             policy_factory=lambda grader: make_policy(policy, grader, seed),
         )
         result = env.result
+        totals.update({key: result[key] for key in ("tp", "fp", "fn")})
         issues = {issue["issue_id"]: issue for issue in env._ep["truth"]["issues"]}
         for label in result["labels"]:
             if label["tp"]:
@@ -42,22 +46,23 @@ def analyze(policy: str, episodes: list[tuple[int, dict]]) -> dict:
             issue = issues[missed["issue_id"]]
             by_type[issue["type"]]["fn"] += 1
             by_scenario[issue.get("scenario", "single")]["fn"] += 1
-        scores.append({
-            "precision": result["precision"],
-            "recall": result["recall"],
-            "f1": result["f1"],
-            "return": result["reward"],
-            "steps": trajectory[-1]["step"],
-        })
+        returns.append(result["reward"])
+        steps.append(trajectory[-1]["step"])
 
     for counts in (*by_type.values(), *by_scenario.values()):
         support = counts["tp"] + counts["fn"]
-        counts["recall"] = counts["tp"] / support if support else 0.0
+        counts["recall"] = round(counts["tp"] / support, 3) if support else 0.0
 
+    precision, recall, f1 = prf1(totals["tp"], totals["fp"], totals["fn"])
     return {
         "policy": policy,
-        "episodes": len(scores),
-        "mean": {key: mean(score[key] for score in scores) for key in scores[0]},
+        "episodes": len(episodes),
+        "micro": {
+            "precision": round(precision, 3),
+            "recall": round(recall, 3),
+            "f1": round(f1, 3),
+        },
+        "mean": {"return": round(mean(returns), 3), "steps": round(float(mean(steps)), 3)},
         "by_type": by_type,
         "by_scenario": by_scenario,
         "fp_total": sum(fp_reasons.values()),
@@ -67,18 +72,21 @@ def analyze(policy: str, episodes: list[tuple[int, dict]]) -> dict:
 
 def _markdown_table(headers, rows) -> str:
     def row(values):
-        return "| " + " | ".join(map(str, values)) + " |"
+        return "| " + " | ".join(f"{value:.3f}" if isinstance(value, float) else str(value)
+                                  for value in values) + " |"
 
     return "\n".join([row(headers), row(["---"] * len(headers)), *(row(values) for values in rows)])
 
 
 def markdown(report: dict) -> str:
     """Render the same aggregates written to JSON."""
+    micro = report["micro"]
     averages = report["mean"]
     return "\n\n".join([
         _markdown_table(
-            ("Policy", "Episodes", "Mean P", "Mean R", "Mean F1", "Mean return", "Mean steps"),
-            [(report["policy"], report["episodes"], *averages.values())],
+            ("Policy", "Episodes", "P (micro)", "R (micro)", "F1 (micro)", "Mean return", "Mean steps"),
+            [(report["policy"], report["episodes"], micro["precision"], micro["recall"],
+              micro["f1"], averages["return"], averages["steps"])],
         ),
         _markdown_table(
             ("Issue type", "TP", "FN", "Recall"),
