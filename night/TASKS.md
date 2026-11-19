@@ -50,7 +50,7 @@ Workers: touch ONLY the files listed for your task.
   (hour, weekday, id format/suffix, amount pattern, row position, description tokens) on 1 000 seeds; report max
   precision; fix any leak > 0.5 in the generator (re-export) — files: scripts/shortcut_miner.py, generator/inject
   if needed — accept: miner reports no column > 0.5 (or documented why acceptable)
-- [ ] D2 (lead) Decide/document "nothing allocated" evidence for payment_allocation (DESIGN §7) — files:
+- [x] D2 (lead) Decide/document "nothing allocated" evidence for payment_allocation (DESIGN §7) — files:
   docs/DESIGN.md (+ inject/verify if changed) — accept: verify 0 problems, decision in DESIGN
 
 ## Block 3 — measured design / engineering
@@ -67,12 +67,12 @@ Workers: touch ONLY the files listed for your task.
   (`uv run python -m auditenv.attack`), `golden` (`uv run python scripts/golden.py --check`), `mutate`
   (`uv run python scripts/mutate_reward.py`), `.PHONY` updated — files: Makefile — accept: `make -n fuzz stress attack`
   prints the commands; `make fuzz` exit 0
-- [ ] R3 (lead) Sensitivity table: baseline ranking under step cost 0.001/0.002/0.005 and tolerance 0/0.1 %/1 %
+- [x] R3 (lead) Sensitivity table: baseline ranking under step cost 0.001/0.002/0.005 and tolerance 0/0.1 %/1 %
   (grader-side param in analysis only, shared reward unchanged) — files: auditenv/analyze.py or scripts/, DESIGN §6 —
   accept: table in DESIGN, ranking stated
 - [x] H2 (lead) Step-budget margin with 100 invoices + 12 issues (+ hard) via `fuzz --stress`; keep max ≤ 80 —
   files: DESIGN — accept: numbers in DESIGN from the stress output
-- [ ] E3b (lead) Hard-mode trajectories `trajectories/train_hard_*.jsonl`, CI badge in README — files: README.md,
+- [x] E3b (lead) Hard-mode trajectories `trajectories/train_hard_*.jsonl`, CI badge in README — files: README.md,
   trajectories/, tests — accept: test_trajectory_files green
 - [x] E4 (lead) Stdlib SVG chart of baseline returns (dev vs hard) for the pitch: `scripts/chart.py` →
   `docs/baselines.svg` from `check --json` — files: scripts/chart.py, docs/baselines.svg, docs/PITCH.md — accept:

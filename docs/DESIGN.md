@@ -134,6 +134,25 @@ contains legitimate look-alikes:
   0.002/step only separates equal answers; guessed ids, unsupported evidence, wrong currency,
   out-of-tolerance amounts are FP; resubmission, malformed input and timeouts behave as specified.
 
+**Sensitivity of the design choices** (`uv run python scripts/sensitivity.py`, 2 s): every baseline episode is
+played once, then re-graded offline with the real matcher and the step cost / amount tolerance overridden
+(the default re-grade reproduces every env reward exactly). Mean return:
+
+| policy · split | cost 0.001 | **0.002** | 0.005 | tol. 0 | **0.1 %** | 1 % |
+|---|---|---|---|---|---|---|
+| oracle · dev | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| reconcile · dev | 0.979 | 0.957 | 0.893 | 0.957 | 0.957 | 0.957 |
+| naive_reconcile · dev | −0.494 | −0.506 | −0.545 | −0.506 | −0.506 | −0.506 |
+| random · dev | −0.803 | −0.807 | −0.817 | −0.807 | −0.807 | −0.807 |
+| flag_all · dev | −1.000 | −1.000 | −1.000 | −1.000 | −1.000 | −1.000 |
+| reconcile_hard · hard | 0.958 | 0.917 | 0.792 | 0.917 | 0.917 | 0.917 |
+| reconcile · hard | −0.063 | −0.095 | −0.190 | −0.095 | −0.095 | −0.095 |
+| naive_reconcile · hard | −0.726 | −0.747 | −0.811 | −0.747 | −0.747 | −0.747 |
+
+The ranking (oracle > reconcile(_hard) > … > random > flag_all) is identical under all five settings on both
+splits: the step cost only spreads the middle, and tolerance never changes a mean (the rule policies compute
+exact amounts; naive's false positives stay false positives at 1 %). The defaults are not tuned to a ranking.
+
 ## 7. Verification of data and truth (`auditenv/verify.py`)
 
 Independent of the generator, from the public tables and closed files only:
@@ -145,6 +164,14 @@ Independent of the generator, from the public tables and closed files only:
    are exactly the truth (type, ids, amount): nothing undeclared, nothing unsupported;
 4. **evidence** — every id exists in the public tables, each set covers the affected records, and
    the declared amount is recomputed from the records of each set alone (sufficiency).
+
+Decision for `payment_allocation` with **nothing allocated** (the AR credit row was removed): the set is the
+payment document, the invoice document, the payment's 2900 unapplied-cash row (and the invoice-date FX rate
+for foreign currency). The amount is the referenced amount × the invoice-date rate, reproduced from the two
+documents and the rate; the 2900 row shows where the money went (linked by `payment_id`, and for a
+base-currency payment it must carry at least the whole referenced amount). The missing AR credit itself is
+an absence no record id can cite — an auditor proves it by listing the ledger, and the verifier proves it in
+step 3 by recomputing every discrepancy from the full ledger. We keep the set minimal instead of padding it.
 
 A jury-style review (separate agent, before submission) found and we fixed: seed recovery from a
 plain-hash `episode_id` (now HMAC + grader key in the RNG); a crash/overrun on non-string `table`

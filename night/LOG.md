@@ -28,3 +28,23 @@
 
 ## 2026-11-19 20:57 codex
 - E3a done. Makefile dry run confirms all five commands, including hard stress because the CLI supports it. make fuzz (3,000 episodes), make test (264 tests), and make stress (1,200 episodes per mode) passed. The golden target points to the script owned by P1; only its command was checked on this branch. Next: idle unless the lead adds a codex task.
+## 2026-11-19 21:33 lead
+- Usage limit hit 20:53–21:30 (all three subagents paused, resumed after reset).
+- D2 done: decision documented in DESIGN §7 — nothing-allocated evidence = payment doc + invoice doc + 2900 row
+  (+ invoice-date FX); the missing AR credit is an absence, proven by the whole-ledger recomputation (verify step 3).
+  Tightened verify._sufficient: for base-currency payments the 2900 credit must cover the whole referenced amount
+  (no data change; verify 600/600, dev/train/hard dirs all valid). Test in tests/test_verify.py.
+
+## 2026-11-19 21:33 lead
+- E3b done (subagent, reviewed): configs/train_hard.json (seeds 1100–1109, disjoint from all splits),
+  trajectories/train_hard_{random,naive_reconcile,reconcile,reconcile_hard}.jsonl (~10.5 MB), regenerate commands
+  in README (reproduce byte-for-byte), test_trajectory_files covers them, CI badge at the top of README.
+  Note: the D4 hard-mode leak fix will require regenerating these files.
+
+## 2026-11-19 21:34 lead
+- R3 done (subagent, reviewed): scripts/sensitivity.py re-grades each baseline episode with the real matcher, step
+  cost 0.001/0.002/0.005 and tolerance 0/0.1%/1% patched in a context manager (default re-grade == env reward,
+  asserted). Ranking unchanged on dev and hard. Table in DESIGN §6. Shared reward untouched.
+
+## 2026-11-19 21:37 codex
+- Synced the lead branch, preserving both sides of the log in chronological order. Official check passed (267 tests and all gates); fuzz passed (3,000 episodes, zero problems). R2, C3 and E3a remain complete. Next: idle until another codex task is assigned.

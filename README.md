@@ -1,5 +1,7 @@
 # auditenv — RL environment for AI financial auditors
 
+[![check](https://github.com/madiyar-abi/genesis/actions/workflows/check.yml/badge.svg?branch=main)](https://github.com/madiyar-abi/genesis/actions/workflows/check.yml)
+
 > **Кратко (RU).** Воспроизводимая RL-среда для дообучения ИИ-аудитора (кейс FinTech, Genesis
 > Hackathon 2026). Генератор строит согласованную скрытую историю вымышленной компании,
 > правильную двойную запись, затем вносит ошибки четырёх типов (дубли счетов, неполное
@@ -132,6 +134,17 @@ uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval
 Policies: `random`, `naive_reconcile`, `reconcile`, `reconcile_hard`, `flag_all`, `oracle` (grader-side, reads truth — reward ceiling only).
 Each trajectory line: `episode_id, step, action, observation, reward, terminated, truncated`.
 
+The committed `trajectories/` files are reproduced byte-for-byte by (train mode, no truth in observations):
+
+```bash
+for p in random naive_reconcile reconcile; do
+  uv run python -m auditenv.run --policy $p --config configs/train.json --out trajectories/train_$p.jsonl
+done
+for p in random naive_reconcile reconcile reconcile_hard; do  # hard train split, seeds 1100–1109
+  uv run python -m auditenv.run --policy $p --config configs/train_hard.json --out trajectories/train_hard_$p.jsonl
+done
+```
+
 ### Plugging in your own policy (organisers' baselines)
 
 Any object with `reset(first_observation)` and `act(observation) -> action` works:
@@ -200,10 +213,10 @@ make check | make test | make verify
 | `auditenv/export.py`, `load.py`, `demo.py` | episode files on disk and back, narrated demo |
 | `auditenv/experimental.py` | materiality-weighted reward, reported next to the shared one |
 | `schemas/` | JSON Schemas: action, observation, findings, manifest, truth, trajectory step |
-| `configs/` | versioned episode lists: train (1000–1009), dev (2000–2009), eval_example (9000–9019), eval_hard (9100–9119) |
+| `configs/` | versioned episode lists: train (1000–1009), dev (2000–2009), eval_example (9000–9019), eval_hard (9100–9119), train_hard (1100–1109) |
 | `episodes/` | exported 10 train + 10 dev + 20 public hard episodes (`public/` for agents, `grader/` closed) |
-| `trajectories/` | training trajectories (JSONL) of reconcile, naive reconcile and random on the train split |
-| `tests/` | 256 unittest tests; `tests/test_jury.py` maps the jury checklist to tests |
+| `trajectories/` | training trajectories (JSONL) of reconcile, naive reconcile and random on the train split, and the same three plus reconcile_hard on the hard train split (`train_hard_*`) |
+| `tests/` | 266 unittest tests; `tests/test_jury.py` maps the jury checklist to tests |
 | `docs/` | contract, design note, demo script, pitch outline; `REVIEW.md` — jury-style review log |
 
 ## Honest limitations
