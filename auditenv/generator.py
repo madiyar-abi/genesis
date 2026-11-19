@@ -599,7 +599,8 @@ def policy_for(st: State) -> dict:
                              "fx_error": "[invoice_id] or [payment_id]",
                              "period_cutoff": "[invoice_id]"},
             "evidence": "doc_id / row_id / fx_id values; must include at least one full acceptable evidence set: "
-                        "duplicate_invoice: both invoice docs + the later copy's AR (or revenue) row; "
+                        "duplicate_invoice: both invoice docs + one AR (or revenue) row of each invoice, the original and the "
+                        "later copy; "
                         "payment_allocation: payment doc + invoice doc + the AR credit row of that invoice in the "
                         "payment (or, if nothing was allocated to it, the 2900 row) + the invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row "
                         "+ the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row",

@@ -57,3 +57,14 @@ Status legend: **OK** = checked, no problem; **ISSUE n** = see "Findings" below.
 | 5 | tests | medium | Missing explicit tests: different seeds → different episodes; action after truncation; error messages without paths/truth; reward 0 on every non-terminal tool; train/dev cover all 4 types, I1, I2 and clean books; every truth evidence id reachable via the tools; exported manifests match the schema. | fixed: `tests/test_jury.py` (30 tests, grouped by jury criterion; leak and terminal-state tests checked to fail on an injected leak / removed episode_over guard) |
 | 6 | docs | medium | PITCH not in the requested 10-slide order; DESIGN lacks per-type examples and seeds per baseline row. | fixed: PITCH rewritten into the 10-slide order; DESIGN: key decisions, worked example per error type with real ids and amounts, seeds column, edge-case table (with new `EdgeCaseDataTests`), seed sweep and reproducible stress test; README: why/how, errors, reward, results, commands, license; DEMO: numbers and test step |
 | 7 | data & truth | high | On seed 7 (default and hard, four inspections), two invoice documents and only the copy booking scored TP=1, reward 0.992. They did not establish that the original was booked. | Fixed. Each evidence alternative binds both documents to a positive AR debit or revenue credit for each invoice. The copy booking determines the claimed amount. The same incomplete submission now scores FP=1, FN=1, reward −1. Tests cover missing, substituted, zero and reversed postings. |
+
+## Round 2 jury-style review (2026-11-19)
+Independent read-only review against SPEC §09/§10 (agent). An own checker re-derived truth from public tables on
+1 000 episodes (incl. 400 with `AUDITENV_SECRET`): identical to truth.json. Leaks, reward, reproducibility: nothing found.
+- **R2-1 (high, fixed):** the agent-facing evidence rule for `duplicate_invoice` (`policy.json`, generator) still
+  said "both docs + the later copy's AR row"; since D1 the truth also needs a booking row of the original, so an agent
+  following the text literally scored −1 (seed 2003). Text now says "one AR (or revenue) row of each invoice";
+  all 40 exported episodes (policy.json only), trajectories and golden hashes regenerated;
+  `tests/test_jury.PolicyTextTests` builds the evidence from the text and requires a TP.
+- **R2-2 (medium, fixed):** `AUDITENV_SECRET=x auditenv.check` failed 46 fixture tests; the unit-test gate now runs
+  with the public key and says so.

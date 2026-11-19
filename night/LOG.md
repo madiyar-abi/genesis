@@ -107,3 +107,11 @@
   correctness of env/grader, not difficulty ("Высокая награда oracle сама по себе не даёт баллов за сложность";
   "недоказанные улучшения обучения баллов не дают"); H1 would add a third generator path (high risk to the
   verified data), E5 could read as model training. Time goes to the jury-style review findings instead.
+
+## 2026-11-19 21:56 lead
+- Jury-style review (subagent) done; details in REVIEW.md "Round 2". Fixed R2-1 (stale duplicate evidence rule in the
+  agent-facing policy text → -1 for a literal follower; re-exported train/dev/hard: exactly 40 policy.json files
+  changed; trajectories + golden hashes regenerated; new PolicyTextTests) and R2-2 (check failed with
+  AUDITENV_SECRET set; unit tests now run with the public key). check exit 0 (278 tests), secret check exit 0.
+- Next: review defects 3–6 (unknown action params accepted, grading crash on non-str keys, loose reset input,
+  stale README lines).

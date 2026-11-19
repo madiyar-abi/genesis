@@ -45,6 +45,9 @@ def _gate(name: str, ok: bool, detail: str = "") -> bool:
 
 
 def run_tests() -> bool:
+    # the tests compare against the committed public episodes, which use the public key: a grader secret
+    # in the environment would generate other companies, so the unit tests run without it
+    secret = os.environ.pop("AUDITENV_SECRET", None)
     suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, "tests"), top_level_dir=ROOT)
     with open(os.devnull, "w") as devnull:
         stdout, sys.stdout = sys.stdout, devnull
@@ -52,8 +55,11 @@ def run_tests() -> bool:
             result = unittest.TextTestRunner(stream=devnull, verbosity=0).run(suite)
         finally:
             sys.stdout = stdout
+            if secret is not None:
+                os.environ["AUDITENV_SECRET"] = secret
+    note = "; run with the public key (AUDITENV_SECRET set: other gates use it)" if secret is not None else ""
     return _gate("unit tests", result.wasSuccessful(),
-                 f"{result.testsRun} tests, {len(result.failures)} failures, {len(result.errors)} errors")
+                 f"{result.testsRun} tests, {len(result.failures)} failures, {len(result.errors)} errors{note}")
 
 
 def run_verifier(n_seeds: int) -> bool:
