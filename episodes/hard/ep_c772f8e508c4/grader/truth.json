@@ -3,42 +3,42 @@
   "issues": [
     {
       "affected_ids": [
-        "F0631166"
+        "F0752520"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "DOC0435473",
-          "L02633"
+          "DOC0774184",
+          "L03706"
         ],
         [
-          "DOC0435473",
-          "L02632"
+          "DOC0774184",
+          "L03705"
         ]
       ],
-      "expected_amount_minor": 56700,
+      "expected_amount_minor": 1194364,
       "issue_id": "ISS-1",
       "scenario": "single",
       "type": "period_cutoff"
     },
     {
       "affected_ids": [
-        "F0032037"
+        "F0215826"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "2025-09-08:GBP:EUR",
-          "DOC0009816",
-          "L02846"
+          "2025-09-22:USD:EUR",
+          "DOC0369828",
+          "L03479"
         ],
         [
-          "2025-09-08:GBP:EUR",
-          "DOC0009816",
-          "L02845"
+          "2025-09-22:USD:EUR",
+          "DOC0369828",
+          "L03480"
         ]
       ],
-      "expected_amount_minor": 6424,
+      "expected_amount_minor": 1981,
       "issue_id": "ISS-2",
       "scenario": "single",
       "type": "fx_error"
@@ -52,12 +52,12 @@
         [
           "2025-09-25:USD:EUR",
           "DOC0199655",
-          "L03415"
+          "L03522"
         ],
         [
           "2025-09-25:USD:EUR",
           "DOC0199655",
-          "L03416"
+          "L03523"
         ]
       ],
       "expected_amount_minor": 2075,

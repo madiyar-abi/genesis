@@ -3,81 +3,81 @@
   "issues": [
     {
       "affected_ids": [
-        "F0849842"
+        "F0637973"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "2026-06-01:USD:EUR",
-          "D-07aded",
-          "L02965"
+          "2026-06-17:JPY:EUR",
+          "D-0c6d40",
+          "L03560"
         ],
         [
-          "2026-06-01:USD:EUR",
-          "D-07aded",
-          "L02964"
+          "2026-06-17:JPY:EUR",
+          "D-0c6d40",
+          "L03561"
         ]
       ],
-      "expected_amount_minor": 1148,
+      "expected_amount_minor": 4558,
       "issue_id": "ISS-1",
       "scenario": "single",
       "type": "fx_error"
     },
     {
       "affected_ids": [
-        "F0681845"
+        "F0091080"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "2026-06-24:JPY:EUR",
-          "D-0dab0d",
-          "L03902"
+          "2026-06-29:JPY:EUR",
+          "D-0480f8",
+          "L04159"
         ],
         [
-          "2026-06-24:JPY:EUR",
-          "D-0dab0d",
-          "L03901"
+          "2026-06-29:JPY:EUR",
+          "D-0480f8",
+          "L04160"
         ]
       ],
-      "expected_amount_minor": 13494,
+      "expected_amount_minor": 2293,
       "issue_id": "ISS-2",
       "scenario": "single",
       "type": "fx_error"
     },
     {
       "affected_ids": [
-        "F0372188",
-        "RCPT0198436"
+        "F0637103",
+        "RCPT0339311"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "2026-06-05:JPY:EUR",
-          "D-0359a9",
-          "D-07151c",
-          "L03848"
+          "2026-06-04:JPY:EUR",
+          "D-02ff52",
+          "D-0c8539",
+          "L04113"
         ]
       ],
-      "expected_amount_minor": 24132,
+      "expected_amount_minor": 1762188,
       "issue_id": "ISS-3",
       "scenario": "single",
       "type": "payment_allocation"
     },
     {
       "affected_ids": [
-        "F0866394",
-        "RCPT0002523"
+        "F0093487",
+        "RCPT0836507"
       ],
       "currency": "EUR",
       "evidence_sets": [
         [
-          "D-019d46",
-          "D-081d2d",
-          "L03413"
+          "D-0171a7",
+          "D-058421",
+          "L03626"
         ]
       ],
-      "expected_amount_minor": 53000,
+      "expected_amount_minor": 2729200,
       "issue_id": "ISS-4",
       "scenario": "single",
       "type": "payment_allocation"

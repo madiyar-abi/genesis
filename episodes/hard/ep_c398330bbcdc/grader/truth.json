@@ -3,97 +3,98 @@
   "issues": [
     {
       "affected_ids": [
-        "2612-203547"
+        "2612-878157"
       ],
       "currency": "KZT",
       "evidence_sets": [
         [
-          "DOC0054657",
-          "GL-005226"
+          "DOC0125435",
+          "GL-002020"
         ],
         [
-          "DOC0054657",
-          "GL-005225"
+          "DOC0125435",
+          "GL-002019"
         ]
       ],
-      "expected_amount_minor": 847573500,
+      "expected_amount_minor": 650416500,
       "issue_id": "ISS-1",
       "scenario": "single",
       "type": "period_cutoff"
     },
     {
       "affected_ids": [
-        "2612-333734",
-        "2612-990243"
+        "2612-393868",
+        "2612-760341"
       ],
       "currency": "KZT",
       "evidence_sets": [
         [
-          "DOC0336641",
-          "DOC0411847",
-          "GL-004566",
-          "GL-004647"
+          "DOC0447376",
+          "DOC0695848",
+          "GL-001711",
+          "GL-001719"
         ],
         [
-          "DOC0336641",
-          "DOC0411847",
-          "GL-004567",
-          "GL-004647"
+          "DOC0447376",
+          "DOC0695848",
+          "GL-001711",
+          "GL-001718"
         ],
         [
-          "DOC0336641",
-          "DOC0411847",
-          "GL-004566",
-          "GL-004646"
+          "DOC0447376",
+          "DOC0695848",
+          "GL-001712",
+          "GL-001719"
         ],
         [
-          "DOC0336641",
-          "DOC0411847",
-          "GL-004567",
-          "GL-004646"
+          "DOC0447376",
+          "DOC0695848",
+          "GL-001712",
+          "GL-001718"
         ]
       ],
-      "expected_amount_minor": 58016800,
+      "expected_amount_minor": 1100439354,
       "issue_id": "ISS-2",
       "scenario": "single",
       "type": "duplicate_invoice"
     },
     {
       "affected_ids": [
-        "2612-734863"
+        "2612-892791"
       ],
       "currency": "KZT",
       "evidence_sets": [
         [
-          "2026-12-02:CHF:KZT",
-          "DOC0085887",
-          "GL-004261"
+          "2026-12-29:JPY:KZT",
+          "DOC0982595",
+          "GL-002013"
         ],
         [
-          "2026-12-02:CHF:KZT",
-          "DOC0085887",
-          "GL-004260"
+          "2026-12-29:JPY:KZT",
+          "DOC0982595",
+          "GL-002014"
         ]
       ],
-      "expected_amount_minor": 108173,
+      "expected_amount_minor": 5198226,
       "issue_id": "ISS-3",
       "scenario": "single",
       "type": "fx_error"
     },
     {
       "affected_ids": [
-        "2612-028619",
-        "PAY-542986"
+        "2612-203668",
+        "PAY-759265"
       ],
       "currency": "KZT",
       "evidence_sets": [
         [
-          "DOC0063006",
-          "DOC0837737",
-          "GL-005053"
+          "2026-12-10:CHF:KZT",
+          "DOC0077171",
+          "DOC0696549",
+          "GL-001443"
         ]
       ],
-      "expected_amount_minor": 447670298,
+      "expected_amount_minor": 28350163,
       "issue_id": "ISS-4",
       "scenario": "single",
       "type": "payment_allocation"

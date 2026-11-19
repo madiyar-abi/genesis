@@ -180,16 +180,23 @@ class DuplicateEvidenceTest(unittest.TestCase):
 
     def test_reproduce_incomplete_two_doc_copy_row_before_after(self):
         """Reproduce the seed 7 gap: 2 docs + copy row only matched before D1, rejected after."""
-        for difficulty, orig_row, copy_row in [("default", "R390", "R445"), ("hard", "L00300", "L00362")]:
+        for difficulty in ("default", "hard"):
             cfg = {"errors": {"duplicate_invoice": 1}}
             if difficulty == "hard":
                 cfg["difficulty"] = "hard"
             ep = generate(7, cfg)
             iss = ep["truth"]["issues"][0]
-            orig_doc, dup_doc = [d["doc_id"] for d in sorted(
+            orig_inv, dup_inv = sorted(
                 [i for i in ep["tables"]["invoices"] if i["invoice_id"] in iss["affected_ids"]],
                 key=lambda x: x["issued_at"]
-            )]
+            )
+            orig_doc, dup_doc = orig_inv["doc_id"], dup_inv["doc_id"]
+            rows = {r["row_id"]: r for r in ep["tables"]["ledger"]}
+            ev_rows = [rows[i] for i in iss["evidence_sets"][0] if i in rows]
+            orig_row = next(r["row_id"] for r in ev_rows if r["invoice_id"] == orig_inv["invoice_id"])
+            copy_row = next(r["row_id"] for r in ev_rows if r["invoice_id"] == dup_inv["invoice_id"])
+            if difficulty == "default":  # the original seed-7 gap from REVIEW.md
+                self.assertEqual((orig_row, copy_row), ("R390", "R445"))
 
             # Incomplete submission (the "before" pattern: 2 docs + copy row only)
             incomplete_sub = {

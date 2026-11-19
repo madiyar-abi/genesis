@@ -134,6 +134,25 @@ contains legitimate look-alikes:
   0.002/step only separates equal answers; guessed ids, unsupported evidence, wrong currency,
   out-of-tolerance amounts are FP; resubmission, malformed input and timeouts behave as specified.
 
+**Sensitivity of the design choices** (`uv run python scripts/sensitivity.py`, 2 s): every baseline episode is
+played once, then re-graded offline with the real matcher and the step cost / amount tolerance overridden
+(the default re-grade reproduces every env reward exactly). Mean return:
+
+| policy · split | cost 0.001 | **0.002** | 0.005 | tol. 0 | **0.1 %** | 1 % |
+|---|---|---|---|---|---|---|
+| oracle · dev | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| reconcile · dev | 0.979 | 0.957 | 0.893 | 0.957 | 0.957 | 0.957 |
+| naive_reconcile · dev | −0.494 | −0.506 | −0.545 | −0.506 | −0.506 | −0.506 |
+| random · dev | −0.803 | −0.807 | −0.817 | −0.807 | −0.807 | −0.807 |
+| flag_all · dev | −1.000 | −1.000 | −1.000 | −1.000 | −1.000 | −1.000 |
+| reconcile_hard · hard | 0.958 | 0.916 | 0.789 | 0.916 | 0.916 | 0.916 |
+| reconcile · hard | 0.323 | 0.288 | 0.180 | 0.288 | 0.288 | 0.288 |
+| naive_reconcile · hard | −0.690 | −0.711 | −0.773 | −0.711 | −0.711 | −0.711 |
+
+The ranking (oracle > reconcile(_hard) > … > random > flag_all) is identical under all five settings on both
+splits: the step cost only spreads the middle, and tolerance never changes a mean (the rule policies compute
+exact amounts; naive's false positives stay false positives at 1 %). The defaults are not tuned to a ranking.
+
 ## 7. Verification of data and truth (`auditenv/verify.py`)
 
 Independent of the generator, from the public tables and closed files only:
@@ -146,9 +165,17 @@ Independent of the generator, from the public tables and closed files only:
 4. **evidence** — every id exists in the public tables, each set covers the affected records, and
    the declared amount is recomputed from the records of each set alone (sufficiency).
 
+Decision for `payment_allocation` with **nothing allocated** (the AR credit row was removed): the set is the
+payment document, the invoice document, the payment's 2900 unapplied-cash row (and the invoice-date FX rate
+for foreign currency). The amount is the referenced amount × the invoice-date rate, reproduced from the two
+documents and the rate; the 2900 row shows where the money went (linked by `payment_id`, and for a
+base-currency payment it must carry at least the whole referenced amount). The missing AR credit itself is
+an absence no record id can cite — an auditor proves it by listing the ledger, and the verifier proves it in
+step 3 by recomputing every discrepancy from the full ledger. We keep the set minimal instead of padding it.
+
 A jury-style review (separate agent, before submission) found and we fixed: seed recovery from a
 plain-hash `episode_id` (now HMAC + grader key in the RNG); a crash/overrun on non-string `table`
-(now a bounded error, 100-step cap holds — plus a 20 314-action fuzz test); a telltale timezone on the
+(now a bounded error, 100-step cap holds — plus a 20 312-action fuzz test); a telltale timezone on the
 I1 payment, a timestamp-mismatch shortcut for cutoff, a telltale hour on duplicate copies (removed,
 measured with the shortcut's precision: 1.00 → undefined / 0.09 / 0.02); evidence sets that did not
 contain the FX rate or the invoice document; skipping hidden episodes in server mode (now graded as
@@ -172,18 +199,18 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 
 | policy | seeds | P | R | F1 | return | steps | time s | exp. return* |
 |---|---|---|---|---|---|---|---|---|
-| random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.047 | −0.807 |
-| naive reconciliation | 2000–2009 | 0.169 | 0.700 | 0.273 | −0.506 | 17.2 | 0.048 | −0.210 |
-| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.957 | 22.5 | 0.041 | 0.957 |
-| flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.035 | −1.000 |
-| oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.031 | 1.000 |
+| random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.004 | −0.807 |
+| naive reconciliation | 2000–2009 | 0.169 | 0.700 | 0.273 | −0.506 | 17.2 | 0.004 | −0.210 |
+| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.957 | 22.5 | 0.004 | 0.957 |
+| flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.003 | −1.000 |
+| oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.003 | 1.000 |
 
 Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30 truth issues).
 P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode. Timing is a snapshot of the measurement host. CI compares deterministic cells and checks that times are finite and nonnegative.
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount; reported separately, the shared reward is unchanged.
-Other gates in the same run: 256 unit tests pass; verifier 200/200 episodes valid (600/600 with
-`auditenv.verify --seeds 0-199`); 20/20 paired checks; out-of-process run leaks nothing.
+Other gates in the same run: 283 unit tests pass; verifier 200/200 episodes valid (600/600 with
+`auditenv.verify --seeds 0-199`); 20/20 paired checks on default and 20/20 on hard episodes; out-of-process run leaks nothing.
 
 Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200
 episodes (300 seeds × random mix / clean / 12 issues / 12 issues with 100 invoices): **0 imperfect
@@ -235,20 +262,44 @@ and checks that every credit note is in the period and after its booking.
 | policy | P | R | F1 | return | steps | exp. return* |
 |---|---|---|---|---|---|---|
 | random explorer (seeded) | 0.000 | 0.000 | 0.000 | −0.806 | 33.1 | −0.806 |
-| naive reconciliation | 0.093 | 0.543 | 0.159 | −0.747 | 33.2 | −0.656 |
-| reconciliation (default rules) | 0.471 | 0.870 | 0.611 | −0.095 | 42.6 | −0.341 |
-| reconciliation + hard rules (`reconcile_hard`) | 1.000 | 1.000 | 1.000 | 0.917 | 42.6 | 0.917 |
+| naive reconciliation | 0.105 | 0.630 | 0.181 | −0.711 | 33.4 | −0.565 |
+| reconciliation (default rules) | 0.651 | 0.891 | 0.752 | 0.288 | 43.2 | 0.103 |
+| reconciliation + hard rules (`reconcile_hard`) | 1.000 | 1.000 | 1.000 | 0.916 | 43.2 | 0.916 |
 | flag-everything attack | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | −1.000 |
 | oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 1.000 |
 
 Gates in the check: hard verifier 50/50 episodes valid; oracle 1.0; `reconcile_hard` F1 ≥ 0.95;
 default `reconcile` F1 ≤ 0.8; flag-everything < 0. Failure analysis of the default rules
-(`auditenv.analyze --policy reconcile --config configs/eval_hard.json`): duplicate recall 2/8 (re-typed
-copies missed), all other types 100 %; 45 false positives, all `no_matching_issue` — the credit-note
+(`auditenv.analyze --policy reconcile --config configs/eval_hard.json`): duplicate recall 3/8 (re-typed
+copies missed), all other types 100 %; 22 false positives, all `no_matching_issue` — the credit-note
 reissues flagged as duplicates. `reconcile_hard` is the same script plus the two policy rules: it shows
 the level is solvable from the records, not that a learning agent finds those rules.
 Stress test of `reconcile_hard` (`auditenv.fuzz --stress reconcile_hard --seeds 0-299 --hard`, 1 200 hard
-episodes): 0 imperfect, max 58 steps, no truncation.
+episodes): 0 imperfect, max 57 steps, no truncation.
+
+**Timing** (`uv run python scripts/bench.py`, median of 3, Python 3.11.14, Apple-silicon Mac, one core):
+
+| operation | workload | time |
+|---|---|---|
+| `generate()` default | 100 seeds | 0.28 s (2.8 ms / episode) |
+| `generate()` hard | 100 seeds | 0.98 s (9.8 ms / episode) |
+| `auditenv.verify` | 300 episodes | 1.69 s (5.6 ms / episode) |
+| one full episode, any baseline | dev / hard | 3–5 ms / 9–12 ms |
+| `auditenv.check` (everything) | — | ≈ 24 s |
+
+An episode costs milliseconds against the 60 s limit, so the limit only binds the agent's own thinking time.
+
+**Step-budget margin** (same stress runs, 300 seeds per row, steps used of the 100-step budget):
+
+| policy · mode | config | median | p95 | max |
+|---|---|---|---|---|
+| reconcile · default | random mix | 22 | 26 | 28 |
+| reconcile · default | 12 issues, 100 invoices | 29 | 31 | 33 |
+| reconcile_hard · hard | random mix | 44 | 50 | 53 |
+| reconcile_hard · hard | 12 issues, 100 invoices | 50 | 56 | 57 |
+
+The heaviest hard episode leaves 43 % of the budget: a script needs ≤ 57 steps, a learning agent has room
+to explore.
 
 ### Edge cases (all tested)
 
@@ -273,6 +324,14 @@ episodes): 0 imperfect, max 58 steps, no truncation.
   the reward does not prove fitness for real audits.
 - The generator is open and deterministic: hidden runs must set `AUDITENV_SECRET` in the grader
   process (otherwise, as for the public splits, anyone can regenerate an episode from its seed).
+- Shortcut miner (`uv run python scripts/shortcut_miner.py [--hard]`, 1 000 seeds): single observable
+  features that predict truth records with precision > 0.5. Fixed: re-typed descriptions marked hard-mode
+  duplicate copies (1.000 → 0.467: invoices and re-issues are now keyed in by hand too). Left, measured:
+  in default mode "same entity, currency and total exactly twice" finds duplicates (0.996) — it is the
+  duplicate definition, but default mode has no near-miss decoys (hard mode has: 0.360); I1 payments are
+  always on the last day, so a 2900/7900 row on the last day hints at fx_error (0.70) and a large 2900
+  amount at payment_allocation (0.75–0.78). Each hint names a record, not the claimed amount — scoring
+  still needs the reconciliation.
 - Cutoff of a next-period invoice is booked *before* its issue instant; a policy can learn that
   direction-of-lag cue, but it is exactly the audit rule (document date outside the period).
 - The I1 payment is always on the last evening of the period (by the definition of the scenario);
@@ -284,7 +343,7 @@ episodes): 0 imperfect, max 58 steps, no truncation.
   baselines (≤ 0.01 s per episode).
 - Step cost vs F1 granularity: with 12 issues, skipping one finding at 0 steps (0.913) beats the full
   answer after 60 steps (0.880); with ≤ 10 issues the full answer always wins.
-- A policy-aware rule script solves the default distribution (F1 1.0); the same script gets F1 0.611 in
+- A policy-aware rule script solves the default distribution (F1 1.0); the same script gets F1 0.752 in
   hard mode, and only after adding the two hard rules (`reconcile_hard`) is it perfect again. Every level
   a script can solve is still learnable for an agent that must discover the rules within 100 tool calls;
   the baselines measure how much the distractors hurt shortcuts, not agent difficulty.

@@ -9,9 +9,9 @@
   "counts": {
     "documents": 67,
     "fx": 318,
-    "invoices": 44,
-    "ledger": 1285,
-    "payments": 23
+    "invoices": 43,
+    "ledger": 1196,
+    "payments": 24
   },
   "episode_id": "ep_80c210480a64",
   "generator_version": "1.0.0",

@@ -6,11 +6,11 @@
   },
   "base_currency": "EUR",
   "counts": {
-    "documents": 120,
+    "documents": 126,
     "fx": 212,
     "invoices": 86,
-    "ledger": 1146,
-    "payments": 34
+    "ledger": 1096,
+    "payments": 40
   },
   "episode_id": "ep_87fdfdb652dd",
   "generator_version": "1.0.0",

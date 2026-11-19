@@ -35,32 +35,32 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 787437,
-              "entity_id": "CUST14969",
-              "invoice_id": "INV-181390",
+              "debit_minor": 663800,
+              "entity_id": "CUST62781",
+              "invoice_id": "INV-336577",
               "payment_id": null,
-              "row_id": "L04710",
-              "timestamp": "2025-05-07T21:04:00+03:00"
+              "row_id": "L01729",
+              "timestamp": "2025-05-16T14:54:00+03:00"
             },
             {
               "account": "4000",
-              "credit_minor": 787437,
+              "credit_minor": 663800,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "CUST14969",
-              "invoice_id": "INV-181390",
+              "entity_id": "CUST62781",
+              "invoice_id": "INV-336577",
               "payment_id": null,
-              "row_id": "L04709",
-              "timestamp": "2025-05-07T21:04:00+03:00"
+              "row_id": "L01730",
+              "timestamp": "2025-05-16T14:54:00+03:00"
             }
           ],
           "before": null,
-          "journal": "inv:INV-181390"
+          "journal": "inv:INV-336577"
         }
       ],
-      "description": "invoice INV-045702 entered a second time as INV-181390 and booked again",
+      "description": "invoice INV-916384 entered a second time as INV-336577 and booked again",
       "documents_added": [
-        "DOC0747987"
+        "DOC0133831"
       ],
       "issue_id": "ISS-1",
       "scenario": "single",
@@ -74,32 +74,32 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 1121400,
-              "entity_id": "CUST62781",
-              "invoice_id": "INV-588507",
+              "debit_minor": 273515,
+              "entity_id": "CUST04122",
+              "invoice_id": "INV-917891",
               "payment_id": null,
-              "row_id": "L04828",
-              "timestamp": "2025-05-12T11:21:00+03:00"
+              "row_id": "L02110",
+              "timestamp": "2025-05-27T19:32:00+03:00"
             },
             {
               "account": "4000",
-              "credit_minor": 1121400,
+              "credit_minor": 273515,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "CUST62781",
-              "invoice_id": "INV-588507",
+              "entity_id": "CUST04122",
+              "invoice_id": "INV-917891",
               "payment_id": null,
-              "row_id": "L04827",
-              "timestamp": "2025-05-12T11:21:00+03:00"
+              "row_id": "L02109",
+              "timestamp": "2025-05-27T19:32:00+03:00"
             }
           ],
           "before": null,
-          "journal": "inv:INV-588507"
+          "journal": "inv:INV-917891"
         }
       ],
-      "description": "invoice INV-605184 entered a second time as INV-588507 and booked again",
+      "description": "invoice INV-350774 entered a second time as INV-917891 and booked again",
       "documents_added": [
-        "DOC0651376"
+        "DOC0804254"
       ],
       "issue_id": "ISS-2",
       "scenario": "single",
@@ -113,45 +113,23 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 91676,
-              "entity_id": "CUST40278",
+              "debit_minor": 303779,
+              "entity_id": "CUST79690",
               "invoice_id": null,
-              "payment_id": "PAY-420648",
-              "row_id": "L05193",
-              "timestamp": "2025-05-23T18:40:00+03:00"
-            },
-            {
-              "account": "1200",
-              "credit_minor": 36891,
-              "currency": "EUR",
-              "debit_minor": 0,
-              "entity_id": "CUST40278",
-              "invoice_id": "INV-933101",
-              "payment_id": "PAY-420648",
-              "row_id": "L05195",
-              "timestamp": "2025-05-23T18:40:00+03:00"
+              "payment_id": "PAY-090255",
+              "row_id": "L01622",
+              "timestamp": "2025-05-13T22:07:00+03:00"
             },
             {
               "account": "2900",
-              "credit_minor": 54442,
+              "credit_minor": 303779,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "CUST40278",
+              "entity_id": "CUST79690",
               "invoice_id": null,
-              "payment_id": "PAY-420648",
-              "row_id": "L05196",
-              "timestamp": "2025-05-23T18:40:00+03:00"
-            },
-            {
-              "account": "7900",
-              "credit_minor": 343,
-              "currency": "EUR",
-              "debit_minor": 0,
-              "entity_id": "CUST40278",
-              "invoice_id": null,
-              "payment_id": "PAY-420648",
-              "row_id": "L05194",
-              "timestamp": "2025-05-23T18:40:00+03:00"
+              "payment_id": "PAY-090255",
+              "row_id": "L01623",
+              "timestamp": "2025-05-13T22:07:00+03:00"
             }
           ],
           "before": [
@@ -159,40 +137,40 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 91676,
-              "entity_id": "CUST40278",
+              "debit_minor": 303779,
+              "entity_id": "CUST79690",
               "invoice_id": null,
-              "payment_id": "PAY-420648",
-              "row_id": "L05193",
-              "timestamp": "2025-05-23T18:40:00+03:00"
+              "payment_id": "PAY-090255",
+              "row_id": "L01622",
+              "timestamp": "2025-05-13T22:07:00+03:00"
             },
             {
               "account": "1200",
-              "credit_minor": 90831,
+              "credit_minor": 305828,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "CUST40278",
-              "invoice_id": "INV-933101",
-              "payment_id": "PAY-420648",
-              "row_id": "L05195",
-              "timestamp": "2025-05-23T18:40:00+03:00"
+              "entity_id": "CUST79690",
+              "invoice_id": "INV-924062",
+              "payment_id": "PAY-090255",
+              "row_id": "pre-133",
+              "timestamp": "2025-05-13T22:07:00+03:00"
             },
             {
               "account": "7900",
-              "credit_minor": 845,
+              "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 0,
-              "entity_id": "CUST40278",
+              "debit_minor": 2049,
+              "entity_id": "CUST79690",
               "invoice_id": null,
-              "payment_id": "PAY-420648",
-              "row_id": "L05194",
-              "timestamp": "2025-05-23T18:40:00+03:00"
+              "payment_id": "PAY-090255",
+              "row_id": "pre-134",
+              "timestamp": "2025-05-13T22:07:00+03:00"
             }
           ],
-          "journal": "pay:PAY-420648"
+          "journal": "pay:PAY-090255"
         }
       ],
-      "description": "payment PAY-420648 allocated partially to INV-933101; the rest went to unapplied cash",
+      "description": "payment PAY-090255 allocated nothing to INV-924062; the rest went to unapplied cash",
       "documents_added": [],
       "issue_id": "ISS-3",
       "scenario": "single",

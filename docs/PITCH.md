@@ -44,8 +44,13 @@ episodes, seeds 9100–9119). Re-run the check before exporting the final slides
 - `reward = clip(2·F1 − 1 − 0.002·steps, −1, 1)`; invalid submission −1; F1 = 1 for silence on clean books.
 - Same books, other answers (demo): silence −1, guessed ids −1, answer repeated twice 0.33,
   flag-everything −1; clean company: silence 1.0, guessed ids −1.
+- Tests bite: 15/15 one-line mutants of matcher/reward caught; baseline ranking unchanged for step cost
+  0.001–0.005 and tolerance 0–1 % (`scripts/mutate_reward.py`, `scripts/sensitivity.py`).
 
 ## 7. Results
+
+Chart for this slide: `docs/baselines.svg` (mean return per baseline, dev vs hard; regenerate with
+`uv run python -m auditenv.check --json /tmp/auditenv-metrics.json && uv run python scripts/chart.py`).
 
 | policy | split | P | R | F1 | return |
 |---|---|---|---|---|---|
@@ -54,23 +59,26 @@ episodes, seeds 9100–9119). Re-run the check before exporting the final slides
 | naive reconcile | dev | 0.169 | 0.700 | 0.273 | −0.506 |
 | random explorer | dev | 0.000 | 0.000 | 0.000 | −0.807 |
 | flag-everything | dev | 0.000 | 0.000 | 0.000 | −1.000 |
-| reconcile_hard | hard | 1.000 | 1.000 | 1.000 | 0.917 |
-| reconcile (default) | hard | 0.471 | 0.870 | 0.611 | −0.095 |
+| reconcile_hard | hard | 1.000 | 1.000 | 1.000 | 0.916 |
+| reconcile (default) | hard | 0.651 | 0.891 | 0.752 | 0.288 |
 | oracle (grader-side) | hard | 1.000 | 1.000 | 1.000 | 1.000 |
 
 - Dev split (micro P/R/F1 · mean return): oracle 1.0/1.0/1.0 · 1.000; reconcile 1.0/1.0/1.0 · 0.957;
   naive 0.17/0.70/0.27 · −0.506; random 0/0/0 · −0.807; flag-all 0/0/0 · −1.000.
 - Naive rules: 103 false accusations (22 on clean books), allocation recall 1/8, I1 0/2 →
   distractors and timezones defeat shortcuts.
-- Hard split: reconcile drops to 0.47/0.87/0.61 · −0.095 (45 false accusations); with the two policy rules
-  (`reconcile_hard`) 1.0 · 0.917; oracle 1.0 → harder, still solvable.
+- Hard split: reconcile drops to 0.65/0.89/0.75 · 0.288 (22 false accusations); with the two policy rules
+  (`reconcile_hard`) 1.0 · 0.916; oracle 1.0 → harder, still solvable.
 
 ## 8. Reproducibility and tests
-- 256 unit tests incl. a 20 314-action fuzz test and `tests/test_jury.py` (the jury checklist as tests).
+- 283 unit tests incl. a 20 312-action fuzz test and `tests/test_jury.py` (the jury checklist as tests);
+  80 golden hashes catch any generator drift.
 - Verifier 600/600 generated + 40/40 exported episodes; seed sweep 3 000 default + 600 hard episodes:
   0 exceptions, 0 verifier problems, oracle 1.0 everywhere, flag-all negative on all.
-- 20/20 paired checks: replay is byte-exact; relabel + permute keeps the oracle answer and reward.
-- Stress: 1 200 episodes (reconcile) and 1 200 hard (reconcile_hard): every error found within budget.
+- 20/20 paired checks on default and 20/20 on hard episodes: replay is byte-exact; relabel + permute
+  keeps the oracle answer and reward.
+- Stress: 1 200 default + 1 200 hard episodes, every error found, max 57 of 100 steps; a shortcut
+  miner hunts single-feature leaks (one found in hard mode and fixed).
 
 ## 9. Team
 - [names, roles — fill in]

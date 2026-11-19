@@ -38,8 +38,8 @@
               "entity_id": "E0093",
               "invoice_id": "SI-2025-876297",
               "payment_id": null,
-              "row_id": "GL-005586",
-              "timestamp": "2025-08-29T17:47:00+03:00"
+              "row_id": "GL-004660",
+              "timestamp": "2025-08-31T12:31:00+03:00"
             },
             {
               "account": "4000",
@@ -49,15 +49,15 @@
               "entity_id": "E0093",
               "invoice_id": "SI-2025-876297",
               "payment_id": null,
-              "row_id": "GL-005587",
-              "timestamp": "2025-08-29T17:47:00+03:00"
+              "row_id": "GL-004661",
+              "timestamp": "2025-08-31T12:31:00+03:00"
             }
           ],
           "before": null,
           "journal": "inv:SI-2025-876297"
         }
       ],
-      "description": "invoice SI-2025-876297 issued 2025-09-01 (outside the period) booked on 2025-08-29",
+      "description": "invoice SI-2025-876297 issued 2025-09-01 (outside the period) booked on 2025-08-31",
       "documents_added": [],
       "issue_id": "ISS-1",
       "scenario": "single",
@@ -71,30 +71,30 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "GBP",
-              "debit_minor": 1158479,
-              "entity_id": "E6271",
-              "invoice_id": "SI-2025-903663",
+              "debit_minor": 1586706,
+              "entity_id": "E5678",
+              "invoice_id": "SI-2025-401955",
               "payment_id": null,
-              "row_id": "GL-005603",
-              "timestamp": "2025-08-30T15:30:00+03:00"
+              "row_id": "GL-004606",
+              "timestamp": "2025-08-29T21:00:00+03:00"
             },
             {
               "account": "4000",
-              "credit_minor": 1158479,
+              "credit_minor": 1586706,
               "currency": "GBP",
               "debit_minor": 0,
-              "entity_id": "E6271",
-              "invoice_id": "SI-2025-903663",
+              "entity_id": "E5678",
+              "invoice_id": "SI-2025-401955",
               "payment_id": null,
-              "row_id": "GL-005602",
-              "timestamp": "2025-08-30T15:30:00+03:00"
+              "row_id": "GL-004607",
+              "timestamp": "2025-08-29T21:00:00+03:00"
             }
           ],
           "before": null,
-          "journal": "inv:SI-2025-903663"
+          "journal": "inv:SI-2025-401955"
         }
       ],
-      "description": "invoice SI-2025-903663 issued 2025-09-05 (outside the period) booked on 2025-08-30",
+      "description": "invoice SI-2025-401955 issued 2025-09-06 (outside the period) booked on 2025-08-29",
       "documents_added": [],
       "issue_id": "ISS-2",
       "scenario": "single",
@@ -108,23 +108,23 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "GBP",
-              "debit_minor": 226058,
-              "entity_id": "E5678",
+              "debit_minor": 2075000,
+              "entity_id": "E3718",
               "invoice_id": null,
-              "payment_id": "RCPT0518393",
-              "row_id": "GL-005551",
-              "timestamp": "2025-08-28T15:26:00+03:00"
+              "payment_id": "RCPT0013532",
+              "row_id": "GL-004575",
+              "timestamp": "2025-08-29T08:26:00+03:00"
             },
             {
               "account": "2900",
-              "credit_minor": 226058,
+              "credit_minor": 2075000,
               "currency": "GBP",
               "debit_minor": 0,
-              "entity_id": "E5678",
+              "entity_id": "E3718",
               "invoice_id": null,
-              "payment_id": "RCPT0518393",
-              "row_id": "GL-005550",
-              "timestamp": "2025-08-28T15:26:00+03:00"
+              "payment_id": "RCPT0013532",
+              "row_id": "GL-004574",
+              "timestamp": "2025-08-29T08:26:00+03:00"
             }
           ],
           "before": [
@@ -132,40 +132,29 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "GBP",
-              "debit_minor": 226058,
-              "entity_id": "E5678",
+              "debit_minor": 2075000,
+              "entity_id": "E3718",
               "invoice_id": null,
-              "payment_id": "RCPT0518393",
-              "row_id": "GL-005551",
-              "timestamp": "2025-08-28T15:26:00+03:00"
+              "payment_id": "RCPT0013532",
+              "row_id": "GL-004575",
+              "timestamp": "2025-08-29T08:26:00+03:00"
             },
             {
               "account": "1200",
-              "credit_minor": 226436,
+              "credit_minor": 2075000,
               "currency": "GBP",
               "debit_minor": 0,
-              "entity_id": "E5678",
-              "invoice_id": "SI-2025-685342",
-              "payment_id": "RCPT0518393",
-              "row_id": "pre-140",
-              "timestamp": "2025-08-28T15:26:00+03:00"
-            },
-            {
-              "account": "7900",
-              "credit_minor": 0,
-              "currency": "GBP",
-              "debit_minor": 378,
-              "entity_id": "E5678",
-              "invoice_id": null,
-              "payment_id": "RCPT0518393",
-              "row_id": "pre-141",
-              "timestamp": "2025-08-28T15:26:00+03:00"
+              "entity_id": "E3718",
+              "invoice_id": "SI-2025-754411",
+              "payment_id": "RCPT0013532",
+              "row_id": "pre-145",
+              "timestamp": "2025-08-29T08:26:00+03:00"
             }
           ],
-          "journal": "pay:RCPT0518393"
+          "journal": "pay:RCPT0013532"
         }
       ],
-      "description": "payment RCPT0518393 allocated nothing to SI-2025-685342; the rest went to unapplied cash",
+      "description": "payment RCPT0013532 allocated nothing to SI-2025-754411; the rest went to unapplied cash",
       "documents_added": [],
       "issue_id": "ISS-3",
       "scenario": "single",
@@ -179,45 +168,45 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "GBP",
-              "debit_minor": 1028769,
+              "debit_minor": 438098,
               "entity_id": "E6645",
               "invoice_id": null,
-              "payment_id": "RCPT0952238",
-              "row_id": "GL-005453",
-              "timestamp": "2025-08-25T19:32:00+03:00"
+              "payment_id": "RCPT0550241",
+              "row_id": "GL-004292",
+              "timestamp": "2025-08-21T08:48:00+03:00"
             },
             {
               "account": "1200",
-              "credit_minor": 138433,
+              "credit_minor": 328873,
+              "currency": "GBP",
+              "debit_minor": 0,
+              "entity_id": "E6645",
+              "invoice_id": "SI-2025-881905",
+              "payment_id": "RCPT0550241",
+              "row_id": "GL-004294",
+              "timestamp": "2025-08-21T08:48:00+03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 51621,
               "currency": "GBP",
               "debit_minor": 0,
               "entity_id": "E6645",
               "invoice_id": "SI-2025-765158",
-              "payment_id": "RCPT0952238",
-              "row_id": "GL-005452",
-              "timestamp": "2025-08-25T19:32:00+03:00"
-            },
-            {
-              "account": "1200",
-              "credit_minor": 595034,
-              "currency": "GBP",
-              "debit_minor": 0,
-              "entity_id": "E6645",
-              "invoice_id": "SI-2025-926590",
-              "payment_id": "RCPT0952238",
-              "row_id": "GL-005451",
-              "timestamp": "2025-08-25T19:32:00+03:00"
+              "payment_id": "RCPT0550241",
+              "row_id": "GL-004293",
+              "timestamp": "2025-08-21T08:48:00+03:00"
             },
             {
               "account": "2900",
-              "credit_minor": 295302,
+              "credit_minor": 57604,
               "currency": "GBP",
               "debit_minor": 0,
               "entity_id": "E6645",
               "invoice_id": null,
-              "payment_id": "RCPT0952238",
-              "row_id": "GL-005450",
-              "timestamp": "2025-08-25T19:32:00+03:00"
+              "payment_id": "RCPT0550241",
+              "row_id": "GL-004291",
+              "timestamp": "2025-08-21T08:48:00+03:00"
             }
           ],
           "before": [
@@ -225,40 +214,40 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "GBP",
-              "debit_minor": 1028769,
+              "debit_minor": 438098,
               "entity_id": "E6645",
               "invoice_id": null,
-              "payment_id": "RCPT0952238",
-              "row_id": "GL-005453",
-              "timestamp": "2025-08-25T19:32:00+03:00"
+              "payment_id": "RCPT0550241",
+              "row_id": "GL-004292",
+              "timestamp": "2025-08-21T08:48:00+03:00"
             },
             {
               "account": "1200",
-              "credit_minor": 138433,
+              "credit_minor": 328873,
+              "currency": "GBP",
+              "debit_minor": 0,
+              "entity_id": "E6645",
+              "invoice_id": "SI-2025-881905",
+              "payment_id": "RCPT0550241",
+              "row_id": "GL-004294",
+              "timestamp": "2025-08-21T08:48:00+03:00"
+            },
+            {
+              "account": "1200",
+              "credit_minor": 109225,
               "currency": "GBP",
               "debit_minor": 0,
               "entity_id": "E6645",
               "invoice_id": "SI-2025-765158",
-              "payment_id": "RCPT0952238",
-              "row_id": "GL-005452",
-              "timestamp": "2025-08-25T19:32:00+03:00"
-            },
-            {
-              "account": "1200",
-              "credit_minor": 890336,
-              "currency": "GBP",
-              "debit_minor": 0,
-              "entity_id": "E6645",
-              "invoice_id": "SI-2025-926590",
-              "payment_id": "RCPT0952238",
-              "row_id": "GL-005451",
-              "timestamp": "2025-08-25T19:32:00+03:00"
+              "payment_id": "RCPT0550241",
+              "row_id": "GL-004293",
+              "timestamp": "2025-08-21T08:48:00+03:00"
             }
           ],
-          "journal": "pay:RCPT0952238"
+          "journal": "pay:RCPT0550241"
         }
       ],
-      "description": "payment RCPT0952238 allocated partially to SI-2025-926590; the rest went to unapplied cash",
+      "description": "payment RCPT0550241 allocated partially to SI-2025-765158; the rest went to unapplied cash",
       "documents_added": [],
       "issue_id": "ISS-4",
       "scenario": "single",

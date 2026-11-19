@@ -369,5 +369,33 @@ class EdgeCaseDataTests(unittest.TestCase):
         self._with(crossing)
 
 
+class PolicyTextTests(unittest.TestCase):
+    def test_duplicate_evidence_built_from_the_policy_text_matches(self):
+        """An agent that follows the published evidence rule literally (both docs + one AR row of each
+        invoice) must score a TP; the rule text must name the original's row (review defect, round 2)."""
+        HEAVY = {"errors": {t: 2 for t in ISSUE_TYPES}, "interacting": {"I1": 1, "I2": 1}}
+        checked = 0
+        for mode in ("default", "hard"):
+            for seed in range(15):
+                ep = generate(seed, {**HEAVY, "difficulty": mode})
+                self.assertIn("one AR (or revenue) row of each invoice", ep["policy"]["findings"]["evidence"])
+                invs = {i["invoice_id"]: i for i in ep["tables"]["invoices"]}
+                for iss in ep["truth"]["issues"]:
+                    if iss["type"] != "duplicate_invoice":
+                        continue
+                    ev = [invs[i]["doc_id"] for i in iss["affected_ids"]]
+                    for inv_id in iss["affected_ids"]:
+                        ev.append(next(r["row_id"] for r in ep["tables"]["ledger"] if r["invoice_id"] == inv_id
+                                       and r["account"] == "1200" and r["debit_minor"] > 0 and r["payment_id"] is None))
+                    eid = ep["episode_id"]
+                    sub = {"episode_id": eid, "findings": [{
+                        "type": "duplicate_invoice", "affected_ids": iss["affected_ids"],
+                        "claimed_amount_minor": iss["expected_amount_minor"], "currency": iss["currency"],
+                        "evidence_ids": ev}]}
+                    self.assertEqual(grade(ep["truth"], sub, eid, 0)["tp"], 1, (mode, seed, ev))
+                    checked += 1
+        self.assertGreater(checked, 20)
+
+
 if __name__ == "__main__":
     unittest.main()

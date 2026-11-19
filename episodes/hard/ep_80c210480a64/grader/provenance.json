@@ -35,30 +35,30 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "KZT",
-              "debit_minor": 1831506678,
-              "entity_id": "E3429",
-              "invoice_id": "INV-495482",
+              "debit_minor": 182177179,
+              "entity_id": "E6293",
+              "invoice_id": "INV-488276",
               "payment_id": null,
-              "row_id": "L02234",
-              "timestamp": "2026-01-31T18:59:00+00:00"
+              "row_id": "L02841",
+              "timestamp": "2026-01-30T18:46:00+00:00"
             },
             {
               "account": "4000",
-              "credit_minor": 1831506678,
+              "credit_minor": 182177179,
               "currency": "KZT",
               "debit_minor": 0,
-              "entity_id": "E3429",
-              "invoice_id": "INV-495482",
+              "entity_id": "E6293",
+              "invoice_id": "INV-488276",
               "payment_id": null,
-              "row_id": "L02237",
-              "timestamp": "2026-01-31T18:59:00+00:00"
+              "row_id": "L02840",
+              "timestamp": "2026-01-30T18:46:00+00:00"
             }
           ],
           "before": null,
-          "journal": "inv:INV-495482"
+          "journal": "inv:INV-488276"
         }
       ],
-      "description": "invoice INV-495482 issued 2026-02-02 (outside the period) booked on 2026-01-31",
+      "description": "invoice INV-488276 issued 2026-02-03 (outside the period) booked on 2026-01-30",
       "documents_added": [],
       "issue_id": "ISS-1",
       "scenario": "I2",
@@ -66,7 +66,7 @@
     },
     {
       "changes": [],
-      "description": "invoice INV-495482 converted with the 2026-01-31 rate instead of 2026-02-02",
+      "description": "invoice INV-488276 converted with the 2026-01-30 rate instead of 2026-02-03",
       "documents_added": [],
       "issue_id": "ISS-2",
       "scenario": "I2",

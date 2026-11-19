@@ -119,7 +119,9 @@ Actions (`type` + params):
 - `{"type":"calculator","expression":str}` → `{value: str}`
 - `{"type":"submit","findings":{episode_id, findings:[...]}}` → terminates.
 
-Errors (unknown action/table/id, bad params) consume a step; codes:
+Errors (unknown action/table/id, bad params — including parameters not listed for the action, as in
+`schemas/action.schema.json`; a `submit` with such parameters still ends the episode, as an invalid
+submission) consume a step; codes:
 `unknown_action, bad_params, unknown_table, not_found, calc_error, episode_over`, plus
 `time_limit` (wall-clock limit hit → truncated) and `invalid_findings` (train mode only; in eval
 the policy just sees `{"submitted": true}`).

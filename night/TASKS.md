@@ -1,43 +1,117 @@
-# TASKS — night/2026-11-19
+# TASKS — round 2 (polish run, night/2026-11-19-r2)
 
-Format: `- [ ] T<n> (owner) task — files: <paths> — accept: <check>`.
-Interfaces: `docs/CONTRACT.md` (read it before any task). Tests: stdlib `unittest`.
-Test command for everything: `uv run python -m unittest discover -s tests -t .`
-Workers: take only your tagged tasks, in order; a task saying "after Tn" waits until Tn is `[x]`
-on `origin/night/2026-11-19` (merge it first). Touch only the listed files.
+Goals: `night/ROUND2.md`. Ideas: `HANDOFF.md` → "Ideas to improve".
+Format: `- [ ] ID (owner) task — files: <paths> — accept: <check>`. `[x]` only after the check passed.
+Every task also requires: `uv run python -m auditenv.check` exit 0 (workers may run the unit tests
+`uv run python -m unittest discover -s tests -t .` instead if check is slow). Never change the reset/step
+contract, actions, findings format or the shared reward (`matcher.py`, `metrics.py` logic). Stdlib only.
+Workers: touch ONLY the files listed for your task.
 
-## Phase 1 — contract + core (end-to-end as early as possible)
-- [x] T1 (lead) Skeleton: pyproject (py3.11, no deps), package, tests dir, LICENSE, contract doc — files: pyproject.toml, auditenv/__init__.py, tests/__init__.py, LICENSE, docs/CONTRACT.md — accept: `uv run python -c "import auditenv"`
-- [x] T2 (codex) Safe calculator: `evaluate(expression: str) -> str` using `ast` + `decimal.Decimal` (prec 28). Allowed: int/decimal literals, `+ - * /`, unary `+ -`, parentheses. Reject everything else (names, calls, `**`, `%`, `//`, strings, attributes, exponents like `1e5`), expressions > 200 chars, division by zero, |result| > 1e30 → raise `CalculatorError(message)` (message ≤ 100 chars, never echoes more than 40 chars of input). Result: normalized plain decimal string (`"3"`, `"0.5"`, `"-12.345"`, no exponent notation) — files: auditenv/calculator.py, tests/test_calculator.py — accept: `uv run python -m unittest tests.test_calculator` passes with ≥ 15 cases incl. `"__import__('os')"`, `"2**10"`, `"1/0"`, `"a+1"`, `"(1.10+2.205)*3"`
-- [x] T3 (gemini) Findings validator: `validate_findings(obj, episode_id: str) -> str | None` (None = valid, else short error message) and `normalize_finding(f: dict) -> dict` (strip ids, dedupe+sort affected_ids, strip+sort+dedupe evidence_ids, uppercase currency). Rules exactly as CONTRACT §5 (`ISSUE_TYPES` constant tuple of the 4 types, `MAX_FINDINGS=30`, `MAX_EVIDENCE=10`, `MAX_EXPLANATION=1000`, `MAX_AFFECTED=10`). Extra unknown keys in a finding → invalid. `explanation` optional, default "" — files: auditenv/schema.py, tests/test_schema.py — accept: `uv run python -m unittest tests.test_schema` with ≥ 15 cases (wrong episode_id, 31 findings, 11 evidence, bool amount, negative amount, float amount, lowercase currency invalid in validation, unknown type, non-dict, missing keys, empty affected_ids)
-- [x] T4 (codex) Metrics: in `auditenv/metrics.py` `prf1(tp, fp, fn) -> (p, r, f1)` floats: p = tp/(tp+fp) or 0.0 if denominator 0; r = tp/(tp+fn) or 0.0; f1 = 2tp/(2tp+fp+fn), and f1 = 1.0 when tp=fp=fn=0 (empty truth + empty findings) and `terminal_reward(f1: float, inspection_steps: int) -> float` = clip(2*f1-1-0.002*steps, -1, 1), rounded to 6 decimals — files: auditenv/metrics.py, tests/test_metrics.py — accept: `uv run python -m unittest tests.test_metrics` ≥ 8 cases
-- [x] T5 (lead) Money/FX/time utils + generator: hidden company history (entities, invoices, payments, expenses, fx table), correct ledger, errors `duplicate_invoice` + `fx_error`, truth + provenance — files: auditenv/money.py, auditenv/generator.py, auditenv/inject.py, tests/test_generator.py — accept: same seed → identical JSON; ledger journals balance pre-injection; truth issues reproduce from records
-- [x] T6 (lead) Matcher + reward over truth/findings — files: auditenv/matcher.py, tests/test_matcher.py — accept: unit tests (TP/FP/FN, duplicates, wrong currency, tolerance, evidence)
-- [x] T7 (lead) Env reset/step, tools, limits, train/eval modes, grader log — files: auditenv/env.py, tests/test_env.py — accept: tests for paging/cursors, errors consume steps, 100-step truncation, submit terminates, step after end, no truth keys in any observation
-- [x] T8 (lead) Remaining error types `payment_allocation`, `period_cutoff`; clean companies; distractors (split/partial payments, refunds, recurring amounts, tz boundary, unidentified receipts) — files: auditenv/generator.py, auditenv/inject.py, tests/test_generator.py — accept: tests per type + clean episode has empty truth
-- [x] T9 (lead) Interacting scenarios I1, I2 + benign transform (`transform_seed`: relabel ids, permute rows) — files: auditenv/generator.py, auditenv/inject.py, auditenv/transform.py, tests/test_transform.py — accept: oracle reward identical before/after transform
-- [x] T10 (lead) Independent verifier: pre-injection accounting equalities, post-injection declared discrepancy recomputed from the evidence records only, evidence ids exist in public tables — files: auditenv/verify.py, tests/test_verify.py — accept: verifier passes on 200 seeds of mixed configs
+## Block 1 — reward / contract / isolation
+- [x] R2 (codex) Mutation testing of the reward: new `scripts/mutate_reward.py` applies ~15 single-line source
+  mutations, one at a time, to an in-memory copy of `auditenv/matcher.py` and `auditenv/metrics.py` (e.g. flip
+  `<=`/`<`, change tolerance constant, drop a check in `_checks`, swap precision/recall, remove dedup, change step
+  cost), writes the mutated module to a temp dir copy of the package (never edit the real files), runs
+  `python -m unittest tests.test_matcher tests.test_reward_attacks tests.test_jury tests.test_metrics` against it,
+  and prints a table mutant → killed/survived; exit 1 if any mutant survives. If a mutant survives, add a test that
+  kills it to `tests/test_reward_attacks.py` (the test must pass on the real code) — files: scripts/mutate_reward.py,
+  tests/test_reward_attacks.py, tests/test_mutate_reward.py (smoke test: the script's mutant list is non-empty and
+  every mutation pattern matches the source exactly once) — accept: `uv run python scripts/mutate_reward.py` exit 0,
+  all mutants killed; `uv run python -m unittest tests.test_mutate_reward tests.test_reward_attacks` green
+- [x] C3 (codex) Injectable clock for the 60 s limit: `AuditEnv(clock=time.monotonic)` — optional constructor
+  argument, default unchanged; replace the three `time.monotonic()` calls in `auditenv/env.py` with `self._clock()`.
+  New `tests/test_clock.py` with a fake clock: (a) a step at elapsed 59.9 s works, (b) the first step after 60.0+ s
+  returns error code `time_limit`, truncated=True, terminated=False, empty-answer grade in train mode, (c) the step
+  after that returns `episode_over`, (d) a custom `time_limit_s` in config is honoured, (e) eval mode: no reward/info
+  leak on time limit (info == {} and reward == 0.0). No sleeping in tests — files: auditenv/env.py, tests/test_clock.py
+  — accept: `uv run python -m unittest tests.test_clock tests.test_env` green; `uv run python -m auditenv.check` exit 0
+- [x] C2 (gemini) Bound request size and bad bytes in `auditenv/server.py`: read stdin as bytes (`sys.stdin.buffer`),
+  reject any request line longer than 1 MiB (constant `MAX_LINE = 1 << 20`) with `{"error": "request too large"}`
+  without parsing it, decode UTF-8 strictly and answer `{"error": "invalid utf-8"}` on failure; the server keeps
+  serving after either error (next valid request works). Keep the JSON-lines protocol and all existing responses
+  unchanged; `serve()` must still accept text streams used by existing tests (accept both bytes and str lines).
+  Tests in `tests/test_server.py` (in-process `serve()` with io.BytesIO/StringIO, plus one subprocess test sending a
+  10 MB line and invalid UTF-8 then a valid reset) — files: auditenv/server.py, tests/test_server.py — accept:
+  `uv run python -m unittest tests.test_server` green; `uv run python -m auditenv.check` exit 0 (remote gate passes)
 
-## Phase 2 — baselines, trajectories, episodes, check command
-- [x] T11 (codex) start now (code against CONTRACT §4/§7; run the env tests once T7 is [x]): baselines `RandomExplorer(seed)` (random list/get/get_document actions for 20–40 steps using ids seen in observations, then submits 0–3 findings built from seen ids with random types; deterministic per seed) and `FlagAll` (lists all invoices+payments pages, then submits up to 30 findings: every seen invoice/payment id × each type, amount = its total converted naively 1:1, evidence = its doc_id) — files: auditenv/policies/__init__.py, auditenv/policies/random_explorer.py, auditenv/policies/flag_all.py, tests/test_baselines_simple.py — accept: test runs both on 5 seeds via `auditenv.run.run_episode`; same seed → identical trajectory; FlagAll mean reward < 0
-- [x] T12 (gemini) start now — generator is in (`auditenv.generator.generate(seed, config)` returns `{manifest, policy, tables, truth}`; all 4 error types + I1/I2 already injected). Write a pure function `reconcile_findings(manifest, tables) -> list[finding]` and test it directly on `generate()` output vs `truth` (no env needed); the `Reconcile` policy class (pages all 4 tables via actions, then calls the function) is tested once T7 is [x]. Rule-based findings per CONTRACT §2–3 (duplicates = same entity+currency+identical line_items; fx = recompute AR debit with rate of the issue date in company tz; cutoff = invoice issue date in company tz outside period but has AR row; allocation = payment ref amount converted vs AR credit for that invoice+payment), evidence per CONTRACT §3 — files: auditenv/policies/reconcile.py, tests/test_reconcile.py — accept: on 10 dev seeds mean F1 ≥ 0.5 and ≤ 6% of steps are errors
-- [x] T13 (lead) Oracle (grader-side) + runner + trajectories.jsonl writer — files: auditenv/policies/oracle.py, auditenv/run.py, tests/test_run.py — accept: oracle reward == max on 50 seeds; trajectories contain no truth keys
-- [x] T14 (lead) Out-of-process grader: JSON-lines stdio server + client; eval mode keeps reward in grader file — files: auditenv/server.py, auditenv/client.py, tests/test_server.py — accept: policy run via subprocess gets identical trajectory to in-process (train), reward 0 in eval
-- [x] T15 (lead) Reward attack tests (section 05 list: correct > silence on dirty, silence > false accusations on clean, duplicates no gain, flag-all bad, step cost small; guessed ids, unsupported evidence, wrong currency, resubmit, bad input, timeout) — files: tests/test_reward_attacks.py — accept: all pass
-- [x] T16 (gemini) after T9 (done): episode export + configs. Config file format (CHANGED): `{"config_version": "1.0", "split": "dev", "episodes": [{"seed": int, "config": {...}}, ...]}`. Write `configs/train.json` (10 episodes, seeds 1000–1009), `configs/dev.json` (10 episodes, seeds 2000–2009) — in each: 2 clean (`{"errors": {}}`), 2 with interacting errors (`"interacting": {"I1": 1}` / `{"I2": 1}` plus 1–2 single errors), 6 mixed single-error configs (vary counts 1–3 per type, total ≤ 12; vary `n_invoices` 30–80) — and `configs/eval_example.json` (20 episodes, seeds 9000–9019: 5 clean, 5 interacting, 10 mixed; mirrors the organisers' hidden-run shape). `python -m auditenv.export --config configs/dev.json --out episodes/dev` writes `<episode_id>/public/{manifest.json,ledger.csv,invoices.jsonl,payments.jsonl,fx.csv,policy.json}` and `<episode_id>/grader/{truth.json,provenance.json}` (CSV: header = CONTRACT §2 field order, null → empty cell; JSON with sort_keys, indent 2; jsonl one record per line, sort_keys) plus `episodes/<split>/index.json` (list of `{episode_id, seed, config}`); export train + dev into `episodes/train`, `episodes/dev` and commit them — files: auditenv/export.py, configs/train.json, configs/dev.json, configs/eval_example.json, episodes/, tests/test_export.py — accept: export twice → byte-identical; every exported episode passes `auditenv.verify.verify_episode(generate(seed, config))`; test passes
-- [x] T17 (lead) Single check command: tests + verifier + 4 baselines on dev + paired checks → table P/R/F1/return/steps/time — files: auditenv/check.py, Makefile — accept: `uv run python -m auditenv.check` exits 0
-- [x] T18 (codex) Dockerfile (python:3.11-slim, copies repo, `CMD ["python","-m","auditenv.check"]`, no network needed at run) + .dockerignore — files: Dockerfile, .dockerignore — accept: `grep -q 'python:3.11-slim' Dockerfile && grep -q 'auditenv.check' Dockerfile`
-- [x] T23 (codex) Failure analysis: `python -m auditenv.analyze --policy reconcile --seeds 2000-2009 [--config configs/dev.json] [--json out.json]` runs a policy in-process (reuse `auditenv.run.make_policy`/`run_episode`), aggregates grader-side `env.result` over episodes: per issue type TP/FN (TP labels carry issue_id → look up type in `env._ep["truth"]`; FN from `result["missed"]`), per scenario (single/I1/I2) recall, FP counts by `labels[i]["reason"]`, mean P/R/F1/return/steps; prints a markdown table; `--json` writes the same numbers. Works for policies random, flag_all, oracle now and reconcile once T12 lands — files: auditenv/analyze.py, tests/test_analyze.py — accept: `uv run python -m unittest tests.test_analyze` (oracle → recall 1.0 for every type and 0 FP; flag_all → FP > 0)
-- [x] T24 (codex) JSON Schemas (draft 2020-12) documenting the contract: `schemas/findings.schema.json` (CONTRACT §5 incl. limits 30/10/1000, enum of the 4 types, additionalProperties false), `schemas/action.schema.json` (oneOf the 5 actions, CONTRACT §4), `schemas/observation.schema.json` (first obs + step obs), `schemas/manifest.schema.json`, `schemas/truth.schema.json` (issue: issue_id, type, scenario, affected_ids, expected_amount_minor, currency, evidence_sets), `schemas/trajectory_step.schema.json` (episode_id, step, action, observation, reward, terminated, truncated) — files: schemas/*.json, tests/test_schemas.py — accept: test loads every schema with `json`, checks enums/limits equal `auditenv.schema` constants, and checks with a tiny hand-written required-keys/type walker (no external libs) that real objects from `auditenv.generator.generate(1)` (manifest, truth) and from an `AuditEnv` episode (first obs, step obs, a trajectory step from `auditenv.run.run_episode` with the oracle) conform
-- [x] T25 (codex) Experimental reward (reported separately, the shared reward stays unchanged): `auditenv/experimental.py` `experimental_reward(result: dict, truth: dict) -> float` = clip(amount-weighted F1 * 2 - 1 - 0.002*inspection_steps, -1, 1) where TP weight = expected_amount_minor of the matched issue, FN weight = its expected amount, FP weight = the claimed amount of that finding (needs `findings`: pass them in as a 3rd arg `findings: list`); docstring explains why (material misstatements matter more) — files: auditenv/experimental.py, tests/test_experimental.py — accept: tests: oracle → 1.0; silence on clean → 1.0; missing the largest issue costs more than missing the smallest; never changes `matcher.grade` output
-- [x] T26 (codex) `NaiveReconcile` baseline = what a careless reconciliation does (shows the distractors work): pages ledger, invoices, payments, fx (no get_document), then flags: duplicate_invoice = same entity_id + currency + total_minor (ignores line items → trips on legit recurring retainers); period_cutoff and fx dates = the date written in the timestamp string itself (`ts[:10]`, ignores company timezone); fx_error = invoice AR debit vs total converted at the written-date rate (payments not checked); payment_allocation = every payment journal with a 2900 credit, amount = that credit, affected [first ref invoice_id or skip if refs null, payment_id] (trips on overpayments/refunds); evidence as CONTRACT §3. Class `NaiveReconcile(seed=0)`, `name = "naive_reconcile"` — files: auditenv/policies/naive_reconcile.py, tests/test_naive_reconcile.py — accept: on 10 seeds of `{"errors": {}}` with distractors it produces ≥ 1 FP in at least 5 episodes; on dirty seeds its F1 is lower than `Reconcile`'s (mean over 10 seeds); deterministic
+## Block 2 — reproducibility / data
+- [x] P1 (gemini) Golden hashes: new `scripts/golden.py` computes sha256 of `json.dumps(generate(seed, config),
+  sort_keys=True, separators=(",", ":"))` for seeds 0–19 × configs [default `{}`, `{"errors": {}}`,
+  `{"difficulty": "hard"}`, `{"transform_seed": 7}`] (80 hashes) and writes `tests/golden_hashes.json`
+  (`{"<config-json>|<seed>": "<hex>"}`); `--check` mode compares and exits 1 on drift. New `tests/test_golden.py`
+  recomputes all 80 and asserts equality, with a message telling to run `scripts/golden.py` after an intended
+  generator change (and to re-export episodes). Use `from auditenv.generator import generate` — files:
+  scripts/golden.py, tests/golden_hashes.json, tests/test_golden.py — accept: `uv run python -m unittest
+  tests.test_golden` green and < 20 s; `uv run python scripts/golden.py --check` exit 0
+- [x] P2 (lead) Paired checks for hard mode inside `auditenv.check` (seed replay + transform keeps oracle reward,
+  hard config); confirm transform shuffles FX (it does) — files: auditenv/check.py, tests/ — accept: check prints the
+  hard paired gate and exits 0
+- [x] D4 (lead) Shortcut miner: new `scripts/shortcut_miner.py` — for each truth issue type, single-column predictors
+  (hour, weekday, id format/suffix, amount pattern, row position, description tokens) on 1 000 seeds; report max
+  precision; fix any leak > 0.5 in the generator (re-export) — files: scripts/shortcut_miner.py, generator/inject
+  if needed — accept: miner reports no column > 0.5 (or documented why acceptable)
+- [x] D2 (lead) Decide/document "nothing allocated" evidence for payment_allocation (DESIGN §7) — files:
+  docs/DESIGN.md (+ inject/verify if changed) — accept: verify 0 problems, decision in DESIGN
 
-## Phase 3 — docs and jury materials
-- [x] T28 (gemini) Load exported episodes back from disk and verify them: `auditenv/load.py` `load_episode(path) -> dict` (inverse of export: CSV empty cell → None, ints back to int for debit_minor/credit_minor, rate stays a string; returns `{episode_id, manifest, policy, tables, truth, provenance}`), and `python -m auditenv.verify --dir episodes/dev` (add a `--dir` option to `auditenv/verify.py` main: verify every `<dir>/*/` episode, print problems, exit 1 on any) — files: auditenv/load.py, auditenv/verify.py (main() only), tests/test_load.py — accept: for every committed episode under episodes/train and episodes/dev, `load_episode` equals `generate(seed, config)` (from index.json) minus the `task` key, and `verify_episode` returns []; `uv run python -m auditenv.verify --dir episodes/dev` exits 0
-- [x] T29 (codex) Fuzz test of the env contract: `tests/test_fuzz.py` plays ≥ 3000 random actions over ≥ 30 episodes (seeded `random.Random`): random/missing/wrong-typed `type`, `table`, `id`, `doc_id`, `cursor`, `limit`, `expression` (incl. huge strings, nested dicts, None, numbers, unicode), occasional valid actions and random submits (valid and malformed). Assert: `step` never raises; every observation has exactly keys step/steps_remaining/result/error; error is None or {code, message} with code in the CONTRACT list and len(message) ≤ 200; steps_remaining decreases by exactly 1 per step until the end; after terminated/truncated further steps return episode_over; reward is 0.0 on non-terminal steps and in [-1, 1] at the end; json.dumps(observation) works — files: tests/test_fuzz.py — accept: `uv run python -m unittest tests.test_fuzz` passes in < 20 s; if it finds an env bug, do not edit env.py: log the failing action in LOG.md and mark the task [!]
-- [x] T27 (lead) after T16: training trajectories: `trajectories/train_reconcile.jsonl` and `trajectories/train_random.jsonl` (train split, mode train) + README/DESIGN pointers — files: trajectories/, README.md — accept: every line matches schemas/trajectory_step.schema.json keys; no truth keys in observations
-- [x] T30 (codex) `auditenv/analyze.py`: report pooled (micro) P/R/F1 from summed TP/FP/FN exactly like `auditenv/check.py` (use `auditenv.metrics.prf1`), keep mean return/steps; round every float to 3 decimals in the markdown and the `--json` output; column headers "P (micro)", "R (micro)", "F1 (micro)" — files: auditenv/analyze.py, tests/test_analyze.py — accept: `uv run python -m unittest tests.test_analyze`; reconcile on configs/dev.json shows 1.0/1.0/1.0; naive_reconcile shows the same P/R/F1 as the check table (0.177/0.733/0.286)
-- [x] T19 (lead) Design note: architecture, generator, errors, matcher/tolerance/tie rules, measured failure analysis, honest limitations — files: docs/DESIGN.md — accept: every number in it comes from `auditenv.check` output
-- [x] T20 (lead) README: what it is, one-command check, container, run a policy, file layout — files: README.md — accept: every command in it runs
-- [x] T21 (lead) `docs/DEMO.md` — demo-video script: 2–3 min, numbered steps, exact commands and inputs, what to say, which result to show — files: docs/DEMO.md — accept: every command runs
-- [x] T22 (lead) `docs/PITCH.md` — slide outline: problem → solution → live demo → how it works → results/metrics → what's next → team; ≤ 4 bullets per slide, facts from the code — files: docs/PITCH.md — accept: numbers match check output
+## Block 3 — measured design / engineering
+- [x] E2 (gemini) Timing benchmark: new `scripts/bench.py` measures wall time (time.perf_counter, median of 3) of
+  (a) `generate()` for seeds 0–99 default and hard, (b) one full episode per policy (`auditenv.run` APIs) on
+  `configs/dev.json` and `configs/eval_hard.json`, (c) `auditenv.verify` over seeds 0–99; prints a markdown table
+  and with `--json PATH` writes the numbers; prints Python version and `platform.platform()`. Do NOT edit docs — the
+  lead pastes the table into DESIGN — files: scripts/bench.py, tests/test_bench.py (smoke test running a tiny
+  subset via a function call, < 10 s) — accept: `uv run python scripts/bench.py` prints the table, exit 0;
+  `uv run python -m unittest tests.test_bench` green
+- [x] E3a (codex) Makefile targets `fuzz` (`uv run python -m auditenv.fuzz --seeds 0-999`), `stress`
+  (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299` and the hard variant `--hard --stress
+  reconcile_hard --seeds 0-299` if `--hard` supports it — check `auditenv/fuzz.py`), `attack`
+  (`uv run python -m auditenv.attack`), `golden` (`uv run python scripts/golden.py --check`), `mutate`
+  (`uv run python scripts/mutate_reward.py`), `.PHONY` updated — files: Makefile — accept: `make -n fuzz stress attack`
+  prints the commands; `make fuzz` exit 0
+- [x] R3 (lead) Sensitivity table: baseline ranking under step cost 0.001/0.002/0.005 and tolerance 0/0.1 %/1 %
+  (grader-side param in analysis only, shared reward unchanged) — files: auditenv/analyze.py or scripts/, DESIGN §6 —
+  accept: table in DESIGN, ranking stated
+- [x] H2 (lead) Step-budget margin with 100 invoices + 12 issues (+ hard) via `fuzz --stress`; keep max ≤ 80 —
+  files: DESIGN — accept: numbers in DESIGN from the stress output
+- [x] E3b (lead) Hard-mode trajectories `trajectories/train_hard_*.jsonl`, CI badge in README — files: README.md,
+  trajectories/, tests — accept: test_trajectory_files green
+- [x] E4 (lead) Stdlib SVG chart of baseline returns (dev vs hard) for the pitch: `scripts/chart.py` →
+  `docs/baselines.svg` from `check --json` — files: scripts/chart.py, docs/baselines.svg, docs/PITCH.md — accept:
+  SVG renders, numbers match check
+
+## Block 3b — added by the lead after the first merge (21:50)
+- [x] M1 (codex) Shortcut-miner noise filter + make targets: in `scripts/shortcut_miner.py` exclude from FLAGGING (still
+  report them in a separate "excluded: per-episode random identifiers" list) every feature whose value is a raw
+  per-episode random identifier (entity_id, counterparty/customer ids, invoice/payment/row id values themselves —
+  NOT id format/length/prefix features, those stay flagged) since such values cannot transfer between episodes;
+  print how many values were excluded. Add Makefile targets `miner` (`uv run python scripts/shortcut_miner.py
+  --report-only`), `bench` (`uv run python scripts/bench.py`), `sensitivity` (`uv run python scripts/sensitivity.py`),
+  `chart` (`uv run python -m auditenv.check --json /tmp/auditenv-metrics.json && uv run python scripts/chart.py`),
+  update `.PHONY`. Do not change labels, other features or the 0.5 threshold — files: scripts/shortcut_miner.py,
+  tests/test_shortcut_miner.py (test: an entity_id feature is never flagged), Makefile — accept: `uv run python -m
+  unittest tests.test_shortcut_miner` green; `uv run python scripts/shortcut_miner.py --seeds 0-199 --report-only`
+  shows no `entity_id` value among flagged items; `make -n miner bench sensitivity chart` prints the commands
+- [x] G1 (gemini) `docs/CHECKS.md` — jury criteria map. One section per criterion of `night/SPEC.md` §10 (Контракт и
+  изоляция 25, Данные и эталон 25, Надёжность награды 25, Воспроизводимость и обобщение 15, Инженерия и объяснение 10).
+  For each: a table "what the jury checks → where it lives (file / test name) → command to see it → measured result".
+  Find the tests with `grep -n "def test" tests/test_jury.py tests/test_env.py tests/test_reward_attacks.py
+  tests/test_verify.py tests/test_hardening.py tests/test_clock.py tests/test_server.py tests/test_golden.py` and
+  the gates in `auditenv/check.py`. Measured results ONLY as pass counts copied from real output you ran (e.g.
+  "20/20 pairs pass", "600/600 episodes valid", "15/15 mutants killed", "80 golden hashes match") — NO baseline
+  returns/F1 numbers (they are in README and change). Commands to run: `uv run python -m auditenv.check`,
+  `uv run python -m auditenv.verify --seeds 0-199`, `uv run python scripts/mutate_reward.py`,
+  `uv run python scripts/golden.py --check`, `uv run python -m auditenv.attack`, `uv run python -m unittest
+  tests.test_fuzz`. Engineering: one-command run, versioned configs (`configs/`), trajectory logs (`trajectories/`),
+  measured failure analysis (`auditenv.analyze`), honest limitations (`docs/DESIGN.md` §10). English, terse —
+  files: docs/CHECKS.md only — accept: every command in it exits 0 when run; every file/test name it cites exists
+  (`grep` it)
+
+## Block 4 — optional (only if 1–3 done)
+- [!] H1 (lead) SKIPPED (see LOG 22:0x) "expert" difficulty (opt-in) — accept: new check gates, default episodes byte-identical
+- [!] E5 (lead) SKIPPED (see LOG) Rule-search baseline — last, skip if short on time
+
+## Jury materials (last)
+- [x] J1 (lead) `docs/DEMO.md` — demo-video script: 2–3 min, numbered steps, exact commands, what to say, which
+  result to show; refresh for round-2 features — files: docs/DEMO.md — accept: every command runs
+- [x] J2 (lead) `docs/PITCH.md` — slide outline: problem → solution → live demo → how it works → results/metrics →
+  what's next → team; ≤ 4 bullets per slide, facts from the code; refresh numbers — files: docs/PITCH.md — accept:
+  numbers match check output (`scripts/sync_docs.py --check`)

@@ -15,6 +15,10 @@ PAGE_MAX = 50
 DEFAULTS = {"mode": "train", "max_steps": 100, "time_limit_s": 60.0}
 CONFIG_KEYS = {"mode", "max_steps", "time_limit_s", "errors", "interacting", "n_invoices", "distractors",
                "transform_seed", "difficulty"}
+ACTION_KEYS = {  # schemas/action.schema.json: additionalProperties false
+    "list_records": {"type", "table", "cursor", "limit"}, "get_record": {"type", "table", "id"},
+    "get_document": {"type", "doc_id"}, "calculator": {"type", "expression"}, "submit": {"type", "findings"},
+}
 TOOLS = [
     {"type": "list_records", "params": {"table": "ledger|invoices|payments|fx", "cursor": "null|str",
                                         "limit": "int<=50"},
@@ -37,12 +41,15 @@ class ToolError(Exception):
 class AuditEnv:
     """One episode at a time. `grader_log` is grader-side state; never send it to a policy."""
 
-    def __init__(self):
+    def __init__(self, clock=time.monotonic):
+        self._clock = clock
         self._ep = None
         self.grader_log: list[dict] = []
 
     # ------------------------------------------------------------------ API
     def reset(self, seed: int, config: dict | None = None):
+        if isinstance(seed, bool) or not isinstance(seed, int):
+            raise ValueError("seed must be an int")
         config = dict(config or {})
         unknown = set(config) - CONFIG_KEYS
         if unknown:
@@ -53,8 +60,8 @@ class AuditEnv:
         if isinstance(cfg["max_steps"], bool) or not (isinstance(cfg["max_steps"], int) and 1 <= cfg["max_steps"] <= 100):
             raise ValueError("max_steps must be an int in [1, 100]")
         tl = cfg["time_limit_s"]
-        if isinstance(tl, bool) or not isinstance(tl, (int, float)) or tl < 0:
-            raise ValueError("time_limit_s must be a non-negative number")
+        if isinstance(tl, bool) or not isinstance(tl, (int, float)) or not 0 <= tl < float("inf"):
+            raise ValueError("time_limit_s must be a finite non-negative number")
         self._cfg = cfg
         self._ep = generate(seed, config)
         t = self._ep["tables"]
@@ -64,7 +71,7 @@ class AuditEnv:
         self._steps = 0
         self._done = False
         self._terminated = self._truncated = False
-        self._start = time.monotonic()
+        self._start = self._clock()
         self.result = None
         obs = {"task": self._ep["task"], "manifest": copy.deepcopy(self._ep["manifest"]),
                "policy": copy.deepcopy(self._ep["policy"]), "tools": copy.deepcopy(TOOLS),
@@ -93,15 +100,19 @@ class AuditEnv:
             return obs, 0.0, self._terminated, self._truncated, {}
         self._steps += 1
         result, error, reward, terminated, truncated, info = None, None, 0.0, False, False, {}
-        timed_out = time.monotonic() - self._start > float(self._cfg["time_limit_s"])
+        timed_out = self._clock() - self._start > float(self._cfg["time_limit_s"])
         if timed_out:
             error = {"code": "time_limit", "message": "time limit reached"}
         else:
             try:
                 kind = action.get("type") if isinstance(action, dict) else None
-                if kind == "submit":
+                extra = set(action) - ACTION_KEYS[kind] if kind in ACTION_KEYS else set()
+                bad = f"unknown parameters for {kind}: {sorted(map(str, extra))[:5]}"[:160] if extra else None
+                if bad and kind != "submit":
+                    raise ToolError("bad_params", bad)
+                if kind == "submit":  # submit always ends the episode; a malformed one is an invalid submission
                     terminated = True
-                    res = self._finish(action.get("findings"), self._steps - 1, "submit")
+                    res = self._finish(action.get("findings"), self._steps - 1, "submit", error=bad)
                     if self._cfg["mode"] == "train":
                         reward, info = res["reward"], public_summary(res)
                         result = {"submitted": True, "accepted": res["valid"]}
@@ -127,14 +138,16 @@ class AuditEnv:
         return obs, reward, terminated, truncated, info
 
     # ------------------------------------------------------------------ internals
-    def _finish(self, submission, inspection_steps: int, how: str) -> dict:
-        res = grade(self._ep["truth"], submission, self.episode_id, inspection_steps)
+    def _finish(self, submission, inspection_steps: int, how: str, error: str | None = None) -> dict:
+        res = grade(self._ep["truth"], None if error else submission, self.episode_id, inspection_steps)
+        if error:  # grade(None) is the invalid-submission result; keep the real reason
+            res["error"] = error
         # experimental materiality-weighted reward: grader-side only, reported next to the shared one
         res["experimental_reward"] = experimental_reward(
             res, self._ep["truth"], submission["findings"] if res["valid"] else [])
         self.result = res
         self.grader_log.append({"episode_id": self.episode_id, "end": how, "steps": self._steps,
-                                "elapsed_s": round(time.monotonic() - self._start, 4), **res})
+                                "elapsed_s": round(self._clock() - self._start, 4), **res})
         return res
 
     def _tool(self, kind, action: dict):

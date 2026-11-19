@@ -34,30 +34,30 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 56700,
-              "entity_id": "CUST39185",
-              "invoice_id": "F0631166",
+              "debit_minor": 1194364,
+              "entity_id": "CUST43449",
+              "invoice_id": "F0752520",
               "payment_id": null,
-              "row_id": "L02633",
-              "timestamp": "2025-09-01T16:45:00+09:00"
+              "row_id": "L03706",
+              "timestamp": "2025-09-29T18:11:00+09:00"
             },
             {
               "account": "4000",
-              "credit_minor": 56700,
+              "credit_minor": 1194364,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "CUST39185",
-              "invoice_id": "F0631166",
+              "entity_id": "CUST43449",
+              "invoice_id": "F0752520",
               "payment_id": null,
-              "row_id": "L02632",
-              "timestamp": "2025-09-01T16:45:00+09:00"
+              "row_id": "L03705",
+              "timestamp": "2025-09-29T18:11:00+09:00"
             }
           ],
           "before": null,
-          "journal": "inv:F0631166"
+          "journal": "inv:F0752520"
         }
       ],
-      "description": "invoice F0631166 issued 2025-08-25 (outside the period) booked on 2025-09-01",
+      "description": "invoice F0752520 issued 2025-10-07 (outside the period) booked on 2025-09-29",
       "documents_added": [],
       "issue_id": "ISS-1",
       "scenario": "single",
@@ -71,23 +71,23 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 1050202,
-              "entity_id": "CUST43449",
-              "invoice_id": "F0032037",
+              "debit_minor": 285973,
+              "entity_id": "CUST70078",
+              "invoice_id": "F0215826",
               "payment_id": null,
-              "row_id": "L02846",
-              "timestamp": "2025-09-08T16:47:00+09:00"
+              "row_id": "L03479",
+              "timestamp": "2025-09-24T08:05:00+09:00"
             },
             {
               "account": "4000",
-              "credit_minor": 1050202,
+              "credit_minor": 285973,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "CUST43449",
-              "invoice_id": "F0032037",
+              "entity_id": "CUST70078",
+              "invoice_id": "F0215826",
               "payment_id": null,
-              "row_id": "L02845",
-              "timestamp": "2025-09-08T16:47:00+09:00"
+              "row_id": "L03480",
+              "timestamp": "2025-09-24T08:05:00+09:00"
             }
           ],
           "before": [
@@ -95,29 +95,29 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "EUR",
-              "debit_minor": 1056626,
-              "entity_id": "CUST43449",
-              "invoice_id": "F0032037",
+              "debit_minor": 283992,
+              "entity_id": "CUST70078",
+              "invoice_id": "F0215826",
               "payment_id": null,
-              "row_id": "L02846",
-              "timestamp": "2025-09-08T16:47:00+09:00"
+              "row_id": "L03479",
+              "timestamp": "2025-09-24T08:05:00+09:00"
             },
             {
               "account": "4000",
-              "credit_minor": 1056626,
+              "credit_minor": 283992,
               "currency": "EUR",
               "debit_minor": 0,
-              "entity_id": "CUST43449",
-              "invoice_id": "F0032037",
+              "entity_id": "CUST70078",
+              "invoice_id": "F0215826",
               "payment_id": null,
-              "row_id": "L02845",
-              "timestamp": "2025-09-08T16:47:00+09:00"
+              "row_id": "L03480",
+              "timestamp": "2025-09-24T08:05:00+09:00"
             }
           ],
-          "journal": "inv:F0032037"
+          "journal": "inv:F0215826"
         }
       ],
-      "description": "invoice F0032037 converted with the 2025-09-13 rate instead of 2025-09-08",
+      "description": "invoice F0215826 converted with the 2025-09-24 rate instead of 2025-09-22",
       "documents_added": [],
       "issue_id": "ISS-2",
       "scenario": "single",
@@ -135,7 +135,7 @@
               "entity_id": "CUST70078",
               "invoice_id": "F0297252",
               "payment_id": null,
-              "row_id": "L03415",
+              "row_id": "L03522",
               "timestamp": "2025-09-25T13:20:00+09:00"
             },
             {
@@ -146,7 +146,7 @@
               "entity_id": "CUST70078",
               "invoice_id": "F0297252",
               "payment_id": null,
-              "row_id": "L03416",
+              "row_id": "L03523",
               "timestamp": "2025-09-25T13:20:00+09:00"
             }
           ],
@@ -159,7 +159,7 @@
               "entity_id": "CUST70078",
               "invoice_id": "F0297252",
               "payment_id": null,
-              "row_id": "L03415",
+              "row_id": "L03522",
               "timestamp": "2025-09-25T13:20:00+09:00"
             },
             {
@@ -170,7 +170,7 @@
               "entity_id": "CUST70078",
               "invoice_id": "F0297252",
               "payment_id": null,
-              "row_id": "L03416",
+              "row_id": "L03523",
               "timestamp": "2025-09-25T13:20:00+09:00"
             }
           ],

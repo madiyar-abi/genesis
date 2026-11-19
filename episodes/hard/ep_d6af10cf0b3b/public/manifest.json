@@ -7,11 +7,11 @@
   },
   "base_currency": "USD",
   "counts": {
-    "documents": 71,
+    "documents": 74,
     "fx": 315,
-    "invoices": 49,
-    "ledger": 1354,
-    "payments": 22
+    "invoices": 50,
+    "ledger": 1039,
+    "payments": 24
   },
   "episode_id": "ep_d6af10cf0b3b",
   "generator_version": "1.0.0",

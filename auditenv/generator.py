@@ -73,6 +73,11 @@ def gen_config(config: dict) -> dict:
     n = config.get("n_invoices")
     if n is not None and (isinstance(n, bool) or not isinstance(n, int) or not 10 <= n <= 100):
         raise ValueError("n_invoices must be an int in [10, 100] (keeps documents <= 200)")
+    if not isinstance(config.get("distractors", True), bool):
+        raise ValueError("distractors must be true or false")
+    ts = config.get("transform_seed")
+    if ts is not None and (isinstance(ts, bool) or not isinstance(ts, int)):
+        raise ValueError("transform_seed must be an int or null")
     difficulty = config.get("difficulty", "default")
     if difficulty not in DIFFICULTIES:
         raise ValueError(f"difficulty must be one of {DIFFICULTIES}")
@@ -199,6 +204,20 @@ class State:
     def new_entity(self) -> dict:
         cur = self.base if self.rng.random() < 0.6 else self.rng.choice(self.foreign)
         return {"id": self.new_id("entity"), "currency": cur, "offset": self.rng.choice(OFFSETS_MIN)}
+
+    def retype(self, items: list[dict]) -> list[dict]:
+        """Hard mode: the same lines keyed in again by hand: other order, case and ref punctuation."""
+        items = [dict(i) for i in items]
+        self.rng.shuffle(items)
+        for i in items:
+            name, sep, ref = i["description"].rpartition(" (")
+            upper = self.rng.random() < 0.5
+            if not sep:  # no reference to re-type (e.g. retainer text): change the case only
+                i["description"] = i["description"].upper() if upper else i["description"].lower()
+                continue
+            ref = ref.rstrip(")").replace("-", self.rng.choice((" ", "", "/")))
+            i["description"] = f"{name.upper() if upper else name.lower()} - {ref}"
+        return items
 
     def new_invoice(self, ent: dict, d: date, hour: int | None = None, items=None,
                     offset_min: int | None = None, currency: str | None = None) -> dict:
@@ -343,6 +362,10 @@ def build_history(st: State) -> None:
             st.new_invoice(rng.choice(west), st.pe + timedelta(days=1), hour=0)
             st.new_invoice(rng.choice(west), st.ps, hour=0)
 
+    if st.hard:  # some invoices are keyed in by hand, so a re-typed description is no sign of a duplicate
+        for inv in st.invoices:
+            if rng.random() < 0.12:
+                inv["line_items"] = st.retype(inv["line_items"])
     for inv in list(st.invoices):
         if st.in_period(inv["_cdate"]):
             lag = rng.randint(1, 3) if rng.random() < 0.3 else 0  # legitimate posting lag inside the period
@@ -432,8 +455,11 @@ def _build_reissues(st: State) -> None:
         if d == at.date() and at.hour >= 21:
             d += timedelta(days=1)
         hour = rng.randint(max(at.hour + 2, 9), 22) if d == at.date() else rng.randint(9, 22)
+        items = copy.deepcopy(orig["line_items"])
+        if rng.random() < 0.5:  # the replacement is keyed in by hand as often as a duplicate copy
+            items = st.retype(items)
         new = st.new_invoice(next(e for e in st.entities if e["id"] == orig["entity_id"]), d, hour=hour,
-                             items=copy.deepcopy(orig["line_items"]), currency=orig["currency"])
+                             items=items, currency=orig["currency"])
         jid = "inv:" + orig["invoice_id"]
         amt = next(r["debit_minor"] for r in st.journals[jid] if r["account"] == "1200")
         dt = new["_dt"] - timedelta(minutes=rng.randint(1, 50))
@@ -578,7 +604,8 @@ def policy_for(st: State) -> dict:
                              "fx_error": "[invoice_id] or [payment_id]",
                              "period_cutoff": "[invoice_id]"},
             "evidence": "doc_id / row_id / fx_id values; must include at least one full acceptable evidence set: "
-                        "duplicate_invoice: both invoice docs + the later copy's AR (or revenue) row; "
+                        "duplicate_invoice: both invoice docs + one AR (or revenue) row of each invoice, the original and the "
+                        "later copy; "
                         "payment_allocation: payment doc + invoice doc + the AR credit row of that invoice in the "
                         "payment (or, if nothing was allocated to it, the 2900 row) + the invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row "
                         "+ the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row",
@@ -599,9 +626,10 @@ TASK_TEXT = (
 
 
 TASK_HARD = (
-    " Hard mode: the ledger is larger; a duplicate copy may have its line items re-typed (other order, "
-    "case and punctuation of the descriptions) but the same products, quantities and prices; an invoice "
-    "cancelled by a full credit note and re-issued with the same line items is legitimate."
+    " Hard mode: the ledger is larger; line items keyed in by hand (some invoices, re-issues and duplicate "
+    "copies) may be re-typed (other order, case and punctuation of the descriptions) with the same products, "
+    "quantities and prices; an invoice cancelled by a full credit note and re-issued with the same line items "
+    "is legitimate."
 )
 
 

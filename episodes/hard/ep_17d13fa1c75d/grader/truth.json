@@ -3,36 +3,36 @@
   "issues": [
     {
       "affected_ids": [
-        "2604-510057",
-        "BNK-894815"
+        "2604-491155",
+        "BNK-043080"
       ],
       "currency": "USD",
       "evidence_sets": [
         [
-          "2026-04-02:GBP:USD",
-          "D-040f7b",
-          "D-099d94",
-          "R3401"
+          "2026-04-23:EUR:USD",
+          "D-008629",
+          "D-0dd186",
+          "R1617"
         ]
       ],
-      "expected_amount_minor": 432307,
+      "expected_amount_minor": 93814,
       "issue_id": "ISS-1",
       "scenario": "I1",
       "type": "payment_allocation"
     },
     {
       "affected_ids": [
-        "BNK-894815"
+        "BNK-043080"
       ],
       "currency": "USD",
       "evidence_sets": [
         [
-          "2026-04-30:GBP:USD",
-          "D-040f7b",
-          "R3402"
+          "2026-04-30:EUR:USD",
+          "D-008629",
+          "R1618"
         ]
       ],
-      "expected_amount_minor": 2528,
+      "expected_amount_minor": 1847,
       "issue_id": "ISS-2",
       "scenario": "I1",
       "type": "fx_error"

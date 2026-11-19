@@ -264,7 +264,10 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
             if row["account"] == "1200":
                 ok = expected - row["credit_minor"] == exp
             else:  # 2900 row: nothing was allocated, the whole ref went to unapplied cash -> amount = expected
-                ok = row["account"] == "2900" and row["payment_id"] == pay["payment_id"] and exp == expected
+                # (the missing AR credit is an absence no id can show; step 3 proves it from the whole ledger).
+                # A base-currency payment needs no rate: the unapplied credit must cover the whole ref.
+                covers = pay["currency"] != books.base or row["credit_minor"] >= ref["amount_minor"]
+                ok = row["account"] == "2900" and row["payment_id"] == pay["payment_id"] and exp == expected and covers
         return [] if ok else [f"evidence set {s} does not reproduce the amount"]
     except (KeyError, StopIteration, ValueError, IndexError):
         return [f"evidence set {s} is missing a record needed to reproduce the amount"]

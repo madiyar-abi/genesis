@@ -54,18 +54,7 @@ def _wrong_date(st, correct: date, local_ts: str, amount: int, cur: str) -> date
 
 
 def _retype(st, items: list[dict]) -> list[dict]:
-    """Hard mode: the same lines keyed in again by hand: other order, case and ref punctuation."""
-    items = [dict(i) for i in items]
-    st.rng.shuffle(items)
-    for i in items:
-        name, sep, ref = i["description"].rpartition(" (")
-        upper = st.rng.random() < 0.5
-        if not sep:  # no reference to re-type (e.g. retainer text): change the case only
-            i["description"] = i["description"].upper() if upper else i["description"].lower()
-            continue
-        ref = ref.rstrip(")").replace("-", st.rng.choice((" ", "", "/")))
-        i["description"] = f"{name.upper() if upper else name.lower()} - {ref}"
-    return items
+    return st.retype(items)
 
 
 # ---------------------------------------------------------------- single errors
