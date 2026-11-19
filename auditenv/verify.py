@@ -191,11 +191,17 @@ def _structure(ep: dict) -> list[str]:
     for key, rows in (("invoice_id", t["invoices"]), ("payment_id", t["payments"]), ("fx_id", t["fx"])):
         if len({r[key] for r in rows}) != len(rows):
             problems.append(f"duplicate {key}")
+    inv_ids = {i["invoice_id"] for i in t["invoices"]}
+    pay_ids = {p["payment_id"] for p in t["payments"]}
     for r in t["ledger"]:
         d, c = r["debit_minor"], r["credit_minor"]
         if r["currency"] != m["base_currency"] or type(d) is not int or type(c) is not int or (d > 0) == (c > 0) \
                 or d < 0 or c < 0:
             problems.append(f"bad ledger row {r['row_id']}")
+        if r.get("invoice_id") is not None and r["invoice_id"] not in inv_ids:
+            problems.append(f"ledger row {r['row_id']} references unknown invoice {r['invoice_id']}")
+        if r.get("payment_id") is not None and r["payment_id"] not in pay_ids:
+            problems.append(f"ledger row {r['row_id']} references unknown payment {r['payment_id']}")
     if not 200 <= len(t["ledger"]) <= 2000 or not 20 <= actual_docs <= 200:
         problems.append("episode size outside 200-2000 rows / 20-200 documents")
     return problems

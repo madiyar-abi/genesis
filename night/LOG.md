@@ -22,3 +22,4 @@ for mode in ("default", "hard"):
     print(mode, "100/100")
 PY
 ```
+- 2026-11-20 00:18 gemini1 — T1 completed: updated _structure in auditenv/verify.py to reject dangling ledger invoice and payment references (including balanced orphan journals). Created tests/test_ledger_refs.py covering intact episodes pass, seed 7 clean paired expense rows assigned nonexistent payment failure, and dangling invoice reference failure (3/3 tests pass). All 301 unit tests and all check gates pass. Next: IDLE.
