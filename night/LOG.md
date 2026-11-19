@@ -11,3 +11,7 @@
   reconcile_hard + random, transform keeps oracle/reconcile_hard reward); new test in tests/test_hard.py.
   Transform already shuffles FX rows (transform.py) — no change needed. check exit 0 (20.1 s), sync_docs --check ok.
 - Dispatched subagents: D4 shortcut miner, E4 SVG chart.
+
+## 2026-11-19 20:51 lead
+- E4 done (subagent, reviewed: rendered PNG, no overlaps): scripts/chart.py → docs/baselines.svg from check --json,
+  tests/test_chart.py; linked from PITCH slide 7. Episode counts read from configs/*.json (not in metrics JSON).

@@ -47,6 +47,9 @@ episodes, seeds 9100–9119). Re-run the check before exporting the final slides
 
 ## 7. Results
 
+Chart for this slide: `docs/baselines.svg` (mean return per baseline, dev vs hard; regenerate with
+`uv run python -m auditenv.check --json /tmp/auditenv-metrics.json && uv run python scripts/chart.py`).
+
 | policy | split | P | R | F1 | return |
 |---|---|---|---|---|---|
 | oracle (grader-side) | dev | 1.000 | 1.000 | 1.000 | 1.000 |

@@ -74,7 +74,7 @@ Workers: touch ONLY the files listed for your task.
   files: DESIGN — accept: numbers in DESIGN from the stress output
 - [ ] E3b (lead) Hard-mode trajectories `trajectories/train_hard_*.jsonl`, CI badge in README — files: README.md,
   trajectories/, tests — accept: test_trajectory_files green
-- [ ] E4 (lead) Stdlib SVG chart of baseline returns (dev vs hard) for the pitch: `scripts/chart.py` →
+- [x] E4 (lead) Stdlib SVG chart of baseline returns (dev vs hard) for the pitch: `scripts/chart.py` →
   `docs/baselines.svg` from `check --json` — files: scripts/chart.py, docs/baselines.svg, docs/PITCH.md — accept:
   SVG renders, numbers match check
 
