@@ -47,6 +47,8 @@ and verifies the actions recorded in the seven published training trajectories.
 
 - T8. Snapshotting actions and observations fixed 40 stored invoice-list responses across three files. All 2,258 records now replay exactly. All seven files were regenerated; actions, rewards, IDs, step numbers and termination flags matched their earlier values. The mutating-policy regression and official check passed.
 
+- T2. The official suite now replays the seven published trajectory files against the train and hard-train configs and checks every reset and transition.
+
 ## Round 10 complete · 20 November 2026
 
 All eleven tasks passed on `night/2026-11-20-r10`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 366 tests passed, along with 20 default and 20 hard paired checks.

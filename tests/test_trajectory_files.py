@@ -1,8 +1,12 @@
-"""Committed training trajectories: required keys, no closed truth in observations."""
+"""Committed training trajectories: required keys, no closed truth in observations, action replay."""
 import glob
 import json
 import os
 import unittest
+from unittest import mock
+
+from auditenv.env import AuditEnv
+from auditenv.run import load_episodes
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KEYS = {"episode_id", "step", "action", "observation", "reward", "terminated", "truncated"}
@@ -34,6 +38,67 @@ class TrajectoryFilesTest(unittest.TestCase):
                 self.assertTrue(all(r["reward"] == 0.0 for r in steps[:-1]))
                 hard = os.path.basename(path).startswith("train_hard_")
                 self.assertEqual(HARD_MARK in steps[0]["observation"]["task"], hard, path)
+
+    def test_deterministic_action_replay(self):
+        """Replay actions from all committed trajectory files against AuditEnv."""
+        files = sorted(glob.glob(os.path.join(ROOT, "trajectories", "*.jsonl")))
+        self.assertTrue(EXPECTED <= {os.path.basename(f) for f in files})
+        env = AuditEnv()
+
+        with mock.patch.dict(os.environ):
+            os.environ.pop("AUDITENV_SECRET", None)
+
+            for path in files:
+                base = os.path.basename(path)
+                cfg_name = "train_hard.json" if base.startswith("train_hard_") else "train.json"
+                cfg_path = os.path.join(ROOT, "configs", cfg_name)
+                episodes_spec = [(s, {**c, "mode": "train"}) for s, c in load_episodes(cfg_path)]
+
+                with open(path) as fh:
+                    recs = [json.loads(line) for line in fh]
+
+                by_ep: list[list[dict]] = []
+                curr: list[dict] = []
+                for r in recs:
+                    if r["step"] == 0:
+                        if curr:
+                            by_ep.append(curr)
+                        curr = [r]
+                    else:
+                        curr.append(r)
+                if curr:
+                    by_ep.append(curr)
+
+                self.assertEqual(len(by_ep), len(episodes_spec), f"Episode count mismatch in {base}")
+
+                for ep_idx, ((seed, config), ep_recs) in enumerate(zip(episodes_spec, by_ep)):
+                    with self.subTest(file=base, episode=ep_idx, seed=seed):
+                        # Episode boundary checks
+                        self.assertEqual([r["step"] for r in ep_recs], list(range(len(ep_recs))))
+                        self.assertTrue(ep_recs[-1]["terminated"] or ep_recs[-1]["truncated"])
+                        self.assertTrue(all(not r["terminated"] and not r["truncated"] for r in ep_recs[:-1]))
+                        self.assertTrue(all(r["reward"] == 0.0 for r in ep_recs[:-1]))
+
+                        # Reset record verification
+                        obs, info = env.reset(seed, config)
+                        r0 = ep_recs[0]
+                        self.assertEqual(r0["step"], 0)
+                        self.assertIsNone(r0["action"])
+                        self.assertEqual(r0["reward"], 0.0)
+                        self.assertFalse(r0["terminated"])
+                        self.assertFalse(r0["truncated"])
+                        self.assertEqual(info["episode_id"], r0["episode_id"])
+                        self.assertEqual(obs, r0["observation"])
+
+                        # Action replay verification
+                        for step_idx, step_rec in enumerate(ep_recs[1:], start=1):
+                            obs, reward, terminated, truncated, _info = env.step(step_rec["action"])
+                            self.assertEqual(obs["step"], step_rec["step"])
+                            self.assertEqual(obs, step_rec["observation"])
+                            self.assertEqual(reward, step_rec["reward"])
+                            self.assertEqual(terminated, step_rec["terminated"])
+                            self.assertEqual(truncated, step_rec["truncated"])
+                            self.assertEqual(env.episode_id, step_rec["episode_id"])
 
 
 if __name__ == "__main__":
