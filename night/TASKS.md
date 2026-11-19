@@ -1,6 +1,6 @@
 # Round 7
 
-- [ ] T1 (gemini1) Cross-check the published chart against measured dev and hard tables and correct any discrepancy — files: docs/baselines.svg, scripts/chart.py — accept: regenerate chart from official check metrics and compare all plotted values.
+- [x] T1 (gemini1) Cross-check the published chart against measured dev and hard tables and correct any discrepancy — files: docs/baselines.svg, scripts/chart.py — accept: regenerate chart from official check metrics and compare all plotted values.
 - [ ] T2 (gemini2) Check payment posting entity identity in generated books — files: tests/test_payment_entities.py — accept: independently compare entity IDs on payment receivables postings with the invoices referenced by their payment documents across 100 heavy seeds per difficulty, record counts and a reproduction command in LOG.
 - [ ] T3 (gemini3) Audit README offline reproduction instructions — files: README.md — accept: run documented local quick start and verify Docker instructions against Dockerfile and CI, correct stale directions.
 - [x] T4 (deepseek) Audit the jury evidence map against discovered tests — files: docs/CHECKS.md — accept: resolve each referenced test and correct stale mappings, run referenced verifier test module.
