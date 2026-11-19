@@ -168,3 +168,10 @@
   Regression tests fail on the old verifier. New dev naive: 0.169/0.700/0.273, −0.506; hard naive 0.093/0.543/0.159, −0.747.
 - #2: GitHub Actions workflow (docker build + run --network none; plain Python check + verifier). #3 verify totals. #4 hard replay/transform test.
 - check: ALL CHECKS PASSED, 196 tests, 11.5 s.
+
+## 2026-11-19 16:00 — hinabaina + Claude (jury-review, phase 3)
+- CI run 44503197633 (GitHub Actions): docker build + `docker run --rm --network none auditenv` → ALL CHECKS PASSED; plain Python job too. REVIEW #2 closed.
+- tests/test_jury.py: 30 tests mapped to the jury checklist (contract, leaks, matcher/reward, reproducibility, exported data:
+  balance before/after, evidence reachable through the tools, manifest/truth schema, coverage of 4 types + I1 + I2 + clean).
+  Sensitivity: an injected `expected_amount_minor` in tool results and a removed episode_over guard both make them fail.
+- check: ALL CHECKS PASSED, 226 tests, 13.9 s.
