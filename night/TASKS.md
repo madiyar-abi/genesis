@@ -1,10 +1,11 @@
-# Round 4
+# Round 5
 
-- [x] T1 (gemini1) Reject incorrect combined document counts and apply size checks to actual records in _structure — files: auditenv/verify.py (only _structure), tests/test_manifest_counts.py — accept: seed 7 with documents=20 fails and original passes.
-- [x] T2 (lead) Make verify --dir reject empty and incomplete indexed splits and report unreadable episode files — files: auditenv/verify.py (CLI only), tests/test_verify_dir.py — accept: invalid splits exit nonzero and train/dev/hard pass.
-- [x] T3 (gemini2) Check all three public exports against fresh output recursively and record reproduction commands in the log — files: night/LOG.md — accept: 3 identical directories.
-- [x] T4 (gemini3) Check committed trajectories against fresh runner output, document any timing fields and reproducibility evidence — files: night/LOG.md — accept: compare every JSONL step on each split and record results.
-- [x] T5 (deepseek) Independently verify all 80 golden hashes and reward mutation checks on this branch — files: night/LOG.md — accept: both scripts pass and record counts.
-- [x] T8 (lead) Verify quantity times unit price on each invoice line — files: auditenv/verify.py (Books), tests/test_verify.py — accept: seed 7 clean invoice with doubled quantity is rejected.
-- [x] T6 (lead) Rehearse the demo and verify timing cues and output — files: docs/DEMO.md — accept: five sections show scripted seed results.
-- [x] T7 (lead) Check pitch against current metrics and update inaccurate claims — files: docs/PITCH.md — accept: slide narrative and measured claims verified.
+- [x] T1 (gemini1) Reject dangling ledger invoice and payment references, including balanced orphan journals — files: auditenv/verify.py (_structure only), tests/test_ledger_refs.py — accept: seed 7 clean paired expense rows assigned a nonexistent payment fail verification, intact episodes pass.
+- [x] T2 (gemini2) Strengthen paired checks to detect a no-op transform, including on clean episodes. Check actual relabelled public IDs and shuffled order on the fixed paired fixtures (FX ids are stable), and that untranslated dirty findings earn zero TP — files: auditenv/check.py (paired checks), tests/test_paired_transform.py — accept: stub identity transform fails, real default and hard pairs pass.
+- [x] T3 (gemini3) Audit jury evidence map references and verify what paired checks and split loader tests actually demonstrate. Remove brittle aggregate unittest counts from the map as round 5 adds regressions — files: docs/CHECKS.md — accept: named tests exist and claims match measured commands.
+- [x] T4 (deepseek) Independently check accounting discrepancies and evidence on transformed heavy episodes in both modes over 100 seeds each with verify_episode(transform(...)). Record exact command and results, report any failures — files: night/LOG.md — accept: all 200 checked, failures identified or zero.
+- [x] T5 (lead) Validate truth file episode identity against the public manifest and uniqueness of issue identifiers — files: auditenv/verify.py (verify_episode), tests/test_truth_identity.py — accept: wrong episode ID and duplicated issue ID rejected, valid dirty and clean episodes pass.
+- [x] T8 (lead) Bind allocation evidence to a positive AR credit on the affected payment and invoice — files: auditenv/verify.py (_sufficient), tests/test_allocation_posting.py — accept: seed 1 original invoice debit substituted for payment posting fails verification.
+- [x] T9 (lead) Remove the embedded worker API credential and require an explicit key before contacting the service — files: scripts/deepseek_worker.py — accept: missing key fails locally, tracked source scan is clear.
+- [x] T6 (lead) Rehearse the numbered demo and check narrated evidence and terminal results — files: docs/DEMO.md — accept: public walkthrough reproduces scripted outputs within the timed outline.
+- [x] T7 (lead) Verify slide claims against the integrated checks and sync metrics — files: docs/PITCH.md — accept: ten-slide outline matches measured output and docs sync passes.

@@ -191,11 +191,17 @@ def _structure(ep: dict) -> list[str]:
     for key, rows in (("invoice_id", t["invoices"]), ("payment_id", t["payments"]), ("fx_id", t["fx"])):
         if len({r[key] for r in rows}) != len(rows):
             problems.append(f"duplicate {key}")
+    inv_ids = {i["invoice_id"] for i in t["invoices"]}
+    pay_ids = {p["payment_id"] for p in t["payments"]}
     for r in t["ledger"]:
         d, c = r["debit_minor"], r["credit_minor"]
         if r["currency"] != m["base_currency"] or type(d) is not int or type(c) is not int or (d > 0) == (c > 0) \
                 or d < 0 or c < 0:
             problems.append(f"bad ledger row {r['row_id']}")
+        if r.get("invoice_id") is not None and r["invoice_id"] not in inv_ids:
+            problems.append(f"ledger row {r['row_id']} references unknown invoice {r['invoice_id']}")
+        if r.get("payment_id") is not None and r["payment_id"] not in pay_ids:
+            problems.append(f"ledger row {r['row_id']} references unknown payment {r['payment_id']}")
     if not 200 <= len(t["ledger"]) <= 2000 or not 20 <= actual_docs <= 200:
         problems.append("episode size outside 200-2000 rows / 20-200 documents")
     return problems
@@ -270,7 +276,10 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
             expected = conv(ref["amount_minor"], pay["currency"], inv["issued_at"])
             row = ev_rows[0]
             if row["account"] == "1200":
-                ok = expected - row["credit_minor"] == exp
+                ok = ({pay["payment_id"], inv["invoice_id"]} == set(iss["affected_ids"])
+                      and row["payment_id"] == pay["payment_id"] and row["invoice_id"] == inv["invoice_id"]
+                      and row["debit_minor"] == 0 and row["credit_minor"] > 0
+                      and expected - row["credit_minor"] == exp)
             else:  # 2900 row: nothing was allocated, the whole ref went to unapplied cash -> amount = expected
                 # (the missing AR credit is an absence no id can show; step 3 proves it from the whole ledger).
                 # A base-currency payment needs no rate: the unapplied credit must cover the whole ref.
@@ -284,6 +293,8 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
 def verify_episode(ep: dict) -> list[str]:
     problems = _structure(ep)
     m, t = ep["manifest"], ep["tables"]
+    if ep["truth"].get("episode_id") != m["episode_id"]:
+        problems.append("truth episode_id differs from manifest")
     # pre-injection: correct books
     pre_issues, pre_problems = Books(m, revert(ep)).discrepancies()
     problems += [f"pre-injection: {p}" for p in pre_problems]
@@ -300,7 +311,11 @@ def verify_episode(ep: dict) -> list[str]:
     rows = {r["row_id"]: r for r in t["ledger"]}
     docs = {d["doc_id"]: d for d in t["invoices"] + t["payments"]}
     fx_ids = {r["fx_id"] for r in t["fx"]}
+    issue_ids = set()
     for iss in ep["truth"]["issues"]:
+        if iss["issue_id"] in issue_ids:
+            problems.append(f"duplicate truth issue_id {iss['issue_id']}")
+        issue_ids.add(iss["issue_id"])
         if iss.get("currency") != m["base_currency"]:
             problems.append(f"{iss['issue_id']}: truth currency differs from ledger base currency")
         aff = set(iss["affected_ids"])

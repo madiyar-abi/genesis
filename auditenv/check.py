@@ -172,8 +172,53 @@ def run_paired(n: int = 20, hard: bool = False) -> bool:
                [(x["type"], x["expected_amount_minor"]) for x in ep2["truth"]["issues"]]
         if r1 != r2 or not same:
             failures.append((seed, "oracle", f"transform changed reward {r1} -> {r2}"))
+
+        # Detect no-op transform (including on clean episodes): id_map must exist with no identity mappings
+        id_map = ep2.get("provenance", {}).get("id_map", {})
+        if not id_map or set(id_map).intersection(id_map.values()) or len(set(id_map.values())) != len(id_map):
+            failures.append((seed, "transform", "missing, overlapping, or non-unique ID mapping"))
+
+        for table, key, secondary in (
+            ("ledger", "row_id", ("entity_id", "invoice_id", "payment_id")),
+            ("invoices", "doc_id", ("invoice_id", "entity_id")),
+            ("payments", "doc_id", ("payment_id",)),
+            ("fx", "fx_id", ()),
+        ):
+            originals = ep1["tables"][table]
+            transformed = ep2["tables"][table]
+            expected = [r[key] if table == "fx" else id_map.get(r[key]) for r in originals]
+            actual = [r[key] for r in transformed]
+            if (None in expected or len(set(expected)) != len(expected)
+                    or sorted(actual) != sorted(expected)):
+                failures.append((seed, "transform", f"{table} public IDs differ from the expected IDs"))
+                continue
+            if len(expected) > 1 and expected == actual:
+                failures.append((seed, "transform", f"{table} row order was not shuffled"))
+            by_id = {r[key]: r for r in transformed}
+            for old, new_key in zip(originals, expected):
+                new = by_id[new_key]
+                links = [(old[field], new[field]) for field in secondary]
+                if table == "payments":
+                    old_refs, new_refs = old["invoice_refs"], new["invoice_refs"]
+                    if (old_refs is None) != (new_refs is None) or len(old_refs or []) != len(new_refs or []):
+                        failures.append((seed, "transform", "payment invoice references changed"))
+                        break
+                    links.extend((a["invoice_id"], b["invoice_id"]) for a, b in zip(old_refs or [], new_refs or []))
+                if any((value is not None and value not in id_map) or id_map.get(value) != target
+                       for value, target in links):
+                    failures.append((seed, "transform", f"{table} contains an incorrectly translated reference"))
+                    break
+
+        # Untranslated dirty findings must earn zero TP against the transformed truth
+        if ep1["truth"]["issues"]:
+            untranslated = [{"type": iss["type"], "affected_ids": list(iss["affected_ids"]),
+                             "claimed_amount_minor": iss["expected_amount_minor"], "currency": iss["currency"],
+                             "evidence_ids": list(iss["evidence_sets"][0])} for iss in ep1["truth"]["issues"]]
+            m_untrans = grade(ep2["truth"], {"episode_id": ep2["episode_id"], "findings": untranslated}, ep2["episode_id"], 0)
+            if m_untrans["tp"] > 0:
+                failures.append((seed, "transform", f"untranslated dirty findings earned TP: {m_untrans['tp']}"))
+
         # the ORIGINAL oracle answer, translated through the id relabelling, must stay a full answer
-        id_map = ep2["provenance"]["id_map"]
         moved = [{"type": i["type"], "affected_ids": [id_map.get(a, a) for a in i["affected_ids"]],
                   "claimed_amount_minor": i["expected_amount_minor"], "currency": i["currency"],
                   "evidence_ids": [id_map.get(e, e) for e in i["evidence_sets"][0]]} for i in ep1["truth"]["issues"]]

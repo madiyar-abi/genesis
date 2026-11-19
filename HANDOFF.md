@@ -28,6 +28,22 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 5 complete · 20 November 2026
+
+Before sharing the repository, the credential owner must revoke the DeepSeek API key exposed in Git history. The launcher now requires an explicit key.
+
+The verifier rejects ledger postings that cite a missing payment or invoice, including balanced orphan journals. It also checks the truth episode ID and requires distinct issue IDs. Allocation evidence that cites a receivables posting must identify the payment and invoice on a positive credit.
+
+The jury evidence map lists the checks for each scoring criterion in `docs/CHECKS.md`.
+
+Paired checks now compare the public identifiers and row order in all four tables and reject untranslated dirty findings.
+
+Independent verification passed for all 200 transformed heavy episodes, covering 100 seeds in each difficulty. The reproduction command is in `night/LOG.md`.
+
+The ten-slide outline matches the integrated metrics and both interacting scenarios. The rehearsed demo in `docs/DEMO.md` identifies the two amounts on the same payment for the recording.
+
+All nine tasks on `night/2026-11-20-r5` passed. Run `uv run python -m auditenv.check` at the repository root. All 309 tests and both sets of 20 paired checks passed. The seed sweeps found zero problems across 3,000 default and 600 hard episodes. All 80 golden hashes matched, 15/15 reward mutants were caught, and 11,000 reward mutations produced zero violations. The miner still flags 16 default and 11 hard feature values. The marathon handles PR integration and CI. Engineering freeze is 22 November at 18:00 Astana.
+
 ## Round 4 complete · 19 November 2026
 
 All eight tasks on `night/2026-11-19-r4` passed. The verifier now compares invoice lines with quantity times unit price, counts documents directly from the public tables, and rejects empty, unreadable or incomplete indexed exports. The demo and pitch reproduce the same public company even on a machine configured with a private grader key.
@@ -97,7 +113,7 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 
 ## Remaining work before submission
 
-- **Engineering:** round 3 is merged. Follow round-4 integration and CI. The first scheduled nightly CI run can be checked after merge.
+- **Engineering:** round 4 is merged. Follow round-5 integration and CI. The first scheduled nightly CI run can be checked after merge.
 - **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md` (chart: `docs/baselines.svg`), including the Team slide.
 - **Access and submission:** the repository owner arranges jury access. The team checks the repo, video and presentation links, adds them to the Google Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 

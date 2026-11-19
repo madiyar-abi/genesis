@@ -8,7 +8,7 @@
 > распределение платежа, неверная дата курса, ошибка периода) и два сценария
 > взаимодействующих ошибок, записывая причинное изменение. Агент читает записи только через
 > узкие инструменты (`reset/step`, JSON, лимит 100 шагов) и отправляет выводы с доказательствами;
-> общий matcher и терминальная награда `clip(2*F1 − 1 − 0.002*steps, −1, 1)` оценивают результат.
+> общий matcher и терминальная награда `clip(2*F1 − 1 − 0.002*inspection_steps, −1, 1)` оценивают результат.
 > Одна команда проверки: `uv run python -m auditenv.check`. Без сети, без GPU, без зависимостей.
 
 Python 3.11, **standard library only** (zero runtime dependencies), MIT licence.
@@ -171,7 +171,7 @@ The four baseline adapters live in `auditenv/policies/` (`random_explorer.py`, `
 
 ```bash
 # organiser side: hidden episode list never reaches the agent
-AUDITENV_SECRET=<grader-only key> uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl
+AUDITENV_SECRET="${GRADER_KEY:?Set GRADER_KEY in the organiser shell}" uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl
 ```
 
 `hidden.json` uses the `configs/*.json` format (`{"episodes": [{"seed": int, "config": {...}}, ...]}`) or
@@ -231,7 +231,7 @@ make miner | make bench | make sensitivity | make chart
 | `configs/` | versioned episode lists: train (1000–1009), dev (2000–2009), eval_example (9000–9019), eval_hard (9100–9119), train_hard (1100–1109) |
 | `episodes/` | exported 10 train + 10 dev + 20 public hard episodes (`public/` for agents, `grader/` closed) |
 | `trajectories/` | training trajectories (JSONL) of reconcile, naive reconcile and random on the train split, and the same three plus reconcile_hard on the hard train split (`train_hard_*`) |
-| `tests/` | 295 unittest tests; `tests/test_jury.py` maps the jury checklist to tests |
+| `tests/` | Unit tests; `tests/test_jury.py` maps the jury checklist to tests |
 | `docs/` | contract, design note, demo script, pitch outline, `CHECKS.md` (jury criteria → test → command → result); `REVIEW.md` — jury-style review log |
 
 ## Honest limitations

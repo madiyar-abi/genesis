@@ -20,7 +20,7 @@
 ## 4. From company history to evidence
 
 - Each episode can contain duplicate invoices, missing or partial payment allocations, FX conversion errors, and period cutoff errors.
-- Interacting scenarios combine late foreign payments with partial allocations, or backdated invoices with an incorrect exchange rate.
+- One scenario partially allocates a period-end foreign payment and converts its cash entry at the wrong day’s rate. Another backdates a next-period foreign invoice and converts it at the booking-date rate.
 - Clean books include split payments, refunds, and recurring charges. Hard episodes add credit-note reissues and retyped invoice lines.
 - The verifier independently derives discrepancies from the records and checks the evidence cited for each issue.
 
