@@ -28,6 +28,15 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 11 in progress · 20 November 2026
+
+Work is on `night/2026-11-20-r11`. See `night/TASKS.md` for ownership and
+`night/LOG.md` for verification. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`
+from the repository root. This round addresses duplicate seeds in failure reports
+and verifies the actions recorded in the seven published training trajectories.
+
+- T1. Failure reports now retain each configuration sharing a seed. The full and filtered report regressions failed before the fix and pass after it. Explicit seed ordering and missing-seed errors are preserved.
+
 ## Round 10 complete · 20 November 2026
 
 All eleven tasks passed on `night/2026-11-20-r10`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 366 tests passed, along with 20 default and 20 hard paired checks.
@@ -102,7 +111,7 @@ Demo rehearsal complete. Follow `docs/DEMO.md` for the 2:40 video. The ten-slide
 Branch `night/2026-11-19-r3`. The round freeze is 22 November at 18:00 local time. Round 2 is in main. The verifier now rejects a truth amount denominated in the wrong currency. Run `uv run python -m unittest tests.test_verify` for all six verifier tests. Gemini’s jury map in `docs/CHECKS.md` matches the merged suite. The official check passed all 285 tests. All 40 exported episodes verified and both seed sweeps passed (3,000 default and 600 hard episodes). Record the demo, finish the team slide, and complete the access and submission checklist above.
 
 ## Status
-Round 10 is on `night/2026-11-20-r10`. The current task board is `night/TASKS.md`. Rounds 1–9 are in main. Round 2 evidence is retained below.
+Round 11 is on `night/2026-11-20-r11`. The current task board is `night/TASKS.md`. Rounds 1–10 are in main. Round 2 evidence is retained below.
 
 Round-2 results (each with its command; numbers from the current code):
 - Reward: R2 `scripts/mutate_reward.py` — 15/15 one-line mutants of matcher/reward caught; R3

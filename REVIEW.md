@@ -143,3 +143,14 @@ Checked and OK: identical episodes, observations and grader logs under `PYTHONHA
 - The hard-mode ledger size and credit-note count were documented as fixed ranges. With `{"difficulty":"hard","n_invoices":10,"errors":{"duplicate_invoice":12},"distractors":false}`, seed 3 generates 1,413 ledger rows and seed 4 has one credit note. In `generator._build_expenses` the size target precedes injection, and `_build_reissues` selects from eligible unpaid invoices. README, CONTRACT and DESIGN now describe those bounds.
 - README's random mix rule missed the case where only `interacting` is supplied. `generator.gen_config` selects explicit counts when either object is present. CONTRACT now describes the configured step limit and post-terminal counter (`env.AuditEnv.step`), and its four evidence rows render in one table. DESIGN specifies which payment row proves a partial allocation, matching `tests.test_hardening.AllocationEvidenceTest`. The lifecycle row in CHECKS cites the test that actually checks the step decrement.
 - The README shell block connected independent Make targets with pipes. A pasted command launched the targets concurrently and hid earlier exit codes. The examples now run the check or preview the available commands with `make -n`.
+
+## Round 11 jury review
+
+The failure-analysis CLI indexed the configured episodes by seed. A two-entry
+config using seed 1 for both default and hard mode reported one episode. This
+can hide failures in paired experiments using the same company seed with
+different configurations. The trajectory runner already retains both entries.
+
+The committed-trajectory test checked row structure and budgets, but did not
+compare a saved observation or terminal reward with replaying its recorded action.
+Round 11 adds that comparison to the offline check.

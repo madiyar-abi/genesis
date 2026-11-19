@@ -1,0 +1,2 @@
+2026-11-20 04:16 lead — Published round 11 assignments. The repeated-seed reproduction uses two configs sharing seed 1. Use the public seed domain for artifact checks and the 18:00 local freeze.
+2026-11-20 04:17 lead — T1 Failure reports now retain each configuration sharing a seed. The full and filtered report regressions failed before the fix and pass after it. Explicit seed ordering and missing-seed errors are preserved.

@@ -1,14 +1,14 @@
 """Summarize grader-side policy failures across a reproducible set of episodes."""
 
 import argparse
-from collections import Counter
+from collections import Counter, defaultdict
 import json
 from pathlib import Path
 from statistics import mean
 
 from .env import AuditEnv
 from .metrics import prf1
-from .run import POLICIES, make_policy, parse_seeds, run_episode
+from .run import POLICIES, load_episodes, make_policy, parse_seeds, run_episode
 from .schema import ISSUE_TYPES
 
 _SCENARIOS = ("single", "I1", "I2")
@@ -116,30 +116,31 @@ def main(argv=None) -> int:
     parser.add_argument("--json", type=Path, help="Write the report as JSON")
     args = parser.parse_args(argv)
 
-    if args.config is None:
-        configs = None
-    else:
-        try:
-            spec = json.loads(args.config.read_text(encoding="utf-8"))
-            configs = {entry["seed"]: entry["config"] for entry in spec["episodes"]}
-        except (OSError, ValueError, KeyError, TypeError) as exc:
-            parser.error(f"cannot read episode configuration: {exc}")
-
     try:
-        if args.seeds is not None:
-            seeds = parse_seeds(args.seeds)
-        else:
-            seeds = list(configs) if configs is not None else parse_seeds("2000-2009")
+        seeds = parse_seeds(args.seeds) if args.seeds is not None else None
     except ValueError as exc:
         parser.error(f"invalid --seeds: {exc}")
-    if not seeds:
-        parser.error("select at least one seed")
-    if configs is not None:
-        missing = [seed for seed in seeds if seed not in configs]
-        if missing:
-            parser.error(f"seeds missing from --config: {missing}")
 
-    episodes = [(seed, configs[seed] if configs is not None else {}) for seed in seeds]
+    if args.config is None:
+        if seeds is None:
+            seeds = parse_seeds("2000-2009")
+        episodes = [(seed, {}) for seed in seeds]
+    else:
+        try:
+            episodes = load_episodes(args.config)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            parser.error(f"cannot read episode configuration: {exc}")
+        if seeds is not None:
+            by_seed = defaultdict(list)
+            for seed, config in episodes:
+                by_seed[seed].append(config)
+            missing = [seed for seed in seeds if seed not in by_seed]
+            if missing:
+                parser.error(f"seeds missing from --config: {missing}")
+            episodes = [(seed, config) for seed in seeds for config in by_seed[seed]]
+    if not episodes:
+        parser.error("select at least one seed")
+
     report = analyze(args.policy, episodes)
     if args.json is not None:
         args.json.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
