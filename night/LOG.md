@@ -94,3 +94,8 @@
 - T25 done: amount-weighted experimental terminal reward. Five targeted tests and full suite passed.
 - Assumptions: use the shared invalid-submission penalty and reward rounding. A zero weighted denominator receives F1=1 only when truth and findings are both empty.
 - Next: no open codex tasks.
+
+## 2026-11-19 13:58 — codex
+- T26 done: NaiveReconcile uses only table listings. Seeds 2000–2009: FPs on 10/10 clean distractor episodes, mean dirty F1 0.431414 vs Reconcile 1.000000 (one error of each type plus I1 and I2). Determinism and full suite passed.
+- Assumptions: skip FX checks if the written-date rate is absent; flag later equal-total bookings against the first; cap findings at 30. The policy is available directly through run_episode.
+- Also verified T23 with Reconcile after T12 landed. Next: no open codex tasks.
