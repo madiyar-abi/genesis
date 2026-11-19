@@ -39,6 +39,8 @@ and verifies the actions recorded in the seven published training trajectories.
 
 - T6. The five Enter prompts in the 2:40 demo script reproduced the two PAY-136430 discrepancies, 21 inspections, four matches and a closed-run return of 0.958.
 
+- T5. The DeepSeek launcher reported a missing API key, so the lead reassigned its export check. For split/config pairs train/train, dev/dev and hard/eval_hard, ran env -u AUDITENV_SECRET uv run python -m auditenv.export --config "configs/$cfg.json" --out "$tmpdir/$split" and diff -qr "episodes/$split" "$tmpdir/$split". All 81 train, 81 dev and 161 hard files matched.
+
 ## Round 10 complete · 20 November 2026
 
 All eleven tasks passed on `night/2026-11-20-r10`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 366 tests passed, along with 20 default and 20 hard paired checks.
