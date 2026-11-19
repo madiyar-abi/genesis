@@ -65,3 +65,8 @@
 - run.py: --config now reads the per-episode format `{episodes:[{seed, config}]}` (T16 spec updated accordingly).
 - Assumption: check uses a built-in fallback dev list until configs/dev.json exists.
 - Next: T19–T22 docs; merge gemini T12/T16 and codex T23 when pushed.
+
+## 2026-11-19 13:55 — codex
+- T23 done: grader-side Markdown and JSON failure analysis. Oracle recalls every tested type and scenario with zero FPs; FlagAll records FPs. T7 environment and T11 baseline tests also passed.
+- Assumptions: recall is zero for groups with no issues, means are per episode, steps include submit, and explicit seeds must exist in the supplied config. Reconcile verification awaits T12.
+- Next: no open codex tasks.
