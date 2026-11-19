@@ -64,8 +64,9 @@ brute-forced from the id nor the episode regenerated from the open-source code. 
 **Interacting scenarios** (each yields two truth issues computed after both changes):
 - `I1` — foreign-currency payment late on the last day: partially allocated **and** its cash
   converted at the next day's rate (the date shown in the bank's timezone).
-- `I2` — next-period foreign invoice backdated into the period **and** converted at the
-  booking-date rate (period_cutoff + fx_error on the same invoice).
+- `I2` — next-period foreign invoice backdated into the period **and** converted using the rate
+  of the booking date or an earlier fallback day (1, 2, or 4 days earlier when the booking-date conversion
+  differs from the correct invoice value by less than 10 base-currency minor units; period_cutoff + fx_error on the same invoice).
 
 Every type is independently configurable (`errors: {type: count}`), injectors never touch an
 already-affected document, and amounts are the real ledger misstatement — not a "suspicious row".

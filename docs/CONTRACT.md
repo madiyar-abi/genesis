@@ -84,7 +84,10 @@ set's records (plus the manifest).
 Interacting scenarios: `I1` = foreign-currency payment at the period boundary that is
 partially allocated (`payment_allocation`) **and** converted at the wrong date (`fx_error`
 on the payment). `I2` = next-period foreign invoice booked in the period (`period_cutoff`)
-at the booking-date rate (`fx_error` on the invoice).
+and converted at the wrong rate (`fx_error` on the invoice). The injector tries the booking
+date, then 1, 2 and 4 days before booking. It selects the first date whose converted invoice
+total differs from the issue-date valuation by at least 10 base-currency minor units.
+If none qualifies, it uses the booking date.
 
 ## 4. Environment API (`auditenv/env.py`)
 ```python
