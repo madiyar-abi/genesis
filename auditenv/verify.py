@@ -270,7 +270,10 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
             expected = conv(ref["amount_minor"], pay["currency"], inv["issued_at"])
             row = ev_rows[0]
             if row["account"] == "1200":
-                ok = expected - row["credit_minor"] == exp
+                ok = ({pay["payment_id"], inv["invoice_id"]} == set(iss["affected_ids"])
+                      and row["payment_id"] == pay["payment_id"] and row["invoice_id"] == inv["invoice_id"]
+                      and row["debit_minor"] == 0 and row["credit_minor"] > 0
+                      and expected - row["credit_minor"] == exp)
             else:  # 2900 row: nothing was allocated, the whole ref went to unapplied cash -> amount = expected
                 # (the missing AR credit is an absence no id can show; step 3 proves it from the whole ledger).
                 # A base-currency payment needs no rate: the unapplied credit must cover the whole ref.
