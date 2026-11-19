@@ -51,6 +51,8 @@ class AuditEnv:
     def reset(self, seed: int, config: dict | None = None):
         if isinstance(seed, bool) or not isinstance(seed, int):
             raise ValueError("seed must be an int")
+        if config is not None and not isinstance(config, dict):
+            raise ValueError("config must be an object or null")
         config = dict(config or {})
         unknown = set(config) - CONFIG_KEYS
         if unknown:

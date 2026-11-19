@@ -97,7 +97,8 @@ obs, reward, terminated, truncated, info = env.step(action: dict)
 ```
 All values JSON-compatible. `config` keys (all optional): `mode` ("train" | "eval",
 default "train"), `max_steps` (100), `time_limit_s` (60), `errors`
-(`{type: count}`), `interacting` (`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`
+(`{type: count}`), `interacting` (`{"I1": n, "I2": n}`; both must be objects — both omitted → random mix,
+either given → exactly the listed counts, the rest 0), `n_invoices` (10–100), `distractors`
 (bool), `transform_seed` (int | null: benign relabel/permutation), `difficulty` ("default" |
 "hard"; default "default" — absent from the normalised config, so default episodes are unchanged).
 Hard: 900–1 400 ledger rows, 2–3 credit-note reissues, re-typed duplicates; `policy.ledger.credit_note`

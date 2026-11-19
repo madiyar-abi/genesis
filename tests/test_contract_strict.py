@@ -54,6 +54,17 @@ class StrictInputTests(unittest.TestCase):
                 env.reset(seed, cfg)
         env.reset(1, {"time_limit_s": 0.5, "distractors": False, "transform_seed": 3})
 
+    def test_reset_rejects_config_of_the_wrong_shape(self):
+        # Round 10: {"errors": "x"} raised AttributeError and {"errors": 0 | false | []} silently gave a clean company.
+        env = AuditEnv()
+        for cfg in ({"errors": "x"}, {"errors": 5}, {"errors": 0}, {"errors": False}, {"errors": []},
+                    {"errors": None}, {"interacting": [1]}, {"interacting": 0}, {"interacting": None},
+                    [("errors", {})], 5, "x"):
+            with self.assertRaises(ValueError, msg=cfg):
+                env.reset(1, cfg)
+        env.reset(1, None)
+        env.reset(1, {"errors": {}, "interacting": {}})
+
     def test_server_does_not_coerce_seeds(self):
         inp = io.StringIO(json.dumps({"cmd": "reset", "seed": 1.5}) + "\n" + json.dumps({"cmd": "reset", "seed": 1}) + "\n")
         out = io.StringIO()

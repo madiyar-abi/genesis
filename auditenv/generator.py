@@ -66,7 +66,10 @@ def secret() -> str:
 def gen_config(config: dict) -> dict:
     """Normalise the generation-relevant config (equal meaning -> equal company)."""
     explicit = "errors" in config or "interacting" in config
-    given_e, given_i = config.get("errors") or {}, config.get("interacting") or {}
+    for key in ("errors", "interacting"):
+        if key in config and not isinstance(config[key], dict):
+            raise ValueError(f"{key} must be an object of counts")
+    given_e, given_i = config.get("errors", {}), config.get("interacting", {})
     for key, val in list(given_e.items()) + list(given_i.items()):
         if key not in ISSUE_TYPES + SCENARIOS or isinstance(val, bool) or not isinstance(val, int) or val < 0:
             raise ValueError(f"bad error config entry {key!r}: {val!r}")
