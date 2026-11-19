@@ -14,7 +14,7 @@ TABLES = {"ledger": "row_id", "invoices": "invoice_id", "payments": "payment_id"
 PAGE_MAX = 50
 DEFAULTS = {"mode": "train", "max_steps": 100, "time_limit_s": 60.0}
 CONFIG_KEYS = {"mode", "max_steps", "time_limit_s", "errors", "interacting", "n_invoices", "distractors",
-               "transform_seed"}
+               "transform_seed", "difficulty"}
 TOOLS = [
     {"type": "list_records", "params": {"table": "ledger|invoices|payments|fx", "cursor": "null|str",
                                         "limit": "int<=50"},

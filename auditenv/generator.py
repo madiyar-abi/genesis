@@ -24,6 +24,7 @@ SCHEMA_VERSION = "1.0"
 ISSUE_TYPES = ("duplicate_invoice", "payment_allocation", "fx_error", "period_cutoff")
 SCENARIOS = ("I1", "I2")
 MAX_ISSUES = 12
+DIFFICULTIES = ("default", "hard")
 
 USD_VALUE = {"USD": 1.0, "EUR": 1.08, "GBP": 1.27, "CHF": 1.12, "JPY": 0.0067, "KZT": 0.0021}
 BASES = ("USD", "EUR", "GBP", "KZT")
@@ -72,12 +73,18 @@ def gen_config(config: dict) -> dict:
     n = config.get("n_invoices")
     if n is not None and (isinstance(n, bool) or not isinstance(n, int) or not 10 <= n <= 100):
         raise ValueError("n_invoices must be an int in [10, 100] (keeps documents <= 200)")
-    return {
+    difficulty = config.get("difficulty", "default")
+    if difficulty not in DIFFICULTIES:
+        raise ValueError(f"difficulty must be one of {DIFFICULTIES}")
+    gen = {
         "errors": {t: given_e.get(t, 0) for t in ISSUE_TYPES} if explicit else None,
         "interacting": {k: given_i.get(k, 0) for k in SCENARIOS} if explicit else None,
         "n_invoices": n,
         "distractors": bool(config.get("distractors", True)),
     }
+    if difficulty != "default":  # absent for default: default episodes stay byte-identical
+        gen["difficulty"] = difficulty
+    return gen
 
 
 def episode_id_for(seed: int, config: dict) -> str:
@@ -98,6 +105,7 @@ class State:
         self.seed = seed
         self.config = config
         self.gen = gen_config(config)
+        self.hard = self.gen.get("difficulty") == "hard"
         self.rng = random.Random(f"auditenv|{secret()}|{GENERATOR_VERSION}|{seed}|{canonical(self.gen)}")
         rng = self.rng
         self.base = rng.choice(BASES)
@@ -345,6 +353,8 @@ def build_history(st: State) -> None:
                 st.book_invoice(inv)
 
     _build_payments(st, distractors)
+    if st.hard:
+        _build_reissues(st)
     while len(st.invoices) + len(st.payments) < 22:  # keep >= 20 documents after any injection
         st.book_invoice(st.new_invoice(rng.choice(st.entities), st.ps + timedelta(days=rng.randrange(st.ndays))))
     _build_expenses(st)
@@ -404,6 +414,35 @@ def _build_payments(st: State, distractors: bool) -> None:
         st.book_payment(st.new_payment(d, cur, amt, refs, ent))
 
 
+def _build_reissues(st: State) -> None:
+    """Hard mode: legitimate cancel-and-reissue. An unpaid invoice is reversed by a credit note
+    (Dr 4000 / Cr 1200, same invoice_id) and re-issued with identical line items under a new
+    number. It looks exactly like a duplicate unless the reversal in the ledger is checked."""
+    rng = st.rng
+    paid = {ref["invoice_id"] for p in st.payments for ref in p["invoice_refs"] or []}
+    def booked_at(inv):  # the AR row can lag the issue date (posting lag)
+        return next(r["_dt"] for r in st.journals["inv:" + inv["invoice_id"]] if r["account"] == "1200")
+
+    cands = [i for i in st.invoices if st.in_period(i["_cdate"]) and ("inv:" + i["invoice_id"]) in st.journals
+             and i["invoice_id"] not in paid and st.cdate(booked_at(i)) + timedelta(days=4) <= st.pe]
+    rng.shuffle(cands)
+    for orig in cands[: rng.randint(2, 3)]:
+        at = booked_at(orig).astimezone(st.tz)
+        d = at.date() + timedelta(days=rng.randint(0, 3))
+        if d == at.date() and at.hour >= 21:
+            d += timedelta(days=1)
+        hour = rng.randint(max(at.hour + 2, 9), 22) if d == at.date() else rng.randint(9, 22)
+        new = st.new_invoice(next(e for e in st.entities if e["id"] == orig["entity_id"]), d, hour=hour,
+                             items=copy.deepcopy(orig["line_items"]), currency=orig["currency"])
+        jid = "inv:" + orig["invoice_id"]
+        amt = next(r["debit_minor"] for r in st.journals[jid] if r["account"] == "1200")
+        dt = new["_dt"] - timedelta(minutes=rng.randint(1, 50))
+        e, i = orig["entity_id"], orig["invoice_id"]
+        st.journals[jid] += [st.row(dt, "4000", amt, e, i), st.row(dt, "1200", -amt, e, i)]
+        st.book_invoice(new)
+        st.touched.update({orig["invoice_id"], new["invoice_id"]})
+
+
 def _build_expenses(st: State) -> None:
     rng = st.rng
     scale = 10 ** EXPONENT[st.base] / USD_VALUE[st.base]
@@ -417,7 +456,7 @@ def _build_expenses(st: State) -> None:
     add(st.ps, "6100", rng.uniform(3000, 12000))
     add(st.ps + timedelta(days=14), "6200", rng.uniform(20000, 80000))
     add(st.pe, "6200", rng.uniform(20000, 80000))
-    target = rng.randint(230, 420)
+    target = rng.randint(900, 1400) if st.hard else rng.randint(230, 420)
     while len(st.ledger_rows()) < target:
         account = rng.choice(("6300", "6300", "6400", "6400", "6400"))
         usd = rng.uniform(20, 900) if account == "6300" else rng.uniform(1, 60)
@@ -525,6 +564,9 @@ def policy_for(st: State) -> dict:
                        "rate; remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; "
                        "difference to 7900; negative amount = refund (Dr 2900 / Cr 1000)",
             "expense": "Dr 6xxx / Cr 1000",
+            **({"credit_note": "a cancelled invoice is reversed in full: Dr 4000 / Cr 1200 with the same "
+                               "invoice_id and no payment_id; a re-issued replacement is booked as a new invoice"}
+               if st.hard else {}),
         },
         "findings": {
             "amount": "misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the "
@@ -556,6 +598,13 @@ TASK_TEXT = (
 )
 
 
+TASK_HARD = (
+    " Hard mode: the ledger is larger; a duplicate copy may have its line items re-typed (other order, "
+    "case and punctuation of the descriptions) but the same products, quantities and prices; an invoice "
+    "cancelled by a full credit note and re-issued with the same line items is legitimate."
+)
+
+
 def generate(seed: int, config: dict | None = None) -> dict:
     """Generate one episode: public tables + grader-only truth and provenance."""
     from . import inject  # local import: inject uses State
@@ -566,7 +615,7 @@ def generate(seed: int, config: dict | None = None) -> dict:
     errors, inter = _plan(st)
     inject.apply(st, errors, inter)
     episode = render(st, episode_id_for(int(seed), config))
-    episode["task"] = TASK_TEXT
+    episode["task"] = TASK_TEXT + (TASK_HARD if st.hard else "")
     if config.get("transform_seed") is not None:
         from .transform import transform
         episode = transform(episode, int(config["transform_seed"]))

@@ -65,11 +65,25 @@ class Books:
             if sum(r["debit_minor"] for r in rows) != sum(r["credit_minor"] for r in rows):
                 problems.append(f"unbalanced journal {jid}")
         # invoices: booking, period, FX
-        booked = {}
+        booked, self.voided = {}, set()
         for jid, rows in js.items():
             if jid.startswith("inv:"):
                 ar = [r for r in rows if r["account"] == "1200"]
                 rev = [r for r in rows if r["account"] == "4000"]
+                if len(ar) == 2 and len(rev) == 2:  # booking + full credit note (cancelled invoice)
+                    ar_dr = [r for r in ar if r["debit_minor"]]
+                    amounts = {r["debit_minor"] + r["credit_minor"] for r in ar + rev}
+                    reversal = [r for r in ar + rev if (r["account"] == "1200") == bool(r["credit_minor"])]
+                    if len(ar_dr) != 1 or len(amounts) != 1 or len(reversal) != 2 \
+                            or reversal[0]["timestamp"] != reversal[1]["timestamp"] \
+                            or datetime_key(reversal[0]["timestamp"]) < datetime_key(ar_dr[0]["timestamp"]):
+                        problems.append(f"malformed credit note in {jid}")
+                        continue
+                    if not self.in_period(reversal[0]["timestamp"]):
+                        problems.append(f"credit note {reversal[0]['row_id']} outside the period")
+                    self.voided.add(jid[4:])
+                    ar = ar_dr
+                    rev = [r for r in rev if r["credit_minor"]]
                 if len(ar) != 1 or len(rev) != 1 or ar[0]["debit_minor"] != rev[0]["credit_minor"]:
                     problems.append(f"malformed invoice journal {jid}")
                     continue
@@ -91,10 +105,13 @@ class Books:
                 problems.append(f"invoice {iid} total != line items")
             if self.in_period(inv["issued_at"]) and iid not in booked:
                 problems.append(f"in-period invoice {iid} not booked")
-        # duplicates: same entity, currency, identical line items -> later copy
+        # duplicates: same entity, currency, same line items (re-typed text allowed) -> later copy;
+        # an invoice cancelled by a full credit note is not a duplicate of its replacement
         seen = defaultdict(list)
         for inv in self.invoices.values():
-            key = (inv["entity_id"], inv["currency"], repr(inv["line_items"]))
+            if inv["invoice_id"] in self.voided:
+                continue
+            key = (inv["entity_id"], inv["currency"], line_key(inv["line_items"]))
             seen[key].append(inv)
         for group in seen.values():
             if len(group) < 2:
@@ -141,6 +158,12 @@ class Books:
             if not ar_ids <= {r["invoice_id"] for r in refs}:
                 problems.append(f"payment {pid} credits an invoice it does not reference")
         return issues, problems
+
+
+def line_key(items: list[dict]) -> tuple:
+    """Order-, case- and punctuation-insensitive identity of an invoice's lines."""
+    return tuple(sorted(("".join(ch for ch in li["description"].lower() if ch.isalnum()), li["quantity"],
+                         li["unit_price_minor"], li["amount_minor"]) for li in items))
 
 
 def datetime_key(ts: str):
@@ -205,7 +228,8 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
     try:
         if typ == "duplicate_invoice":
             a, b = sorted(ev_docs, key=lambda d: datetime_key(d["issued_at"]))
-            same = (a["entity_id"], a["currency"], a["line_items"]) == (b["entity_id"], b["currency"], b["line_items"])
+            same = (a["entity_id"], a["currency"], line_key(a["line_items"])) == \
+                (b["entity_id"], b["currency"], line_key(b["line_items"]))
             got = next(r["debit_minor"] + r["credit_minor"] for r in ev_rows if r["invoice_id"] == b["invoice_id"])
             ok = same and got == exp
         elif typ == "period_cutoff":

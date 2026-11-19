@@ -53,6 +53,21 @@ def _wrong_date(st, correct: date, local_ts: str, amount: int, cur: str) -> date
     return next((d for d in order if good(d)), None)
 
 
+def _retype(st, items: list[dict]) -> list[dict]:
+    """Hard mode: the same lines keyed in again by hand: other order, case and ref punctuation."""
+    items = [dict(i) for i in items]
+    st.rng.shuffle(items)
+    for i in items:
+        name, sep, ref = i["description"].rpartition(" (")
+        upper = st.rng.random() < 0.5
+        if not sep:  # no reference to re-type (e.g. retainer text): change the case only
+            i["description"] = i["description"].upper() if upper else i["description"].lower()
+            continue
+        ref = ref.rstrip(")").replace("-", st.rng.choice((" ", "", "/")))
+        i["description"] = f"{name.upper() if upper else name.lower()} - {ref}"
+    return items
+
+
 # ---------------------------------------------------------------- single errors
 def duplicate_invoice(st, scenario="single") -> bool:
     cands = [i for i in st.invoices if st.in_period(i["_cdate"]) and _booked(st, i) and _free(st, i["invoice_id"])
@@ -65,8 +80,10 @@ def duplicate_invoice(st, scenario="single") -> bool:
     if d == orig["_cdate"] and hour is None:
         d += timedelta(days=1)
     # the duplicate is always issued strictly after the original (truth amount = later copy)
-    dup = st.new_invoice(_entity(st, orig["entity_id"]), d, hour=hour,
-                         items=copy.deepcopy(orig["line_items"]), currency=orig["currency"])
+    items = copy.deepcopy(orig["line_items"])
+    if st.hard and st.rng.random() < 0.5:
+        items = _retype(st, items)
+    dup = st.new_invoice(_entity(st, orig["entity_id"]), d, hour=hour, items=items, currency=orig["currency"])
     jid = st.book_invoice(dup)
     st.touched.update({orig["invoice_id"], dup["invoice_id"]})
     ar = _row(st, jid, "1200")
