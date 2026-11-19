@@ -131,3 +131,8 @@
 - tests/test_load.py: 6 tests — roundtrip for dev and train (loaded == generate minus task key), verify_episode on all loaded episodes, --dir CLI exits 0.
 - All 181 tests pass. `uv run python -m auditenv.verify --dir episodes/dev` exits 0.
 - Next: no open gemini tasks remaining.
+## 2026-11-19 14:05 — codex
+- T29 blocked: added the seeded 40-episode step contract fuzz test. The test exercised more than 3,000 actions in 0.121 s, then reported these uncaught input-validation errors.
+- Episode 0, step 17: {"type":"get_record","table":{"a":{"b":1}},"id":{"a":{"b":1}}} raises TypeError (unhashable dict). Episode 0, step 22: {"type":"get_record","table":[],"id":[]} raises TypeError (unhashable list).
+- Episode 6, step 54: {"type":"list_records","table":"ledger","cursor":"ledger:²","limit":200} raises ValueError because the digit test accepts a character that integer parsing rejects.
+- Assumptions: use train and eval in alternation, keeping random submits near the end so the run reaches its action minimum. As assigned, the lead owns fixes in env.py. Re-run `uv run python -m unittest tests.test_fuzz` after those fixes.
