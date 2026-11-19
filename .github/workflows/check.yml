@@ -33,3 +33,7 @@ jobs:
           python -m auditenv.verify --seeds 0-199
           python -m auditenv.verify --dir episodes/train
           python -m auditenv.verify --dir episodes/dev
+      - name: Seed sweep (1 000 seeds default, 200 seeds hard)
+        run: |
+          python -m auditenv.fuzz --seeds 0-999
+          python -m auditenv.fuzz --seeds 0-199 --hard

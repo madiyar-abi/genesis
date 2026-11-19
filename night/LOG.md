@@ -175,3 +175,11 @@
   balance before/after, evidence reachable through the tools, manifest/truth schema, coverage of 4 types + I1 + I2 + clean).
   Sensitivity: an injected `expected_amount_minor` in tool results and a removed episode_over guard both make them fail.
 - check: ALL CHECKS PASSED, 226 tests, 13.9 s.
+
+## 2026-11-19 16:20 — hinabaina + Claude (jury-review, phase 4)
+- New `python -m auditenv.fuzz` (seed sweep): per episode generate + verifier + oracle/random/flag-all through the env.
+- Default, seeds 0-999 × {random mix, clean, heavy} = 3000 episodes (1989 dirty, 1011 clean), 45 s: 0 exceptions,
+  0 verifier problems, oracle 1.0 everywhere (> 0.9 dirty, 1.0 clean); random > 0 on 245/3000, all on clean books
+  (it submitted nothing — the correct answer), 0 on dirty; flag-all < 0 on 3000/3000.
+- Hard, seeds 0-199 = 600 episodes (395 dirty): 0 problems; random > 0 on 50/600, 0 on dirty; flag-all < 0 on 600/600.
+- tests/test_fuzz_sweep.py (clean sweep + a corrupted ledger is reported); CI runs both sweeps.
