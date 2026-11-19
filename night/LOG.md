@@ -1,0 +1,1 @@
+2026-11-20 00:32 lead — Round 6 began with a clean branch and no task list. Four worker assignments pushed. T5 reproduced swapped rate labels on clean seed 0; enforced CONTRACT § FX identifier and unique rate tuples. Both regression tests and official check passed. Existing demo and generator stay compatible. T1–T4 and jury materials follow.

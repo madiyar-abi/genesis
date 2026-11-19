@@ -191,6 +191,14 @@ def _structure(ep: dict) -> list[str]:
     for key, rows in (("invoice_id", t["invoices"]), ("payment_id", t["payments"]), ("fx_id", t["fx"])):
         if len({r[key] for r in rows}) != len(rows):
             problems.append(f"duplicate {key}")
+    rate_keys = set()
+    for rate in t["fx"]:
+        key = (rate["date"], rate["source_currency"], rate["target_currency"])
+        if key in rate_keys:
+            problems.append(f"duplicate FX rate for {key}")
+        rate_keys.add(key)
+        if rate["fx_id"] != ":".join(key):
+            problems.append(f"fx_id differs from date and currency pair: {rate['fx_id']}")
     inv_ids = {i["invoice_id"] for i in t["invoices"]}
     pay_ids = {p["payment_id"] for p in t["payments"]}
     for r in t["ledger"]:

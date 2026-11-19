@@ -28,6 +28,10 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 6 in progress · 20 November 2026
+
+The verifier checks each public FX identifier against its date and currency pair and rejects duplicate rate keys. Run `uv run python -m unittest tests.test_fx_identity`. The remaining verifier work, evidence checks, and jury materials are tracked in `night/TASKS.md`.
+
 ## Round 5 complete · 20 November 2026
 
 Before sharing the repository, the credential owner must revoke the DeepSeek API key exposed in Git history. The launcher now requires an explicit key.
