@@ -22,7 +22,7 @@
 - Each episode can contain duplicate invoices, missing or partial payment allocations, FX conversion errors, and period cutoff errors.
 - One scenario partially allocates a period-end foreign payment and converts its cash entry at the wrong day’s rate. Another backdates a next-period foreign invoice and converts it using a rate from the booking date or an earlier day.
 - Clean books include split payments, refunds, and recurring charges. Hard episodes add credit-note reissues and retyped invoice lines.
-- The verifier independently derives discrepancies from the records and checks the evidence cited for each issue.
+- The verifier independently derives discrepancies from the records and checks the evidence cited for each issue. It also rejects books that break the published posting policy, such as an account used outside its journal type or a mislabelled customer.
 
 ## 5. How the environment runs
 
