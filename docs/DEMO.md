@@ -44,7 +44,8 @@ Section 1 on screen (press Enter to advance through the sections).
 
 > "reset with a seed and a config gives the first observation: the task, the manifest — base
 > currency, company timezone, period, record counts — the bookkeeping policy and a 100-step budget.
-> The episode id is a hash, so the agent never sees the seed."
+> The episode id is an HMAC; in a closed run the grader sets a secret key, so the seed can't be
+> recovered and the episode can't be regenerated from our open-source code."
 
 **4. The agent investigates (1:00–1:30)** — section 2.
 
