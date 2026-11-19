@@ -26,6 +26,14 @@ class ShortcutMinerTest(unittest.TestCase):
     def test_hard(self):
         self.check(mine(list(range(5)), hard=True), 10)
 
+    def test_raw_entity_ids_are_reported_separately(self):
+        r = mine([0], configs={"heavy": {"errors": {t: 2 for t in ISSUE_TYPES}}}, min_support=1, top=1000)
+        self.assertTrue(any(c["feature"] == "entity_id" for c in r["excluded"]))
+        self.assertFalse(any(c["feature"] == "entity_id" and c["value"] != "None" for c in r["flagged"]))
+        self.assertTrue(any(c["feature"] == "entity_shape"
+                            for d in r["labelings"]["affected"].values() for c in d["top"]))
+        self.assertIn("Excluded values: " + str(len(r["excluded"])), markdown(r, 0.0))
+
 
 if __name__ == "__main__":
     unittest.main()

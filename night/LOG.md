@@ -59,6 +59,8 @@
   cost 0.001/0.002/0.005 and tolerance 0/0.1%/1% patched in a context manager (default re-grade == env reward,
   asserted). Ranking unchanged on dev and hard. Table in DESIGN §6. Shared reward untouched.
 
+## 2026-11-19 21:37 codex
+- Synced the lead branch, preserving both sides of the log in chronological order. Official check passed (267 tests and all gates); fuzz passed (3,000 episodes, zero problems). R2, C3 and E3a remain complete. Next: idle until another codex task is assigned.
 ## 2026-11-19 21:37 lead
 - Merged codex (R2, C3, E3a) and gemini (C2, P1, E2); reviewed diffs. LOG conflicts resolved keeping all entries
   in time order. Review fix on C2: `for line in inp` read a whole over-long line into memory before rejecting it;
@@ -85,6 +87,9 @@
   large 2900 → allocation 0.75–0.78) documented in DESIGN §10 instead of fixed — fixing them regenerates all default
   data and doc numbers for little gain (each hint names a record, the amount still needs reconciling).
 - tests/test_hardening seed-7 test now derives row ids from truth (hard ids moved), default ids still asserted.
+
+## 2026-11-19 21:44 codex
+- M1 done: raw non-null ID values are listed once per table, feature and value in Markdown and JSON, outside the precision rankings and flags. Null stays eligible as a missing-reference signal, and identifier shapes and suffixes stay eligible. Added miner, bench, sensitivity and chart Makefile targets. Targeted tests (3) and make dry run passed. Seeds 0–199 covered 400 episodes, with 9,718 excluded values and no entity_id flags. Official check passed (277 tests and all gates); fuzz passed (3,000 episodes, zero problems). Next: idle unless the lead adds another codex task.
 
 ## 2026-11-19 21:46 lead
 - J1/J2 refreshed for round 2: DEMO (276 tests, hard paired checks, F1 0.75 in hard mode, optional mutation-test

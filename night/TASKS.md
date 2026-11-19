@@ -79,7 +79,7 @@ Workers: touch ONLY the files listed for your task.
   SVG renders, numbers match check
 
 ## Block 3b — added by the lead after the first merge (21:50)
-- [ ] M1 (codex) Shortcut-miner noise filter + make targets: in `scripts/shortcut_miner.py` exclude from FLAGGING (still
+- [x] M1 (codex) Shortcut-miner noise filter + make targets: in `scripts/shortcut_miner.py` exclude from FLAGGING (still
   report them in a separate "excluded: per-episode random identifiers" list) every feature whose value is a raw
   per-episode random identifier (entity_id, counterparty/customer ids, invoice/payment/row id values themselves —
   NOT id format/length/prefix features, those stay flagged) since such values cannot transfer between episodes;

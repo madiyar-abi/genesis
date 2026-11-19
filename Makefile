@@ -1,4 +1,4 @@
-.PHONY: check test verify fuzz stress attack golden mutate
+.PHONY: check test verify fuzz stress attack golden mutate miner bench sensitivity chart
 
 
 check:
@@ -25,3 +25,15 @@ golden:
 
 mutate:
 	uv run python scripts/mutate_reward.py
+
+miner:
+	uv run python scripts/shortcut_miner.py --report-only
+
+bench:
+	uv run python scripts/bench.py
+
+sensitivity:
+	uv run python scripts/sensitivity.py
+
+chart:
+	uv run python -m auditenv.check --json /tmp/auditenv-metrics.json && uv run python scripts/chart.py
