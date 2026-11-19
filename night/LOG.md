@@ -1,30 +1,30 @@
-# Round 5
+2026-11-20 00:32 lead — Round 6 began with a clean branch and no task list. Four worker assignments pushed. T5 reproduced swapped rate labels on clean seed 0; enforced CONTRACT § FX identifier and unique rate tuples. Both regression tests and official check passed. Existing demo and generator stay compatible. T1–T4 and jury materials follow.
+2026-11-20 00:33 lead — T6 rehearsed docs/DEMO.md using its public command and five Enter inputs. PAY-136430 discrepancies were 286 and 351331 minor units; the closed grader recorded TP 4 FP 0 FN 0 and 0.958. The recording script matched throughout.
+2026-11-20 00:33 lead — T7 corrected I2 rate selection on slide four after reproducing seed 180. All ten slides checked, official check and docs sync passed. Prior handoff recorded an unresolved DeepSeek worktree; delegated T4 to a fallback on its named branch pending confirmation of branch availability.
 
-- 2026-11-20 00:11 lead — Started from a clean round branch without a task list. Reviewed SPEC, previous findings and current checks. Official baseline passed 295 tests. Published assignments for all four named workers. Deadline uses local UTC+5.
-- 2026-11-20 00:11 lead — T5 reproduced both identity errors before the fix. Both regressions pass after checking the manifest episode ID and unique issue IDs. Full check passed with T8 also present.
-- 2026-11-20 00:11 lead — T8 reproduced seed 1 with an invoice debit substituted for the payment posting. Require a positive receivables credit on the affected payment and invoice. Ten focused tests and all official gates passed.
-- 2026-11-20 00:12 lead — T6 replayed all five prompts with the public key unset. The two findings on PAY-136430 differ by cause and amount. Added their amounts as recording cues. The six segments allow 160 seconds for 318 narration words.
-- 2026-11-20 00:14 lead — T9 removed the embedded worker key discovered while diagnosing T4. Without a key the launcher exits 2 before accessing the service. The tracked tree scan found no matching credentials. Revoke the historical key through the provider. The old DeepSeek checkout has an unresolved merge, so a fallback subagent runs its assigned sweep on the dedicated round-five worker branch.
-- 2026-11-20 00:14 deepseek (lead fallback) — T4 verified 100 default and 100 hard transformed heavy episodes against their public records, with zero discrepancies or evidence failures. Used public generation and the episode seed for each transform. Reproduce from the repo root:
+2026-11-20 00:33 · deepseek (lead fallback) · T4 passed. Seeds 0–99 generated 26,659 default and 26,242 hard FX rows in 200 heavy episodes. Every date/source/target tuple was unique within its episode and every FX ID matched its tuple. No exceptions. The lead integrates the worker branch. Reproduction command:
 
 ```sh
-env -u AUDITENV_SECRET uv run python - <<'PY'
-from auditenv.check import HEAVY
+uv run python - <<'PY'
+from auditenv.fuzz import HEAVY
 from auditenv.generator import generate
-from auditenv.transform import transform
-from auditenv.verify import verify_episode
 
-for mode in ("default", "hard"):
+for difficulty in ("default", "hard"):
+    count = 0
+    config = HEAVY if difficulty == "default" else {**HEAVY, "difficulty": difficulty}
     for seed in range(100):
-        episode = generate(seed, {**HEAVY, "difficulty": mode})
-        problems = verify_episode(transform(episode, seed))
-        assert not problems, (mode, seed, problems)
-    print(mode, "100/100")
+        rows = generate(seed, config)["tables"]["fx"]
+        keys = [(r["date"], r["source_currency"], r["target_currency"]) for r in rows]
+        assert len(keys) == len(set(keys)), (difficulty, seed, "duplicate FX key")
+        assert all(r["fx_id"] == ":".join(k) for r, k in zip(rows, keys)), (difficulty, seed, "FX ID")
+        count += len(rows)
+    print(difficulty, "100 episodes", count, "FX rows")
 PY
 ```
-- 2026-11-20 00:18 gemini1 — T1 completed: updated _structure in auditenv/verify.py to reject dangling ledger invoice and payment references (including balanced orphan journals). Created tests/test_ledger_refs.py covering intact episodes pass, seed 7 clean paired expense rows assigned nonexistent payment failure, and dangling invoice reference failure (3/3 tests pass). All 301 unit tests and all check gates pass. Next: IDLE.
-- 2026-11-20 00:20 gemini3 — T3: audited all 63 test and command references in docs/CHECKS.md. Verified that every cited test class and method exists. Clarified what paired checks (deterministic replay, benign transform with ID relabelling and row/FX table shuffling) and split loader tests (roundtrip fidelity of exported splits, verifier zero-problem compliance) actually demonstrate. Removed brittle aggregate test counts (e.g. 32/32, 66/66, 34/34, 55/55, 9/9, 295 unit tests) across all 5 evaluation criteria tables, replacing them with invariant functional descriptions and measured invariants. All listed verification commands pass. Next: IDLE.
-- 2026-11-20 00:21 gemini2 — T2 completed: strengthened paired checks in auditenv/check.py (run_paired) to verify id_map existence and lack of identity mappings, check relabelling of public IDs (ledger row_id, invoices doc_id, payments doc_id), check shuffled row order across all tables including fx (FX ids are stable), and verify that untranslated dirty findings earn exactly 0 TP. Added tests/test_paired_transform.py with 8 comprehensive unit tests covering stub identity transform failure (including on clean books), dirty untranslated 0 TP assertion, stable FX IDs, shuffled order verification, and real default and hard pairs pass (8/8 tests pass). All 306 unit tests and official checks pass. Next: IDLE.
-- 2026-11-20 00:21 lead — T2 review found that comparing whole rows mistook ID changes for shuffling. Compare the mapped ID sequence for each table and verify the translated references. A regression shuffles only FX and restores the other three tables to their original order.
-- 2026-11-20 00:23 lead — T7 verified all ten slides against the integrated metrics, public demo, and both scenario injectors. The recorded answer earned 0.958 with four true positives in 22 actions. All documentation tables match. Updated the README grader command and the design note test count.
-- 2026-11-20 00:24 lead — Rechecked SPEC §§01–13 and confirmed all four remote worker branches are ancestors of the lead. Final official check passed 309 tests and all gates. Default and hard sweeps passed 3,000 and 600 episodes. Golden hashes matched 80/80, mutation tests caught 15/15, reward search returned zero violations in 11,000 trials, and the miner reproduced 16 default and 11 hard flags. Documentation sync passed. The team owns credential revocation, jury access, recording, deck export and submission. Round complete.
+
+2026-11-20 00:39 gemini2 — T2 completed: verified that I2 can use an earlier rate than the booking date when abs(conv(booking) - conv(inv._cdate)) < MIN_DIFF (100 minor units). Verified injector fallback in auditenv/inject.py (line 259) across 500 seeds with I2: in 498 episodes (99.6%) the booking-date rate was used, and in 2 episodes (0.4%, seeds 180 and 497) it fell back to 1 day earlier (booking - 1d, 2025-02-27 instead of 2025-02-28). Updated docs/CONTRACT.md and docs/DESIGN.md to describe actual date selection (booking date or earlier fallback day 1, 2, or 4 days before booking). All 311 unit tests pass. Next: IDLE.
+2026-11-20 00:39 gemini3 — T3: aligned README.md I2 description with inject.py rate fallback ('converted using the booking-date rate or an earlier fallback rate'); verified auditenv.check description against check.py gates (added naive reconciliation to dev baselines list and clarified paired replay policies reconcile_hard and random); verified split descriptions across configs/ (train, train_hard, dev, eval_example, eval_hard) and episodes/ (train, dev, hard public/grader splits). Ran auditenv.check and sync_docs.py --check: ALL CHECKS PASSED (311 unit tests, 0 failures), docs in sync. Next: IDLE.
+2026-11-20 00:40 lead — Reviewed T2 against the generator: the threshold compares converted invoice totals in base minor units. Clarified the threshold and final default in the contract and synchronized the injector docstring.
+2026-11-20 00:40 lead — T3 README claims matched split configs and baseline and paired runs. Correction to the T2 worker log: MIN_DIFF is 10 minor units, as documented in the reviewed contract.
+2026-11-20 00:41 gemini1 — T1 completed: updated Books.discrepancies in auditenv/verify.py to reject any out-of-period posting across all public and reverted ledger rows using company-local dates (self.in_period). Created tests/test_posting_period.py covering clean seed 0 pass, revenue credit moved to 2099 failure, expense/payment out-of-period failures, pre-injection out-of-period failure, and boundary timestamp checks in company local timezone (5/5 tests pass). All 316 unit tests and all check gates pass. Next: IDLE.
+2026-11-20 00:43 lead — Reviewed the final four worker tips and SPEC §§01–13. Final official check passed 316 tests, both sets of 20 pairs and remote isolation. All 40 indexed exports verified. Default and hard sweeps passed 3000 and 600 episodes; all 80 hashes matched, 15/15 mutants were caught, and 11000 reward mutations produced zero violations. Miner reproduced 16 default and 11 hard flags. No new Docker run locally. Recording, slides, credential revocation and access/submission remain with the team; the marathon handles PR and CI.

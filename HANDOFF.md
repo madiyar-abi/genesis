@@ -28,6 +28,14 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 6 complete · 20 November 2026
+
+All seven tasks passed on `night/2026-11-20-r6`. The verifier rejects out-of-period postings in the public and reconstructed ledgers, duplicate dated FX rates, and FX evidence identifiers that disagree with the date or currency pair. The independent sweep checked 52,901 FX rows across 200 heavy episodes.
+
+Run `uv run python -m auditenv.check` from the repository root. All 316 unit tests and both sets of 20 paired checks passed. The seed sweeps found zero problems across 3,000 default and 600 hard episodes. All 40 exported episodes verified. The miner flagged 16 default and 11 hard feature values, as documented in the design limitations.
+
+The contract, README and pitch describe the earlier FX date that can occur on a backdated invoice. Follow `docs/DEMO.md` to record the verified seed-2003 walkthrough. The grader matched all four findings and returned 0.958. Use `docs/PITCH.md` for the deck. The marathon handles branch integration and CI. The credential owner must revoke the previously exposed DeepSeek key before sharing the repository.
+
 ## Round 5 complete · 20 November 2026
 
 Before sharing the repository, the credential owner must revoke the DeepSeek API key exposed in Git history. The launcher now requires an explicit key.
@@ -113,7 +121,7 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 
 ## Remaining work before submission
 
-- **Engineering:** round 4 is merged. Follow round-5 integration and CI. The first scheduled nightly CI run can be checked after merge.
+- **Engineering:** round 5 is merged. Follow round-6 integration and CI. The first scheduled nightly CI run can be checked after merge.
 - **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md` (chart: `docs/baselines.svg`), including the Team slide.
 - **Access and submission:** the repository owner arranges jury access. The team checks the repo, video and presentation links, adds them to the Google Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 

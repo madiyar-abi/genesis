@@ -100,3 +100,9 @@ invalid submission, −1, logged (CONTRACT updated).
 - Replacing the paired transformation with an identity function and an empty ID map passed the default and hard paired gates. The translated answer could reuse all original IDs.
 - A clean company's truth file carrying another company's episode ID passed verification. Reusing an issue ID for two distinct findings on dirty books also passed.
 - On seed 1 with a single payment allocation error, replacing the unapplied cash posting in the evidence with the original invoice debit passed verification. That debit establishes the invoice booking but provides no evidence of a payment allocation.
+
+## Round 6 jury review
+
+- Swapping the public IDs of two FX rows on clean seed 0 passed verification. Looking up evidence by ID could therefore return a different dated rate from the one used to check the books.
+- Moving the revenue credit L02511 on clean seed 0 to 2099 left its receivables debit in the reporting period. The verifier still reported valid books.
+- With one I2 scenario, seed 180 books the invoice on 2025-02-28 using the rate for 2025-02-27. The scenario descriptions assumed the booking date always produced a large enough discrepancy.

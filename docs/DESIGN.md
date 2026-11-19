@@ -64,8 +64,9 @@ brute-forced from the id nor the episode regenerated from the open-source code. 
 **Interacting scenarios** (each yields two truth issues computed after both changes):
 - `I1` — foreign-currency payment late on the last day: partially allocated **and** its cash
   converted at the next day's rate (the date shown in the bank's timezone).
-- `I2` — next-period foreign invoice backdated into the period **and** converted at the
-  booking-date rate (period_cutoff + fx_error on the same invoice).
+- `I2` — next-period foreign invoice backdated into the period **and** converted using the rate
+  of the booking date or an earlier fallback day (1, 2, or 4 days earlier when the booking-date conversion
+  differs from the correct invoice value by less than 10 base-currency minor units; period_cutoff + fx_error on the same invoice).
 
 Every type is independently configurable (`errors: {type: count}`), injectors never touch an
 already-affected document, and amounts are the real ledger misstatement — not a "suspicious row".
@@ -209,7 +210,7 @@ Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30
 P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode. Timing is a snapshot of the measurement host. CI compares deterministic cells and checks that times are finite and nonnegative.
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount; reported separately, the shared reward is unchanged.
-Other gates in the same run: 309 unit tests pass; verifier 200/200 episodes valid (600/600 with
+Other gates in the same run: 316 unit tests pass; verifier 200/200 episodes valid (600/600 with
 `auditenv.verify --seeds 0-199`); 20/20 paired checks on default and 20/20 on hard episodes; out-of-process run leaks nothing.
 
 Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200
