@@ -18,9 +18,8 @@ DEEPSEEK_DIR="${DEEPSEEK_DIR-../genesis-deepseek}"
 CHECK_CMD="${CHECK_CMD:-uv run python -m auditenv.check}"
 PR="${PR:-1}"                                   # 0 = push only, no PR/merge (testing)
 EMPTY_SLEEP="${EMPTY_SLEEP:-7200}"              # after a round with no product change
-NIGHT_SH="${NIGHT_SH:-scripts/night.sh}"
-
 cd "$(dirname "$0")/.." || exit 1
+NIGHT_SH="${NIGHT_SH:-$PWD/scripts/night.sh}"
 mkdir -p .night-logs
 caffeinate -dimsu -w $$ &
 now() { date +%s; }
@@ -30,7 +29,7 @@ stopped() { [ -e .night-logs/STOP ] || [ "$(now)" -ge "$END" ]; }
 nap() { local e=$(( $(now) + $1 )); while [ "$(now)" -lt "$e" ] && ! stopped; do sleep 20; done; }
 
 ROUND_FILE=.night-logs/marathon-round
-round=$(cat "$ROUND_FILE" 2>/dev/null || echo 3)
+round=$(cat "$ROUND_FILE" 2>/dev/null || echo 4)
 
 # Commit whatever the agents left uncommitted, so no work is lost when branches change.
 save_leftovers() {
@@ -86,8 +85,8 @@ run_team() {
   if [ -n "$GEM1_DIR" ]; then
     workers="${workers:+$workers,}gemini1"
     [ -d "$GEM1_DIR" ] || git worktree add -q --detach "$GEM1_DIR" "origin/$B"
-    ( cd "$GEM1_DIR" && git stash -q -u 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
-      && rm -f night/STOP .night-logs/session-* && mkdir -p .night-logs \
+    ( cd "$GEM1_DIR" && git checkout -q -- . 2>/dev/null; git clean -fdq 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
+      && rm -f night/STOP night/DONE .night-logs/session-* 2>/dev/null && mkdir -p .night-logs \
       && exec "$NIGHT_SH" --role worker --name gemini1 --engine agy --branch "$B" --model "$GEM_MODEL" \
            --accounts "default" --until "$FREEZE" >> .night-logs/worker.out 2>&1 ) &
     g1pid=$!
@@ -95,8 +94,8 @@ run_team() {
   if [ -n "$GEM2_DIR" ]; then
     workers="${workers:+$workers,}gemini2"
     [ -d "$GEM2_DIR" ] || git worktree add -q --detach "$GEM2_DIR" "origin/$B"
-    ( cd "$GEM2_DIR" && git stash -q -u 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
-      && rm -f night/STOP .night-logs/session-* && mkdir -p .night-logs \
+    ( cd "$GEM2_DIR" && git checkout -q -- . 2>/dev/null; git clean -fdq 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
+      && rm -f night/STOP night/DONE .night-logs/session-* 2>/dev/null && mkdir -p .night-logs \
       && exec "$NIGHT_SH" --role worker --name gemini2 --engine agy --branch "$B" --model "$GEM_MODEL" \
            --accounts "$HOME/.agy-acc2" --until "$FREEZE" >> .night-logs/worker.out 2>&1 ) &
     g2pid=$!
@@ -104,8 +103,8 @@ run_team() {
   if [ -n "$GEM3_DIR" ]; then
     workers="${workers:+$workers,}gemini3"
     [ -d "$GEM3_DIR" ] || git worktree add -q --detach "$GEM3_DIR" "origin/$B"
-    ( cd "$GEM3_DIR" && git stash -q -u 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
-      && rm -f night/STOP .night-logs/session-* && mkdir -p .night-logs \
+    ( cd "$GEM3_DIR" && git checkout -q -- . 2>/dev/null; git clean -fdq 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
+      && rm -f night/STOP night/DONE .night-logs/session-* 2>/dev/null && mkdir -p .night-logs \
       && exec "$NIGHT_SH" --role worker --name gemini3 --engine agy --branch "$B" --model "$GEM_MODEL" \
            --accounts "$HOME/.agy-acc3" --until "$FREEZE" >> .night-logs/worker.out 2>&1 ) &
     g3pid=$!
@@ -115,8 +114,8 @@ run_team() {
   if [ -n "$DEEPSEEK_DIR" ]; then
     workers="${workers:+$workers,}deepseek"
     [ -d "$DEEPSEEK_DIR" ] || git worktree add -q --detach "$DEEPSEEK_DIR" "origin/$B"
-    ( cd "$DEEPSEEK_DIR" && git stash -q -u 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
-      && rm -f night/STOP .night-logs/session-* && mkdir -p .night-logs \
+    ( cd "$DEEPSEEK_DIR" && git checkout -q -- . 2>/dev/null; git clean -fdq 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
+      && rm -f night/STOP night/DONE .night-logs/session-* 2>/dev/null && mkdir -p .night-logs \
       && exec "$NIGHT_SH" --role worker --name deepseek --engine deepseek --branch "$B" --model "deepseek-v4.1-flash" \
            --until "$FREEZE" >> .night-logs/worker-deepseek.out 2>&1 ) &
     dpid=$!
