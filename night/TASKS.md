@@ -25,7 +25,7 @@ Workers: touch ONLY the files listed for your task.
   after that returns `episode_over`, (d) a custom `time_limit_s` in config is honoured, (e) eval mode: no reward/info
   leak on time limit (info == {} and reward == 0.0). No sleeping in tests — files: auditenv/env.py, tests/test_clock.py
   — accept: `uv run python -m unittest tests.test_clock tests.test_env` green; `uv run python -m auditenv.check` exit 0
-- [ ] C2 (gemini) Bound request size and bad bytes in `auditenv/server.py`: read stdin as bytes (`sys.stdin.buffer`),
+- [x] C2 (gemini) Bound request size and bad bytes in `auditenv/server.py`: read stdin as bytes (`sys.stdin.buffer`),
   reject any request line longer than 1 MiB (constant `MAX_LINE = 1 << 20`) with `{"error": "request too large"}`
   without parsing it, decode UTF-8 strictly and answer `{"error": "invalid utf-8"}` on failure; the server keeps
   serving after either error (next valid request works). Keep the JSON-lines protocol and all existing responses
@@ -35,7 +35,7 @@ Workers: touch ONLY the files listed for your task.
   `uv run python -m unittest tests.test_server` green; `uv run python -m auditenv.check` exit 0 (remote gate passes)
 
 ## Block 2 — reproducibility / data
-- [ ] P1 (gemini) Golden hashes: new `scripts/golden.py` computes sha256 of `json.dumps(generate(seed, config),
+- [x] P1 (gemini) Golden hashes: new `scripts/golden.py` computes sha256 of `json.dumps(generate(seed, config),
   sort_keys=True, separators=(",", ":"))` for seeds 0–19 × configs [default `{}`, `{"errors": {}}`,
   `{"difficulty": "hard"}`, `{"transform_seed": 7}`] (80 hashes) and writes `tests/golden_hashes.json`
   (`{"<config-json>|<seed>": "<hex>"}`); `--check` mode compares and exits 1 on drift. New `tests/test_golden.py`
@@ -54,7 +54,7 @@ Workers: touch ONLY the files listed for your task.
   docs/DESIGN.md (+ inject/verify if changed) — accept: verify 0 problems, decision in DESIGN
 
 ## Block 3 — measured design / engineering
-- [ ] E2 (gemini) Timing benchmark: new `scripts/bench.py` measures wall time (time.perf_counter, median of 3) of
+- [x] E2 (gemini) Timing benchmark: new `scripts/bench.py` measures wall time (time.perf_counter, median of 3) of
   (a) `generate()` for seeds 0–99 default and hard, (b) one full episode per policy (`auditenv.run` APIs) on
   `configs/dev.json` and `configs/eval_hard.json`, (c) `auditenv.verify` over seeds 0–99; prints a markdown table
   and with `--json PATH` writes the numbers; prints Python version and `platform.platform()`. Do NOT edit docs — the

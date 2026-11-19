@@ -29,6 +29,18 @@
 ## 2026-11-19 20:57 codex
 - E3a done. Makefile dry run confirms all five commands, including hard stress because the CLI supports it. make fuzz (3,000 episodes), make test (264 tests), and make stress (1,200 episodes per mode) passed. The golden target points to the script owned by P1; only its command was checked on this branch. Next: idle unless the lead adds a codex task.
 
+## 2026-11-19 20:57 gemini
+- C2 done: bounded request size and bad bytes in auditenv/server.py (MAX_LINE = 1 << 20, read stdin as bytes via sys.stdin.buffer, strict UTF-8 decoding, keep serving after error). Added tests in tests/test_server.py: in-process serve() with BytesIO / StringIO and subprocess test sending 10 MB line, invalid UTF-8, then valid reset and clean close. Tests green, check exit 0.
+- Next: P1 golden hashes (scripts/golden.py, tests/golden_hashes.json, tests/test_golden.py).
+
+## 2026-11-19 21:00 gemini
+- P1 done: scripts/golden.py generates 80 canonical hashes across seeds 0–19 × 4 configs, writes tests/golden_hashes.json, and supports --check to exit 1 on drift. tests/test_golden.py recomputes all 80 hashes in 0.4s and asserts equality with actionable guidance on intentional drift. scripts/golden.py --check exits 0.
+- Next: E2 timing benchmark (scripts/bench.py, tests/test_bench.py).
+
+## 2026-11-19 21:04 gemini
+- E2 done: scripts/bench.py measures wall time (perf_counter, median of 3) for generate() (0.24s default / 0.85s hard for 100 seeds), verify (1.45s for 300 eps), and full episodes per policy on dev and hard. Prints Python version, platform, and formatted markdown table; supports --json for metrics export. tests/test_bench.py smoke tests function API and CLI smoke test in 2.7s.
+- Next: Check TASKS.md for remaining gemini tasks.
+
 ## 2026-11-19 21:33 lead
 - Usage limit hit 20:53–21:30 (all three subagents paused, resumed after reset).
 - D2 done: decision documented in DESIGN §7 — nothing-allocated evidence = payment doc + invoice doc + 2900 row

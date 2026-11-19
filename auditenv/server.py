@@ -25,8 +25,10 @@ import sys
 from .env import AuditEnv
 from .run import load_episodes
 
+MAX_LINE: int = 1 << 20  # 1 MiB
 
-def serve(inp, out, grader_log: str | None, episodes: list[tuple[int, dict]] | None) -> None:
+
+def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dict]] | None = None) -> None:
     env = AuditEnv()
     queue = list(episodes) if episodes is not None else None
     logged = 0
@@ -39,21 +41,45 @@ def serve(inp, out, grader_log: str | None, episodes: list[tuple[int, dict]] | N
                     fh.write(json.dumps(rec, sort_keys=True) + "\n")
             logged = len(env.grader_log)
 
+    def send_resp(resp: dict) -> None:
+        data = json.dumps(resp) + "\n"
+        try:
+            out.write(data)
+        except TypeError:
+            out.write(data.encode("utf-8"))
+        out.flush()
+
     for line in inp:
-        line = line.strip()
-        if not line:
+        if isinstance(line, bytes):
+            if len(line) > MAX_LINE:
+                send_resp({"error": "request too large"})
+                continue
+            try:
+                line_str = line.decode("utf-8")
+            except UnicodeDecodeError:
+                send_resp({"error": "invalid utf-8"})
+                continue
+        elif isinstance(line, str):
+            if len(line) > MAX_LINE or len(line.encode("utf-8")) > MAX_LINE:
+                send_resp({"error": "request too large"})
+                continue
+            line_str = line
+        else:
+            send_resp({"error": "invalid input type"})
+            continue
+
+        line_str = line_str.strip()
+        if not line_str:
             continue
         try:
-            req = json.loads(line)
+            req = json.loads(line_str)
             cmd = req.get("cmd")
             if cmd == "reset":
                 env.abandon()
                 flush_log()
                 if queue is not None:
                     if not queue:
-                        resp = {"error": "no more episodes"}
-                        out.write(json.dumps(resp) + "\n")
-                        out.flush()
+                        send_resp({"error": "no more episodes"})
                         continue
                     seed, config = queue.pop(0)
                     config = {**config, "mode": config.get("mode", "eval")}
@@ -72,8 +98,7 @@ def serve(inp, out, grader_log: str | None, episodes: list[tuple[int, dict]] | N
                 resp = {"error": "unknown cmd"}
         except Exception as e:  # bounded error, never a traceback with internals
             resp = {"error": f"{type(e).__name__}: {str(e)[:160]}"}
-        out.write(json.dumps(resp) + "\n")
-        out.flush()
+        send_resp(resp)
     env.abandon()  # close / EOF with an open episode: graded as truncated, empty answer
     flush_log()
 
@@ -84,7 +109,8 @@ def main(argv=None) -> int:
     ap.add_argument("--episodes", help="hidden episode list {seeds, config}; resets ignore client seeds")
     args = ap.parse_args(argv)
     episodes = load_episodes(args.episodes) if args.episodes else None
-    serve(sys.stdin, sys.stdout, args.grader_log, episodes)
+    inp = getattr(sys.stdin, "buffer", sys.stdin)
+    serve(inp, sys.stdout, args.grader_log, episodes)
     return 0
 
 
