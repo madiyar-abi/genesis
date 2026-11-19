@@ -22,6 +22,7 @@
 - T18 done: Python 3.11 slim Dockerfile and build-context exclusions. Task grep checks and full unittest suite passed.
 - Assumptions: T18 can proceed while T11 waits for T7. The image runs the stdlib check entry point directly. Docker execution deferred because Docker is unavailable locally and T17 owns the check module.
 - Next: T11 after T7 is checked on the lead branch, with integrated acceptance once the T13 runner is available.
+
 ## 2026-11-19 13:41 — gemini
 - T3 done: auditenv/schema.py (validate_findings, normalize_finding) + tests/test_schema.py (42 tests, all pass).
 - Constants: ISSUE_TYPES (4 types), MAX_FINDINGS=30, MAX_EVIDENCE=10, MAX_EXPLANATION=1000, MAX_AFFECTED=10.
@@ -35,6 +36,11 @@
 - Assumptions: expense journals carry no ids (schema has no journal id) → grouped by timestamp in checks;
   period window for documents = prior 35 days .. next 7 days; FX table covers period −60 .. +15 days, only foreign→base pairs.
 - Next: T6 matcher, T7 env (lead).
+
+## 2026-11-19 13:48 — codex
+- T11 done: RandomExplorer and FlagAll. Five seeds each via run_episode produced repeatable trajectories and negative mean FlagAll reward. Targeted tests and full available suite passed.
+- Assumptions: policies reserve the final available step for submit; FlagAll keeps paging after reaching the findings cap, uses base currency at a naive 1:1, and takes absolute payment amounts to satisfy the nonnegative claim schema.
+- Next: rerun the full suite after the lead publishes T7 tests. No other codex tasks are open.
 
 ## 2026-11-19 13:50 — lead
 - T6/T7 code in (matcher.py, env.py) + oracle + run.py; end-to-end oracle = 1.0. Tests for T6/T7 and T15 being written by subagents.
@@ -53,10 +59,6 @@
 - Env config validation tightened (bool max_steps, time_limit_s type). CONTRACT updated (error codes time_limit/invalid_findings, get_document kind, scenario key).
 - Known design limit (for DESIGN.md): with 12 issues, missing one finding at 0 steps (0.913) beats full answer after 60 steps (0.88) — step cost vs F1 granularity.
 - Next: merge workers, T17 check command.
-## 2026-11-19 13:48 — codex
-- T11 done: RandomExplorer and FlagAll. Five seeds each via run_episode produced repeatable trajectories and negative mean FlagAll reward. Targeted tests and full available suite passed.
-- Assumptions: policies reserve the final available step for submit; FlagAll keeps paging after reaching the findings cap, uses base currency at a naive 1:1, and takes absolute payment amounts to satisfy the nonnegative claim schema.
-- Next: rerun the full suite after the lead publishes T7 tests. No other codex tasks are open.
 
 ## 2026-11-19 13:54 — lead
 - Merged codex T11 (random explorer, flag-all). Reviewed: observation-only, deterministic per seed.
@@ -65,6 +67,7 @@
 - run.py: --config now reads the per-episode format `{episodes:[{seed, config}]}` (T16 spec updated accordingly).
 - Assumption: check uses a built-in fallback dev list until configs/dev.json exists.
 - Next: T19–T22 docs; merge gemini T12/T16 and codex T23 when pushed.
+
 ## 2026-11-19 13:55 — gemini
 - T12 done: auditenv/policies/reconcile.py (reconcile_findings, Reconcile policy) + tests/test_reconcile.py (all pass).
 - Reconcile baseline: pages ledger, invoices, payments, fx (max 50 rows/page); fetches line_items for duplicate candidates via get_document; rule-based detection for duplicate_invoice, period_cutoff, fx_error, payment_allocation.
@@ -86,6 +89,12 @@
 - Assumptions: action schemas describe intended valid inputs; list cursor and limit are optional as in the environment, and the manifest includes the optional generator version. Episode-ID equality is enforced by the grader.
 - Next: T25 experimental reward.
 
+## 2026-11-19 13:56 — lead
+- Merged gemini T12 (Reconcile: obs-only, pages all tables + get_document for duplicate candidates) and codex T23 (analyze.py).
+  Check: reconcile micro-F1 1.000, return 0.956, 22.8 steps on dev — the books are solvable within budget from the records alone.
+- Added T26 (codex) NaiveReconcile to measure that distractors/timezones trip naive rules (honest difficulty evidence).
+- Next: T19 design note with measured numbers, T21/T22.
+
 ## 2026-11-19 13:57 — codex
 - T25 done: amount-weighted experimental terminal reward. Five targeted tests and full suite passed.
 - Assumptions: use the shared invalid-submission penalty and reward rounding. A zero weighted denominator receives F1=1 only when truth and findings are both empty.
@@ -97,3 +106,7 @@
 - Reconcile stress test: 1200 episodes (300 seeds × 4 configs) → 0 imperfect, max 32 steps → truth always findable from records.
 - Docs: README (T20 draft), DESIGN.md draft (T19; results placeholders until T16/T26).
 - Next: DEMO.md, PITCH.md drafts; merge T16/T26.
+## 2026-11-19 13:58 — codex
+- T26 done: NaiveReconcile uses only table listings. Seeds 2000–2009: FPs on 10/10 clean distractor episodes, mean dirty F1 0.431414 vs Reconcile 1.000000 (one error of each type plus I1 and I2). Determinism and full suite passed.
+- Assumptions: skip FX checks if the written-date rate is absent; flag later equal-total bookings against the first; cap findings at 30. The policy is available directly through run_episode.
+- Also verified T23 with Reconcile after T12 landed. Next: no open codex tasks.
