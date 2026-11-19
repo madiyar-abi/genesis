@@ -44,6 +44,8 @@ Branch `night/2026-11-20-r12`. See `night/TASKS.md` for remaining work.
 
 - T3. Gemini2 regenerated the chart. The lead independently compared docs/baselines.svg byte for byte with scripts/chart.py output from the integrated check metrics.
 
+- T2. Gemini1 and the lead independently counted generated truth. Each 20-company evaluation config contains five clean companies and five with interacting errors.
+
 ## Round 11 complete · 20 November 2026
 
 Work is on `night/2026-11-20-r11`. See `night/TASKS.md` for ownership and
