@@ -27,3 +27,9 @@
   (+ invoice-date FX); the missing AR credit is an absence, proven by the whole-ledger recomputation (verify step 3).
   Tightened verify._sufficient: for base-currency payments the 2900 credit must cover the whole referenced amount
   (no data change; verify 600/600, dev/train/hard dirs all valid). Test in tests/test_verify.py.
+
+## 2026-11-19 21:33 lead
+- E3b done (subagent, reviewed): configs/train_hard.json (seeds 1100–1109, disjoint from all splits),
+  trajectories/train_hard_{random,naive_reconcile,reconcile,reconcile_hard}.jsonl (~10.5 MB), regenerate commands
+  in README (reproduce byte-for-byte), test_trajectory_files covers them, CI badge at the top of README.
+  Note: the D4 hard-mode leak fix will require regenerating these files.
