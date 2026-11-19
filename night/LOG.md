@@ -115,3 +115,10 @@
   AUDITENV_SECRET set; unit tests now run with the public key). check exit 0 (278 tests), secret check exit 0.
 - Next: review defects 3–6 (unknown action params accepted, grading crash on non-str keys, loose reset input,
   stale README lines).
+
+## 2026-11-19 22:00 lead
+- Fixed review defects 3–6 (REVIEW.md R2-3..R2-6): unknown action params → bad_params; validate_findings never
+  raises; reset rejects non-int seeds / NaN-inf time limits / non-bool distractors / non-int transform_seed, server no
+  longer int()-coerces seeds; README/CONTRACT/load.py doc fixes; test counts 282 everywhere. New
+  tests/test_contract_strict.py. check exit 0 (282 tests), golden unchanged, sync_docs ok.
+- Assumption: rejecting time_limit_s=inf is fine (the case fixes a 60 s limit; nobody needs to disable it).

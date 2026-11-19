@@ -2,7 +2,7 @@
 
 Usage:
     from auditenv.load import load_episode
-    ep = load_episode("episodes/dev/ep_34a13a83cba2")
+    ep = load_episode("episodes/dev/ep_14eca11ac929")
 
 Returns: {episode_id, manifest, policy, tables, truth, provenance}
 (same keys as generate() minus "task").

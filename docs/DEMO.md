@@ -20,7 +20,7 @@ uv run python -m auditenv.check
 
 Show the `[PASS]` lines, the dev baseline table and the hard-mode table.
 
-> "This is the official check, one command. It runs 276 unit tests, an
+> "This is the official check, one command. It runs 282 unit tests, an
 > independent verifier that recomputes every hidden error from the records, the baseline
 > policies, twenty paired reproducibility checks on default and twenty on hard episodes, a closed run
 > in a separate process and the hard mode. The oracle reaches reward 1, the flag-everything attack

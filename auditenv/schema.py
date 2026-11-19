@@ -91,8 +91,16 @@ def normalize_finding(f: dict) -> dict:
 def validate_findings(obj: object, episode_id: str) -> str | None:
     """Validate a findings submission object.
 
-    Returns ``None`` if valid, otherwise a short error message string.
+    Returns ``None`` if valid, otherwise a short error message string. Never raises: anything the checks
+    below do not anticipate (exotic in-process objects) is an invalid submission, not a crash.
     """
+    try:
+        return _validate(obj, episode_id)
+    except Exception:
+        return "malformed findings"
+
+
+def _validate(obj: object, episode_id: str) -> str | None:
 
     if not isinstance(obj, dict):
         return "findings object must be a dict"
@@ -132,7 +140,7 @@ def _validate_one(f: object, index: int) -> str | None:
     # Extra unknown keys → invalid.
     extra = set(f.keys()) - _FINDING_KEYS
     if extra:
-        return f"finding[{index}] has unknown keys: {sorted(extra)}"
+        return f"finding[{index}] has unknown keys: {sorted(map(str, extra))[:5]}"
 
     # --- type ---
     ftype = f.get("type")

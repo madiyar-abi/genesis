@@ -15,6 +15,10 @@ PAGE_MAX = 50
 DEFAULTS = {"mode": "train", "max_steps": 100, "time_limit_s": 60.0}
 CONFIG_KEYS = {"mode", "max_steps", "time_limit_s", "errors", "interacting", "n_invoices", "distractors",
                "transform_seed", "difficulty"}
+ACTION_KEYS = {  # schemas/action.schema.json: additionalProperties false
+    "list_records": {"type", "table", "cursor", "limit"}, "get_record": {"type", "table", "id"},
+    "get_document": {"type", "doc_id"}, "calculator": {"type", "expression"}, "submit": {"type", "findings"},
+}
 TOOLS = [
     {"type": "list_records", "params": {"table": "ledger|invoices|payments|fx", "cursor": "null|str",
                                         "limit": "int<=50"},
@@ -44,6 +48,8 @@ class AuditEnv:
 
     # ------------------------------------------------------------------ API
     def reset(self, seed: int, config: dict | None = None):
+        if isinstance(seed, bool) or not isinstance(seed, int):
+            raise ValueError("seed must be an int")
         config = dict(config or {})
         unknown = set(config) - CONFIG_KEYS
         if unknown:
@@ -54,8 +60,8 @@ class AuditEnv:
         if isinstance(cfg["max_steps"], bool) or not (isinstance(cfg["max_steps"], int) and 1 <= cfg["max_steps"] <= 100):
             raise ValueError("max_steps must be an int in [1, 100]")
         tl = cfg["time_limit_s"]
-        if isinstance(tl, bool) or not isinstance(tl, (int, float)) or tl < 0:
-            raise ValueError("time_limit_s must be a non-negative number")
+        if isinstance(tl, bool) or not isinstance(tl, (int, float)) or not 0 <= tl < float("inf"):
+            raise ValueError("time_limit_s must be a finite non-negative number")
         self._cfg = cfg
         self._ep = generate(seed, config)
         t = self._ep["tables"]
@@ -100,6 +106,9 @@ class AuditEnv:
         else:
             try:
                 kind = action.get("type") if isinstance(action, dict) else None
+                extra = set(action) - ACTION_KEYS[kind] if kind in ACTION_KEYS else set()
+                if extra:
+                    raise ToolError("bad_params", f"unknown parameters for {kind}: {sorted(map(str, extra))[:5]}"[:160])
                 if kind == "submit":
                     terminated = True
                     res = self._finish(action.get("findings"), self._steps - 1, "submit")

@@ -73,6 +73,11 @@ def gen_config(config: dict) -> dict:
     n = config.get("n_invoices")
     if n is not None and (isinstance(n, bool) or not isinstance(n, int) or not 10 <= n <= 100):
         raise ValueError("n_invoices must be an int in [10, 100] (keeps documents <= 200)")
+    if not isinstance(config.get("distractors", True), bool):
+        raise ValueError("distractors must be true or false")
+    ts = config.get("transform_seed")
+    if ts is not None and (isinstance(ts, bool) or not isinstance(ts, int)):
+        raise ValueError("transform_seed must be an int or null")
     difficulty = config.get("difficulty", "default")
     if difficulty not in DIFFICULTIES:
         raise ValueError(f"difficulty must be one of {DIFFICULTIES}")
