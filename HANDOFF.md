@@ -30,7 +30,7 @@ message says a Google Doc — follow the latest, re-check the form before submit
 
 ## Round 4 in progress
 
-Branch `night/2026-11-19-r4`. The verifier checks each invoice line against quantity times unit price. Run `uv run python -m unittest tests.test_verify`. The split verifier cross-checks indexed episode directories and reports empty or unreadable exports. The five recording cues in `docs/DEMO.md` were rehearsed on public seed 2003. The pitch uses the same public demo command and its baseline tables match the check. All 323 export files matched fresh output across the three splits. The verifier now compares the manifest document count with the invoice and payment tables. All seven committed trajectories reproduced byte for byte. Remaining assignments are in `night/TASKS.md`. Freeze is 22 November at 18:00 Astana.
+Branch `night/2026-11-19-r4`. The verifier checks each invoice line against quantity times unit price. Run `uv run python -m unittest tests.test_verify`. The split verifier cross-checks indexed episode directories and reports empty or unreadable exports. The five recording cues in `docs/DEMO.md` were rehearsed on public seed 2003. The pitch uses the same public demo command and its baseline tables match the check. All 323 export files matched fresh output across the three splits. The verifier now compares the manifest document count with the invoice and payment tables. All seven committed trajectories reproduced byte for byte. All 80 golden hashes matched and the test suite detected all 15 reward mutants. All eight tasks are checked off. Freeze is 22 November at 18:00 Astana.
 
 ## Round 3 complete · 19 November 2026
 
