@@ -29,8 +29,10 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] Doc link submitted in the personal account on the site
 
 ## Status
-**Round 2 (agent polish run) on `night/2026-11-19-r2` — all planned ideas done except the optional H1/E5
-(skipped on purpose, see `night/LOG.md`).** Goals: `night/ROUND2.md`; tasks: `night/TASKS.md`.
+**Round 2 (agent polish run) on `night/2026-11-19-r2` is DONE (`night/DONE`): all planned ideas done except the
+optional H1/E5 (skipped on purpose, see `night/LOG.md`), plus fixes from an independent jury-style review
+(`REVIEW.md` → "Round 2": a stale agent-facing duplicate evidence rule — the one high-impact defect — and stricter
+input handling). Jury criteria → tests → commands: `docs/CHECKS.md`.** Goals: `night/ROUND2.md`; tasks: `night/TASKS.md`.
 Humans open the PR from `night/2026-11-19-r2` into `main` (the night run never touches `main`).
 
 Round-2 results (each with its command; numbers from the current code):
@@ -169,6 +171,9 @@ uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out
 uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json
 uv run python -m auditenv.fuzz --seeds 0-999          # seed sweep (3 000 episodes, ~45 s)
 uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299
+uv run python scripts/mutate_reward.py                # 15/15 reward mutants caught
+uv run python scripts/golden.py --check               # generator drift detector (80 hashes)
+make fuzz | make stress | make attack | make miner | make sensitivity | make bench | make chart
 ```
 No `uv`: `python3.11 -m auditenv.check` from the repo root. Docker: `docker build -t auditenv . && docker run --rm --network none auditenv`
 (verified in CI; Docker is not installed on the dev Mac).

@@ -138,3 +138,11 @@
 - Merged gemini G1 (docs/CHECKS.md). Reviewed: every cited file/Class::test exists (scripted scan), module test
   counts match (env 32, jury 34, clock 2, load 9, hardening 14, reward_attacks 17); fixed one count (§10 has 11
   limitation bullets, not 12). Linked from the README layout table.
+
+## 2026-11-19 22:29 lead
+- Final pass: re-read SPEC.md §01–§13; every requirement covered (one gap found and fixed: submit with extra action
+  keys must still terminate). Merged origin/main (teammates' night.sh/NIGHT.md rotation change, clean).
+  check exit 0 (283 tests), fuzz default 3 000 + hard 600 PASSED, verify 600/600 and all exported dirs valid,
+  sync_docs ok, golden 80/80, mutate 15/15, attack 0/11 000, README/DEMO commands exit 0, trajectories reproduce.
+- Created night/DONE. Next for humans: open the PR night/2026-11-19-r2 → main, record the video (docs/DEMO.md),
+  build slides (docs/PITCH.md + docs/baselines.svg), make the repo viewable, submit the Google Doc by 22 Nov 22:00.
