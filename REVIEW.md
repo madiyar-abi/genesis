@@ -184,3 +184,11 @@ attempts the reset, continues inspecting and submits in the original episode.
 The paired check originally passed both a clean and a dirty episode when the
 test transform replaced every invoice due date with its issue date. It now
 compares the complete public rows after translating the expected ID fields.
+
+## Round 13
+
+The official comparison covered the ten dev companies and twenty hard companies.
+The public default cohort in configs/eval_example.json was missing from both the
+console and the metrics JSON. A regression ran the reporting entry point and
+failed on the missing split. The check now scores every default baseline on the
+same twenty companies and includes all six diagnostics in both outputs.

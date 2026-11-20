@@ -5,7 +5,7 @@
 
 1. unit tests (unittest discover)
 2. independent verifier on generated episodes (truth == recomputed discrepancies)
-3. four baseline policies on the dev split -> P / R / F1 / return / steps / time per policy
+3. baseline policies on dev and the public default evaluation split -> P / R / F1 / return / steps / time per policy
 4. 20 paired checks: seed+actions replay is exact; relabel+permute keeps the oracle answer and reward
 5. out-of-process eval run: rewards hidden from the policy, results only in the grader log
 6. hard mode (configs/eval_hard.json): verifier on hard episodes, baseline table, gates: oracle 1.0,
@@ -104,9 +104,9 @@ def baseline_table(episodes, names) -> dict:
     return table
 
 
-def run_baselines(episodes) -> tuple[bool, dict]:
+def run_baselines(episodes, split="dev") -> tuple[bool, dict]:
     table = baseline_table(episodes, available_policies())
-    print(f"(dev split, {len(episodes)} episodes; P/R/F1 micro-averaged; return/steps/time means; "
+    print(f"({split} split, {len(episodes)} episodes; P/R/F1 micro-averaged; return/steps/time means; "
           "*exp_ret = experimental materiality-weighted reward, reported separately)\n")
     ok = _gate("oracle reaches the maximum reward", table["oracle"]["return"] == 1.0)
     ok &= _gate("flag-all attack is penalised", table["flag_all"]["return"] < 0,
@@ -277,6 +277,9 @@ def main(argv=None) -> int:
     ok &= run_verifier(15 if args.quick else 50)
     base_ok, table = run_baselines(episodes)
     ok &= base_ok
+    eval_episodes = load_episodes(os.path.join(ROOT, "configs", "eval_example.json"))
+    eval_ok, eval_table = run_baselines(eval_episodes, "eval_example")
+    ok &= eval_ok
     ok &= run_paired(20)
     ok &= run_remote()
     hard_ok, hard_table = run_hard(10 if args.quick else 25)
@@ -284,7 +287,7 @@ def main(argv=None) -> int:
     ok &= run_paired(20, hard=True)
     if args.json:
         with open(args.json, "w") as fh:
-            json.dump({"dev": table, "hard": hard_table}, fh, indent=2, sort_keys=True)
+            json.dump({"dev": table, "eval_example": eval_table, "hard": hard_table}, fh, indent=2, sort_keys=True)
     print(f"\n{'ALL CHECKS PASSED' if ok else 'SOME CHECKS FAILED'} in {time.monotonic() - t0:.1f} s")
     return 0 if ok else 1
 

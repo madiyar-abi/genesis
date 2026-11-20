@@ -1,1 +1,2 @@
 2026-11-20 05:05 lead T6. Rehearsed all five Enter prompts. PAY-136430 showed 286 and 351331 USD minor units. The closed grader recorded four matches after 21 inspections for a return of 0.958.
+2026-11-20 05:06 lead T1. Added the public 20-company default comparison to console and JSON. The regression failed before implementation and the integrated offline run passed all 376 tests and both 20-pair gates.
