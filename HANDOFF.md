@@ -32,6 +32,20 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 15 · 20 November 2026
+
+Branch `night/2026-11-20-r15`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. The check passes with
+380 tests, and `scripts/sync_docs.py --check` finds no drift.
+
+- T1. The JSON-lines server answered a non-object request with an internal `AttributeError` name and accepted
+  `NaN` / `Infinity`. Non-object requests now get `request must be a JSON object`. Malformed JSON, non-standard
+  constants and over-deep nesting get `invalid json`, and the server keeps serving (`tests/test_server.py`).
+- T6. The top of this file now gives the current state, and the repo's private visibility is flagged.
+- T7, T8. The demo script and the slide outline were re-checked against fresh demo and check output, and every
+  number matched.
+- Workers T2–T5 run evidence-only sweeps on new seeds (fuzz 5000–5999, attack 3000–3019, stress 3000–3299, HANDOFF
+  commands). Their results go into `night/LOG.md`.
+
 ## Round 14 complete · 20 November 2026
 
 Branch `night/2026-11-20-r14`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. All eight tasks passed: 379 tests, both 20-pair gates and the out-of-process run. `scripts/sync_docs.py --check` found no drift. The marathon handles CI and PR integration. Human submission steps remain in the checklist above.
