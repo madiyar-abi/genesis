@@ -28,9 +28,15 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
-## Round 14 · 20 November 2026
+## Round 14 complete · 20 November 2026
 
-Branch `night/2026-11-20-r14`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. Open work and verification are tracked in `night/TASKS.md`.
+Branch `night/2026-11-20-r14`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. All eight tasks passed: 379 tests, both 20-pair gates and the out-of-process run. `scripts/sync_docs.py --check` found no drift. The marathon handles CI and PR integration. Human submission steps remain in the checklist above.
+
+- T2. Gemini1 changed `docs/CHECKS.md` to describe the out-of-process gate as a two-episode public smoke test (seeds 7001–7002, `flag_all`), separate from the withheld cohorts. The lead checked both values against `run_remote`.
+
+- T3. Gemini2 added the server's JSON-lines commands and the standalone smoke command to the README. The lead checked the command names against `server.py` and confirmed the smoke command exits 0.
+
+- T4. Gemini3 found no drift between the measured JSON and the README, DESIGN and PITCH tables. The lead reran `sync_docs --check` on fresh check output and got the same result.
 
 - T1. The official check now reports a failing assertion and restores the grader key after a discovery exception. Both regressions failed before the fix; the integrated suite passed 378 tests.
 
