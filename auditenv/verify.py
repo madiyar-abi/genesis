@@ -207,6 +207,8 @@ def datetime_key(ts: str):
 
 def _structure(ep: dict) -> list[str]:
     problems = []
+    if not isinstance(ep.get("task"), str) or not ep["task"].strip():
+        problems.append("public task text must contain instructions")
     m, t = ep["manifest"], ep["tables"]
     for name in ("ledger", "invoices", "payments", "fx"):
         if m["counts"][name] != len(t[name]):

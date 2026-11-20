@@ -257,3 +257,7 @@ fresh export. The trajectory replay checks the environment's answers, not which
 policy produced the actions, so swapping two trajectory files passed. The
 README's byte-for-byte claim is now a test. The unit-test gate printed PASS
 for zero discovered tests and now fails.
+
+## Round 17
+
+- SPEC §04. Replacing an exported public/task.txt with an empty string or whitespace left verify --dir reporting 1/1 valid. The verifier now requires nonblank instructions. The directory regression exercises both cases.
