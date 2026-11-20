@@ -129,6 +129,13 @@ reset_epoch() {
 }
 
 # Per-slot "usable again at" epochs, space separated (bash 3.2: no associative arrays).
+# Machine-local last-resort lead slots (git-ignored), e.g. Gemini Flash so the lead never
+# stands still while every other slot waits for its reset:
+#   echo "agy|default|Gemini 3.8 Flash (High);agy|$HOME/.agy-acc2|Gemini 3.8 Flash (High)" > .night-logs/lead-extra-slots
+if [ "$ROLE" = lead ] && [ -s .night-logs/lead-extra-slots ]; then
+  SLOTS="$SLOTS;$(tr -d '\n' < .night-logs/lead-extra-slots)"
+  N_SLOTS=$(echo "$SLOTS" | awk -F';' '{print NF}')
+fi
 AVAIL=""; for k in $(seq 1 "$N_SLOTS"); do AVAIL="$AVAIL 0"; done
 avail_get() { echo $AVAIL | cut -d' ' -f"$1"; }
 avail_set() { AVAIL=$(echo $AVAIL | awk -v i="$1" -v v="$2" '{$i=v; print}'); }
