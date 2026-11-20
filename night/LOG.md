@@ -28,6 +28,18 @@ Results per TZ:
 Export outputs and golden hashes are completely timezone-independent. Removed temporary export directories in /tmp.
 Assumption: none; evidence-only task. Next: check TASKS.md for remaining (gemini2) tasks, else IDLE.
 
+2026-11-20 09:08 gemini3 — T3. Locale / output-encoding robustness, evidence only (9 runs):
+1. `env -u AUDITENV_SECRET LC_ALL=C LANG=C uv run python -m auditenv.demo`: exit code 0, last line: `Done. Full check: uv run python -m auditenv.check`
+2. `env -u AUDITENV_SECRET PYTHONIOENCODING=ascii uv run python -m auditenv.demo`: exit code 0, last line: `Done. Full check: uv run python -m auditenv.check`
+3. `env -u AUDITENV_SECRET PYTHONUTF8=0 LC_ALL=C uv run python -m auditenv.demo`: exit code 0, last line: `Done. Full check: uv run python -m auditenv.check`
+4. `env -u AUDITENV_SECRET LC_ALL=C LANG=C uv run python -m auditenv.verify --seeds 0-9`: exit code 0, last line: `30/30 episodes valid; episodes with problems: 0`
+5. `env -u AUDITENV_SECRET PYTHONIOENCODING=ascii uv run python -m auditenv.verify --seeds 0-9`: exit code 0, last line: `30/30 episodes valid; episodes with problems: 0`
+6. `env -u AUDITENV_SECRET PYTHONUTF8=0 LC_ALL=C uv run python -m auditenv.verify --seeds 0-9`: exit code 0, last line: `30/30 episodes valid; episodes with problems: 0`
+7. `env -u AUDITENV_SECRET LC_ALL=C LANG=C uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json`: exit code 0, last line: `| Total | 103 |`
+8. `env -u AUDITENV_SECRET PYTHONIOENCODING=ascii uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json`: exit code 0, last line: `| Total | 103 |`
+9. `env -u AUDITENV_SECRET PYTHONUTF8=0 LC_ALL=C uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json`: exit code 0, last line: `| Total | 103 |`
+No UnicodeEncodeError or traceback occurred across any run. All 9 runs completed with exit code 0. Assumption: evidence only, no code changes required. What's next: check for remaining (gemini3) tasks, else IDLE.
+
 2026-11-20 09:09 lead — T5. The verifier now rejects blank public/task.txt. Both empty and whitespace-only instructions previously passed standalone directory verification. The directory regressions pass, and all ten dev exports verify.
 
 2026-11-20 09:10 lead — T6. The verifier checks integer exponents for every currency used in public records. Two mutations previously passed: a missing JPY exponent and JSON false in place of zero. Both now fail, and valid dev exports pass.
@@ -35,3 +47,5 @@ Assumption: none; evidence-only task. Next: check TASKS.md for remaining (gemini
 2026-11-20 09:10 lead — T1. Reviewed the fresh clone run in a path containing Cyrillic and spaces. The official check, demo and verifier all exited zero.
 
 2026-11-20 09:10 lead — T2. Reviewed four timezone runs. Dev exports matched byte for byte and all 80 golden hashes matched in each timezone.
+
+2026-11-20 09:10 lead — T3. Reviewed all nine command and encoding combinations. The demo, verifier and analysis CLI exited zero under each setting.
