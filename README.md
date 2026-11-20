@@ -88,7 +88,8 @@ Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs
    injections reverted the books contain zero discrepancies; after injection the discrepancies
    recomputed independently from the public records equal `truth.json` (type, ids, amount); both
    books follow the published posting policy (accounts per journal, entities, unapplied cash, dates);
-   every evidence set exists and covers the affected records.
+   every evidence set exists and covers the affected records. The verifier also requires nonblank task
+   instructions and integer minor-unit exponents for every currency used in the public tables.
 3. **Baselines on dev and the public default evaluation split** — random explorer, naive reconciliation, rule-based reconciliation, flag-everything
    attack, oracle → P / R / F1 / return / steps / time. The check reports 10 dev companies and
    20 companies from `configs/eval_example.json` separately. The latter mirrors the hidden cohort’s composition.

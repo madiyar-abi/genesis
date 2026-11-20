@@ -55,3 +55,5 @@ No UnicodeEncodeError or traceback occurred across any run. All 9 runs completed
 2026-11-20 09:11 lead — T4. DeepSeek exited with the missing-key error before starting. The lead independently verified its acceptance command during integration. `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 30000` exited 0 in 99.94 s wall time.
 config sweep, cases 30000-32999: 3000 random configs (1195 hard) in 99.9 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 58
 FUZZ PASSED
+
+2026-11-20 09:12 lead — Rechecked SPEC §§01–13, README, demo and pitch. The final offline check passed all 387 tests, both 20-pair suites, data, reward and remote gates in 37.5 s. All 40 exports verify and sync_docs --check passes. Fuzz 0–999 verified 3,000 episodes, attack checked 11,000 mutations with zero violations and the miner confirmed the default duplicate cue (4,902/4,920). The marathon owns PR/CI integration. Human submission checklist remains open.
