@@ -4,7 +4,17 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Current state (20 November 2026).** Round 16 is on main. Round 17 is verified on `night/2026-11-20-r17`. The marathon handles its PR and CI before the 22 November 18:00 feature freeze.
+**Current state (20 November 2026).** Independent hardening audit complete on branch `feature/hardening-r18-audit` (PR open). All 404 tests, verifiers, baselines and paired checks pass (exit 0). Round 17 is verified on `night/2026-11-20-r17`.
+
+## Independent audit (Chingiz, 20 November) — complete
+
+Branch `feature/hardening-r18-audit`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` (all 404 tests and both 20-pair suites pass in ~39s).
+
+Summary of fixes and verification:
+- **Verifier (truth labels & semantics)**: Fixed 10 tamper vectors (`tests/test_verify_semantics.py`). `fx_error` now accepted only for foreign amounts producible by published rates. Scenario labels (`I1`/`I2`/`single`) must match the books. Unapplied cash rule tightened: account 2900 must hold exactly the unallocated portion at the payment-date rate. Cancelled invoices require matching replacement invoices. Strict type checking: payment/ref amounts must be integers, and timestamps require explicit UTC offsets.
+- **Server robustness**: Pipe closure with in-flight requests now reliably grades open and remaining unplayed hidden episodes as abandoned instead of crashing with `BrokenPipeError` (`tests/test_server_robust.py`). Hidden episode lists are validated at startup to fail fast on config typos (exit 2) instead of failing at close with empty logs. Resets without seeds return structured contract errors.
+- **Key protection & schemas**: Server warns on stderr if hidden episodes are served without `AUDITENV_SECRET` (flags seed leak via HMAC recovery; `--public` for intended public smoke tests). `docs/CONTRACT.md` and `schemas/findings.schema.json` document that `claimed_amount_minor` must be a JSON integer literal (rejecting `.0` floats).
+- **All checks pass**: 404/404 unit tests, 200/200 verifier episodes, 50/50 hard episodes, 20/20 paired tests pass cleanly.
 
 ## Round 17 complete
 
