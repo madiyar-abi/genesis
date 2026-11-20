@@ -12,3 +12,19 @@
 Assumption: temporary JSON configs in /tmp are sufficient for the search; no code changes required (evidence-only task). Next: IDLE.
 2026-11-20 08:40 lead — T4, taken over from deepseek: its worktree has no worker.out for this round (no live process), so the lead ran it. `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 4000-4299` took 9 s: `reconcile on 1200 default episodes (seeds 4000-4299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0`. `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 4000-4299` took 23 s: `reconcile_hard on 1200 hard episodes (...): imperfect 0, max steps 57, truncated 0`. T98 and T99: a fresh `auditenv.demo --seed 2003` matches every number in docs/DEMO.md, and PITCH tables match fresh check JSON (sync_docs --check clean). No edit needed; both are re-checked at close if later fixes touch docs.
 2026-11-20 08:40 lead — Merged gemini2 (T2, evidence only: night/LOG.md and night/TASKS.md). The lead reproduced run 4 independently: hard seeds 4000-4019 with --steps 40 gave 11000 mutations and 0 violations in 0.63 s, so the sub-second wall times are genuine.
+2026-11-20 08:42 gemini3 — T3. Seed sweep on new seeds 6000-6999 across default and hard modes (6,000 episodes total, 0 problems found, both PASSED):
+1. `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 6000-6999`: wall time 56.54 s.
+  Summary:
+  default mode, seeds 6000-6999: 3000 episodes (1985 dirty, 1015 clean) in 56.5 s
+    episodes with a problem (exception / verifier / oracle): 0
+    random explorer reward > 0: 248/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+    flag-all reward < 0: 3000/3000
+  FUZZ PASSED
+2. `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 6000-6999 --hard`: wall time 157.80 s.
+  Summary:
+  hard mode, seeds 6000-6999: 3000 episodes (1989 dirty, 1011 clean) in 157.8 s
+    episodes with a problem (exception / verifier / oracle): 0
+    random explorer reward > 0: 261/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+    flag-all reward < 0: 3000/3000
+  FUZZ PASSED
+Problems found: 0. Assumptions: none; evidence-only sweep. What's next: check for remaining (gemini3) tasks, else IDLE.
