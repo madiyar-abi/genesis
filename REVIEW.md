@@ -197,3 +197,9 @@ The episode list loader coerced true, 1.9 and "7" into integer seeds. It also
 treated false, zero, an empty list and an empty string as default config, as
 did the JSON-lines reset endpoint. Both paths now reject those malformed types.
 Omitted and null configs still select defaults.
+
+## Round 14
+
+A deliberately failing unit test produced only the failure count in the official
+command. The test name and assertion were discarded. A discovery exception also
+left the caller's grader key unset. Both regressions now pass.

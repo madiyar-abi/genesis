@@ -18,12 +18,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import os
-import sys
 import tempfile
 import time
 import unittest
+from contextlib import redirect_stdout
 
 from .env import AuditEnv
 from .generator import ISSUE_TYPES, generate
@@ -48,15 +49,16 @@ def run_tests() -> bool:
     # the tests compare against the committed public episodes, which use the public key: a grader secret
     # in the environment would generate other companies, so the unit tests run without it
     secret = os.environ.pop("AUDITENV_SECRET", None)
-    suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, "tests"), top_level_dir=ROOT)
-    with open(os.devnull, "w") as devnull:
-        stdout, sys.stdout = sys.stdout, devnull
-        try:
-            result = unittest.TextTestRunner(stream=devnull, verbosity=0).run(suite)
-        finally:
-            sys.stdout = stdout
-            if secret is not None:
-                os.environ["AUDITENV_SECRET"] = secret
+    report = io.StringIO()
+    try:
+        with open(os.devnull, "w") as devnull, redirect_stdout(devnull):
+            suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, "tests"), top_level_dir=ROOT)
+            result = unittest.TextTestRunner(stream=report, verbosity=0).run(suite)
+    finally:
+        if secret is not None:
+            os.environ["AUDITENV_SECRET"] = secret
+    if not result.wasSuccessful():
+        print(report.getvalue(), end="")
     note = "; run with the public key (AUDITENV_SECRET set: other gates use it)" if secret is not None else ""
     return _gate("unit tests", result.wasSuccessful(),
                  f"{result.testsRun} tests, {len(result.failures)} failures, {len(result.errors)} errors{note}")

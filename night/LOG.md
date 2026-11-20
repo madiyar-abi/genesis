@@ -1,0 +1,1 @@
+2026-11-20 05:28 lead — T1. The official check now reports a failing assertion and restores the grader key after a discovery exception. Both regressions failed before the fix; the integrated suite passed 378 tests.

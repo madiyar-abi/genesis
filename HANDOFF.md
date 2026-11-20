@@ -28,6 +28,12 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 14 · 20 November 2026
+
+Branch `night/2026-11-20-r14`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. Open work and verification are tracked in `night/TASKS.md`.
+
+- T1. The official check now reports a failing assertion and restores the grader key after a discovery exception. Both regressions failed before the fix; the integrated suite passed 378 tests.
+
 ## Round 13 complete · 20 November 2026
 
 Branch `night/2026-11-20-r13`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. All eight tasks passed. The marathon handles CI and PR integration. Human submission steps remain in the checklist above.
