@@ -162,15 +162,19 @@ def main(argv=None) -> int:
               f"oracle or rule policy F1 < 1): {len(r['problems'])}; max steps {r['max_steps']}")
         print("FUZZ PASSED" if not r["problems"] else "FUZZ FAILED")
         return 0 if not r["problems"] else 1
+    try:
+        seeds = parse_seeds(args.seeds)
+    except ValueError as exc:
+        ap.error(f"invalid --seeds: {exc}")
     if args.stress:
-        r = stress(args.stress, parse_seeds(args.seeds), args.hard)
+        r = stress(args.stress, seeds, args.hard)
         for p in r["imperfect"][:20]:
             print("   ", p)
         print(f"{args.stress} on {r['episodes']} {'hard' if args.hard else 'default'} episodes (seeds {args.seeds} x "
               f"{', '.join(STRESS)}): imperfect {len(r['imperfect'])}, max steps {r['max_steps']}, "
               f"truncated {r['truncated']} ({time.monotonic() - t0:.1f} s)")
         return 0 if not r["imperfect"] and not r["truncated"] else 1
-    r = sweep(parse_seeds(args.seeds), args.hard)
+    r = sweep(seeds, args.hard)
     for p in r["problems"][:20]:
         print("   ", p)
     n = r["episodes"]

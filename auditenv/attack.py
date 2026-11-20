@@ -25,7 +25,7 @@ from typing import Any, Callable
 
 from .generator import ISSUE_TYPES, generate
 from .matcher import grade, tolerance
-from .run import load_episodes
+from .run import load_episodes, parse_seeds
 from .schema import MAX_EVIDENCE, MAX_EXPLANATION, MAX_FINDINGS
 
 
@@ -834,7 +834,7 @@ def main(argv: list[str] | None = None) -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     ap.add_argument("--config", help="Path to episode config json (default configs/eval_example.json)")
-    ap.add_argument("--seeds", help="Comma-separated seeds or range (e.g. 9000-9019)")
+    ap.add_argument("--seeds", type=parse_seeds, help="Comma-separated seeds or range (e.g. 9000-9019)")
     ap.add_argument("--min-mutations", type=int, default=10000, help="Minimum total mutations (default 10000)")
     ap.add_argument("--per-seed", type=int, default=550, help="Mutations per seed (default 550)")
     ap.add_argument("--steps", type=int, default=0, help="Inspection steps for evaluation (default 0)")
@@ -843,22 +843,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--report-path", default=DEFAULT_FAILURE_REPORT_PATH, help="Path for automatic failure report artifact")
     args = ap.parse_args(argv)
 
-    parsed_seeds = None
-    if args.seeds is not None:
-        parsed_seeds = []
-        for part in args.seeds.split(","):
-            part = part.strip()
-            if not part:
-                continue
-            if "-" in part:
-                a, b = part.split("-")
-                parsed_seeds.extend(range(int(a), int(b) + 1))
-            else:
-                parsed_seeds.append(int(part))
-
     try:
         result = run_attack_search(
-            seeds=parsed_seeds,
+            seeds=args.seeds,
             config_path=args.config,
             min_mutations=args.min_mutations,
             per_seed_target=args.per_seed,

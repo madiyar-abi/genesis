@@ -168,3 +168,19 @@ dictionaries when it opens their documents. The runner retained the original
 observation objects, so serialization after the episode retroactively added line
 items to some earlier invoice-list results. The environment returns those list
 results without line items. The comparison must include every observation field.
+
+## Round 12
+
+A reversed seed interval made the verifier print `0/0 episodes valid` and exit
+successfully. The shared range parser now rejects reversed intervals, including
+an invalid interval mixed into a valid list. The command regression exercises
+run, analyze, fuzz, attack and verify.
+
+A failed reset installed the requested configuration before the generator
+validated its error counts. On an existing evaluation episode, the next step
+then used the rejected budget and mode. The regression takes an inspection,
+attempts the reset, continues inspecting and submits in the original episode.
+
+The paired check originally passed both a clean and a dirty episode when the
+test transform replaced every invoice due date with its issue date. It now
+compares the complete public rows after translating the expected ID fields.

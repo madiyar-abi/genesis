@@ -96,6 +96,19 @@ class TestPairedTransform(unittest.TestCase):
             for tbl in ("ledger", "invoices", "payments", "fx"):
                 self.assertNotEqual(ep1["tables"][tbl], ep2["tables"][tbl])
 
+    def test_changed_invoice_due_dates_fail(self):
+        def change_due_dates(episode, transform_seed):
+            changed = transform(episode, transform_seed)
+            for invoice in changed["tables"]["invoices"]:
+                invoice["due_at"] = invoice["issued_at"]
+            return changed
+
+        with patch("auditenv.transform.transform", side_effect=change_due_dates):
+            with redirect_stdout(io.StringIO()) as output:
+                self.assertFalse(run_paired(n=2))
+            self.assertIn("0/2 pairs pass", output.getvalue())
+            self.assertIn("invoices", output.getvalue())
+
     def test_shuffling_only_fx_fails(self):
         def shuffle_only_fx(episode, transform_seed):
             changed = transform(episode, transform_seed)

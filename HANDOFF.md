@@ -28,6 +28,26 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 12 complete · 20 November 2026
+
+Branch `night/2026-11-20-r12`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 374 tests and both 20-pair gates passed. The seed sweep verified 3,000 companies. The marathon handles PR integration and CI.
+
+- T1. The verifier previously accepted 3-1 after checking zero episodes. Five command entry points now reject reversed ranges. Ordered and repeated seeds still work. The focused tests and official check passed.
+
+- T8. A failed reset now preserves the active episode’s evaluation mode and budget. The regression failed on the old code and all 33 environment tests passed after the fix.
+
+- T6. The rehearsed demo labels each amount in USD minor units. PAY-136430 shows $2.86 and $3,513.31. Four findings matched after 21 inspections and the closed return was 0.958.
+
+- T5. The DeepSeek launcher exited with a configuration error, so the lead ran auditenv.verify --dir for each committed split. All 10 train, 10 dev and 20 hard companies passed.
+
+- T7. The paired gate now compares complete translated public rows. A due-date mutation that previously passed is caught on both clean and dirty episodes. Both 20-pair suites passed and all three documentation tables matched current metrics. The submitter still needs the recording, credits, slide export and jury access.
+
+- T3. Gemini2 regenerated the chart. The lead independently compared docs/baselines.svg byte for byte with scripts/chart.py output from the integrated check metrics.
+
+- T2. Gemini1 and the lead independently counted generated truth. Each 20-company evaluation config contains five clean companies and five with interacting errors.
+
+- T4. All seven trajectory files have the required fields across 2,258 records, including 70 resets. All 70 episodes terminated and none truncated.
+
 ## Round 11 complete · 20 November 2026
 
 Work is on `night/2026-11-20-r11`. See `night/TASKS.md` for ownership and
@@ -127,7 +147,7 @@ Demo rehearsal complete. Follow `docs/DEMO.md` for the 2:40 video. The ten-slide
 Branch `night/2026-11-19-r3`. The round freeze is 22 November at 18:00 local time. Round 2 is in main. The verifier now rejects a truth amount denominated in the wrong currency. Run `uv run python -m unittest tests.test_verify` for all six verifier tests. Gemini’s jury map in `docs/CHECKS.md` matches the merged suite. The official check passed all 285 tests. All 40 exported episodes verified and both seed sweeps passed (3,000 default and 600 hard episodes). Record the demo, finish the team slide, and complete the access and submission checklist above.
 
 ## Status
-Round 11 is on `night/2026-11-20-r11`. The current task board is `night/TASKS.md`. Rounds 1–10 are in main. Round 2 evidence is retained below.
+Round 12 is on `night/2026-11-20-r12`. The current task board is `night/TASKS.md`. Rounds 1–11 are in main. Round 2 evidence is retained below.
 
 Round-2 results (each with its command; numbers from the current code):
 - Reward: R2 `scripts/mutate_reward.py` — 15/15 one-line mutants of matcher/reward caught; R3

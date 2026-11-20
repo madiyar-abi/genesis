@@ -55,7 +55,10 @@ def parse_seeds(text: str) -> list[int]:
     for part in text.split(","):
         if "-" in part:
             a, b = part.split("-")
-            seeds += list(range(int(a), int(b) + 1))
+            start, end = int(a), int(b)
+            if end < start:
+                raise ValueError(f"reversed seed range {part!r}")
+            seeds.extend(range(start, end + 1))
         else:
             seeds.append(int(part))
     return seeds
@@ -73,7 +76,7 @@ def load_episodes(path: str) -> list[tuple[int, dict]]:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--policy", choices=sorted(POLICIES), default="reconcile")
-    ap.add_argument("--seeds", default=None, help="e.g. 2000-2009 or 1,2,3 (default 2000-2009)")
+    ap.add_argument("--seeds", type=parse_seeds, default=None, help="e.g. 2000-2009 or 1,2,3 (default 2000-2009)")
     ap.add_argument("--config", help="configs/*.json episode list (ignored if --seeds is given)")
     ap.add_argument("--mode", choices=("train", "eval"), default="train")
     ap.add_argument("--out", help="write trajectories.jsonl here")
@@ -82,7 +85,7 @@ def main(argv=None) -> int:
     if args.config and args.seeds is None:
         episodes = load_episodes(args.config)
     else:
-        episodes = [(s, {}) for s in parse_seeds(args.seeds or "2000-2009")]
+        episodes = [(s, {}) for s in (args.seeds if args.seeds is not None else parse_seeds("2000-2009"))]
     episodes = [(s, {**c, "mode": args.mode}) for s, c in episodes]
     env = AuditEnv()
     out = open(args.out, "w") if args.out else None

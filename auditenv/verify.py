@@ -483,7 +483,7 @@ def main(argv=None) -> int:
     from .run import parse_seeds
 
     ap = argparse.ArgumentParser(description="verify generated episodes")
-    ap.add_argument("--seeds", default="0-199")
+    ap.add_argument("--seeds", type=parse_seeds, default="0-199")
     ap.add_argument("--dir", default=None,
                     help="verify every episode under this directory (e.g. episodes/dev)")
     args = ap.parse_args(argv)
@@ -492,7 +492,7 @@ def main(argv=None) -> int:
     if args.dir is not None:
         return _verify_directory(Path(args.dir))
 
-    for seed in parse_seeds(args.seeds):
+    for seed in args.seeds:
         for cfg in (None, {"errors": {}}, {"errors": {"duplicate_invoice": 2, "payment_allocation": 2, "fx_error": 2,
                                                        "period_cutoff": 2}, "interacting": {"I1": 1, "I2": 1}}):
             total += 1

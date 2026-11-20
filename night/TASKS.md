@@ -1,10 +1,10 @@
-# Round 11
+# Round 12
 
-- [x] T1 (lead) Preserve distinct configurations sharing a seed in failure analysis, with and without seed selection — files: auditenv/analyze.py, tests/test_analyze.py, REVIEW.md — accept: two same-seed entries both contribute to the report, missing explicit seeds still fail, unit and official checks pass.
-- [x] T2 (gemini1) Add deterministic action replay of all seven committed trajectory files against their training configs, with public secret environment isolated — files: tests/test_trajectory_files.py — accept: compare every observation, reward and termination flag, all reset records and episode boundaries; run the trajectory test module.
-- [x] T3 (gemini2) Verify measured hard-mode failure explanations with analyze on both reconciliation policies — files: night/LOG.md — accept: record exact commands, TP/FN by type and FP reason counts for both; compare docs/DESIGN.md and flag discrepancies.
-- [x] T4 (gemini3) Audit per-policy step counts and timing claims in jury materials against benchmark outputs and stated methodology — files: night/LOG.md — accept: list exact commands and reproducible step counts, identify any unsupported timing claim.
-- [x] T5 (lead) Check public export integrity against all three versioned configs — files: night/LOG.md — accept: regenerate splits in a temporary directory and diff all files, log command and counts.
-- [x] T8 (lead) Snapshot transitions at collection time and regenerate the seven published trajectories — files: auditenv/run.py, tests/test_run.py, trajectories/ — accept: mutating-policy regression passes, every published observation equals raw replay, rewards and actions match prior artifacts.
-- [x] T6 (lead) Verify the numbered 2–3 minute demo script against the public recording command — files: docs/DEMO.md — accept: match IDs, amounts, steps and scores.
-- [x] T7 (lead) Verify slide outline, run commands and metrics; sync jury documentation — files: docs/PITCH.md, docs/CHECKS.md, docs/DESIGN.md, README.md — accept: metrics sync passes and slide claims trace to measured results.
+- [x] T1 (lead) Reject reversed seed ranges in evaluation commands — files: auditenv/{run,verify,fuzz,analyze,attack}.py, tests/test_seed_ranges.py — accept: previously green empty verifier invocation exits nonzero, valid lists and ranges retain order.
+- [x] T2 (gemini1) Audit the public config selections against SPEC §6 — files: night/LOG.md — accept: count clean and interacting episodes from generated truth for both 20-company evaluation splits.
+- [x] T3 (gemini2) Verify the chart is reproducible from the current measurement inputs — files: night/LOG.md — accept: regenerate into a temporary file and compare to docs/baselines.svg.
+- [x] T4 (gemini3) Check documented trajectory fields and terminal coverage — files: night/LOG.md — accept: report file, episode and terminal/truncation counts for each policy file and any missing required fields.
+- [x] T5 (lead) Verify committed export directories independently — files: night/LOG.md — accept: verify --dir succeeds for train, dev and hard.
+- [x] T8 (lead) Preserve active episode settings after rejected resets — files: auditenv/env.py, reset regression tests — accept: rejected config preserves eval isolation and remaining budget.
+- [x] T6 (lead) Rehearse the numbered recording script — files: docs/DEMO.md, auditenv/demo.py, tests/test_demo.py — accept: reproduce the payment evidence, four matches and closed return with the printed commands.
+- [x] T7 (lead) Verify slide outline and submission handoff — files: docs/PITCH.md, README.md, HANDOFF.md, auditenv/check.py, tests/test_paired_transform.py — accept: current metrics match slides, official check and SPEC review pass.

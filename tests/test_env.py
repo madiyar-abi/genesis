@@ -67,6 +67,21 @@ class ResetTests(EnvTestBase):
         with self.assertRaises(ValueError):
             AuditEnv().reset(1, {"errors": {}, "bogus": 1})
 
+    def test_rejected_reset_preserves_active_eval_episode(self):
+        env, _, initial_info = self.make(mode="eval", max_steps=4)
+        env.step(CALC)
+        with self.assertRaises(ValueError):
+            env.reset(SEED + 1, {"mode": "train", "max_steps": 2, "errors": {"bogus": 1}})
+
+        obs, _, terminated, truncated, _ = env.step(CALC)
+        self.assertEqual((obs["step"], obs["steps_remaining"]), (2, 2))
+        self.assertFalse(terminated or truncated)
+        findings = {"episode_id": initial_info["episode_id"], "findings": []}
+        _, _, terminated, truncated, info = env.step({"type": "submit", "findings": findings})
+        self.assertTrue(terminated)
+        self.assertFalse(truncated)
+        self.assertEqual(info, {})
+
     def test_reproducible(self):
         def play(seed, config):
             env = AuditEnv()
