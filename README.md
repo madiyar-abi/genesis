@@ -94,8 +94,9 @@ Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs
    20 companies from `configs/eval_example.json` separately. The latter mirrors the hidden cohort’s composition.
 4. **20 paired checks** replay the same seed and actions, then relabel IDs and shuffle rows.
    Each translated public row must match in full, and the translated oracle answer must earn the same reward.
-5. **Out-of-process eval run** — environment and grader in a subprocess; the policy sees no
-   reward and no truth; results go only to the grader log.
+5. **Out-of-process eval run (public smoke)** — a two-episode public smoke test (seeds 7001–7002, `flag_all` policy)
+   with environment and grader isolated in a subprocess; the policy sees no reward and no truth; results go only
+   to the grader log. This tests the subprocess harness locally, distinct from the withheld evaluation cohort.
 6. **Hard mode** — verifier on hard episodes, baselines on `configs/eval_hard.json`; gates: oracle 1.0,
    `reconcile_hard` (the policy's hard rules) solves it from the records, plain `reconcile` does not;
    20 more paired checks on hard episodes (replay with `reconcile_hard` and `random`, relabel + permute incl. FX rows).
@@ -183,8 +184,14 @@ AUDITENV_SECRET="${GRADER_KEY:?Set GRADER_KEY in the organiser shell}" uv run py
 `{"seeds": [...], "config": {...}}`. Set the secret only in the server process: `auditenv.check` and the committed
 public episodes use the public key (with a secret set, the check runs its unit tests without it).
 
-`auditenv.client.RemoteEnv` speaks the same `reset/step` API over JSON lines; with `--episodes`
+`auditenv.server` communicates via JSON lines over stdin/stdout (`{"cmd": "reset"}`, `{"cmd": "step", "action": {...}}`, `{"cmd": "close"}`).
+`auditenv.client.RemoteEnv` manages the subprocess and speaks the same `reset/step` API; with `--episodes`
 the client cannot choose seeds, rewards are 0.0 and results are written only to `grader.jsonl`.
+
+To verify the out-of-process harness locally without withheld data, `auditenv.check` runs a public two-episode smoke test (seeds 7001–7002, `flag_all` policy), which can also be run independently:
+```bash
+uv run python -c "from auditenv.check import run_remote; assert run_remote()"
+```
 
 ### Other commands
 
@@ -193,6 +200,7 @@ With Python 3.11 installed, the checks below run offline. You can substitute `py
 ```bash
 uv run python -m unittest discover -s tests -t .     # tests only
 uv run python -m unittest tests.test_env             # one module
+uv run python -c "from auditenv.check import run_remote; assert run_remote()"  # public 2-episode out-of-process smoke
 uv run python -m auditenv.verify --seeds 0-199       # verifier on 600 generated episodes
 uv run python -m auditenv.verify --dir episodes/train  # verifier on exported splits (40 episodes)
 uv run python -m auditenv.verify --dir episodes/dev
