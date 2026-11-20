@@ -4,3 +4,5 @@
 2026-11-20 09:08 lead — T98 rehearsed seed 2003. Four matches, 21 inspections, 0.958 return, closed policy saw [0.0]. Fresh reconcile micro-F1 1.000 dev and 0.752 hard. Script matches. Next: verify standalone exported task validation (T5).
 
 2026-11-20 09:09 lead — T5. The verifier now rejects blank public/task.txt. Both empty and whitespace-only instructions previously passed standalone directory verification. The directory regressions pass, and all ten dev exports verify.
+
+2026-11-20 09:10 lead — T6. The verifier checks integer exponents for every currency used in public records. Two mutations previously passed: a missing JPY exponent and JSON false in place of zero. Both now fail, and valid dev exports pass.

@@ -2,6 +2,7 @@
 
 import copy
 import unittest
+from unittest.mock import patch
 
 from auditenv.fuzz import HEAVY
 from auditenv.generator import generate
@@ -35,6 +36,17 @@ class RedTeamTest(unittest.TestCase):
         self.t = self.ep["tables"]
         self.base = self.ep["manifest"]["base_currency"]
         self.assertEqual(verify_episode(self.ep), [])
+
+    def test_manifest_exponents_cover_used_currencies_as_integers(self):
+        with patch.dict("os.environ", {"AUDITENV_SECRET": ""}):
+            ep = generate(0, {})
+        exponents = ep["manifest"]["amount_exponents"]
+        self.assertEqual(exponents.pop("JPY"), 0)
+        with self.subTest("missing JPY"):
+            self.assertTrue(_has(verify_episode(ep), "amount exponents"))
+        exponents["JPY"] = False
+        with self.subTest("JSON boolean instead of integer"):
+            self.assertTrue(_has(verify_episode(ep), "amount exponents"))
 
     def _base_single_ref_payment(self):
         for p in self.t["payments"]:

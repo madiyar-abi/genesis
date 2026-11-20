@@ -261,3 +261,4 @@ for zero discovered tests and now fails.
 ## Round 17
 
 - SPEC §04. Replacing an exported public/task.txt with an empty string or whitespace left verify --dir reporting 1/1 valid. The verifier now requires nonblank instructions. The directory regression exercises both cases.
+- SPEC §03. Removing the JPY exponent from the public seed-0 manifest or replacing 0 with JSON false previously passed verify_episode. The verifier now checks coverage of ledger, invoice, payment and FX currencies and requires integer exponents. The regression pins the public generation key so the same company runs inside the keyed official check.
