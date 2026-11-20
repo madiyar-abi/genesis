@@ -10,8 +10,28 @@
 3. `env -u AUDITENV_SECRET uv run python -m auditenv.verify --dir episodes/dev`: exit 0, wall time 0.09s, last line: "10/10 episodes valid; episodes with problems: 0"
 Zero non-zero exits and zero tracebacks; all 385 tests and verifiers passed without issues in non-ASCII path with spaces. Removed clone directory. Next: check for further unchecked tasks tagged (gemini1).
 
+2026-11-20 09:08 gemini2 — T2. Timezone independence evidence across UTC, Asia/Almaty, America/Los_Angeles, Pacific/Kiritimati.
+For each timezone, ran `TZ=<tz> env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r17-tz-<name>/dev` (where name has `/` replaced by `_`), `diff -r episodes/dev /tmp/r17-tz-<name>/dev`, and `TZ=<tz> env -u AUDITENV_SECRET uv run python scripts/golden.py --check`.
+Results per TZ:
+1. `TZ=UTC` (name=UTC):
+   - diff: empty (byte-for-byte identical to episodes/dev)
+   - golden.py last line: "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2/tests/golden_hashes.json." (exit code 0)
+2. `TZ=Asia/Almaty` (name=Asia_Almaty):
+   - diff: empty (byte-for-byte identical to episodes/dev)
+   - golden.py last line: "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2/tests/golden_hashes.json." (exit code 0)
+3. `TZ=America/Los_Angeles` (name=America_Los_Angeles):
+   - diff: empty (byte-for-byte identical to episodes/dev)
+   - golden.py last line: "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2/tests/golden_hashes.json." (exit code 0)
+4. `TZ=Pacific/Kiritimati` (name=Pacific_Kiritimati):
+   - diff: empty (byte-for-byte identical to episodes/dev)
+   - golden.py last line: "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2/tests/golden_hashes.json." (exit code 0)
+Export outputs and golden hashes are completely timezone-independent. Removed temporary export directories in /tmp.
+Assumption: none; evidence-only task. Next: check TASKS.md for remaining (gemini2) tasks, else IDLE.
+
 2026-11-20 09:09 lead — T5. The verifier now rejects blank public/task.txt. Both empty and whitespace-only instructions previously passed standalone directory verification. The directory regressions pass, and all ten dev exports verify.
 
 2026-11-20 09:10 lead — T6. The verifier checks integer exponents for every currency used in public records. Two mutations previously passed: a missing JPY exponent and JSON false in place of zero. Both now fail, and valid dev exports pass.
 
 2026-11-20 09:10 lead — T1. Reviewed the fresh clone run in a path containing Cyrillic and spaces. The official check, demo and verifier all exited zero.
+
+2026-11-20 09:10 lead — T2. Reviewed four timezone runs. Dev exports matched byte for byte and all 80 golden hashes matched in each timezone.
