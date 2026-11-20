@@ -97,6 +97,8 @@ class Books:
                         or ar[0]["debit_minor"] != rev[0]["credit_minor"]:
                     problems.append(f"malformed invoice journal {jid}")
                     continue
+                if datetime_key(ar[0]["timestamp"]) != datetime_key(rev[0]["timestamp"]):
+                    problems.append(f"invoice {jid[4:]}: booking debit and credit dated at different instants")
                 booked[jid[4:]] = ar[0]
         for iid, ar in booked.items():
             inv = self.invoices.get(iid)

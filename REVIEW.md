@@ -262,3 +262,7 @@ for zero discovered tests and now fails.
 
 - SPEC §04. Replacing an exported public/task.txt with an empty string or whitespace left verify --dir reporting 1/1 valid. The verifier now requires nonblank instructions. The directory regression exercises both cases.
 - SPEC §03. Removing the JPY exponent from the public seed-0 manifest or replacing 0 with JSON false previously passed verify_episode. The verifier now checks coverage of ledger, invoice, payment and FX currencies and requires integer exponents. The regression pins the public generation key so the same company runs inside the keyed official check.
+
+## Round 18
+
+On clean seed 0, moving only the invoice revenue credit one second forward left the independent verifier's problem list empty. Between the two posting instants the receivables debit had no corresponding credit. The verifier now compares both original booking timestamps as instants, including on an invoice later cancelled by a hard-mode credit note. The regression checks both the reconstructed and final books and accepts equivalent UTC offsets. Run `uv run python -m unittest tests.test_verify_round18 tests.test_posting_period`. The local-date boundary test now moves a complete expense journal so that its valid fixtures still balance.

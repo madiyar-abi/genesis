@@ -65,7 +65,8 @@ class PostingPeriodTest(unittest.TestCase):
     def test_boundary_examples_using_company_local_dates(self):
         """Test boundary conditions using company-local dates."""
         ep = generate(0, {"errors": {}})
-        rev_row = next(r for r in ep["tables"]["ledger"] if r["account"] == "4000" and r["credit_minor"] > 0)
+        expenses = [r for r in ep["tables"]["ledger"] if r["invoice_id"] is None and r["payment_id"] is None]
+        journal = [r for r in expenses if r["timestamp"] == expenses[0]["timestamp"]]
         cases = [
             ("2026-08-01T00:00:00-03:00", True),
             ("2026-08-31T23:59:59-03:00", True),
@@ -76,12 +77,13 @@ class PostingPeriodTest(unittest.TestCase):
         ]
         for timestamp, valid in cases:
             with self.subTest(timestamp=timestamp):
-                rev_row["timestamp"] = timestamp
+                for row in journal:
+                    row["timestamp"] = timestamp
                 problems = verify_episode(ep)
                 if valid:
                     self.assertEqual(problems, [])
                 else:
-                    self.assertIn(f"post-injection: ledger row {rev_row['row_id']} outside the period", problems)
+                    self.assertIn(f"post-injection: ledger row {journal[0]['row_id']} outside the period", problems)
 
 
 if __name__ == "__main__":

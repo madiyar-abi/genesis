@@ -14,6 +14,8 @@
 
 - T4. The DeepSeek launcher exited with code 2 because its API key is unavailable. The lead independently ran scripts/golden.py --check and all 80 hashes matched.
 
+- T5. The verifier now rejects invoice booking legs posted at different instants, including on hard-mode invoices later reversed by a credit note. Both regression cases failed before the fix. The full offline check passes.
+
 ## Round 17 complete
 
 Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 387 tests and both 20-pair suites pass. The verifier now rejects blank task instructions and incomplete or noninteger currency exponents. The new regressions and reproductions are in `REVIEW.md`.
