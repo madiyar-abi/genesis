@@ -60,7 +60,7 @@ def run_tests() -> bool:
     if not result.wasSuccessful():
         print(report.getvalue(), end="")
     note = "; run with the public key (AUDITENV_SECRET set: other gates use it)" if secret is not None else ""
-    return _gate("unit tests", result.wasSuccessful(),
+    return _gate("unit tests", result.wasSuccessful() and result.testsRun > 0,  # zero discovered tests is no pass
                  f"{result.testsRun} tests, {len(result.failures)} failures, {len(result.errors)} errors{note}")
 
 

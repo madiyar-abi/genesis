@@ -247,3 +247,13 @@ episodes the duplicate copy is re-typed (`IMPLEMENTATION SERVICES - PO/6638`
 against `Implementation services (PO-6638)`), so an agent working from the files
 alone could not apply the rule. Each export now includes `public/task.txt`, and
 `load_episode` reads it back, so the round trip equals `generate()` in full.
+
+Three checks verified less than they claimed. Only the hard export had a
+byte-for-byte re-export test. Dev and train were compared through the loader,
+which reads a fixed set of files and columns, so a copy of `truth.json` placed in
+`public/` or an extra ledger column marking the injected rows still passed
+every test and `verify --dir`. All three splits are now byte-compared with a
+fresh export. The trajectory replay checks the environment's answers, not which
+policy produced the actions, so swapping two trajectory files passed. The
+README's byte-for-byte claim is now a test. The unit-test gate printed PASS
+for zero discovered tests and now fails.
