@@ -20,6 +20,23 @@ class StrictInputTests(unittest.TestCase):
             self.assertFalse(term or trunc)
         self.assertEqual(obs["step"], 3)
 
+    def test_huge_claimed_amount_is_graded_and_logged(self):
+        # Red-team round 16: a 401-digit claim next to a zero claim made the experimental reward raise
+        # OverflowError; the episode ended with reward 0, a "malformed action" error and no grader-log line.
+        for mode in ("train", "eval"):
+            env = AuditEnv()
+            obs, info = env.reset(5, {"mode": mode})
+            junk = {"type": "fx_error", "affected_ids": ["X"], "currency": obs["manifest"]["base_currency"],
+                    "evidence_ids": []}
+            sub = {"episode_id": obs["manifest"]["episode_id"],
+                   "findings": [{**junk, "claimed_amount_minor": 0}, {**junk, "claimed_amount_minor": 10 ** 400}]}
+            obs, reward, term, trunc, info = env.step({"type": "submit", "findings": sub})
+            self.assertTrue(term)
+            self.assertIsNone(obs["error"], mode)
+            self.assertEqual(len(env.grader_log), 1, mode)
+            self.assertEqual(env.grader_log[0]["reward"], -1.0)
+            self.assertEqual(reward, -1.0 if mode == "train" else 0.0)
+
     def test_submit_with_unknown_parameters_still_ends_the_episode_as_invalid(self):
         env = AuditEnv()
         _, info = env.reset(3, {"mode": "train"})
