@@ -218,7 +218,7 @@ P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means 
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount but at least the mean expected amount (a zero claim is no free
 accusation); reported separately, the shared reward is unchanged.
-Other gates in the same run: 376 unit tests pass; verifier 200/200 episodes valid (50 seeds × 4 configs in check; 600/600 with
+Other gates in the same run: all unit tests pass (the check prints the count); verifier 200/200 episodes valid (50 seeds × 4 configs in check; 600/600 with
 `auditenv.verify --seeds 0-199` over 200 seeds × 3 configs); 20/20 paired checks on default and 20/20 on hard episodes; out-of-process run leaks nothing.
 
 Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200
