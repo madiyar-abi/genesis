@@ -103,6 +103,9 @@ either given → exactly the listed counts, the rest 0), `n_invoices` (10–100)
 "hard"; default "default" — absent from the normalised config, so default episodes are unchanged).
 Hard mode pads the ledger to a target of 900–1 400 rows before injection and selects up to three eligible invoices for credit-note reissues. Duplicates may be re-typed. The task text and `policy.ledger.credit_note` give the extra rules.
 
+A rejected seed or config raises `ValueError` (over `auditenv.server`: a bounded `{"error": ...}`) and leaves
+the current episode unchanged. A successful server reset grades an open episode as abandoned (empty answer).
+
 Grader secret: if the env var `AUDITENV_SECRET` is set (grader process only), it keys both the
 generator RNG and the HMAC `episode_id`, so a policy cannot recover the seed or regenerate the
 episode. Unset = public, reproducible train/dev episodes.
