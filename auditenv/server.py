@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 
 from .env import AuditEnv
@@ -76,11 +77,31 @@ def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dic
     def send_resp(resp: dict) -> None:
         data = json.dumps(resp) + "\n"
         try:
-            out.write(data)
-        except TypeError:
-            out.write(data.encode("utf-8"))
-        out.flush()
+            try:
+                out.write(data)
+            except TypeError:
+                out.write(data.encode("utf-8"))
+            out.flush()
+        except (BrokenPipeError, ConnectionResetError) as e:  # the policy process is gone
+            raise _ClientGone from e
 
+    try:
+        _serve_lines(inp, env, queue, flush_log, send_resp)
+    except _ClientGone:
+        pass  # graded below like a close: the policy cannot skip episodes by killing its pipes
+    finally:
+        env.abandon()  # close / EOF with an open episode: graded as truncated, empty answer
+        for seed, config in queue or ():  # hidden episodes never reset: graded the same way, so none is skipped
+            env.reset(seed, {**config, "mode": config.get("mode", "eval")})
+            env.abandon()
+        flush_log()
+
+
+class _ClientGone(Exception):
+    """The policy closed its end of the pipe; stop serving and grade what is left."""
+
+
+def _serve_lines(inp, env, queue, flush_log, send_resp) -> None:
     for line in _lines(inp):
         if line is TOO_LARGE:
             send_resp({"error": "request too large"})
@@ -126,7 +147,7 @@ def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dic
                     seed, config = queue.pop(0)
                     config = {**config, "mode": config.get("mode", "eval")}
                 else:
-                    seed, config = req["seed"], req.get("config")
+                    seed, config = req.get("seed"), req.get("config")
                 obs, info = env.reset(seed, config, abandon_open=True)  # a rejected reset keeps the open episode
                 flush_log()
                 resp = {"observation": obs, "info": info}
@@ -142,11 +163,6 @@ def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dic
         except Exception as e:  # bounded error, never a traceback with internals
             resp = {"error": f"{type(e).__name__}: {str(e)[:160]}"}
         send_resp(resp)
-    env.abandon()  # close / EOF with an open episode: graded as truncated, empty answer
-    for seed, config in queue or ():  # hidden episodes never reset: graded the same way, so none is skipped
-        env.reset(seed, {**config, "mode": config.get("mode", "eval")})
-        env.abandon()
-    flush_log()
 
 
 def main(argv=None) -> int:
@@ -161,8 +177,18 @@ def main(argv=None) -> int:
               "recover each seed from episode_id and regenerate the truth. Set it in the grader process "
               "(README, closed run) or pass --public for a deliberately public list.", file=sys.stderr, flush=True)
     episodes = load_episodes(args.episodes) if args.episodes else None
+    for i, (seed, config) in enumerate(episodes or (), start=1):  # fail fast: a typo must not surface at close
+        try:
+            AuditEnv().reset(seed, {**config, "mode": config.get("mode", "eval")})
+        except (ValueError, TypeError, AttributeError) as e:
+            print(f"auditenv.server: hidden episode {i}: {e}", file=sys.stderr, flush=True)
+            return 2
     inp = getattr(sys.stdin, "buffer", sys.stdin)
     serve(inp, sys.stdout, args.grader_log, episodes)
+    try:
+        sys.stdout.flush()
+    except BrokenPipeError:  # the policy is gone; keep the interpreter's exit flush quiet
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
     return 0
 
 
