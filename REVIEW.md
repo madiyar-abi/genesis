@@ -203,3 +203,8 @@ Omitted and null configs still select defaults.
 A deliberately failing unit test produced only the failure count in the official
 command. The test name and assertion were discarded. A discovery exception also
 left the caller's grader key unset. Both regressions now pass.
+
+The paired check scored an oracle using the first allowed evidence set.
+Dropping a second valid evidence set or adding a shorter invalid alternative
+still passed. It now compares each issue's complete collection of evidence
+sets after translating the record IDs. Reordering equivalent evidence passes.

@@ -149,6 +149,16 @@ def _digest(traj) -> str:
     return hashlib.sha256(json.dumps(traj, sort_keys=True).encode()).hexdigest()
 
 
+def _evidence_by_issue(issues, id_map):
+    return {
+        issue["issue_id"]: {
+            frozenset(id_map.get(record_id, record_id) for record_id in evidence)
+            for evidence in issue["evidence_sets"]
+        }
+        for issue in issues
+    }
+
+
 def run_paired(n: int = 20, hard: bool = False) -> bool:
     env = AuditEnv()
     rule = "reconcile_hard" if hard else "reconcile"
@@ -179,6 +189,9 @@ def run_paired(n: int = 20, hard: bool = False) -> bool:
         id_map = ep2.get("provenance", {}).get("id_map", {})
         if not id_map or set(id_map).intersection(id_map.values()) or len(set(id_map.values())) != len(id_map):
             failures.append((seed, "transform", "missing, overlapping, or non-unique ID mapping"))
+
+        if _evidence_by_issue(ep1["truth"]["issues"], id_map) != _evidence_by_issue(ep2["truth"]["issues"], {}):
+            failures.append((seed, "transform", "accepted evidence sets changed after ID translation"))
 
         for table, key, secondary in (
             ("ledger", "row_id", ("entity_id", "invoice_id", "payment_id")),

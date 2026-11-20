@@ -96,6 +96,26 @@ class TestPairedTransform(unittest.TestCase):
             for tbl in ("ledger", "invoices", "payments", "fx"):
                 self.assertNotEqual(ep1["tables"][tbl], ep2["tables"][tbl])
 
+    def test_alternative_evidence_must_survive_translation(self):
+        for change in ("drop", "add", "reorder"):
+            def change_alternatives(episode, transform_seed):
+                changed = transform(episode, transform_seed)
+                issue = next(i for i in changed["truth"]["issues"] if len(i["evidence_sets"]) > 1)
+                alternatives = issue["evidence_sets"]
+                if change == "drop":
+                    alternatives.pop()
+                elif change == "add":
+                    alternatives.append(alternatives[-1][:1])
+                else:
+                    alternatives.reverse()
+                    for evidence in alternatives:
+                        evidence.reverse()
+                return changed
+
+            with self.subTest(change=change), patch("auditenv.transform.transform", side_effect=change_alternatives):
+                with redirect_stdout(io.StringIO()):
+                    self.assertEqual(run_paired(n=1), change == "reorder")
+
     def test_changed_invoice_due_dates_fail(self):
         def change_due_dates(episode, transform_seed):
             changed = transform(episode, transform_seed)

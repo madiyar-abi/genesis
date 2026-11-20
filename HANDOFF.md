@@ -40,6 +40,8 @@ Branch `night/2026-11-20-r14`. Run `env -u AUDITENV_SECRET uv run python -m audi
 
 - T7. Slide 9 now quantifies the duplicate cue: 4902/4920 flagged invoices on default and 4886/13660 on hard. The ten slides, measured tables and SPEC sections 1–13 were reviewed; the submitter owns team credits, recording, deck export and access.
 
+- T8. Dropping or adding an evidence alternative used to pass the paired gate. Both mutations now fail, reordering passes, and the integrated check passed 379 tests plus both 20-pair gates.
+
 ## Round 13 complete · 20 November 2026
 
 Branch `night/2026-11-20-r13`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. All eight tasks passed. The marathon handles CI and PR integration. Human submission steps remain in the checklist above.
