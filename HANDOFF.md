@@ -4,10 +4,10 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Current state (20 November 2026):** `main` has rounds 1–14 merged. Round 15 is complete on
-`night/2026-11-20-r15` and goes to `main` through the marathon PR. The marathon (`scripts/marathon.sh`) opens one round
+**Current state (20 November 2026):** `main` has rounds 1–15 merged. Round 16 is in progress on
+`night/2026-11-20-r16` and goes to `main` through the marathon PR. The marathon (`scripts/marathon.sh`) opens one round
 after another until the feature freeze on **2026-11-22 18:00**. Each round merges through a PR after CI passes.
-`uv run python -m auditenv.check` passes (380 tests, all gates, about 37 s). After the freeze, only the human
+`uv run python -m auditenv.check` passes (383 tests, all gates, about 40 s). After the freeze, only the human
 submission steps listed below remain.
 
 ## Deadline & submission
@@ -31,6 +31,25 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] Google Doc with the 3 links (repo, video, presentation); the Doc and all
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
+
+## Round 16 in progress · 20 November 2026
+
+Branch `night/2026-11-20-r16`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. The check passes with
+383 tests, and `scripts/sync_docs.py --check` finds no drift. Three red-team subagent passes (reward/contract,
+data/verifier, check-gate false passes) look for new defects; details and reproductions are in `REVIEW.md` → "Round 16".
+
+- T7. A submission claiming 0 and `10**400` made the experimental reward raise `OverflowError`, so the episode ended
+  ungraded with reward 0 and no grader-log line. Anyone below 0 could take that 0 instead, and in eval it hid an
+  episode. It is now graded (−1) and logged.
+- T8. The JSON-lines server abandoned the open episode before validating a new reset's config, so a typo scored the
+  episode −1. A rejected reset now leaves the episode open, as it does in process (CONTRACT §4).
+- T9. Exported `public/` files lacked the task text, the only place the duplicate definition and the hard-mode
+  re-typing rule are stated. Every export now has `public/task.txt`, and the loader round-trips the full episode.
+- T5, T6. DESIGN no longer hard-codes a stale test count. The README's "Honest limitations" now lists the measured
+  limitations (simplified books, rule-script solvability, the 0.996 default duplicate cue, no trained model).
+- Evidence on new seeds, no code change: 44,000 attack mutations with step cost on seeds 4000–4019 found 0 violations.
+  The 6000–6999 fuzz sweep found 0 problems in 6,000 episodes. Stress runs on 4000–4299 gave 0 imperfect episodes out
+  of 2,400 (max 33 / 57 steps). The deepseek worker still has no API key, so the lead ran its task.
 
 ## Round 15 complete · 20 November 2026
 
