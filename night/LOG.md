@@ -49,3 +49,5 @@ No UnicodeEncodeError or traceback occurred across any run. All 9 runs completed
 2026-11-20 09:10 lead — T2. Reviewed four timezone runs. Dev exports matched byte for byte and all 80 golden hashes matched in each timezone.
 
 2026-11-20 09:10 lead — T3. Reviewed all nine command and encoding combinations. The demo, verifier and analysis CLI exited zero under each setting.
+
+2026-11-20 09:10 lead — T99. The ten-slide outline matches the demo and the official metrics. The default reconciliation policy on hard episodes scored 41 TP, 22 FP and 5 FN. The hard policy scored 46 TP with no FP or FN. Both averaged 43.2 actions. Documentation tables match the fresh report.
