@@ -143,7 +143,8 @@ only in `mode="train"`; in `"eval"` it is 0.0 and the result goes to the grader 
 ```
 Limits: ≤ 30 findings, ≤ 10 evidence_ids, explanation ≤ 1000 chars, `type` ∈ the 4
 types, `affected_ids` non-empty list of non-empty strings (≤ 10), amount int ≥ 0
-(not bool), currency 3 uppercase letters, `episode_id` must equal the episode's.
+(not bool; a JSON integer literal — `1234.0` is a float here, although JSON Schema calls it an integer),
+currency 3 uppercase letters, `episode_id` must equal the episode's.
 Invalid structure → episode ends, reward −1, error recorded in the grader log.
 
 ## 6. Matching & reward (`auditenv/matcher.py`, `auditenv/metrics.py`)

@@ -32,7 +32,8 @@
           },
           "claimed_amount_minor": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Write a JSON integer literal (1234). JSON Schema also counts 1234.0 as an integer, but the environment parses it as a float and rejects the submission (reward -1)."
           },
           "currency": {
             "type": "string",
