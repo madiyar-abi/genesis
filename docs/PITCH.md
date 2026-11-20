@@ -65,6 +65,7 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 ## 9. Limits and next experiment
 
 - The simulator covers synthetic receivables and uses fixed UTC offsets. Its benchmark measures performance on the generated cases.
+- Across 1,000 seeds per difficulty, when exactly two invoices shared a customer, currency and total, the fraction of flagged invoices affected by a duplicate was 0.996 on default and 0.358 on hard. Hard companies include legitimate lookalikes.
 - The reported baselines are scripted. A next experiment would compare a learned policy with these baselines on held-out companies under the same investigation budget.
 
 ## 10. Team

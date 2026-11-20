@@ -1,10 +1,9 @@
-# Round 13
-
-- [x] T1 (lead) Include the public 20-company default evaluation in the official diagnostics — files: auditenv/check.py, tests/test_eval_diagnostics.py, REVIEW.md — accept: all required policies run on eval_example, console and JSON identify that split, dev and hard results remain available.
-- [x] T2 (gemini1) Document the official evaluation split in the jury check map — files: docs/CHECKS.md — accept: distinguish public default evaluation from dev and hidden seeds and identify all six diagnostics.
-- [x] T3 (gemini2) Audit design benchmark claims against measured workload — files: docs/DESIGN.md — accept: correct stale test count at line 221 and reconcile scope with actual verifier/benchmark commands.
-- [x] T4 (gemini3) Independently reproduce the default evaluation policy counts and mean returns — files: night/LOG.md — accept: report four required baselines across all 20 public default eval companies.
-- [x] T5 (lead) Verify docs tooling tolerates a third metrics split — files: night/LOG.md — accept: use metrics with eval_example alongside dev/hard and verify sync_docs and chart generation.
-- [x] T8 (lead) Reject malformed JSON seed types and falsey non-object config in episode lists and server resets — files: auditenv/run.py, auditenv/server.py, focused tests — accept: valid selections preserve order and malformed inputs fail explicitly.
-- [x] T6 (lead) Rehearse the 2–3 minute recording script — files: docs/DEMO.md — accept: run the prescribed inputs and verify the selected evidence and closed-run totals.
-- [x] T7 (lead) Review slide outline and jury handoff — files: docs/PITCH.md, README.md, HANDOFF.md — accept: public evaluation clearly identified, numeric claims verified, full offline suite and SPEC review passed.
+# Round 14
+- [x] T1 (lead) Surface actionable unit-test failures in the official command — files: auditenv/check.py, tests/test_check_failures.py, REVIEW.md — accept: injected synthetic failure names test and assertion; official check passes.
+- [x] T2 (gemini1) Correct public smoke versus withheld cohort wording — files: docs/CHECKS.md — accept: verify seeds and policy against run_remote.
+- [x] T3 (gemini2) Check README closed-run instructions against real CLI and clarify public smoke scope — files: README.md — accept: public two-episode smoke passes.
+- [x] T4 (gemini3) Verify public split metrics tables against measured JSON — files: docs/DESIGN.md only if drift — accept: sync_docs --check.
+- [x] T5 (lead) Verify generator hashes and exported splits — files: no product files — accept: golden check and all three verify --dir commands pass.
+- [x] T8 (lead) Preserve alternative evidence under paired relabelling — files: auditenv/check.py, tests/test_paired_transform.py, REVIEW.md — accept: dropping a valid alternative fails the paired gate.
+- [x] T6 (lead) Rehearse numbered 2–3 minute video script — files: docs/DEMO.md — accept: five prompts and closed grader result match.
+- [x] T7 (lead) Review pitch slide sequence and measurements — files: docs/PITCH.md — accept: metrics match official check and all SPEC sections reviewed.

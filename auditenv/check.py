@@ -18,12 +18,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import os
-import sys
 import tempfile
 import time
 import unittest
+from contextlib import redirect_stdout
 
 from .env import AuditEnv
 from .generator import ISSUE_TYPES, generate
@@ -48,15 +49,16 @@ def run_tests() -> bool:
     # the tests compare against the committed public episodes, which use the public key: a grader secret
     # in the environment would generate other companies, so the unit tests run without it
     secret = os.environ.pop("AUDITENV_SECRET", None)
-    suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, "tests"), top_level_dir=ROOT)
-    with open(os.devnull, "w") as devnull:
-        stdout, sys.stdout = sys.stdout, devnull
-        try:
-            result = unittest.TextTestRunner(stream=devnull, verbosity=0).run(suite)
-        finally:
-            sys.stdout = stdout
-            if secret is not None:
-                os.environ["AUDITENV_SECRET"] = secret
+    report = io.StringIO()
+    try:
+        with open(os.devnull, "w") as devnull, redirect_stdout(devnull):
+            suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, "tests"), top_level_dir=ROOT)
+            result = unittest.TextTestRunner(stream=report, verbosity=0).run(suite)
+    finally:
+        if secret is not None:
+            os.environ["AUDITENV_SECRET"] = secret
+    if not result.wasSuccessful():
+        print(report.getvalue(), end="")
     note = "; run with the public key (AUDITENV_SECRET set: other gates use it)" if secret is not None else ""
     return _gate("unit tests", result.wasSuccessful(),
                  f"{result.testsRun} tests, {len(result.failures)} failures, {len(result.errors)} errors{note}")
@@ -147,6 +149,16 @@ def _digest(traj) -> str:
     return hashlib.sha256(json.dumps(traj, sort_keys=True).encode()).hexdigest()
 
 
+def _evidence_by_issue(issues, id_map):
+    return {
+        issue["issue_id"]: {
+            frozenset(id_map.get(record_id, record_id) for record_id in evidence)
+            for evidence in issue["evidence_sets"]
+        }
+        for issue in issues
+    }
+
+
 def run_paired(n: int = 20, hard: bool = False) -> bool:
     env = AuditEnv()
     rule = "reconcile_hard" if hard else "reconcile"
@@ -177,6 +189,9 @@ def run_paired(n: int = 20, hard: bool = False) -> bool:
         id_map = ep2.get("provenance", {}).get("id_map", {})
         if not id_map or set(id_map).intersection(id_map.values()) or len(set(id_map.values())) != len(id_map):
             failures.append((seed, "transform", "missing, overlapping, or non-unique ID mapping"))
+
+        if _evidence_by_issue(ep1["truth"]["issues"], id_map) != _evidence_by_issue(ep2["truth"]["issues"], {}):
+            failures.append((seed, "transform", "accepted evidence sets changed after ID translation"))
 
         for table, key, secondary in (
             ("ledger", "row_id", ("entity_id", "invoice_id", "payment_id")),
