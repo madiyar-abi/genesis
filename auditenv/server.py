@@ -3,7 +3,11 @@
 The policy process only ever sees observations. Truth, provenance, seeds and grading
 results stay in this process; results are appended to --grader-log (JSONL).
 
-    python -m auditenv.server --grader-log grader.jsonl [--episodes hidden.json]
+    AUDITENV_SECRET=<grader key> python -m auditenv.server --grader-log grader.jsonl [--episodes hidden.json]
+
+Set AUDITENV_SECRET in this process for any hidden run: without it the generator and episode_id are
+public, so a policy can recover each seed from episode_id and regenerate the truth. The server then
+warns on stderr; --public silences that for episode lists that are public on purpose (smoke tests, demo).
 
 Requests:  {"cmd": "reset", "seed": int, "config": {...}}   (seed/config ignored with --episodes)
            {"cmd": "step", "action": {...}}
@@ -24,6 +28,7 @@ import json
 import sys
 
 from .env import AuditEnv
+from .generator import secret
 from .run import load_episodes
 
 MAX_LINE: int = 1 << 20  # 1 MiB
@@ -148,7 +153,13 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--grader-log", help="append grading results here (JSONL)")
     ap.add_argument("--episodes", help="hidden episode list {seeds, config}; resets ignore client seeds")
+    ap.add_argument("--public", action="store_true",
+                    help="the episode list is public on purpose: no warning when AUDITENV_SECRET is unset")
     args = ap.parse_args(argv)
+    if args.episodes and not secret() and not args.public:
+        print("auditenv.server: warning: AUDITENV_SECRET is not set, so these episodes are public: a policy can "
+              "recover each seed from episode_id and regenerate the truth. Set it in the grader process "
+              "(README, closed run) or pass --public for a deliberately public list.", file=sys.stderr, flush=True)
     episodes = load_episodes(args.episodes) if args.episodes else None
     inp = getattr(sys.stdin, "buffer", sys.stdin)
     serve(inp, sys.stdout, args.grader_log, episodes)
