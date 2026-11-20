@@ -192,3 +192,8 @@ The public default cohort in configs/eval_example.json was missing from both the
 console and the metrics JSON. A regression ran the reporting entry point and
 failed on the missing split. The check now scores every default baseline on the
 same twenty companies and includes all six diagnostics in both outputs.
+
+The episode list loader coerced true, 1.9 and "7" into integer seeds. It also
+treated false, zero, an empty list and an empty string as default config, as
+did the JSON-lines reset endpoint. Both paths now reject those malformed types.
+Omitted and null configs still select defaults.

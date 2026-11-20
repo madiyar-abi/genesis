@@ -68,9 +68,28 @@ def load_episodes(path: str) -> list[tuple[int, dict]]:
     """configs/*.json -> [(seed, config)]. Format: {config_version, split, episodes:[{seed, config}]}."""
     with open(path) as fh:
         spec = json.load(fh)
+    if not isinstance(spec, dict):
+        raise ValueError("episode list must be an object")
     if "episodes" in spec:
-        return [(int(e["seed"]), dict(e.get("config") or {})) for e in spec["episodes"]]
-    return [(int(s), dict(spec.get("config") or {})) for s in spec["seeds"]]
+        entries = spec["episodes"]
+        if not isinstance(entries, list) or any(not isinstance(e, dict) for e in entries):
+            raise ValueError("episodes must be a list of objects")
+    else:
+        seeds = spec.get("seeds")
+        if not isinstance(seeds, list):
+            raise ValueError("seeds must be a list of integers")
+        entries = [{"seed": seed, "config": spec.get("config")} for seed in seeds]
+
+    episodes = []
+    for entry in entries:
+        seed = entry.get("seed")
+        if type(seed) is not int:
+            raise ValueError("seed must be an int")
+        cfg = entry.get("config")
+        if cfg is not None and not isinstance(cfg, dict):
+            raise ValueError("config must be an object or null")
+        episodes.append((seed, dict(cfg or {})))
+    return episodes
 
 
 def main(argv=None) -> int:

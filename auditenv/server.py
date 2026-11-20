@@ -110,7 +110,7 @@ def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dic
                     seed, config = queue.pop(0)
                     config = {**config, "mode": config.get("mode", "eval")}
                 else:
-                    seed, config = req["seed"], req.get("config") or {}
+                    seed, config = req["seed"], req.get("config")
                 obs, info = env.reset(seed, config)
                 resp = {"observation": obs, "info": info}
             elif cmd == "step":

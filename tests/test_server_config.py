@@ -15,6 +15,7 @@ class ServerConfigTest(unittest.TestCase):
             bufsize=0,
         )
         bad_configs = [
+            False, 0, "", [],
             {"errors": "x"},
             {"errors": 5},
             {"interacting": [1]},

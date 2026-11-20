@@ -11,6 +11,30 @@ FORBIDDEN = ("truth", "evidence_sets", "expected_amount_minor", "provenance", "i
 
 
 class RunTest(unittest.TestCase):
+    def test_episode_list_requires_integer_seeds_and_object_configs(self):
+        def load(spec):
+            with tempfile.NamedTemporaryFile(mode="w") as fh:
+                json.dump(spec, fh)
+                fh.flush()
+                return run.load_episodes(fh.name)
+
+        for spec in ([], {}, {"episodes": {}}, {"seeds": "12"}, {"episodes": [None]}, {"episodes": [{}]}):
+            with self.subTest(spec=spec), self.assertRaises(ValueError):
+                load(spec)
+
+        for make_spec in (lambda seed, cfg: {"episodes": [{"seed": seed, "config": cfg}]},
+                          lambda seed, cfg: {"seeds": [seed], "config": cfg}):
+            for seed in (True, 1.9, "7"):
+                with self.subTest(spec=make_spec(seed, {})), self.assertRaises(ValueError):
+                    load(make_spec(seed, {}))
+            for cfg in (False, 0, "", [], [["errors", {}]]):
+                with self.subTest(spec=make_spec(1, cfg)), self.assertRaises(ValueError):
+                    load(make_spec(1, cfg))
+            self.assertEqual(load(make_spec(-4, None)), [(-4, {})])
+        self.assertEqual(load({"episodes": [{"seed": 2}, {"seed": 1}, {"seed": 2}]}),
+                         [(2, {}), (1, {}), (2, {})])
+        self.assertEqual(load({"seeds": [2, 1, 2]}), [(2, {}), (1, {}), (2, {})])
+
     def test_oracle_reaches_max_reward(self):
         env = AuditEnv()
         for seed in range(50):
