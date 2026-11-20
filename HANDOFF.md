@@ -4,7 +4,11 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Current state (20 November 2026).** Round 16 is on main. Round 17 is verified on `night/2026-11-20-r17`. The marathon handles its PR and CI before the 22 November 18:00 feature freeze.
+**Current state (20 November 2026).** Round 18 is in progress on `night/2026-11-20-r18`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. Open tasks and owners are in `night/TASKS.md`.
+
+## Round 18
+
+- T6. Rehearsed all five prompts on seed 2003. The two PAY-136430 findings claim 286 and 351331 USD minor units. The policy saw zero rewards over 22 actions. The grader matched all four findings for 0.958. The recording script matches.
 
 ## Round 17 complete
 

@@ -1,0 +1,1 @@
+2026-11-20 09:22 lead — T6. Rehearsed all five prompts on seed 2003. The two PAY-136430 findings claim 286 and 351331 USD minor units. The policy saw zero rewards over 22 actions. The grader matched all four findings for 0.958. The recording script matches.
