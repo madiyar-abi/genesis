@@ -71,6 +71,20 @@ class ServerRobustnessTest(unittest.TestCase):
             self.assertIn("hidden episode 2", err.decode())
             self.assertIn("max_steps", err.decode())
 
+    def test_unreadable_hidden_list_is_refused_without_a_traceback(self):
+        for name, text in (("missing", None), ("seed typo", '{"seeds": ["1"], "config": {}}'),
+                           ("bad json", '{"seeds": [1,')):
+            with self.subTest(name), tempfile.TemporaryDirectory() as d:
+                path = os.path.join(d, "hidden.json")
+                if text is not None:
+                    with open(path, "w") as fh:
+                        fh.write(text)
+                proc = subprocess.run([sys.executable, "-m", "auditenv.server", "--episodes", path, "--public"],
+                                      input=b'{"cmd":"close"}\n', capture_output=True, cwd=ROOT, timeout=60)
+                self.assertEqual(proc.returncode, 2)
+                self.assertNotIn(b"Traceback", proc.stderr)
+                self.assertIn(b"hidden episode list", proc.stderr)
+
     def test_reset_without_seed_is_a_contract_error(self):
         out = io.StringIO()
         serve(io.StringIO('{"cmd": "reset"}\n'), out)

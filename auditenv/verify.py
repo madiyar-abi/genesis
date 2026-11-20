@@ -60,7 +60,8 @@ class Books:
             return {credit} if 0 <= credit < ref else set()
         rate = Decimal(self.fx[(self.cdate(ts).isoformat(), cur, self.base)])
         per_unit = rate.scaleb(EXPONENT[self.base] - EXPONENT[cur])  # base minor units per document minor unit
-        guess, width = int(Decimal(credit) / per_unit), int(1 / per_unit) + 3
+        guess = int(Decimal(credit) / per_unit)
+        width = min(int(1 / per_unit) + 3, 1000)  # a rate this small is no real currency pair; bound the search
         return {a for a in range(max(0, guess - width), min(ref, guess + width + 1))
                 if self.conv(a, cur, ts) == credit}
 
@@ -95,7 +96,7 @@ class Books:
             if sum(r["debit_minor"] for r in rows) != sum(r["credit_minor"] for r in rows):
                 problems.append(f"unbalanced journal {jid}")
         # invoices: booking, period, FX
-        booked, self.voided = {}, set()
+        booked, self.voided = {}, {}  # voided: cancelled invoice -> instant of its credit note
         for jid, rows in js.items():
             if jid.startswith("inv:"):
                 ar = [r for r in rows if r["account"] == "1200"]
@@ -110,7 +111,7 @@ class Books:
                             or datetime_key(reversal[0]["timestamp"]) < datetime_key(ar_dr[0]["timestamp"]):
                         problems.append(f"malformed credit note in {jid}")
                         continue
-                    self.voided.add(jid[4:])
+                    self.voided[jid[4:]] = datetime_key(reversal[0]["timestamp"])
                     ar = ar_dr
                     rev = [r for r in rev if r["credit_minor"]]
                 if len(ar) != 1 or len(rev) != 1 or not ar[0]["debit_minor"] \
@@ -143,14 +144,24 @@ class Books:
                 problems.append(f"invoice {iid} total != line items")
             if self.in_period(inv["issued_at"]) and iid not in booked:
                 problems.append(f"in-period invoice {iid} not booked")
-        # hard mode: a cancelled invoice is re-issued as a new invoice with identical line items
-        for iid in self.voided:
+        # hard mode: a cancelled invoice is re-issued as a new invoice with identical line items, booked in the
+        # period after the credit note; each replacement serves one cancelled invoice (CONTRACT §2)
+        used = set()
+        for iid, cancelled_at in sorted(self.voided.items(), key=lambda kv: kv[1]):
             inv = self.invoices.get(iid)
-            key = inv and (inv["entity_id"], inv["currency"], line_key(inv["line_items"]))
-            if inv and not any(o["invoice_id"] != iid and o["invoice_id"] not in self.voided
-                               and (o["entity_id"], o["currency"], line_key(o["line_items"])) == key
-                               for o in self.invoices.values()):
-                problems.append(f"credit-noted invoice {iid} has no replacement invoice with the same line items")
+            if inv is None:
+                continue
+            key = (inv["entity_id"], inv["currency"], line_key(inv["line_items"]))
+            new = next((o for o in sorted(self.invoices.values(), key=lambda o: datetime_key(o["issued_at"]))
+                        if o["invoice_id"] != iid and o["invoice_id"] not in self.voided and o["invoice_id"] in booked
+                        and o["invoice_id"] not in used and self.in_period(o["issued_at"])
+                        and datetime_key(o["issued_at"]) >= cancelled_at
+                        and (o["entity_id"], o["currency"], line_key(o["line_items"])) == key), None)
+            if new is None:
+                problems.append(f"credit-noted invoice {iid} has no replacement invoice with the same line items, "
+                                f"booked in the period after the credit note")
+            else:
+                used.add(new["invoice_id"])
         # duplicates: same entity, currency, same line items (re-typed text allowed) -> later copy;
         # an invoice cancelled by a full credit note is not a duplicate of its replacement
         seen = defaultdict(list)
@@ -470,6 +481,8 @@ def _scenario_problems(issues: list[dict], payment_ids: set) -> list[str]:
 
 def verify_episode(ep: dict) -> list[str]:
     problems = _structure(ep)
+    if any("must be an integer" in p or "timestamp must be" in p for p in problems):
+        return problems  # the bookkeeping checks below assume int amounts and offset-aware timestamps
     m, t = ep["manifest"], ep["tables"]
     if ep["truth"].get("episode_id") != m["episode_id"]:
         problems.append("truth episode_id differs from manifest")

@@ -6,7 +6,7 @@ the change, so the reverted books stay clean), and must be rejected by `verify_e
 
 import copy
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from auditenv.generator import generate
 from auditenv.money import convert, parse_offset
@@ -173,6 +173,33 @@ class CreditNoteReissueTest(unittest.TestCase):
         self.assertTrue(any("replacement" in p for p in verify_episode(ep)), verify_episode(ep))
 
 
+    def test_unbooked_copy_outside_the_period_is_no_replacement(self):
+        for where in ("next", "prev"):
+            ep = generate(11, {"difficulty": "hard", "errors": {}})
+            self.assertEqual(verify_episode(ep), [])
+            t, m = ep["tables"], ep["manifest"]
+            paid = {r["invoice_id"] for p in t["payments"] for r in p["invoice_refs"] or []}
+            voided = {r["invoice_id"] for r in t["ledger"] if r["account"] == "4000" and r["debit_minor"]}
+            x = next(i for i in t["invoices"] if len(inv_rows(ep, i["invoice_id"])) == 2 and i["invoice_id"] not in paid
+                     and i["invoice_id"] not in voided and i["issued_at"][:10] < m["period_end"][:8] + "20")
+            ar = next(r for r in inv_rows(ep, x["invoice_id"]) if r["account"] == "1200")
+            ts = (datetime.fromisoformat(ar["timestamp"]) + timedelta(hours=2)).isoformat()
+            common = dict(currency=m["base_currency"], entity_id=x["entity_id"], invoice_id=x["invoice_id"],
+                          payment_id=None, timestamp=ts)
+            t["ledger"] += [dict(row_id="RCN1", account="4000", debit_minor=ar["debit_minor"], credit_minor=0, **common),
+                            dict(row_id="RCN2", account="1200", debit_minor=0, credit_minor=ar["debit_minor"], **common)]
+            copy_ = {**copy.deepcopy(x), "doc_id": "zz000001", "invoice_id": "F9999999"}
+            day = (datetime.fromisoformat(m["period_end"]) + timedelta(days=3)) if where == "next" else \
+                (datetime.fromisoformat(m["period_start"]) - timedelta(days=20))
+            copy_["issued_at"] = f"{day.date().isoformat()}T10:00:00{m['timezone']}"
+            copy_["due_at"] = f"{(day + timedelta(days=30)).date().isoformat()}T10:00:00{m['timezone']}"
+            t["invoices"].append(copy_)
+            for k, n in (("ledger", 2), ("invoices", 1), ("documents", 1)):
+                m["counts"][k] += n
+            with self.subTest(where=where):
+                self.assertTrue(any("replacement" in p for p in verify_episode(ep)), verify_episode(ep))
+
+
 class PublicRecordTypesTest(unittest.TestCase):
     """Money is int minor units and timestamps carry an offset (CONTRACT §1, §2)."""
 
@@ -193,6 +220,15 @@ class PublicRecordTypesTest(unittest.TestCase):
         pay["amount_minor"] += 0.75
         pay["invoice_refs"][0]["amount_minor"] += 0.75
         self.assertTrue(any("amount_minor must be an integer" in p for p in verify_episode(ep)), verify_episode(ep))
+
+    def test_naive_invoice_or_payment_time_is_reported_not_raised(self):
+        for table, key in (("invoices", "issued_at"), ("payments", "timestamp")):
+            ep = copy.deepcopy(self.ep)
+            rec = ep["tables"][table][0]
+            rec[key] = rec[key][:19]
+            with self.subTest(table=table):
+                problems = verify_episode(ep)  # used to raise TypeError (naive vs aware comparison)
+                self.assertTrue(any("timezone offset" in p for p in problems), problems)
 
     def test_timestamps_without_offset_are_rejected(self):
         ep = copy.deepcopy(self.ep)
