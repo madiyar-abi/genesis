@@ -5,5 +5,5 @@
 - [ ] T4 (gemini3) Verify public split metrics tables against measured JSON — files: docs/DESIGN.md only if drift — accept: sync_docs --check.
 - [x] T5 (lead) Verify generator hashes and exported splits — files: no product files — accept: golden check and all three verify --dir commands pass.
 - [ ] T8 (lead) Preserve alternative evidence under paired relabelling — files: auditenv/check.py, tests/test_paired_transform.py, REVIEW.md — accept: dropping a valid alternative fails the paired gate.
-- [ ] T6 (lead) Rehearse numbered 2–3 minute video script — files: docs/DEMO.md — accept: five prompts and closed grader result match.
+- [x] T6 (lead) Rehearse numbered 2–3 minute video script — files: docs/DEMO.md — accept: five prompts and closed grader result match.
 - [ ] T7 (lead) Review pitch slide sequence and measurements — files: docs/PITCH.md — accept: metrics match official check and all SPEC sections reviewed.

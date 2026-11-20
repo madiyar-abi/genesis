@@ -36,6 +36,8 @@ Branch `night/2026-11-20-r14`. Run `env -u AUDITENV_SECRET uv run python -m audi
 
 - T5. DeepSeek reported a missing API key, so the lead checked all 80 golden hashes and verified all 10 train, 10 dev and 20 hard exports.
 
+- T6. Rehearsed the five video prompts on seed 2003. PAY-136430 shows 286 and 351331 USD minor units. The policy saw zero rewards across 22 steps and the grader matched all four findings for 0.958.
+
 ## Round 13 complete · 20 November 2026
 
 Branch `night/2026-11-20-r13`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. All eight tasks passed. The marathon handles CI and PR integration. Human submission steps remain in the checklist above.
