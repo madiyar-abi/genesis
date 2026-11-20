@@ -34,6 +34,8 @@ Branch `night/2026-11-20-r14`. Run `env -u AUDITENV_SECRET uv run python -m audi
 
 - T1. The official check now reports a failing assertion and restores the grader key after a discovery exception. Both regressions failed before the fix; the integrated suite passed 378 tests.
 
+- T5. DeepSeek reported a missing API key, so the lead checked all 80 golden hashes and verified all 10 train, 10 dev and 20 hard exports.
+
 ## Round 13 complete · 20 November 2026
 
 Branch `night/2026-11-20-r13`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. All eight tasks passed. The marathon handles CI and PR integration. Human submission steps remain in the checklist above.
