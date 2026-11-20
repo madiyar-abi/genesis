@@ -4,11 +4,15 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Current state (20 November 2026):** `main` has rounds 1–15 merged. Round 16 is complete on
-`night/2026-11-20-r16` and goes to `main` through the marathon PR. The marathon (`scripts/marathon.sh`) opens one round
-after another until the feature freeze on **2026-11-22 18:00**. Each round merges through a PR after CI passes.
-`uv run python -m auditenv.check` passes (385 tests, all gates, about 40 s). After the freeze, only the human
-submission steps listed below remain.
+**Current state (20 November 2026).** Round 16 is on main. Round 17 is verified on `night/2026-11-20-r17`. The marathon handles its PR and CI before the 22 November 18:00 feature freeze.
+
+## Round 17 complete
+
+Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 387 tests and both 20-pair suites pass. The verifier now rejects blank task instructions and incomplete or noninteger currency exponents. The new regressions and reproductions are in `REVIEW.md`.
+
+- The seed sweep checked 3,000 episodes. A separate sweep of 3,000 configurations included 1,195 hard cases and used at most 58 steps. Neither sweep found a problem. The reward search found zero violations across 11,000 mutations. The default duplicate cue still has measured precision 0.996.
+- All three Gemini workers supplied evidence. The clone-path, timezone and encoding results are in `night/LOG.md`. DeepSeek could not start without its API key. The lead independently completed its configuration sweep.
+- The seed-2003 demo and ten-slide pitch match the measured outputs. The submitter still owns the recording, confirmed team credits, deck export and access checklist below.
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on

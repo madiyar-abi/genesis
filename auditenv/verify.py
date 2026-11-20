@@ -207,6 +207,8 @@ def datetime_key(ts: str):
 
 def _structure(ep: dict) -> list[str]:
     problems = []
+    if not isinstance(ep.get("task"), str) or not ep["task"].strip():
+        problems.append("public task text must contain instructions")
     m, t = ep["manifest"], ep["tables"]
     for name in ("ledger", "invoices", "payments", "fx"):
         if m["counts"][name] != len(t[name]):
@@ -234,7 +236,13 @@ def _structure(ep: dict) -> list[str]:
         problems.append("policy contradicts the manifest (base currency, timezone or period)")
     if set(pol["ledger"]["accounts"]) != CHART:
         problems.append("policy chart of accounts contradicts the contract")
-    if m["rounding"] != "ROUND_HALF_UP" or any(EXPONENT.get(c) != e for c, e in m["amount_exponents"].items()):
+    currencies = {m["base_currency"]}
+    currencies.update(row["currency"] for table in ("ledger", "invoices", "payments") for row in t[table])
+    currencies.update(row[key] for row in t["fx"] for key in ("source_currency", "target_currency"))
+    exponents = m["amount_exponents"]
+    if (m["rounding"] != "ROUND_HALF_UP" or not isinstance(exponents, dict)
+            or not currencies.issubset(exponents)
+            or any(type(e) is not int or EXPONENT.get(c) != e for c, e in exponents.items())):
         problems.append("manifest rounding or amount exponents contradict the contract")
     inv_ids = {i["invoice_id"] for i in t["invoices"]}
     pay_ids = {p["payment_id"] for p in t["payments"]}

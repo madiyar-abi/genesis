@@ -39,6 +39,13 @@ class VerifyDirectoryTests(unittest.TestCase):
         shutil.copytree(self.example, self.root / self.example.name)
         self.assertIn("1/1 episodes valid", self.verify(0))
 
+    def test_blank_task(self):
+        episode = shutil.copytree(self.example, self.root / self.example.name)
+        for contents in ("", " \t\n"):
+            with self.subTest(contents=contents):
+                (episode / "public/task.txt").write_text(contents, encoding="utf-8")
+                self.assertIn("task", self.verify(1))
+
     def test_invalid_index(self):
         shutil.copytree(self.example, self.root / self.example.name)
         index = self.root / "index.json"
