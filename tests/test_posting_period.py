@@ -1,4 +1,5 @@
 import copy
+from datetime import datetime, timedelta, timezone
 import unittest
 
 from auditenv.generator import generate
@@ -22,6 +23,24 @@ class PostingPeriodTest(unittest.TestCase):
             any(f"ledger row {rev_row['row_id']} outside the period" in p for p in problems),
             f"Expected out-of-period error for {rev_row['row_id']}, got: {problems}",
         )
+
+    def test_either_side_of_invoice_booking_must_share_one_instant(self):
+        for difficulty in ("default", "hard"):
+            ep = generate(0, {"difficulty": difficulty, "errors": {}})
+            ledger = ep["tables"]["ledger"]
+            key_row = next(r for r in ledger if r["account"] == "1200" and not r["payment_id"]
+                           and (difficulty == "default" or r["credit_minor"]))
+            rows = [r for r in ledger if r["invoice_id"] == key_row["invoice_id"] and not r["payment_id"]]
+            self.assertEqual(len(rows), 4 if difficulty == "hard" else 2)
+            for row in rows:
+                original = row["timestamp"]
+                instant = datetime.fromisoformat(original)
+                with self.subTest(difficulty=difficulty, row=row["row_id"]):
+                    row["timestamp"] = instant.astimezone(timezone.utc).isoformat()
+                    self.assertEqual(verify_episode(ep), [])
+                    row["timestamp"] = (instant + timedelta(seconds=1)).isoformat()
+                    self.assertTrue(any(key_row["invoice_id"] in problem for problem in verify_episode(ep)))
+                row["timestamp"] = original
 
     def test_expense_and_payment_postings_outside_period_fail(self):
         """Expense rows and payment ledger rows outside the period must fail verification."""
@@ -65,7 +84,10 @@ class PostingPeriodTest(unittest.TestCase):
     def test_boundary_examples_using_company_local_dates(self):
         """Test boundary conditions using company-local dates."""
         ep = generate(0, {"errors": {}})
-        rev_row = next(r for r in ep["tables"]["ledger"] if r["account"] == "4000" and r["credit_minor"] > 0)
+        ledger = ep["tables"]["ledger"]
+        expense = next(r for r in ledger if not r["invoice_id"] and not r["payment_id"])
+        journal = [r for r in ledger if not r["invoice_id"] and not r["payment_id"]
+                   and r["timestamp"] == expense["timestamp"]]
         cases = [
             ("2026-08-01T00:00:00-03:00", True),
             ("2026-08-31T23:59:59-03:00", True),
@@ -76,12 +98,13 @@ class PostingPeriodTest(unittest.TestCase):
         ]
         for timestamp, valid in cases:
             with self.subTest(timestamp=timestamp):
-                rev_row["timestamp"] = timestamp
+                for row in journal:
+                    row["timestamp"] = timestamp
                 problems = verify_episode(ep)
                 if valid:
                     self.assertEqual(problems, [])
                 else:
-                    self.assertIn(f"post-injection: ledger row {rev_row['row_id']} outside the period", problems)
+                    self.assertIn(f"post-injection: ledger row {expense['row_id']} outside the period", problems)
 
 
 if __name__ == "__main__":

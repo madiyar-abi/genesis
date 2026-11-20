@@ -14,6 +14,10 @@ Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository
 - All three Gemini workers supplied evidence. The clone-path, timezone and encoding results are in `night/LOG.md`. DeepSeek could not start without its API key. The lead independently completed its configuration sweep.
 - The seed-2003 demo and ten-slide pitch match the measured outputs. The submitter still owns the recording, confirmed team credits, deck export and access checklist below.
 
+## Invoice posting and hard export checks
+
+Run `uv run python -m unittest tests.test_posting_period tests.test_load`. Both lines of an invoice booking must carry the same instant. A hard-mode reversal has its own posting instant. The hard export tests require the 20 seed/config pairs listed in `configs/eval_hard.json`, including their episode files. CI also runs `python -m auditenv.verify --dir episodes/hard`.
+
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
 2026-11-19 at 12:00.** **Final deadline: 2026-11-22, 22:00 (Astana; the PDF says 23:59, we plan for 22:00).**

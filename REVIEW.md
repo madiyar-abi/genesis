@@ -9,6 +9,11 @@ through the tools) and targeted data checks.
 
 Status legend: **OK** = checked, no problem; **ISSUE n** = see "Findings" below.
 
+## Invoice postings and completeness of the public hard split
+
+- Moving only the revenue line within the accounting period previously left the invoice journal valid. The verifier now compares both booking instants, including the original booking in a reversed journal. Legitimate posting lag and equivalent timezone offsets still pass.
+- The disk tests previously passed with one hard episode and skipped three checks when the directory was missing. The roundtrip test now compares the index against the configured 20 episodes before checking their contents. Independent trials with a missing directory, 19 entries and a substituted valid twentieth episode all failed as expected.
+
 ## 1.1 Contract and isolation (25)
 - `reset(seed, config) -> (observation, info)`; `step -> (obs, reward, terminated, truncated, info)`, JSON-only — OK (`env.py`, probe).
 - Exactly 5 actions; anything else → `unknown_action`, step consumed — OK.
