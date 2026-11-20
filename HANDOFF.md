@@ -28,6 +28,12 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
+## Round 13 · 20 November 2026
+
+Branch `night/2026-11-20-r13`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. Pending work is tracked in `night/TASKS.md`.
+
+- T6. Rehearsed all five Enter prompts. PAY-136430 showed 286 and 351331 USD minor units. The closed grader recorded four matches after 21 inspections for a return of 0.958.
+
 ## Round 12 complete · 20 November 2026
 
 Branch `night/2026-11-20-r12`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 374 tests and both 20-pair gates passed. The seed sweep verified 3,000 companies. The marathon handles PR integration and CI.
