@@ -24,6 +24,10 @@ env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999
 
 The submission owner still has the video, deck, access checks and submission listed below. No model training was started.
 
+## Export verifier follow-up
+
+Run `uv run python -m unittest tests.test_verify_dir` to reproduce the regressions for truth schema validation, index metadata consistency and evidence verification. The committed train, dev and hard exports pass from disk (10/10, 10/10 and 20/20). The hard split now needs 40 constructions of `Books` across 20 episodes, down from 133.
+
 ## Round 17 complete
 
 Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 387 tests and both 20-pair suites pass. The verifier now rejects blank task instructions and incomplete or noninteger currency exponents. The new regressions and reproductions are in `REVIEW.md`.

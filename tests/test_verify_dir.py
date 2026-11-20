@@ -6,8 +6,9 @@ import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
-from auditenv.verify import main
+from auditenv.verify import Books, main
 
 
 class VerifyDirectoryTests(unittest.TestCase):
@@ -91,3 +92,31 @@ class VerifyDirectoryTests(unittest.TestCase):
             with self.subTest(contents=contents):
                 index.write_text(contents)
                 self.assertIn("index.json", self.verify(1))
+
+    def test_truth_schema_and_index_metadata(self):
+        split = self.example.parent
+        record = next(r for r in json.loads((split / "index.json").read_text()) if r["seed"] == 2003)
+        episode = shutil.copytree(split / record["episode_id"], self.root / record["episode_id"])
+        index = self.root / "index.json"
+        index.write_text(json.dumps([record]))
+        with patch("auditenv.verify.Books", wraps=Books) as build_books:
+            self.verify(0)
+            self.assertEqual(build_books.call_count, 2)
+        path = episode / "grader/truth.json"
+        original = path.read_text()
+        for field in ("scenario", "issue_id", "evidence_sets"):
+            with self.subTest(field=field):
+                data = json.loads(original)
+                issue = data["issues"][0]
+                if field == "scenario":
+                    del issue[field]
+                elif field == "issue_id":
+                    issue[field] = " "
+                else:
+                    issue[field][0].append(issue[field][0][0])
+                path.write_text(json.dumps(data))
+                self.assertIn(field, self.verify(1))
+        path.write_text(original)
+        for field, value in (("seed", 2000), ("config", {"errors": {}})):
+            index.write_text(json.dumps([dict(record, **{field: value})]))
+            self.assertIn(field, self.verify(1))
