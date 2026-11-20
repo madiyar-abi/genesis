@@ -26,6 +26,8 @@ The seed-2003 demo script matches a fresh run (four matches, return 0.958). Work
 
 - T99. The ten-slide outline matches the demo and the official metrics. The default reconciliation policy on hard episodes scored 41 TP, 22 FP and 5 FN. The hard policy scored 46 TP with no FP or FN. Both averaged 43.2 actions. Documentation tables match the fresh report.
 
+- T4. DeepSeek exited with the missing-key error before starting. The lead independently verified its acceptance command during integration. `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 30000` exited 0 in 99.94 s wall time.
+
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
 2026-11-19 at 12:00.** **Final deadline: 2026-11-22, 22:00 (Astana; the PDF says 23:59, we plan for 22:00).**

@@ -51,3 +51,7 @@ No UnicodeEncodeError or traceback occurred across any run. All 9 runs completed
 2026-11-20 09:10 lead — T3. Reviewed all nine command and encoding combinations. The demo, verifier and analysis CLI exited zero under each setting.
 
 2026-11-20 09:10 lead — T99. The ten-slide outline matches the demo and the official metrics. The default reconciliation policy on hard episodes scored 41 TP, 22 FP and 5 FN. The hard policy scored 46 TP with no FP or FN. Both averaged 43.2 actions. Documentation tables match the fresh report.
+
+2026-11-20 09:11 lead — T4. DeepSeek exited with the missing-key error before starting. The lead independently verified its acceptance command during integration. `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 30000` exited 0 in 99.94 s wall time.
+config sweep, cases 30000-32999: 3000 random configs (1195 hard) in 99.9 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 58
+FUZZ PASSED
