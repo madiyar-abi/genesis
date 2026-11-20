@@ -239,3 +239,11 @@ reset config. A typo such as `"mode": "evl"` returned an error, but the open
 episode had already been ended and logged with −1. In process, a rejected
 reset leaves the episode untouched. The server now abandons the open episode
 only after the new one has been generated.
+
+The exported `public/` files for agents had no task text. The duplicate
+definition and the hard-mode re-typing rule are stated only in the task text,
+which the environment sends in the first observation. In 5 of the 20 public hard
+episodes the duplicate copy is re-typed (`IMPLEMENTATION SERVICES - PO/6638`
+against `Implementation services (PO-6638)`), so an agent working from the files
+alone could not apply the rule. Each export now includes `public/task.txt`, and
+`load_episode` reads it back, so the round trip equals `generate()` in full.

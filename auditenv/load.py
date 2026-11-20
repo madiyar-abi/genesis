@@ -4,8 +4,8 @@ Usage:
     from auditenv.load import load_episode
     ep = load_episode("episodes/dev/ep_14eca11ac929")
 
-Returns: {episode_id, manifest, policy, tables, truth, provenance}
-(same keys as generate() minus "task").
+Returns: {episode_id, task, manifest, policy, tables, truth, provenance}
+(same keys as generate()).
 
 Conversion rules:
 - CSV empty cell → None
@@ -65,18 +65,20 @@ def _read_csv(path: str, fields: tuple[str, ...], int_fields: set[str],
 
 
 def load_episode(path: str) -> dict:
-    """Load an exported episode directory back into the generate() format (minus 'task').
+    """Load an exported episode directory back into the generate() format.
 
     Args:
         path: Path to the episode directory (e.g. "episodes/dev/ep_34a13a83cba2")
               containing public/ and grader/ subdirectories.
 
     Returns:
-        dict with keys: episode_id, manifest, policy, tables, truth, provenance
+        dict with keys: episode_id, task, manifest, policy, tables, truth, provenance
     """
     pub_dir = os.path.join(path, "public")
     grd_dir = os.path.join(path, "grader")
 
+    with open(os.path.join(pub_dir, "task.txt"), encoding="utf-8", newline="") as fh:
+        task = fh.read()
     manifest = _read_json(os.path.join(pub_dir, "manifest.json"))
     policy = _read_json(os.path.join(pub_dir, "policy.json"))
 
@@ -109,6 +111,7 @@ def load_episode(path: str) -> dict:
 
     return {
         "episode_id": manifest["episode_id"],
+        "task": task,
         "manifest": manifest,
         "policy": policy,
         "tables": tables,

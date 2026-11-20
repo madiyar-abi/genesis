@@ -93,7 +93,9 @@ class TestExport(unittest.TestCase):
 
             # Public files
             pub = os.path.join(ep_dir, "public")
-            for name in ("manifest.json", "policy.json", "ledger.csv", "invoices.jsonl", "payments.jsonl", "fx.csv"):
+            # task.txt: the duplicate definition and hard-mode rules live only in the task text (red-team round 16)
+            for name in ("task.txt", "manifest.json", "policy.json", "ledger.csv", "invoices.jsonl", "payments.jsonl",
+                         "fx.csv"):
                 self.assertTrue(os.path.exists(os.path.join(pub, name)), f"Missing {name}")
 
             # Grader files

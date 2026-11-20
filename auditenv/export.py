@@ -59,7 +59,10 @@ def export_episode(episode: dict, ep_dir: str) -> None:
     pub_dir = os.path.join(ep_dir, "public")
     grd_dir = os.path.join(ep_dir, "grader")
 
-    # public files
+    # public files (task.txt: the agent's instructions, incl. the duplicate definition and hard-mode rules)
+    os.makedirs(pub_dir, exist_ok=True)
+    with open(os.path.join(pub_dir, "task.txt"), "w", encoding="utf-8", newline="") as fh:
+        fh.write(episode["task"])
     _write_json(os.path.join(pub_dir, "manifest.json"), episode["manifest"])
     _write_json(os.path.join(pub_dir, "policy.json"), episode["policy"])
     _write_csv(os.path.join(pub_dir, "ledger.csv"), LEDGER_FIELDS, episode["tables"]["ledger"])
