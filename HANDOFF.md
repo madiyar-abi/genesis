@@ -10,16 +10,17 @@
 |---|---|
 | [PR #35](https://github.com/madiyar-abi/genesis/pull/35) | Validate grader truth, compare the split index with provenance and reuse ledger indexes. |
 | [PR #36](https://github.com/madiyar-abi/genesis/pull/36) | Check both timestamps of invoice postings and reversals. Require the configured 20 public hard episodes and verify the hard export in CI. |
-| `audit/export-and-input-validation` | Reject ambiguous CSV headers and malformed invoice fields. Detect duplicate episode IDs and leftover episode directories before export writes. Check uniqueness of evidence IDs in schema tests. |
+| [PR #37](https://github.com/madiyar-abi/genesis/pull/37) | Reject ambiguous CSV headers and malformed invoice fields. Detect duplicate episode IDs and leftover episode directories before export writes. Check uniqueness of evidence IDs in schema tests. |
 
-Local acceptance on the export/input branch: Python 3.11.18, 391 tests passed, 600/600 generated episodes and 40/40 committed exports verified, and 3,000 fuzz episodes completed with zero problems.
-
-The next maintainer should review the three branches and run the following from the combined checkout before merging or releasing. `HANDOFF.md`, `auditenv/verify.py` and the disk verifier tests receive changes across the branches. Preserve both the invoice and grader-truth checks when integrating.
+PR #37 contains the commits from #35 and #36 and resolves their overlaps. For release, review #37 against main and check its GitHub Actions run. The combined checkout passed 393 tests on Python 3.11.18, verified 600/600 generated episodes and 40/40 committed exports, and found zero problems in the 3,000-episode fuzz sweep. The reward search found zero violations in 11,000 mutations on 20 seeds. To reproduce:
 
 ```sh
 env -u AUDITENV_SECRET uv run python -m unittest tests.test_export tests.test_verify_dir tests.test_schemas tests.test_posting_period tests.test_load
 env -u AUDITENV_SECRET uv run python -m auditenv.check
 env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999
+env -u AUDITENV_SECRET uv run python -m auditenv.attack
+uv run python -m auditenv.verify --seeds 0-199
+for split in train dev hard; do uv run python -m auditenv.verify --dir "episodes/$split" || exit 1; done
 ```
 
 The submission owner still has the video, deck, access checks and submission listed below. No model training was started.
@@ -35,6 +36,10 @@ Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository
 - The seed sweep checked 3,000 episodes. A separate sweep of 3,000 configurations included 1,195 hard cases and used at most 58 steps. Neither sweep found a problem. The reward search found zero violations across 11,000 mutations. The default duplicate cue still has measured precision 0.996.
 - All three Gemini workers supplied evidence. The clone-path, timezone and encoding results are in `night/LOG.md`. DeepSeek could not start without its API key. The lead independently completed its configuration sweep.
 - The seed-2003 demo and ten-slide pitch match the measured outputs. The submitter still owns the recording, confirmed team credits, deck export and access checklist below.
+
+## Invoice posting and hard export checks
+
+Run `uv run python -m unittest tests.test_posting_period tests.test_load`. Both lines of an invoice booking must carry the same instant. A hard-mode reversal has its own posting instant. The hard export tests require the 20 seed/config pairs listed in `configs/eval_hard.json`, including their episode files. CI also runs `python -m auditenv.verify --dir episodes/hard`.
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on

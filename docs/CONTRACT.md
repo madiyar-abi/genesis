@@ -46,7 +46,8 @@ If you need something not described here, choose the simplest option and log it.
 ### Correct bookkeeping (the "policy"; violations of it are the errors)
 - Invoice issued (only if its issue date in company tz is inside the period):
   `Dr 1200 / Cr 4000`, amount = `convert(total_minor, rate(issue date))`,
-  rows carry invoice_id + entity_id, payment_id null, timestamp = issued_at.
+  rows carry invoice_id + entity_id and payment_id null. Both rows share one booking instant.
+  An in-period invoice may be posted later in the period than its issue instant.
 - Payment received (inside the period): `Dr 1000 convert(amount, rate(payment date))`;
   per ref `Cr 1200 convert(ref.amount, rate(invoice issue date))` with invoice_id;
   remainder (amount − Σrefs, or all of it if refs are null) `Cr 2900` at the payment-date

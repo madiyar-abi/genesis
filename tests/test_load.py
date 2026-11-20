@@ -8,6 +8,7 @@ import unittest
 
 from auditenv.generator import generate
 from auditenv.load import load_episode
+from auditenv.run import load_episodes
 from auditenv.verify import verify_episode
 
 
@@ -85,8 +86,17 @@ class TestLoadRoundtrip(unittest.TestCase):
     def test_roundtrip_train(self) -> None:
         self._check_split(EPISODES_DIR_TRAIN)
 
-    @unittest.skipUnless(os.path.isdir(EPISODES_DIR_HARD), "episodes/hard not found")
     def test_roundtrip_hard(self) -> None:
+        config_path = os.path.join(os.path.dirname(__file__), "..", "configs", "eval_hard.json")
+        expected = load_episodes(config_path)
+        self.assertEqual(len(expected), 20, "the public hard split must contain 20 episodes")
+        with open(os.path.join(EPISODES_DIR_HARD, "index.json"), encoding="utf-8") as stream:
+            index = json.load(stream)
+        self.assertCountEqual(
+            [json.dumps((entry["seed"], entry["config"]), sort_keys=True) for entry in index],
+            [json.dumps(pair, sort_keys=True) for pair in expected],
+            "hard split index differs from configs/eval_hard.json",
+        )
         self._check_split(EPISODES_DIR_HARD)
 
 
@@ -116,7 +126,6 @@ class TestVerifyLoadedEpisodes(unittest.TestCase):
     def test_verify_train(self) -> None:
         self._check_split(EPISODES_DIR_TRAIN)
 
-    @unittest.skipUnless(os.path.isdir(EPISODES_DIR_HARD), "episodes/hard not found")
     def test_verify_hard(self) -> None:
         self._check_split(EPISODES_DIR_HARD)
 
@@ -136,7 +145,6 @@ class TestVerifyDirCLI(unittest.TestCase):
         result = main(["--dir", EPISODES_DIR_TRAIN])
         self.assertEqual(result, 0, "--dir episodes/train should exit 0")
 
-    @unittest.skipUnless(os.path.isdir(EPISODES_DIR_HARD), "episodes/hard not found")
     def test_verify_dir_hard(self) -> None:
         from auditenv.verify import main
         result = main(["--dir", EPISODES_DIR_HARD])

@@ -59,3 +59,5 @@ FUZZ PASSED
 2026-11-20 09:12 lead — Rechecked SPEC §§01–13, README, demo and pitch. The final offline check passed all 387 tests, both 20-pair suites, data, reward and remote gates in 37.5 s. All 40 exports verify and sync_docs --check passes. Fuzz 0–999 verified 3,000 episodes, attack checked 11,000 mutations with zero violations and the miner confirmed the default duplicate cue (4,902/4,920). The marathon owns PR/CI integration. Human submission checklist remains open.
 
 2026-11-20 — Public-input and export review. Checked malformed invoices and repeated headers on temporary copies. Export validates episode identities before writing, so duplicate requests and stale directories preserve the previous split. Added evidence uniqueness coverage and updated HANDOFF.md with integration steps.
+
+Invoice posting and hard-split follow-up: compared ledger instants across each posting pair and required the shipped hard index to match configs/eval_hard.json. A delayed invoice booking and its later credit note remain valid. The disk suite rejected absent, shortened and substituted hard exports. See the focused checks in HANDOFF.md.

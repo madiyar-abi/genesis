@@ -88,7 +88,7 @@ class Books:
                     amounts = {r["debit_minor"] + r["credit_minor"] for r in ar + rev}
                     reversal = [r for r in ar + rev if (r["account"] == "1200") == bool(r["credit_minor"])]
                     if len(ar_dr) != 1 or len(amounts) != 1 or len(reversal) != 2 \
-                            or reversal[0]["timestamp"] != reversal[1]["timestamp"] \
+                            or datetime_key(reversal[0]["timestamp"]) != datetime_key(reversal[1]["timestamp"]) \
                             or datetime_key(reversal[0]["timestamp"]) < datetime_key(ar_dr[0]["timestamp"]):
                         problems.append(f"malformed credit note in {jid}")
                         continue
@@ -99,6 +99,8 @@ class Books:
                         or ar[0]["debit_minor"] != rev[0]["credit_minor"]:
                     problems.append(f"malformed invoice journal {jid}")
                     continue
+                if datetime_key(ar[0]["timestamp"]) != datetime_key(rev[0]["timestamp"]):
+                    problems.append(f"invoice booking rows have different timestamps in {jid}")
                 booked[jid[4:]] = ar[0]
         for iid, ar in booked.items():
             inv = self.invoices.get(iid)
