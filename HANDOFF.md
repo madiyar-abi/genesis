@@ -18,6 +18,8 @@ The seed-2003 demo script matches a fresh run (four matches, return 0.958). Work
 
 - T6. The verifier checks integer exponents for every currency used in public records. Two mutations previously passed: a missing JPY exponent and JSON false in place of zero. Both now fail, and valid dev exports pass.
 
+- T1. Reviewed the fresh clone run in a path containing Cyrillic and spaces. The official check, demo and verifier all exited zero.
+
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
 2026-11-19 at 12:00.** **Final deadline: 2026-11-22, 22:00 (Astana; the PDF says 23:59, we plan for 22:00).**
