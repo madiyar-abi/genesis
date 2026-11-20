@@ -44,6 +44,8 @@ Branch `night/2026-11-20-r13`. Run `env -u AUDITENV_SECRET uv run python -m audi
 
 - T4. Independently reproduced the worker’s public default results. Mean returns rounded to three decimals were 1.000 for oracle, 0.959 for reconcile, and −1.000 for both random and flag_all.
 
+- T2. Verified the jury check map against the official console and JSON outputs and updated its reset-test count to twelve invalid requests.
+
 ## Round 12 complete · 20 November 2026
 
 Branch `night/2026-11-20-r12`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 374 tests and both 20-pair gates passed. The seed sweep verified 3,000 companies. The marathon handles PR integration and CI.
