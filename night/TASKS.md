@@ -1,10 +1,10 @@
-# Round 12
+# Round 13
 
-- [x] T1 (lead) Reject reversed seed ranges in evaluation commands — files: auditenv/{run,verify,fuzz,analyze,attack}.py, tests/test_seed_ranges.py — accept: previously green empty verifier invocation exits nonzero, valid lists and ranges retain order.
-- [x] T2 (gemini1) Audit the public config selections against SPEC §6 — files: night/LOG.md — accept: count clean and interacting episodes from generated truth for both 20-company evaluation splits.
-- [x] T3 (gemini2) Verify the chart is reproducible from the current measurement inputs — files: night/LOG.md — accept: regenerate into a temporary file and compare to docs/baselines.svg.
-- [x] T4 (gemini3) Check documented trajectory fields and terminal coverage — files: night/LOG.md — accept: report file, episode and terminal/truncation counts for each policy file and any missing required fields.
-- [x] T5 (lead) Verify committed export directories independently — files: night/LOG.md — accept: verify --dir succeeds for train, dev and hard.
-- [x] T8 (lead) Preserve active episode settings after rejected resets — files: auditenv/env.py, reset regression tests — accept: rejected config preserves eval isolation and remaining budget.
-- [x] T6 (lead) Rehearse the numbered recording script — files: docs/DEMO.md, auditenv/demo.py, tests/test_demo.py — accept: reproduce the payment evidence, four matches and closed return with the printed commands.
-- [x] T7 (lead) Verify slide outline and submission handoff — files: docs/PITCH.md, README.md, HANDOFF.md, auditenv/check.py, tests/test_paired_transform.py — accept: current metrics match slides, official check and SPEC review pass.
+- [x] T1 (lead) Include the public 20-company default evaluation in the official diagnostics — files: auditenv/check.py, tests/test_eval_diagnostics.py, REVIEW.md — accept: all required policies run on eval_example, console and JSON identify that split, dev and hard results remain available.
+- [x] T2 (gemini1) Document the official evaluation split in the jury check map — files: docs/CHECKS.md — accept: distinguish public default evaluation from dev and hidden seeds and identify all six diagnostics.
+- [x] T3 (gemini2) Audit design benchmark claims against measured workload — files: docs/DESIGN.md — accept: correct stale test count at line 221 and reconcile scope with actual verifier/benchmark commands.
+- [x] T4 (gemini3) Independently reproduce the default evaluation policy counts and mean returns — files: night/LOG.md — accept: report four required baselines across all 20 public default eval companies.
+- [x] T5 (lead) Verify docs tooling tolerates a third metrics split — files: night/LOG.md — accept: use metrics with eval_example alongside dev/hard and verify sync_docs and chart generation.
+- [x] T8 (lead) Reject malformed JSON seed types and falsey non-object config in episode lists and server resets — files: auditenv/run.py, auditenv/server.py, focused tests — accept: valid selections preserve order and malformed inputs fail explicitly.
+- [x] T6 (lead) Rehearse the 2–3 minute recording script — files: docs/DEMO.md — accept: run the prescribed inputs and verify the selected evidence and closed-run totals.
+- [x] T7 (lead) Review slide outline and jury handoff — files: docs/PITCH.md, README.md, HANDOFF.md — accept: public evaluation clearly identified, numeric claims verified, full offline suite and SPEC review passed.

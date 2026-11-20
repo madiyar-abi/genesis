@@ -89,8 +89,9 @@ Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs
    recomputed independently from the public records equal `truth.json` (type, ids, amount); both
    books follow the published posting policy (accounts per journal, entities, unapplied cash, dates);
    every evidence set exists and covers the affected records.
-3. **Baselines on the dev split** — random explorer, naive reconciliation, rule-based reconciliation, flag-everything
-   attack, oracle → P / R / F1 / return / steps / time.
+3. **Baselines on dev and the public default evaluation split** — random explorer, naive reconciliation, rule-based reconciliation, flag-everything
+   attack, oracle → P / R / F1 / return / steps / time. The check reports 10 dev companies and
+   20 companies from `configs/eval_example.json` separately. The latter mirrors the hidden cohort’s composition.
 4. **20 paired checks** replay the same seed and actions, then relabel IDs and shuffle rows.
    Each translated public row must match in full, and the translated oracle answer must earn the same reward.
 5. **Out-of-process eval run** — environment and grader in a subprocess; the policy sees no

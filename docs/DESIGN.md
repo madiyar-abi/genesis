@@ -218,8 +218,8 @@ P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means 
 \*Experimental materiality-weighted reward (`auditenv/experimental.py`): FN/TP weighted by the
 expected amount, FP by the claimed amount but at least the mean expected amount (a zero claim is no free
 accusation); reported separately, the shared reward is unchanged.
-Other gates in the same run: 366 unit tests pass; verifier 200/200 episodes valid (600/600 with
-`auditenv.verify --seeds 0-199`); 20/20 paired checks on default and 20/20 on hard episodes; out-of-process run leaks nothing.
+Other gates in the same run: 376 unit tests pass; verifier 200/200 episodes valid (50 seeds × 4 configs in check; 600/600 with
+`auditenv.verify --seeds 0-199` over 200 seeds × 3 configs); 20/20 paired checks on default and 20/20 on hard episodes; out-of-process run leaks nothing.
 
 Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200
 episodes (300 seeds × random mix / clean / 12 issues / 12 issues with 100 invoices): **0 imperfect
@@ -292,7 +292,7 @@ episodes): 0 imperfect, max 57 steps, no truncation.
 |---|---|---|
 | `generate()` default | 100 seeds | 0.266 s (2.66 ms / episode) |
 | `generate()` hard | 100 seeds | 0.953 s (9.53 ms / episode) |
-| `auditenv.verify` | 300 episodes | 1.783 s (5.94 ms / episode) |
+| `auditenv.verify` | 100 seeds × 3 configs (300 eps) | 1.783 s (5.94 ms / episode) |
 | one full episode, any baseline | dev / hard | 2.88–4.64 ms / 7.50–10.56 ms |
 
 The measured scripted policies finished both sampled companies within the 60 s episode limit.
