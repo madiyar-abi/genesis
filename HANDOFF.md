@@ -40,6 +40,12 @@ Branch `night/2026-11-20-r13`. Run `env -u AUDITENV_SECRET uv run python -m audi
 
 - T5. DeepSeek exited with a missing API key. The lead verified sync_docs --check with the three-split JSON and reproduced the committed chart byte for byte.
 
+- T7. Rechecked SPEC sections 1–13, pitch metrics and README run instructions. Both 3,000-company sweeps passed, 11,000 answer mutations gave zero violations, 15/15 reward mutants were caught and all 80 golden hashes matched. The default miner still flags the documented surface cues. The submitter owns the recording, team credits, deck export and jury access.
+
+- T4. Independently reproduced the worker’s public default results. Mean returns rounded to three decimals were 1.000 for oracle, 0.959 for reconcile, and −1.000 for both random and flag_all.
+
+- T2. Verified the jury check map against the official console and JSON outputs and updated its reset-test count to twelve invalid requests.
+
 ## Round 12 complete · 20 November 2026
 
 Branch `night/2026-11-20-r12`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 374 tests and both 20-pair gates passed. The seed sweep verified 3,000 companies. The marathon handles PR integration and CI.
