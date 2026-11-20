@@ -168,7 +168,8 @@ Independent of the generator, from the public tables and closed files only:
    Cr 1000), entities match the invoices, payment rows carry the payment's instant, no invoice is
    booked before its issue, and invoice refs are positive, unique, same-currency and issued before
    the payment. Credit notes are accepted only where the hard-mode policy publishes the rule, and each
-   cancelled invoice needs a replacement with the same entity, currency and line items;
+   cancelled invoice needs its own replacement with the same entity, currency and line items, booked in the
+   period after the credit note;
 3. **after the errors** — journals still balance and the discrepancies recomputed from the records
    are exactly the truth (type, ids, amount): nothing undeclared, nothing unsupported. A wrong booked
    amount counts as an `fx_error` only if it is foreign and some published rate of the pair produces it;
@@ -348,7 +349,13 @@ to explore.
 - Cutoff of a next-period invoice is booked *before* its issue instant; a policy can learn that
   direction-of-lag cue, but it is exactly the audit rule (document date outside the period).
 - The I1 payment is always on the last evening of the period (by the definition of the scenario);
-  "last-evening payment" alone has precision 0.35.
+  "last-evening payment" alone has precision 0.35. Narrowed to a foreign payment on the last company day after
+  18:00 with one invoice ref equal to its amount, one page of `payments` flags it with precision 0.68 (random mix,
+  1 000 seeds, default and hard) and recall 1.0. It names the payment, not the two amounts, which still need the
+  reconciliation; changing it would change the default episodes, so it stays and is reported here.
+- Hard mode re-issues (credit note + new invoice) are drawn only from unpaid invoices, while duplicates may copy a
+  paid one. A lookalike pair whose earlier invoice is already paid is a duplicate with precision 0.995 (recall
+  432/830, 1 000 hard seeds) without reading the ledger; the credit-note rows in the ledger separate all pairs.
 - Expense journals carry no ids (the schema has no journal id); checks group them by timestamp.
 - Default duplicates are exact copies; hard mode re-types the text, but changed amounts or quantities
   (a "near-duplicate" that is really a different sale) are not modelled.

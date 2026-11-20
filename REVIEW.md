@@ -293,7 +293,7 @@ Reproduced on origin/main b799231 before each fix; every regression failed first
   up to the whole short reference; it now requires exactly the unallocated part of the reference at the
   payment-date rate.
 - Verifier, hard mode. A full credit note on an invoice with no replacement wrote off revenue and verified with
-  unchanged truth. A cancelled invoice now needs a replacement with the same entity, currency and line items.
+  unchanged truth. A cancelled invoice now needs its own replacement with the same entity, currency and line items, booked in the period after the credit note (an unbooked copy dated outside the period no longer counts).
 - Verifier, public records. `amount_minor` 783500.75 on a payment and its ref, and payment timestamps without an
   offset (read in the host time zone), verified. Payment and ref amounts must be integers and every ledger,
   payment and invoice timestamp needs an offset.
@@ -306,3 +306,9 @@ Reproduced on origin/main b799231 before each fix; every regression failed first
 - Server, missing grader key. `auditenv.server --episodes` without `AUDITENV_SECRET` served silently and a
   policy recovered seed 734211 from `episode_id` in 3.8 s. The server now warns on stderr; `--public` marks the
   deliberately public smoke run and demo (`tests/test_server_secret.py`).
+- Verifier and server, reporting. A naive invoice or payment timestamp, or a string amount, made `verify_episode`
+  raise `TypeError` instead of naming the problem; it now returns the structure problem. A missing, malformed or
+  mistyped hidden list ended the server in a traceback; it now exits 2 with one line.
+- Measured, not fixed (generator change; listed in DESIGN §10): one page of `payments` flags the I1 payment with
+  precision 0.68 and recall 1.0; in hard mode a lookalike pair whose earlier invoice is paid is a duplicate with
+  precision 0.995.
