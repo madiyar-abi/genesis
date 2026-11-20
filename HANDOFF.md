@@ -12,7 +12,7 @@
 | [PR #36](https://github.com/madiyar-abi/genesis/pull/36) | Check both timestamps of invoice postings and reversals. Require the configured 20 public hard episodes and verify the hard export in CI. |
 | [PR #37](https://github.com/madiyar-abi/genesis/pull/37) | Reject ambiguous CSV headers and malformed invoice fields. Detect duplicate episode IDs and leftover episode directories before export writes. Check uniqueness of evidence IDs in schema tests. |
 
-PR #37 contains #35, #36 and [#38](https://github.com/madiyar-abi/genesis/pull/38). The merged verifier checks both invoice/truth structure and accounting semantics. For release, review #37 against main and check its GitHub Actions run. After integrating #38, local checks verified 600/600 generated episodes, matched all 80 golden hashes, and found zero violations across 11,000 reward mutations on 20 seeds. To reproduce:
+PR #37 contains #35, #36 and [#38](https://github.com/madiyar-abi/genesis/pull/38). The merged verifier checks both invoice/truth structure and accounting semantics. For release, review #37 against main and check its GitHub Actions run. After integrating #38, Python 3.11.18 passed 410 tests and the seed sweep completed 3,000 episodes with zero problems. Local checks verified 600/600 generated episodes, matched all 80 golden hashes, and found zero violations across 11,000 reward mutations on 20 seeds. To reproduce:
 
 ```sh
 env -u AUDITENV_SECRET uv run python -m unittest tests.test_export tests.test_verify_dir tests.test_schemas tests.test_posting_period tests.test_load
@@ -23,7 +23,7 @@ uv run python -m auditenv.verify --seeds 0-199
 for split in train dev hard; do uv run python -m auditenv.verify --dir "episodes/$split" || exit 1; done
 ```
 
-The submission owner still has the video, deck, access checks and submission listed below. No model training was started.
+The next participant should review PR #37, confirm Python and Docker CI, and merge after team approval. E3 pins the multi-platform Python image by digest. E4 includes the [terminal recording](docs/demo.cast) with verified public demo output. The submission owner still has the narrated video, deck, access checks and submission listed below. No model training was started.
 
 ## Export verifier follow-up
 
@@ -449,7 +449,7 @@ Columns: what to do · why (jury criterion) · start in · how to check · risk.
 | E1 ✓ | Docs from data: `check --json` → script rewrites the tables in README/DESIGN/PITCH; a test fails when docs drift | numbers always match | `check.py`, new `scripts/sync_docs.py` | test | low |
 | E2 ✓ | Timing benchmark (`check`, `fuzz`, one episode per policy) recorded in DESIGN | "измеренный разбор" | `fuzz.py` | numbers in DESIGN | low |
 | E3 ✓ | Hard-mode trajectories (`trajectories/train_hard_*.jsonl`), `make fuzz`/`make stress`, CI badge, Docker image pinned by digest | engineering polish | `run.py`, `Makefile`, README, `Dockerfile` | CI green | low |
-| E4 ✓ | Demo and pitch: asciinema/GIF of `auditenv.demo`, one chart of baseline returns (dev vs hard) for slide 7 | the video and slides score with humans | `docs/DEMO.md`, `docs/PITCH.md` | renders | low |
+| E4 ✓ | Public seed-2003 terminal recording (`asciinema play docs/demo.cast`) and the dev/hard baseline chart for slide 7 | the video and slides score with humans | `docs/DEMO.md`, `docs/PITCH.md` | renders | low |
 | E5 deferred | A learnable baseline without weights: a search over simple rule programs scored by the reward on train, reported on dev/hard (learning curve by iterations) — shows the env is learnable, not only scriptable. Skip if it looks like "training a model" to the jury | explanation | new `policies/rule_search.py` | dev/hard table | medium — time sink; do it last |
 
 ## How to run
