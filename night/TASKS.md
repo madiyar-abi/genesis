@@ -1,9 +1,16 @@
-# Round 14
-- [x] T1 (lead) Surface actionable unit-test failures in the official command — files: auditenv/check.py, tests/test_check_failures.py, REVIEW.md — accept: injected synthetic failure names test and assertion; official check passes.
-- [x] T2 (gemini1) Correct public smoke versus withheld cohort wording — files: docs/CHECKS.md — accept: verify seeds and policy against run_remote.
-- [x] T3 (gemini2) Check README closed-run instructions against real CLI and clarify public smoke scope — files: README.md — accept: public two-episode smoke passes.
-- [x] T4 (gemini3) Verify public split metrics tables against measured JSON — files: docs/DESIGN.md only if drift — accept: sync_docs --check.
-- [x] T5 (lead) Verify generator hashes and exported splits — files: no product files — accept: golden check and all three verify --dir commands pass.
-- [x] T8 (lead) Preserve alternative evidence under paired relabelling — files: auditenv/check.py, tests/test_paired_transform.py, REVIEW.md — accept: dropping a valid alternative fails the paired gate.
-- [x] T6 (lead) Rehearse numbered 2–3 minute video script — files: docs/DEMO.md — accept: five prompts and closed grader result match.
-- [x] T7 (lead) Review pitch slide sequence and measurements — files: docs/PITCH.md — accept: metrics match official check and all SPEC sections reviewed.
+# Round 15
+
+Open improvement round. Rounds 1–14 hardened contract, data, reward and docs (night/archive/, REVIEW.md).
+The lead's review found little left to fix: a raw Python exception name in the JSON-lines server, non-standard
+JSON (NaN/Infinity) accepted there, and a stale HANDOFF. Run modules from the repo root (`uv run python -m ...`)
+with `env -u AUDITENV_SECRET`. Workers: touch only your listed files plus night/TASKS.md and night/LOG.md;
+never edit README.md, HANDOFF.md, docs/ or auditenv/ unless your task lists them.
+
+- [x] T1 (lead) JSON-lines server: a non-object request (`[]`, `1`, `"x"`, `null`) returns `{"error": "request must be a JSON object"}` instead of `AttributeError: 'list' object has no attribute 'get'`; `NaN` / `Infinity` / `-Infinity` constants are rejected as `{"error": "invalid json"}` — files: auditenv/server.py, tests/test_server.py, REVIEW.md — accept: new tests red before / green after; `auditenv.check` green.
+- [x] T2 (gemini1) Seed sweep on new seeds, evidence only: from the repo root run `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 5000-5999` and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 5000-5999 --hard`. Do not modify any tracked file except night/TASKS.md and night/LOG.md — files: night/LOG.md — accept: per command append the exact command, wall time and final summary line to night/LOG.md; any problem line quoted verbatim.
+- [x] T3 (gemini2) Attack search on new seeds, evidence only: from the repo root run `env -u AUDITENV_SECRET uv run python -m auditenv.attack --help` to find the seed option, then run the attack over seeds 3000-3019. Do not modify any tracked file except night/TASKS.md and night/LOG.md — files: night/LOG.md — accept: append the exact command, wall time, mutation count and violation count; any violation quoted verbatim.
+- [x] T4 (gemini3) Re-run every command in HANDOFF.md "How to run" (skip `auditenv.demo --pause`; run `auditenv.demo` without `--pause`) from the repo root with `env -u AUDITENV_SECRET`, evidence only. Do not modify any tracked file except night/TASKS.md and night/LOG.md — files: night/LOG.md — accept: per command the exit code and the last summary line in night/LOG.md; any non-zero exit quoted verbatim.
+- [x] T5 (lead; was deepseek) Stress solvability on new seeds, evidence only: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 3000-3299` and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 3000-3299`. Do not modify any tracked file except night/TASKS.md and night/LOG.md — files: night/LOG.md — accept: per command the exact command, wall time and summary line (imperfect / max steps / truncated).
+- [x] T6 (lead) HANDOFF.md truthful and short at the top: replace the stale 19-Nov header, "Status" (says round 12) and "Remaining work" (says round 10) with the current state; keep round history below — files: HANDOFF.md — accept: no stale round reference in the top sections; `scripts/sync_docs.py --check` clean.
+- [x] T7 (lead) `docs/DEMO.md` (2–3 min demo-video script) re-checked against a fresh `auditenv.demo --seed 2003` run — files: docs/DEMO.md — accept: every number in the script equals the fresh output.
+- [x] T8 (lead) `docs/PITCH.md` (10-slide outline) re-checked against the fresh `auditenv.check --json` metrics — files: docs/PITCH.md — accept: `scripts/sync_docs.py --check` clean and no untraced number.

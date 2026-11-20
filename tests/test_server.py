@@ -142,6 +142,19 @@ class ServerTest(unittest.TestCase):
         self.assertIn("observation", lines[1])
         self.assertIn("info", lines[1])
 
+    def test_non_object_and_non_standard_json_requests_get_protocol_errors(self):
+        bad = ["[]", "1", '"x"', "null", "{", '{"cmd": "reset", "seed": NaN}', '{"cmd": "reset", "seed": Infinity}',
+               '{"cmd": "step", "action": {"type": "list_records", "table": "ledger", "limit": -Infinity}}',
+               "[" * 200000 + "]" * 200000]
+        reset_cmd = json.dumps({"cmd": "reset", "seed": 0, "config": {}})
+        inp = io.StringIO("\n".join(bad + [reset_cmd]) + "\n")
+        out = io.StringIO()
+        serve(inp, out)
+        lines = [json.loads(line) for line in out.getvalue().splitlines() if line]
+        self.assertEqual(lines[:4], [{"error": "request must be a JSON object"}] * 4)
+        self.assertEqual(lines[4:9], [{"error": "invalid json"}] * 5)
+        self.assertIn("observation", lines[9])
+
     def test_subprocess_size_and_invalid_utf8_recovery(self):
         proc = subprocess.Popen(
             [sys.executable, "-m", "auditenv.server"],

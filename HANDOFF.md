@@ -4,7 +4,11 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**19 November 2026 · Khasuetolog** implemented R1, C1, D1, D3, P3 and E1 in commit `66a3504` on `audit/handoff-validation`. The six results and reproduction commands are below. [PR #11 into main](https://github.com/madiyar-abi/genesis/pull/11)
+**Current state (20 November 2026):** `main` has rounds 1–14 merged. Round 15 is complete on
+`night/2026-11-20-r15` and goes to `main` through the marathon PR. The marathon (`scripts/marathon.sh`) opens one round
+after another until the feature freeze on **2026-11-22 18:00**. Each round merges through a PR after CI passes.
+`uv run python -m auditenv.check` passes (380 tests, all gates, about 37 s). After the freeze, only the human
+submission steps listed below remain.
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
@@ -27,6 +31,23 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] Google Doc with the 3 links (repo, video, presentation); the Doc and all
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
+
+## Round 15 complete · 20 November 2026
+
+Branch `night/2026-11-20-r15`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. The check passes with
+380 tests, and `scripts/sync_docs.py --check` finds no drift.
+
+- T1. The JSON-lines server answered a non-object request with an internal `AttributeError` name and accepted
+  `NaN` / `Infinity`. Non-object requests now get `request must be a JSON object`. Malformed JSON, non-standard
+  constants and over-deep nesting get `invalid json`, and the server keeps serving (`tests/test_server.py`).
+- T6. The top of this file now gives the current state, and the repo's private visibility is flagged.
+- T7, T8. The demo script and the slide outline were re-checked against fresh demo and check output, and every
+  number matched.
+- T2–T5 (evidence on new seeds, no code change): fuzz on 5000–5999 found 0 problems in 6,000 default and hard
+  episodes. Attack on 3000–3019 found 0 violations in 11,000 mutations. Stress on 3000–3299 gave 0 imperfect
+  episodes out of 2,400, with at most 58 of 100 steps used. All 11 "How to run" commands exit 0.
+- The deepseek worker fails with `set DEEPSEEK_API_KEY or supply --api-key`. A human has to provide the key in the
+  environment; never put it in a file. The lead did T5.
 
 ## Round 14 complete · 20 November 2026
 
@@ -187,7 +208,9 @@ Demo rehearsal complete. Follow `docs/DEMO.md` for the 2:40 video. The ten-slide
 Branch `night/2026-11-19-r3`. The round freeze is 22 November at 18:00 local time. Round 2 is in main. The verifier now rejects a truth amount denominated in the wrong currency. Run `uv run python -m unittest tests.test_verify` for all six verifier tests. Gemini’s jury map in `docs/CHECKS.md` matches the merged suite. The official check passed all 285 tests. All 40 exported episodes verified and both seed sweeps passed (3,000 default and 600 hard episodes). Record the demo, finish the team slide, and complete the access and submission checklist above.
 
 ## Status
-Round 12 is on `night/2026-11-20-r12`. The current task board is `night/TASKS.md`. Rounds 1–11 are in main. Round 2 evidence is retained below.
+Everything SPEC §07 requires is implemented and passes the official check. The current round is described at the
+top of this file, and earlier rounds are archived in `night/archive/` and summarised below. Round 2's evidence is
+kept here for reference.
 
 Round-2 results (each with its command; numbers from the current code):
 - Reward: R2 `scripts/mutate_reward.py` — 15/15 one-line mutants of matcher/reward caught; R3
@@ -237,9 +260,12 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 
 ## Remaining work before submission
 
-- **Engineering:** follow the Round 10 marathon PR and offline container CI.
+- **Engineering:** the marathon merges each round into `main` through a PR with CI and stops at the 2026-11-22 18:00
+  freeze. Before submitting, check that `main` is green (CI badge in README) and that no PR is left open.
 - **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md` (chart: `docs/baselines.svg`), including the Team slide.
-- **Access and submission:** the repository owner arranges jury access. The team checks the repo, video and presentation links, adds them to the Google Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
+- **Access and submission:** the repository is **private** (checked 2026-11-20), so the owner must make it public or
+  otherwise give the jury access. The team checks the repo, video and presentation links, adds them to the Google
+  Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 
 ## Decisions & assumptions
 - Hidden evaluation: set `AUDITENV_SECRET` in the grader process only (keys generator RNG + HMAC episode_id).
