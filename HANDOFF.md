@@ -10,6 +10,10 @@ after another until the feature freeze on **2026-11-22 18:00**. Each round merge
 `uv run python -m auditenv.check` passes (385 tests, all gates, about 40 s). After the freeze, only the human
 submission steps listed below remain.
 
+## Round 17 in progress
+
+The seed-2003 demo script matches a fresh run (four matches, return 0.958). Worker assignments and outstanding verification are in `night/TASKS.md`.
+
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
 2026-11-19 at 12:00.** **Final deadline: 2026-11-22, 22:00 (Astana; the PDF says 23:59, we plan for 22:00).**
