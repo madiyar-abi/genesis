@@ -2,3 +2,4 @@
 2026-11-20 05:06 lead T1. Added the public 20-company default comparison to console and JSON. The regression failed before implementation and the integrated offline run passed all 376 tests and both 20-pair gates.
 2026-11-20 05:06 lead T8. Runner and server tests cover malformed seed and config values, both list formats, duplicates and ordering. All 18 focused tests and the integrated offline suite passed.
 2026-11-20 05:06 lead T5. DeepSeek exited with a missing API key. The lead verified sync_docs --check with the three-split JSON and reproduced the committed chart byte for byte.
+2026-11-20 05:10 lead T7. Rechecked SPEC sections 1–13, pitch metrics and README run instructions. Both 3,000-company sweeps passed, 11,000 answer mutations gave zero violations, 15/15 reward mutants were caught and all 80 golden hashes matched. The default miner still flags the documented surface cues. The submitter owns the recording, team credits, deck export and jury access.

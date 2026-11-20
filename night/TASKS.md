@@ -7,4 +7,4 @@
 - [x] T5 (lead) Verify docs tooling tolerates a third metrics split — files: night/LOG.md — accept: use metrics with eval_example alongside dev/hard and verify sync_docs and chart generation.
 - [x] T8 (lead) Reject malformed JSON seed types and falsey non-object config in episode lists and server resets — files: auditenv/run.py, auditenv/server.py, focused tests — accept: valid selections preserve order and malformed inputs fail explicitly.
 - [x] T6 (lead) Rehearse the 2–3 minute recording script — files: docs/DEMO.md — accept: run the prescribed inputs and verify the selected evidence and closed-run totals.
-- [ ] T7 (lead) Review slide outline and jury handoff — files: docs/PITCH.md, README.md, HANDOFF.md — accept: public evaluation clearly identified, numeric claims verified, full offline suite and SPEC review passed.
+- [x] T7 (lead) Review slide outline and jury handoff — files: docs/PITCH.md, README.md, HANDOFF.md — accept: public evaluation clearly identified, numeric claims verified, full offline suite and SPEC review passed.
