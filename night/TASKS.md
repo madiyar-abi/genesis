@@ -8,4 +8,4 @@ Workers record their evidence in night/LOG.md and mark their task here. Run from
 - [ ] T4 (deepseek) Verify all generator golden hashes — files: night/LOG.md — accept: scripts/golden.py --check exits zero.
 - [ ] T5 (lead) Detect invoice booking legs posted at different instants — files: auditenv/verify.py, tests/test_verify_round18.py, REVIEW.md — accept: reproduce a false pass, reject it after the fix, and pass the full check.
 - [x] T6 (lead) Rehearse the 2–3 minute demo script — files: docs/DEMO.md — accept: run the five prompts and compare amounts, steps and return.
-- [ ] T7 (lead) Verify the jury slide outline — files: docs/PITCH.md — accept: compare metrics with fresh check JSON and run sync_docs --check.
+- [x] T7 (lead) Verify the jury slide outline — files: docs/PITCH.md — accept: compare metrics with fresh check JSON and run sync_docs --check.

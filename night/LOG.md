@@ -1,1 +1,2 @@
 2026-11-20 09:22 lead — T6. Rehearsed all five prompts on seed 2003. The two PAY-136430 findings claim 286 and 351331 USD minor units. The policy saw zero rewards over 22 actions. The grader matched all four findings for 0.958. The recording script matches.
+2026-11-20 09:23 lead — T7. Condensed slide 8 to four bullets. All ten slides meet the outline limit, the measured tables match the official check, and sync_docs --check passes.

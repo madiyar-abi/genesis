@@ -10,6 +10,8 @@
 
 - T6. Rehearsed all five prompts on seed 2003. The two PAY-136430 findings claim 286 and 351331 USD minor units. The policy saw zero rewards over 22 actions. The grader matched all four findings for 0.958. The recording script matches.
 
+- T7. Condensed slide 8 to four bullets. All ten slides meet the outline limit, the measured tables match the official check, and sync_docs --check passes.
+
 ## Round 17 complete
 
 Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 387 tests and both 20-pair suites pass. The verifier now rejects blank task instructions and incomplete or noninteger currency exponents. The new regressions and reproductions are in `REVIEW.md`.
