@@ -60,18 +60,18 @@ class TestExport(unittest.TestCase):
                 problems = verify_episode(ep)
                 self.assertEqual(problems, [], f"{split_file} seed {seed} failed verifier: {problems}")
 
-    def test_hard_export_reexport_identity(self):
-        """D3: Exported episodes/hard matches a fresh export of configs/eval_hard.json byte-for-byte."""
-        hard_committed = os.path.join(ROOT, "episodes", "hard")
-        self.assertTrue(os.path.isdir(hard_committed), "episodes/hard missing")
-        config_path = os.path.join(ROOT, "configs", "eval_hard.json")
-        with tempfile.TemporaryDirectory() as tmp:
-            out = os.path.join(tmp, "hard")
-            export_split(config_path, out)
-            hashes_committed = _dir_tree_hashes(hard_committed)
-            hashes_fresh = _dir_tree_hashes(out)
-            self.assertEqual(len(hashes_committed), len(hashes_fresh))
-            self.assertEqual(hashes_committed, hashes_fresh, "Re-exported hard split is not byte-identical to committed")
+    def test_committed_exports_reexport_identity(self):
+        """D3 + red-team round 16: every committed split (train, dev, hard) matches a fresh export byte-for-byte,
+        so an extra public file or column (e.g. a leaked truth copy) cannot hide behind the loader."""
+        for split, cfg in (("train", "train.json"), ("dev", "dev.json"), ("hard", "eval_hard.json")):
+            with self.subTest(split=split):
+                committed = os.path.join(ROOT, "episodes", split)
+                self.assertTrue(os.path.isdir(committed), f"episodes/{split} missing")
+                with tempfile.TemporaryDirectory() as tmp:
+                    out = os.path.join(tmp, split)
+                    export_split(os.path.join(ROOT, "configs", cfg), out)
+                    self.assertEqual(_dir_tree_hashes(committed), _dir_tree_hashes(out),
+                                     f"Re-exported {split} split is not byte-identical to committed")
 
     def test_exported_file_structure_and_csv_headers(self):
         """Exported directory contains all expected files with correct headers."""
@@ -93,7 +93,9 @@ class TestExport(unittest.TestCase):
 
             # Public files
             pub = os.path.join(ep_dir, "public")
-            for name in ("manifest.json", "policy.json", "ledger.csv", "invoices.jsonl", "payments.jsonl", "fx.csv"):
+            # task.txt: the duplicate definition and hard-mode rules live only in the task text (red-team round 16)
+            for name in ("task.txt", "manifest.json", "policy.json", "ledger.csv", "invoices.jsonl", "payments.jsonl",
+                         "fx.csv"):
                 self.assertTrue(os.path.exists(os.path.join(pub, name)), f"Missing {name}")
 
             # Grader files

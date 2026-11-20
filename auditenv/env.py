@@ -48,7 +48,9 @@ class AuditEnv:
         self.grader_log: list[dict] = []
 
     # ------------------------------------------------------------------ API
-    def reset(self, seed: int, config: dict | None = None):
+    def reset(self, seed: int, config: dict | None = None, abandon_open: bool = False):
+        """Start an episode. A rejected seed or config raises ValueError and leaves the current episode as it was.
+        `abandon_open` (server): grade the open episode as abandoned once the new one is generated."""
         if isinstance(seed, bool) or not isinstance(seed, int):
             raise ValueError("seed must be an int")
         if config is not None and not isinstance(config, dict):
@@ -65,7 +67,10 @@ class AuditEnv:
         tl = cfg["time_limit_s"]
         if isinstance(tl, bool) or not isinstance(tl, (int, float)) or not 0 <= tl <= sys.float_info.max:
             raise ValueError("time_limit_s must be a finite non-negative number")
-        self._ep = generate(seed, config)
+        ep = generate(seed, config)
+        if abandon_open:
+            self.abandon()
+        self._ep = ep
         self._cfg = cfg
         t = self._ep["tables"]
         self._index = {name: {r[key]: r for r in t[name]} for name, key in TABLES.items()}

@@ -222,3 +222,38 @@ server with RecursionError. The regression covers that case too.
 In-process probes found no defect. Observations are deep copies. Oversized
 ints, NaN, bool and float action values, malformed cursors and a wrong
 episode_id all return bounded errors or a valid grade.
+
+## Round 16
+
+A submission with two false positives, one claiming 0 and one claiming
+`10**400`, ended the episode with reward 0 and no grader-log line. The
+experimental reward's false-positive floor was a float, and adding a 401-digit
+claim to it raised `OverflowError` after the step had already set
+`terminated`. The step reported a generic "malformed action". In train mode
+any answer scoring below 0 could take that 0 instead, and in eval mode it
+removed a hidden episode from the log. The floor is now an exact `Fraction`.
+The submission is graded (2 FP, reward −1) and logged in both modes.
+
+The JSON-lines server abandoned the open episode before it validated the new
+reset config. A typo such as `"mode": "evl"` returned an error, but the open
+episode had already been ended and logged with −1. In process, a rejected
+reset leaves the episode untouched. The server now abandons the open episode
+only after the new one has been generated.
+
+The exported `public/` files for agents had no task text. The duplicate
+definition and the hard-mode re-typing rule are stated only in the task text,
+which the environment sends in the first observation. In 5 of the 20 public hard
+episodes the duplicate copy is re-typed (`IMPLEMENTATION SERVICES - PO/6638`
+against `Implementation services (PO-6638)`), so an agent working from the files
+alone could not apply the rule. Each export now includes `public/task.txt`, and
+`load_episode` reads it back, so the round trip equals `generate()` in full.
+
+Three checks verified less than they claimed. Only the hard export had a
+byte-for-byte re-export test. Dev and train were compared through the loader,
+which reads a fixed set of files and columns, so a copy of `truth.json` placed in
+`public/` or an extra ledger column marking the injected rows still passed
+every test and `verify --dir`. All three splits are now byte-compared with a
+fresh export. The trajectory replay checks the environment's answers, not which
+policy produced the actions, so swapping two trajectory files passed. The
+README's byte-for-byte claim is now a test. The unit-test gate printed PASS
+for zero discovered tests and now fails.

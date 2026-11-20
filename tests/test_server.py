@@ -94,6 +94,23 @@ class ServerTest(unittest.TestCase):
                 self.assertEqual([r["steps"] for r in recs], [1, 0, 0, 0])
                 self.assertEqual(len({r["episode_id"] for r in recs}), 4)
 
+    def test_rejected_reset_keeps_the_open_episode(self):
+        # Red-team round 16: the server abandoned the open episode before validating the new config, so a
+        # typo in a reset scored it -1 and ended it; in process a rejected reset leaves the episode untouched.
+        step = '{"cmd":"step","action":{"type":"calculator","expression":"1"}}\n'
+        with tempfile.TemporaryDirectory() as d:
+            log = os.path.join(d, "grader.jsonl")
+            out = io.StringIO()
+            serve(io.StringIO('{"cmd":"reset","seed":1,"config":{"mode":"eval"}}\n' + step
+                              + '{"cmd":"reset","seed":1,"config":{"mode":"evl"}}\n' + step), out, log)
+            resps = [json.loads(line) for line in out.getvalue().splitlines()]
+            self.assertIn("error", resps[2])
+            self.assertIsNone(resps[3]["observation"]["error"])
+            self.assertEqual(resps[3]["observation"]["step"], 2)
+            with open(log) as fh:
+                recs = [json.loads(line) for line in fh]
+            self.assertEqual([(r["end"], r["steps"]) for r in recs], [("abandoned", 2)])  # logged once, at EOF
+
     def test_in_process_bytes_io(self):
         too_large = b"x" * (MAX_LINE + 10) + b"\n"
         bad_utf8 = b"\xff\xfe\xfa\n"

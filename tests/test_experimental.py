@@ -80,6 +80,17 @@ class ExperimentalRewardTests(unittest.TestCase):
             self.assertLessEqual(experimental_reward(result, _TRUTH, findings), result["reward"])
             self.assertLess(experimental_reward(result, _TRUTH, findings), 1.0)
 
+    def test_huge_false_positive_claim_is_scored_not_raised(self):
+        # Red-team round 16: a float floor plus a 401-digit claim raised OverflowError inside the env's
+        # grading step, so the submission ended the episode ungraded with reward 0 and no grader-log line.
+        findings = [{**_ORACLE[0], "affected_ids": ["J0"], "claimed_amount_minor": 0},
+                    {**_ORACLE[0], "affected_ids": ["J1"], "claimed_amount_minor": 10 ** 400}]
+        result = _grade(_TRUTH, findings)
+        self.assertEqual(experimental_reward(result, _TRUTH, findings), -1.0)
+        with_oracle = [*_ORACLE, findings[1]]
+        result = _grade(_TRUTH, with_oracle)
+        self.assertLessEqual(experimental_reward(result, _TRUTH, with_oracle), result["reward"])
+
     def test_invalid_submission_keeps_fixed_penalty(self):
         result = grade(_TRUTH, None, _EPISODE_ID, 0)
         self.assertEqual(experimental_reward(result, _TRUTH, []), -1.0)

@@ -112,17 +112,18 @@ def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dic
         try:
             cmd = req.get("cmd")
             if cmd == "reset":
-                env.abandon()
-                flush_log()
                 if queue is not None:
                     if not queue:
+                        env.abandon()
+                        flush_log()
                         send_resp({"error": "no more episodes"})
                         continue
                     seed, config = queue.pop(0)
                     config = {**config, "mode": config.get("mode", "eval")}
                 else:
                     seed, config = req["seed"], req.get("config")
-                obs, info = env.reset(seed, config)
+                obs, info = env.reset(seed, config, abandon_open=True)  # a rejected reset keeps the open episode
+                flush_log()
                 resp = {"observation": obs, "info": info}
             elif cmd == "step":
                 obs, reward, terminated, truncated, info = env.step(req.get("action"))

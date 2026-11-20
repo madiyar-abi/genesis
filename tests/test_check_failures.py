@@ -25,6 +25,14 @@ class CheckFailuresTest(unittest.TestCase):
         self.assertIn("17 != 19", output.getvalue())
         self.assertNotIn("suppressed test chatter", output.getvalue())
 
+    def test_empty_discovery_fails_the_gate(self):
+        # Red-team round 16: an empty tests/ directory printed "[PASS] unit tests — 0 tests".
+        output = io.StringIO()
+        with patch.object(unittest.defaultTestLoader, "discover", return_value=unittest.TestSuite()), \
+                redirect_stdout(output):
+            self.assertFalse(check.run_tests())
+        self.assertIn("0 tests", output.getvalue())
+
     def test_discovery_exception_restores_caller_state(self):
         output = io.StringIO()
         with patch.dict(os.environ, {"AUDITENV_SECRET": "test-value"}), redirect_stdout(output):

@@ -1,10 +1,14 @@
 """Committed training trajectories: required keys, no closed truth in observations, action replay."""
+import contextlib
 import glob
+import io
 import json
 import os
+import tempfile
 import unittest
 from unittest import mock
 
+from auditenv import run
 from auditenv.env import AuditEnv
 from auditenv.run import load_episodes
 
@@ -99,6 +103,21 @@ class TrajectoryFilesTest(unittest.TestCase):
                             self.assertEqual(terminated, step_rec["terminated"])
                             self.assertEqual(truncated, step_rec["truncated"])
                             self.assertEqual(env.episode_id, step_rec["episode_id"])
+
+    def test_files_regenerate_byte_for_byte(self):
+        """README: the committed files are reproduced byte-for-byte by its `auditenv.run` commands. The replay
+        above cannot tell which policy produced the actions (red-team round 16: swapping two files passed it)."""
+        with mock.patch.dict(os.environ), tempfile.TemporaryDirectory() as tmp:
+            os.environ.pop("AUDITENV_SECRET", None)
+            for name in sorted(EXPECTED):
+                hard = name.startswith("train_hard_")
+                policy = name[len("train_hard_" if hard else "train_"):-len(".jsonl")]
+                out = os.path.join(tmp, name)
+                cfg = os.path.join(ROOT, "configs", "train_hard.json" if hard else "train.json")
+                with contextlib.redirect_stdout(io.StringIO()):
+                    run.main(["--policy", policy, "--config", cfg, "--out", out])
+                with open(out, "rb") as fresh, open(os.path.join(ROOT, "trajectories", name), "rb") as committed:
+                    self.assertTrue(fresh.read() == committed.read(), f"{name} differs from a fresh run")
 
 
 if __name__ == "__main__":

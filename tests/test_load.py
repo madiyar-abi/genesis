@@ -17,12 +17,12 @@ EPISODES_DIR_HARD = os.path.join(os.path.dirname(__file__), "..", "episodes", "h
 
 
 def _normalise_for_comparison(ep: dict) -> dict:
-    """Strip the 'task' key (not exported) for comparison."""
-    return {k: v for k, v in ep.items() if k != "task"}
+    """The full episode: the task text is exported too (public/task.txt), so nothing is stripped."""
+    return ep
 
 
 class TestLoadRoundtrip(unittest.TestCase):
-    """For every committed episode, load_episode equals generate(seed, config) minus 'task'."""
+    """For every committed episode, load_episode equals generate(seed, config), task text included."""
 
     def _check_split(self, split_dir: str) -> None:
         index_path = os.path.join(split_dir, "index.json")
