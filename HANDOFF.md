@@ -4,7 +4,11 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**19 November 2026 · Khasuetolog** implemented R1, C1, D1, D3, P3 and E1 in commit `66a3504` on `audit/handoff-validation`. The six results and reproduction commands are below. [PR #11 into main](https://github.com/madiyar-abi/genesis/pull/11)
+**Current state (20 November 2026):** `main` has rounds 1–14 merged. Round 15 is in progress on
+`night/2026-11-20-r15`, with its task board in `night/TASKS.md`. The marathon (`scripts/marathon.sh`) opens one round
+after another until the feature freeze on **2026-11-22 18:00**. Each round merges through a PR after CI passes.
+`uv run python -m auditenv.check` passes (380 tests, all gates, about 37 s). After the freeze, only the human
+submission steps listed below remain.
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
@@ -187,7 +191,9 @@ Demo rehearsal complete. Follow `docs/DEMO.md` for the 2:40 video. The ten-slide
 Branch `night/2026-11-19-r3`. The round freeze is 22 November at 18:00 local time. Round 2 is in main. The verifier now rejects a truth amount denominated in the wrong currency. Run `uv run python -m unittest tests.test_verify` for all six verifier tests. Gemini’s jury map in `docs/CHECKS.md` matches the merged suite. The official check passed all 285 tests. All 40 exported episodes verified and both seed sweeps passed (3,000 default and 600 hard episodes). Record the demo, finish the team slide, and complete the access and submission checklist above.
 
 ## Status
-Round 12 is on `night/2026-11-20-r12`. The current task board is `night/TASKS.md`. Rounds 1–11 are in main. Round 2 evidence is retained below.
+Everything SPEC §07 requires is implemented and passes the official check. The current round is described at the
+top of this file, and earlier rounds are archived in `night/archive/` and summarised below. Round 2's evidence is
+kept here for reference.
 
 Round-2 results (each with its command; numbers from the current code):
 - Reward: R2 `scripts/mutate_reward.py` — 15/15 one-line mutants of matcher/reward caught; R3
@@ -237,9 +243,12 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 
 ## Remaining work before submission
 
-- **Engineering:** follow the Round 10 marathon PR and offline container CI.
+- **Engineering:** the marathon merges each round into `main` through a PR with CI and stops at the 2026-11-22 18:00
+  freeze. Before submitting, check that `main` is green (CI badge in README) and that no PR is left open.
 - **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md` (chart: `docs/baselines.svg`), including the Team slide.
-- **Access and submission:** the repository owner arranges jury access. The team checks the repo, video and presentation links, adds them to the Google Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
+- **Access and submission:** the repository is **private** (checked 2026-11-20), so the owner must make it public or
+  otherwise give the jury access. The team checks the repo, video and presentation links, adds them to the Google
+  Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 
 ## Decisions & assumptions
 - Hidden evaluation: set `AUDITENV_SECRET` in the grader process only (keys generator RNG + HMAC episode_id).
