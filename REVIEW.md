@@ -9,6 +9,15 @@ through the tools) and targeted data checks.
 
 Status legend: **OK** = checked, no problem; **ISSUE n** = see "Findings" below.
 
+## Public invoice, CSV and export validation
+
+Before the fix, a repeated debit column with conflicting values was accepted, as were a missing invoice due date and a floating-point total. The split exporter also reported success for duplicate episode IDs or when a smaller requested split left an old episode directory behind. The schema smoke checker accepted duplicate evidence IDs. Targeted regressions live in `tests/test_verify_dir.py`, `tests/test_export.py` and `tests/test_schemas.py`.
+
+## Invoice postings and completeness of the public hard split
+
+- Moving only the revenue line within the accounting period previously left the invoice journal valid. The verifier now compares both booking instants, including the original booking in a reversed journal. Legitimate posting lag and equivalent timezone offsets still pass.
+- The disk tests previously passed with one hard episode and skipped three checks when the directory was missing. The roundtrip test now compares the index against the configured 20 episodes before checking their contents. Independent trials with a missing directory, 19 entries and a substituted valid twentieth episode all failed as expected.
+
 ## 1.1 Contract and isolation (25)
 - `reset(seed, config) -> (observation, info)`; `step -> (obs, reward, terminated, truncated, info)`, JSON-only — OK (`env.py`, probe).
 - Exactly 5 actions; anything else → `unknown_action`, step consumed — OK.
@@ -262,3 +271,38 @@ for zero discovered tests and now fails.
 
 - SPEC §04. Replacing an exported public/task.txt with an empty string or whitespace left verify --dir reporting 1/1 valid. The verifier now requires nonblank instructions. The directory regression exercises both cases.
 - SPEC §03. Removing the JPY exponent from the public seed-0 manifest or replacing 0 with JSON false previously passed verify_episode. The verifier now checks coverage of ledger, invoice, payment and FX currencies and requires integer exponents. The regression pins the public generation key so the same company runs inside the keyed official check.
+
+## Export verifier follow-up
+
+On the dev export (seed 2003), removing the scenario, blanking the issue ID or repeating an evidence ID still allowed verification to pass. Changing the seed or generation config in the split index also passed. The verifier now reports the affected field for each of these five independent corruptions. A valid control episode still passes. Run `uv run python -m unittest tests.test_verify_dir`.
+
+The hard export previously constructed 133 book indexes across 20 episodes because evidence alternatives rebuilt the same post-injection index. Verification now uses two per episode, one for each ledger state. The regression checks the constructor count during on-disk verification.
+
+
+## Independent audit (Chingiz, 20 November)
+
+Reproduced on origin/main b799231 before each fix; every regression failed first and passes after.
+
+- Verifier, truth labels. A base-currency invoice booked 500 too high, declared as `fx_error`, verified; so did
+  a foreign invoice booked at an amount no published rate produces. An `fx_error` is now accepted only for a
+  foreign amount that some published rate of the pair produces. Scenario labels were never checked: swapping
+  I1/I2, labelling both interacting pairs `single` or a single error `I1` all verified. Labels now have to
+  match the books (`tests/test_verify_semantics.py`).
+- Verifier, unapplied cash. With a one-minor-unit allocation shortfall, the whole reference could sit in 2900,
+  balanced by an invented 7900 loss, while truth declared a misstatement of 1. The 2900 rule accepted anything
+  up to the whole short reference; it now requires exactly the unallocated part of the reference at the
+  payment-date rate.
+- Verifier, hard mode. A full credit note on an invoice with no replacement wrote off revenue and verified with
+  unchanged truth. A cancelled invoice now needs a replacement with the same entity, currency and line items.
+- Verifier, public records. `amount_minor` 783500.75 on a payment and its ref, and payment timestamps without an
+  offset (read in the host time zone), verified. Payment and ref amounts must be integers and every ledger,
+  payment and invoice timestamp needs an offset.
+- Server. A policy that closed its pipes with a request in flight crashed the server with `BrokenPipeError`
+  before it graded the rest: 1 of 5 hidden episodes reached the grader log, so killing the pipe skipped hard
+  episodes. The server now grades every open and unplayed episode as abandoned on a broken pipe too
+  (`tests/test_server_robust.py`). One invalid config in the hidden list crashed the server at close with an
+  empty grader log; the list is now validated at start (exit 2, the episode named). A reset without a seed
+  returned `KeyError: 'seed'` and now gets the contract error `seed must be an int`.
+- Server, missing grader key. `auditenv.server --episodes` without `AUDITENV_SECRET` served silently and a
+  policy recovered seed 734211 from `episode_id` in 3.8 s. The server now warns on stderr; `--public` marks the
+  deliberately public smoke run and demo (`tests/test_server_secret.py`).

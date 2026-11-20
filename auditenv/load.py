@@ -50,6 +50,10 @@ def _read_csv(path: str, fields: tuple[str, ...], int_fields: set[str],
     rows = []
     with open(path, "r", encoding="utf-8", newline="") as fh:
         reader = csv.DictReader(fh)
+        header = reader.fieldnames or []
+        duplicates = sorted({name for name in header if header.count(name) > 1})
+        if duplicates:
+            raise ValueError(f"{path}: duplicate CSV columns: {', '.join(duplicates)}")
         for row in reader:
             parsed: dict = {}
             for f in fields:

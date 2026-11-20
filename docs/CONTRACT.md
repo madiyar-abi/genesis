@@ -46,7 +46,8 @@ If you need something not described here, choose the simplest option and log it.
 ### Correct bookkeeping (the "policy"; violations of it are the errors)
 - Invoice issued (only if its issue date in company tz is inside the period):
   `Dr 1200 / Cr 4000`, amount = `convert(total_minor, rate(issue date))`,
-  rows carry invoice_id + entity_id, payment_id null, timestamp = issued_at.
+  rows carry invoice_id + entity_id and payment_id null. Both rows share one booking instant.
+  An in-period invoice may be posted later in the period than its issue instant.
 - Payment received (inside the period): `Dr 1000 convert(amount, rate(payment date))`;
   per ref `Cr 1200 convert(ref.amount, rate(invoice issue date))` with invoice_id;
   remainder (amount − Σrefs, or all of it if refs are null) `Cr 2900` at the payment-date
@@ -143,7 +144,8 @@ only in `mode="train"`; in `"eval"` it is 0.0 and the result goes to the grader 
 ```
 Limits: ≤ 30 findings, ≤ 10 evidence_ids, explanation ≤ 1000 chars, `type` ∈ the 4
 types, `affected_ids` non-empty list of non-empty strings (≤ 10), amount int ≥ 0
-(not bool), currency 3 uppercase letters, `episode_id` must equal the episode's.
+(not bool; a JSON integer literal — `1234.0` is a float here, although JSON Schema calls it an integer),
+currency 3 uppercase letters, `episode_id` must equal the episode's.
 Invalid structure → episode ends, reward −1, error recorded in the grader log.
 
 ## 6. Matching & reward (`auditenv/matcher.py`, `auditenv/metrics.py`)

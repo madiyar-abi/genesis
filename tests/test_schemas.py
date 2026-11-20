@@ -49,6 +49,10 @@ def _matches(value, schema, filename, schemas):
         return False
     if isinstance(value, list) and not schema.get("minItems", 0) <= len(value) <= schema.get("maxItems", len(value)):
         return False
+    if isinstance(value, list) and schema.get("uniqueItems"):
+        # The published schemas apply uniqueness to arrays of string IDs.
+        if not all(isinstance(item, str) for item in value) or len(set(value)) != len(value):
+            return False
     if isinstance(value, list) and "items" in schema:
         return all(_matches(item, schema["items"], filename, schemas) for item in value)
     if isinstance(value, dict):
@@ -79,6 +83,13 @@ class SchemaTests(unittest.TestCase):
     def assertMatches(self, name, value):
         filename = f"{name}.schema.json"
         self.assertTrue(_matches(value, self.schemas[filename], filename, self.schemas), name)
+
+    def test_truth_evidence_ids_are_unique_within_each_set(self):
+        truth = generate(2003, {"errors": {"duplicate_invoice": 1}})["truth"]
+        self.assertMatches("truth", truth)
+        evidence = truth["issues"][0]["evidence_sets"][0]
+        evidence.append(evidence[0])
+        self.assertFalse(_matches(truth, self.schemas["truth.schema.json"], "truth.schema.json", self.schemas))
 
     def test_dialect_and_runtime_constants(self):
         self.assertEqual(set(self.schemas), {

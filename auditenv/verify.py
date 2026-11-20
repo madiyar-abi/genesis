@@ -20,8 +20,11 @@ from __future__ import annotations
 import copy
 import csv
 import json
+import re
+from functools import lru_cache
 from collections import defaultdict
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 from .money import EXPONENT, convert, local_date, parse_offset
@@ -52,6 +55,25 @@ class Books:
         if cur == self.base:
             return amount
         return convert(amount, cur, self.base, self.fx[(self.cdate(ts).isoformat(), cur, self.base)])
+
+    def allocated(self, credit: int, ref: int, cur: str, ts: str) -> set[int]:
+        """Reference amounts a (0 <= a < ref, document currency) whose conversion at `ts` is the AR credit."""
+        if cur == self.base:
+            return {credit} if 0 <= credit < ref else set()
+        rate = Decimal(self.fx[(self.cdate(ts).isoformat(), cur, self.base)])
+        per_unit = rate.scaleb(EXPONENT[self.base] - EXPONENT[cur])  # base minor units per document minor unit
+        guess, width = int(Decimal(credit) / per_unit), int(1 / per_unit) + 3
+        return {a for a in range(max(0, guess - width), min(ref, guess + width + 1))
+                if self.conv(a, cur, ts) == credit}
+
+    def not_fx(self, posted: int, amount: int, cur: str) -> str | None:
+        """Why a wrong base amount cannot be an fx_error (a rate of the wrong date), or None if it can be."""
+        if cur == self.base:
+            return "with no FX involved (base currency)"
+        if all(posted != convert(amount, cur, self.base, rate) for (_, src, tgt), rate in self.fx.items()
+               if (src, tgt) == (cur, self.base)):
+            return "that no published rate produces"
+        return None
 
     def journals(self) -> dict[str, list[dict]]:
         groups = defaultdict(list)
@@ -86,7 +108,7 @@ class Books:
                     amounts = {r["debit_minor"] + r["credit_minor"] for r in ar + rev}
                     reversal = [r for r in ar + rev if (r["account"] == "1200") == bool(r["credit_minor"])]
                     if len(ar_dr) != 1 or len(amounts) != 1 or len(reversal) != 2 \
-                            or reversal[0]["timestamp"] != reversal[1]["timestamp"] \
+                            or datetime_key(reversal[0]["timestamp"]) != datetime_key(reversal[1]["timestamp"]) \
                             or datetime_key(reversal[0]["timestamp"]) < datetime_key(ar_dr[0]["timestamp"]):
                         problems.append(f"malformed credit note in {jid}")
                         continue
@@ -97,6 +119,8 @@ class Books:
                         or ar[0]["debit_minor"] != rev[0]["credit_minor"]:
                     problems.append(f"malformed invoice journal {jid}")
                     continue
+                if datetime_key(ar[0]["timestamp"]) != datetime_key(rev[0]["timestamp"]):
+                    problems.append(f"invoice booking rows have different timestamps in {jid}")
                 booked[jid[4:]] = ar[0]
         for iid, ar in booked.items():
             inv = self.invoices.get(iid)
@@ -109,7 +133,12 @@ class Books:
                 problems.append(f"invoice {iid} booked before it was issued")
             correct = self.conv(inv["total_minor"], inv["currency"], inv["issued_at"])
             if ar["debit_minor"] != correct:
-                issues.append(("fx_error", (iid,), abs(ar["debit_minor"] - correct)))
+                why = self.not_fx(ar["debit_minor"], inv["total_minor"], inv["currency"])
+                if why:  # not an error type of the contract: never matches a declared issue
+                    problems.append(f"invoice {iid} booked at a wrong amount {why}")
+                    issues.append(("booking_error", (iid,), abs(ar["debit_minor"] - correct)))
+                else:
+                    issues.append(("fx_error", (iid,), abs(ar["debit_minor"] - correct)))
         for iid, inv in self.invoices.items():
             for n, line in enumerate(inv["line_items"], start=1):
                 if line["amount_minor"] != line["quantity"] * line["unit_price_minor"]:
@@ -118,6 +147,14 @@ class Books:
                 problems.append(f"invoice {iid} total != line items")
             if self.in_period(inv["issued_at"]) and iid not in booked:
                 problems.append(f"in-period invoice {iid} not booked")
+        # hard mode: a cancelled invoice is re-issued as a new invoice with identical line items
+        for iid in self.voided:
+            inv = self.invoices.get(iid)
+            key = inv and (inv["entity_id"], inv["currency"], line_key(inv["line_items"]))
+            if inv and not any(o["invoice_id"] != iid and o["invoice_id"] not in self.voided
+                               and (o["entity_id"], o["currency"], line_key(o["line_items"])) == key
+                               for o in self.invoices.values()):
+                problems.append(f"credit-noted invoice {iid} has no replacement invoice with the same line items")
         # duplicates: same entity, currency, same line items (re-typed text allowed) -> later copy;
         # an invoice cancelled by a full credit note is not a duplicate of its replacement
         seen = defaultdict(list)
@@ -153,7 +190,12 @@ class Books:
             posted = cash[0]["debit_minor"] - cash[0]["credit_minor"]
             correct = self.conv(pay["amount_minor"], pay["currency"], pay["timestamp"])
             if posted != correct:
-                issues.append(("fx_error", (pid,), abs(posted - correct)))
+                why = self.not_fx(posted, pay["amount_minor"], pay["currency"])
+                if why:  # not an error type of the contract: never matches a declared issue
+                    problems.append(f"payment {pid}: cash booked at a wrong amount {why}")
+                    issues.append(("booking_error", (pid,), abs(posted - correct)))
+                else:
+                    issues.append(("fx_error", (pid,), abs(posted - correct)))
             refs = pay["invoice_refs"] or []
             if sum(r["amount_minor"] for r in refs) > max(pay["amount_minor"], 0):
                 problems.append(f"payment {pid}: refs exceed amount")
@@ -163,7 +205,7 @@ class Books:
                 problems.append(f"payment {pid}: non-positive invoice ref")
             if pay["currency"] == self.base and any(r["account"] == "7900" for r in rows):
                 problems.append(f"payment {pid}: FX gain/loss on a base-currency payment")
-            short = 0  # the refs with an allocation shortfall, each at the payment-date rate
+            extras = {0}  # what the allocation shortfalls may add to 2900 (each moved part at the payment-date rate)
             for ref in refs:
                 inv = self.invoices.get(ref["invoice_id"])
                 if inv is None:
@@ -177,16 +219,21 @@ class Books:
                 credit = sum(r["credit_minor"] - r["debit_minor"] for r in rows
                              if r["account"] == "1200" and r["invoice_id"] == inv["invoice_id"])
                 if credit < expected:
-                    short += self.conv(ref["amount_minor"], pay["currency"], pay["timestamp"])
+                    moved = {self.conv(ref["amount_minor"] - a, pay["currency"], pay["timestamp"])
+                             for a in self.allocated(credit, ref["amount_minor"], pay["currency"], inv["issued_at"])}
+                    if not moved:
+                        problems.append(f"payment {pid}: AR credit to {inv['invoice_id']} is no conversion of a "
+                                        f"part of the reference")
+                    extras = {e + m for e in extras for m in moved}
                     issues.append(("payment_allocation", tuple(sorted((inv["invoice_id"], pid))), expected - credit))
                 elif credit > expected:
                     problems.append(f"payment {pid} over-allocated to {inv['invoice_id']}")
-            # the unreferenced remainder is Cr 2900 at the payment-date rate; an allocation shortfall adds to it,
-            # at most the whole short refs
+            # the unreferenced remainder is Cr 2900 at the payment-date rate; an allocation shortfall adds the
+            # unallocated part of that reference, also at the payment-date rate (CONTRACT §2)
             rest = pay["amount_minor"] - sum(r["amount_minor"] for r in refs)
             rest = self.conv(rest, pay["currency"], pay["timestamp"])
             unapplied = sum(r["credit_minor"] - r["debit_minor"] for r in rows if r["account"] == "2900")
-            if unapplied != rest and not (short and rest < unapplied <= rest + short):
+            if unapplied - rest not in extras:
                 problems.append(f"payment {pid}: incorrect unapplied cash for {'' if refs else 'un'}referenced payment")
             ar_ids = {r["invoice_id"] for r in rows if r["account"] == "1200"}
             if not ar_ids <= {r["invoice_id"] for r in refs}:
@@ -255,6 +302,22 @@ def _structure(ep: dict) -> list[str]:
             problems.append(f"ledger row {r['row_id']} references unknown invoice {r['invoice_id']}")
         if r.get("payment_id") is not None and r["payment_id"] not in pay_ids:
             problems.append(f"ledger row {r['row_id']} references unknown payment {r['payment_id']}")
+    for p in t["payments"]:  # CONTRACT §1/§2: int minor units, ISO-8601 timestamps with an offset
+        refs = p.get("invoice_refs")
+        if type(p.get("amount_minor")) is not int or (refs is not None and (
+                not isinstance(refs, list)
+                or any(not isinstance(r, dict) or type(r.get("amount_minor")) is not int for r in refs))):
+            problems.append(f"payment {p.get('payment_id')}: amount_minor must be an integer")
+    stamps = [(f"ledger row {r['row_id']}", r["timestamp"]) for r in t["ledger"]]
+    stamps += [(f"payment {p['payment_id']}", p["timestamp"]) for p in t["payments"]]
+    stamps += [(f"invoice {i['invoice_id']}", i[k]) for i in t["invoices"] for k in ("issued_at", "due_at")]
+    for label, ts in stamps:
+        try:
+            aware = datetime_key(ts).tzinfo is not None
+        except (TypeError, ValueError):
+            aware = False
+        if not aware:
+            problems.append(f"{label}: timestamp must be ISO-8601 with a timezone offset")
     if not 200 <= len(t["ledger"]) <= 2000 or not 20 <= actual_docs <= 200:
         problems.append("episode size outside 200-2000 rows / 20-200 documents")
     return problems
@@ -384,7 +447,107 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
         return [f"evidence set {s} is missing a record needed to reproduce the amount"]
 
 
+def _invoice_error(invoice: dict) -> str | None:
+    if not isinstance(invoice, dict):
+        return "invoice must be an object"
+    label = f"invoice {invoice.get('invoice_id', '<missing ID>')}"
+    for field in ("invoice_id", "doc_id", "entity_id", "currency"):
+        if not isinstance(invoice.get(field), str) or not invoice[field].strip():
+            return f"{label}: {field} must be a nonblank string"
+    for field in ("issued_at", "due_at"):
+        try:
+            instant = datetime_key(invoice.get(field))
+        except (TypeError, ValueError):
+            return f"{label}: invalid {field}"
+        if instant.tzinfo is None:
+            return f"{label}: {field} must include a timezone offset"
+    if type(invoice.get("total_minor")) is not int:
+        return f"{label}: total_minor must be an integer"
+    if not isinstance(invoice.get("line_items"), list):
+        return f"{label}: line_items must be an array"
+    for i, line in enumerate(invoice["line_items"]):
+        if not isinstance(line, dict) or not isinstance(line.get("description"), str):
+            return f"{label}: line_items[{i}].description must be a string"
+        for field in ("quantity", "unit_price_minor", "amount_minor"):
+            if type(line.get(field)) is not int:
+                return f"{label}: line_items[{i}].{field} must be an integer"
+    return None
+
+
+@lru_cache(maxsize=1)
+def _truth_schema():
+    path = Path(__file__).resolve().parents[1] / "schemas/truth.schema.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _truth_error(value, schema, path="truth"):
+    """Check the keywords used in truth.schema.json, reporting the first invalid field."""
+    kind = schema.get("type")
+    types = {"object": dict, "array": list, "string": str, "integer": int}
+    if kind and type(value) is not types[kind]:
+        return f"{path}: expected {kind}"
+    if "enum" in schema and value not in schema["enum"]:
+        return f"{path}: invalid choice"
+    if kind == "object":
+        fields = schema["properties"]
+        for name in schema["required"]:
+            if name not in value:
+                return f"{path}.{name}: required"
+        for name, item in value.items():
+            if name not in fields:
+                return f"{path}.{name}: unexpected field"
+            error = _truth_error(item, fields[name], f"{path}.{name}")
+            if error:
+                return error
+    if kind == "array":
+        if len(value) < schema.get("minItems", 0):
+            return f"{path}: empty list"
+        for index, item in enumerate(value):
+            error = _truth_error(item, schema["items"], f"{path}[{index}]")
+            if error:
+                return error
+        if schema.get("uniqueItems") and len(set(value)) != len(value):
+            return f"{path}: duplicate ID"
+    if "pattern" in schema and not re.search(schema["pattern"], value):
+        return f"{path}: invalid string"
+    if "minimum" in schema and value < schema["minimum"]:
+        return f"{path}: below minimum"
+    return None
+
+
+def _scenario_problems(issues: list[dict], payment_ids: set) -> list[str]:
+    """CONTRACT §3 scenario labels: I1 = payment_allocation + fx_error on that payment, I2 = period_cutoff +
+    fx_error on the same invoice; every other issue is "single"."""
+    problems, paired = [], set()
+    for a in range(len(issues)):
+        for b in range(a + 1, len(issues)):
+            x, y = issues[a], issues[b]
+            kinds = {x["type"]: x, y["type"]: y}
+            scenario = None
+            if set(kinds) == {"payment_allocation", "fx_error"}:
+                fx_ids = kinds["fx_error"]["affected_ids"]
+                if len(fx_ids) == 1 and fx_ids[0] in payment_ids and fx_ids[0] in kinds["payment_allocation"]["affected_ids"]:
+                    scenario = "I1"
+            elif set(kinds) == {"period_cutoff", "fx_error"} and x["affected_ids"] == y["affected_ids"]:
+                scenario = "I2"
+            if scenario:
+                paired.update((a, b))
+                if x.get("scenario") != scenario or y.get("scenario") != scenario:
+                    problems.append(f"{x['issue_id']}, {y['issue_id']}: interacting errors must have scenario {scenario}")
+    for i, iss in enumerate(issues):
+        if i not in paired and iss.get("scenario") != "single":
+            problems.append(f"{iss['issue_id']}: scenario {iss.get('scenario')} without its interacting partner")
+    return problems
+
+
 def verify_episode(ep: dict) -> list[str]:
+    for invoice in ep["tables"]["invoices"]:
+        error = _invoice_error(invoice)
+        if error:
+            return [error]
+    error = _truth_error(ep.get("truth"), _truth_schema())
+    if error:
+        return [error]
     problems = _structure(ep)
     m, t = ep["manifest"], ep["tables"]
     if ep["truth"].get("episode_id") != m["episode_id"]:
@@ -397,13 +560,15 @@ def verify_episode(ep: dict) -> list[str]:
     problems += [f"pre-injection: {p}" for p in pre_problems + _ledger_policy(pre_tables, accounts)]
     problems += [f"pre-injection discrepancy {i}" for i in pre_issues]
     # post-injection: declared discrepancies == recomputed discrepancies
-    issues, post_problems = Books(m, t, credit_notes).discrepancies()
+    books = Books(m, t, credit_notes)
+    issues, post_problems = books.discrepancies()
     problems += [f"post-injection: {p}" for p in post_problems + _ledger_policy(t, accounts)]
     found = sorted(issues)
     declared = sorted((i["type"], tuple(i["affected_ids"]), i["expected_amount_minor"])
                       for i in ep["truth"]["issues"])
     if found != declared:
         problems.append(f"truth mismatch: recomputed {found} declared {declared}")
+    problems += _scenario_problems(ep["truth"]["issues"], {p["payment_id"] for p in t["payments"]})
     # evidence
     rows = {r["row_id"]: r for r in t["ledger"]}
     docs = {d["doc_id"]: d for d in t["invoices"] + t["payments"]}
@@ -437,11 +602,12 @@ def verify_episode(ep: dict) -> list[str]:
                             and rows[i].get("account") in ("1200", "4000")}
                 if row_invs != aff:
                     problems.append(f"{iss['issue_id']}: duplicate evidence must show booking rows for both invoices")
-            problems += [f"{iss['issue_id']}: {p}" for p in _sufficient(Books(m, t), iss, s, rows, docs)]
+            problems += [f"{iss['issue_id']}: {p}" for p in _sufficient(books, iss, s, rows, docs)]
     return problems
 
 
 def _verify_directory(root: Path) -> int:
+    from .generator import gen_config
     from .load import load_episode
 
     index = root / "index.json"
@@ -452,12 +618,13 @@ def _verify_directory(root: Path) -> int:
             records = json.loads(index.read_text(encoding="utf-8"))
             if not isinstance(records, list) or not records:
                 raise ValueError("expected a nonempty episode list")
-            expected = set()
+            by_id = {}
             for record in records:
                 name = record.get("episode_id") if isinstance(record, dict) else None
-                if not isinstance(name, str) or not name or name in expected:
+                if not isinstance(name, str) or not name or name in by_id:
                     raise ValueError(f"invalid or duplicate episode_id {name!r}")
-                expected.add(name)
+                by_id[name] = record
+            expected = set(by_id)
             if entries != expected:
                 raise ValueError(f"missing episodes {sorted(expected - entries)}, "
                                  f"unlisted episodes {sorted(entries - expected)}")
@@ -473,8 +640,18 @@ def _verify_directory(root: Path) -> int:
         try:
             ep = load_episode(root / name)
             problems = verify_episode(ep)
-            if indexed and ep["episode_id"] != name:
-                problems.append(f"manifest episode_id differs from directory {name}")
+            if indexed:
+                record = by_id[name]
+                provenance = ep["provenance"]
+                if ep["episode_id"] != name:
+                    problems.append(f"manifest episode_id differs from directory {name}")
+                seed = record.get("seed")
+                if type(seed) is not int or seed != provenance.get("seed"):
+                    problems.append("index.json seed differs from provenance")
+                config = record.get("config")
+                if (not isinstance(config, dict) or gen_config(config) != provenance["config"]
+                        or config.get("transform_seed") != provenance.get("transform_seed")):
+                    problems.append("index.json config differs from provenance")
         except (OSError, ValueError, KeyError, TypeError, AttributeError, IndexError, ArithmeticError, csv.Error) as exc:
             problems = [str(exc)]
         if problems:
