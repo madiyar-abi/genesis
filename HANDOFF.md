@@ -4,8 +4,8 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Current state (20 November 2026):** `main` has rounds 1–14 merged. Round 15 is in progress on
-`night/2026-11-20-r15`, with its task board in `night/TASKS.md`. The marathon (`scripts/marathon.sh`) opens one round
+**Current state (20 November 2026):** `main` has rounds 1–14 merged. Round 15 is complete on
+`night/2026-11-20-r15` and goes to `main` through the marathon PR. The marathon (`scripts/marathon.sh`) opens one round
 after another until the feature freeze on **2026-11-22 18:00**. Each round merges through a PR after CI passes.
 `uv run python -m auditenv.check` passes (380 tests, all gates, about 37 s). After the freeze, only the human
 submission steps listed below remain.
@@ -32,7 +32,7 @@ message says a Google Doc — follow the latest, re-check the form before submit
       three materials shared as **"Anyone with the link — Viewer"**
 - [ ] Doc link submitted in the personal account on the site
 
-## Round 15 · 20 November 2026
+## Round 15 complete · 20 November 2026
 
 Branch `night/2026-11-20-r15`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. The check passes with
 380 tests, and `scripts/sync_docs.py --check` finds no drift.
@@ -43,8 +43,11 @@ Branch `night/2026-11-20-r15`. Run `env -u AUDITENV_SECRET uv run python -m audi
 - T6. The top of this file now gives the current state, and the repo's private visibility is flagged.
 - T7, T8. The demo script and the slide outline were re-checked against fresh demo and check output, and every
   number matched.
-- Workers T2–T5 run evidence-only sweeps on new seeds (fuzz 5000–5999, attack 3000–3019, stress 3000–3299, HANDOFF
-  commands). Their results go into `night/LOG.md`.
+- T2–T5 (evidence on new seeds, no code change): fuzz on 5000–5999 found 0 problems in 6,000 default and hard
+  episodes. Attack on 3000–3019 found 0 violations in 11,000 mutations. Stress on 3000–3299 gave 0 imperfect
+  episodes out of 2,400, with at most 58 of 100 steps used. All 11 "How to run" commands exit 0.
+- The deepseek worker fails with `set DEEPSEEK_API_KEY or supply --api-key`. A human has to provide the key in the
+  environment; never put it in a file. The lead did T5.
 
 ## Round 14 complete · 20 November 2026
 
