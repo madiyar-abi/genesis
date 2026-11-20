@@ -30,6 +30,10 @@ MAX_LINE: int = 1 << 20  # 1 MiB
 TOO_LARGE = object()
 
 
+def _reject_constant(name: str):
+    raise ValueError(f"non-standard JSON constant {name}")
+
+
 def _lines(inp):
     """Request lines, reading at most MAX_LINE + 1 bytes/chars at a time: an over-long line is drained in
     bounded chunks and yielded as TOO_LARGE, so memory stays bounded whatever the client sends."""
@@ -98,7 +102,14 @@ def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dic
         if not line_str:
             continue
         try:
-            req = json.loads(line_str)
+            req = json.loads(line_str, parse_constant=_reject_constant)
+        except (ValueError, RecursionError):  # malformed or too deeply nested JSON, or NaN / Infinity (not strict JSON)
+            send_resp({"error": "invalid json"})
+            continue
+        if not isinstance(req, dict):
+            send_resp({"error": "request must be a JSON object"})
+            continue
+        try:
             cmd = req.get("cmd")
             if cmd == "reset":
                 env.abandon()

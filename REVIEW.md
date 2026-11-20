@@ -208,3 +208,17 @@ The paired check scored an oracle using the first allowed evidence set.
 Dropping a second valid evidence set or adding a shorter invalid alternative
 still passed. It now compares each issue's complete collection of evidence
 sets after translating the record IDs. Reordering equivalent evidence passes.
+
+## Round 15
+
+The JSON-lines server answered a non-object request such as `[]` with
+`AttributeError: 'list' object has no attribute 'get'`, which exposed an
+internal exception name. It also accepted `NaN` and `Infinity`, which strict
+JSON forbids. Non-object requests now get `request must be a JSON object`.
+Malformed JSON, non-standard constants and over-deep nesting all get
+`invalid json`, and the server keeps serving. A first version of the fix took
+parsing out of the generic handler, and a 200,000-deep array then crashed the
+server with RecursionError. The regression covers that case too.
+In-process probes found no defect. Observations are deep copies. Oversized
+ints, NaN, bool and float action values, malformed cursors and a wrong
+episode_id all return bounded errors or a valid grade.
