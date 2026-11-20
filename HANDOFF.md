@@ -12,6 +12,8 @@
 
 - T7. Condensed slide 8 to four bullets. All ten slides meet the outline limit, the measured tables match the official check, and sync_docs --check passes.
 
+- T4. The DeepSeek launcher exited with code 2 because its API key is unavailable. The lead independently ran scripts/golden.py --check and all 80 hashes matched.
+
 ## Round 17 complete
 
 Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 387 tests and both 20-pair suites pass. The verifier now rejects blank task instructions and incomplete or noninteger currency exponents. The new regressions and reproductions are in `REVIEW.md`.
