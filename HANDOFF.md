@@ -6,6 +6,10 @@
 
 **Current state (20 November 2026).** Round 16 is on main. Round 17 is verified on `night/2026-11-20-r17`. The marathon handles its PR and CI before the 22 November 18:00 feature freeze.
 
+## Export verifier follow-up
+
+Run `uv run python -m unittest tests.test_verify_dir` to reproduce the regressions for truth schema validation, index metadata consistency and evidence verification. The committed train, dev and hard exports pass from disk (10/10, 10/10 and 20/20). The hard split now needs 40 constructions of `Books` across 20 episodes, down from 133.
+
 ## Round 17 complete
 
 Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 387 tests and both 20-pair suites pass. The verifier now rejects blank task instructions and incomplete or noninteger currency exponents. The new regressions and reproductions are in `REVIEW.md`.

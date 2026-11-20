@@ -262,3 +262,9 @@ for zero discovered tests and now fails.
 
 - SPEC §04. Replacing an exported public/task.txt with an empty string or whitespace left verify --dir reporting 1/1 valid. The verifier now requires nonblank instructions. The directory regression exercises both cases.
 - SPEC §03. Removing the JPY exponent from the public seed-0 manifest or replacing 0 with JSON false previously passed verify_episode. The verifier now checks coverage of ledger, invoice, payment and FX currencies and requires integer exponents. The regression pins the public generation key so the same company runs inside the keyed official check.
+
+## Export verifier follow-up
+
+On the dev export (seed 2003), removing the scenario, blanking the issue ID or repeating an evidence ID still allowed verification to pass. Changing the seed or generation config in the split index also passed. The verifier now reports the affected field for each of these five independent corruptions. A valid control episode still passes. Run `uv run python -m unittest tests.test_verify_dir`.
+
+The hard export previously constructed 133 book indexes across 20 episodes because evidence alternatives rebuilt the same post-injection index. Verification now uses two per episode, one for each ledger state. The regression checks the constructor count during on-disk verification.

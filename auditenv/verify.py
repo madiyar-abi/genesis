@@ -20,6 +20,8 @@ from __future__ import annotations
 import copy
 import csv
 import json
+import re
+from functools import lru_cache
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
@@ -384,7 +386,51 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
         return [f"evidence set {s} is missing a record needed to reproduce the amount"]
 
 
+@lru_cache(maxsize=1)
+def _truth_schema():
+    path = Path(__file__).resolve().parents[1] / "schemas/truth.schema.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _truth_error(value, schema, path="truth"):
+    """Check the keywords used in truth.schema.json, reporting the first invalid field."""
+    kind = schema.get("type")
+    types = {"object": dict, "array": list, "string": str, "integer": int}
+    if kind and type(value) is not types[kind]:
+        return f"{path}: expected {kind}"
+    if "enum" in schema and value not in schema["enum"]:
+        return f"{path}: invalid choice"
+    if kind == "object":
+        fields = schema["properties"]
+        for name in schema["required"]:
+            if name not in value:
+                return f"{path}.{name}: required"
+        for name, item in value.items():
+            if name not in fields:
+                return f"{path}.{name}: unexpected field"
+            error = _truth_error(item, fields[name], f"{path}.{name}")
+            if error:
+                return error
+    if kind == "array":
+        if len(value) < schema.get("minItems", 0):
+            return f"{path}: empty list"
+        for index, item in enumerate(value):
+            error = _truth_error(item, schema["items"], f"{path}[{index}]")
+            if error:
+                return error
+        if schema.get("uniqueItems") and len(set(value)) != len(value):
+            return f"{path}: duplicate ID"
+    if "pattern" in schema and not re.search(schema["pattern"], value):
+        return f"{path}: invalid string"
+    if "minimum" in schema and value < schema["minimum"]:
+        return f"{path}: below minimum"
+    return None
+
+
 def verify_episode(ep: dict) -> list[str]:
+    error = _truth_error(ep.get("truth"), _truth_schema())
+    if error:
+        return [error]
     problems = _structure(ep)
     m, t = ep["manifest"], ep["tables"]
     if ep["truth"].get("episode_id") != m["episode_id"]:
@@ -397,7 +443,8 @@ def verify_episode(ep: dict) -> list[str]:
     problems += [f"pre-injection: {p}" for p in pre_problems + _ledger_policy(pre_tables, accounts)]
     problems += [f"pre-injection discrepancy {i}" for i in pre_issues]
     # post-injection: declared discrepancies == recomputed discrepancies
-    issues, post_problems = Books(m, t, credit_notes).discrepancies()
+    books = Books(m, t, credit_notes)
+    issues, post_problems = books.discrepancies()
     problems += [f"post-injection: {p}" for p in post_problems + _ledger_policy(t, accounts)]
     found = sorted(issues)
     declared = sorted((i["type"], tuple(i["affected_ids"]), i["expected_amount_minor"])
@@ -437,11 +484,12 @@ def verify_episode(ep: dict) -> list[str]:
                             and rows[i].get("account") in ("1200", "4000")}
                 if row_invs != aff:
                     problems.append(f"{iss['issue_id']}: duplicate evidence must show booking rows for both invoices")
-            problems += [f"{iss['issue_id']}: {p}" for p in _sufficient(Books(m, t), iss, s, rows, docs)]
+            problems += [f"{iss['issue_id']}: {p}" for p in _sufficient(books, iss, s, rows, docs)]
     return problems
 
 
 def _verify_directory(root: Path) -> int:
+    from .generator import gen_config
     from .load import load_episode
 
     index = root / "index.json"
@@ -452,12 +500,13 @@ def _verify_directory(root: Path) -> int:
             records = json.loads(index.read_text(encoding="utf-8"))
             if not isinstance(records, list) or not records:
                 raise ValueError("expected a nonempty episode list")
-            expected = set()
+            by_id = {}
             for record in records:
                 name = record.get("episode_id") if isinstance(record, dict) else None
-                if not isinstance(name, str) or not name or name in expected:
+                if not isinstance(name, str) or not name or name in by_id:
                     raise ValueError(f"invalid or duplicate episode_id {name!r}")
-                expected.add(name)
+                by_id[name] = record
+            expected = set(by_id)
             if entries != expected:
                 raise ValueError(f"missing episodes {sorted(expected - entries)}, "
                                  f"unlisted episodes {sorted(entries - expected)}")
@@ -473,8 +522,18 @@ def _verify_directory(root: Path) -> int:
         try:
             ep = load_episode(root / name)
             problems = verify_episode(ep)
-            if indexed and ep["episode_id"] != name:
-                problems.append(f"manifest episode_id differs from directory {name}")
+            if indexed:
+                record = by_id[name]
+                provenance = ep["provenance"]
+                if ep["episode_id"] != name:
+                    problems.append(f"manifest episode_id differs from directory {name}")
+                seed = record.get("seed")
+                if type(seed) is not int or seed != provenance.get("seed"):
+                    problems.append("index.json seed differs from provenance")
+                config = record.get("config")
+                if (not isinstance(config, dict) or gen_config(config) != provenance["config"]
+                        or config.get("transform_seed") != provenance.get("transform_seed")):
+                    problems.append("index.json config differs from provenance")
         except (OSError, ValueError, KeyError, TypeError, AttributeError, IndexError, ArithmeticError, csv.Error) as exc:
             problems = [str(exc)]
         if problems:
