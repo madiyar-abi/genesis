@@ -30,3 +30,35 @@ Assumption: temporary JSON configs in /tmp are sufficient for the search; no cod
 Problems found: 0. Assumptions: none; evidence-only sweep. What's next: check for remaining (gemini3) tasks, else IDLE.
 2026-11-20 08:44 lead — T9. The data/verifier red-team subagent found that public/ exports omit the task text. The lead confirmed it: export.py writes manifest, policy and four tables but not episode["task"]. The duplicate definition ("same entity, currency and identical line items") and the hard-mode re-typing rule live only there, and 5 of the 20 public hard duplicates are re-typed. Export now writes public/task.txt and load_episode reads it. The roundtrip test no longer strips "task" and failed on all 40 committed episodes before the re-export. All three splits were re-exported, adding 40 task.txt files and changing no other file. verify --dir gives 10/10, 10/10 and 20/20, golden 80/80, and trajectories are untouched (generator unchanged). The official check passed 383 tests in 42.1 s and sync_docs is clean. The rest of the data red-team found nothing: 5,880 edge-config episodes, 1,500 random configs, 750 relabel pairs, provenance chains, ambiguity and leak probes.
 2026-11-20 08:44 lead — Merged gemini3 (T3, evidence only). Lead spot-check: `fuzz --seeds 6000-6199 --hard` → 600 episodes, 0 problems, flag-all negative 600/600, matching the worker's report.
+2026-11-20 08:46 gemini1 — T1. Fresh-clone jury walkthrough evidence. Cloned night/2026-11-20-r16 into /tmp/r16-clone and ran every `uv run ...` command in README.md's fenced code blocks in order, verbatim with `env -u AUDITENV_SECRET` (skipping docker lines, server organiser line, and regeneration loop; writing --out to /tmp). All 29 commands exited 0 (0 non-zero exits). Removed /tmp/r16-clone.
+Command results (line, exit, last output line):
+- Line 30: exit 0 — "ALL CHECKS PASSED in 44.6 s"
+- Line 136: exit 0 — "ep_e7bf8f4e24b3   1.00  1.00  1.00   0.962    20   0.01"
+- Line 137: exit 0 — "ep_cc22f883e36f   0.00  0.00  0.00  -1.000    29   0.01"
+- Line 193: exit 0 — "[PASS] out-of-process eval run — policy saw no reward/truth; 2 results in the grader log"
+- Line 201: exit 0 — "All documentation tables match measured data."
+- Line 202: exit 0 — "OK"
+- Line 203: exit 0 — "[PASS] out-of-process eval run — policy saw no reward/truth; 2 results in the grader log"
+- Line 204: exit 0 — "600/600 episodes valid; episodes with problems: 0"
+- Line 205: exit 0 — "10/10 episodes valid; episodes with problems: 0"
+- Line 206: exit 0 — "10/10 episodes valid; episodes with problems: 0"
+- Line 207: exit 0 — "20/20 episodes valid; episodes with problems: 0"
+- Line 208: exit 0 — "Elapsed time: 0.271 s"
+- Line 209: exit 0 — "Python 3.11.14, 20312 episode actions, 20517 total step calls in 0.922 s"
+- Line 210: exit 0 — "ALL CHECKS PASSED in 42.0 s"
+- Line 211: exit 0 — "All documentation tables match measured data."
+- Line 212: exit 0 — "FUZZ PASSED"
+- Line 213: exit 0 — "FUZZ PASSED"
+- Line 214: exit 0 — "reconcile on 1200 default episodes (seeds 0-299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (7.8 s)"
+- Line 215: exit 0 — "| Total | 103 |"
+- Line 216: exit 0 — "Done. Full check: uv run python -m auditenv.check"
+- Line 217: exit 0 — "Exported 10 episodes to /tmp/episodes/dev"
+- Line 218: exit 0 — "Exported 10 episodes to /tmp/episodes/train"
+- Line 219: exit 0 — "Exported 20 episodes to /tmp/episodes/hard"
+- Line 220: exit 0 — "15/15 mutants killed."
+- Line 221: exit 0 — "(re-grade with default parameters reproduced every env reward exactly; tolerance '0 (exact)' = 0 minor units, '1 %' = max(1, expected // 100); 1.8 s)"
+- Line 222: exit 0 — "| ledger | entity_id | E9977 | 47 |"
+- Line 223: exit 0 — "All 80 golden hashes match /private/tmp/r16-clone/tests/golden_hashes.json."
+- Line 224: exit 0 — "| flag_all | hard | 7.42 | 4 | -1.000 | 0.000 |"
+- Line 225: exit 0 — "wrote /private/tmp/r16-clone/docs/baselines.svg"
+Assumption: none; evidence-only walkthrough. What's next: check for remaining (gemini1) tasks, else IDLE.
