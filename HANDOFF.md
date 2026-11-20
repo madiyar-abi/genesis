@@ -46,6 +46,8 @@ Branch `night/2026-11-20-r13`. Run `env -u AUDITENV_SECRET uv run python -m audi
 
 - T2. Verified the jury check map against the official console and JSON outputs and updated its reset-test count to twelve invalid requests.
 
+- T3. Confirmed the official verifier checks 50 seeds under four configurations. The separate 200-seed command verified all 600 companies. DESIGN now gives the measured workloads and 376-test count.
+
 ## Round 12 complete · 20 November 2026
 
 Branch `night/2026-11-20-r12`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. All 374 tests and both 20-pair gates passed. The seed sweep verified 3,000 companies. The marathon handles PR integration and CI.
