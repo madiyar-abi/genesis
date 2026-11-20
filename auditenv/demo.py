@@ -134,7 +134,7 @@ def main(argv=None) -> int:
         log, hidden = os.path.join(d, "grader.jsonl"), os.path.join(d, "hidden.json")
         with open(hidden, "w") as fh:
             json.dump({"seeds": [seed], "config": CFG}, fh)
-        with RemoteEnv(grader_log=log, episodes=hidden) as remote:
+        with RemoteEnv(grader_log=log, episodes=hidden, public=True) as remote:
             obs, _ = remote.reset()
             pol = make_policy("reconcile", None)
             pol.reset(obs)

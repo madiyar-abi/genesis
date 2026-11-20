@@ -8,13 +8,23 @@ import sys
 
 
 class RemoteEnv:
-    def __init__(self, grader_log: str | None = None, episodes: str | None = None, python: str = sys.executable):
+    def __init__(self, grader_log: str | None = None, episodes: str | None = None, python: str = sys.executable,
+                 public: bool = False):
+        cmd = self.command(grader_log, episodes, python, public)
+        self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
+
+    @staticmethod
+    def command(grader_log: str | None = None, episodes: str | None = None, python: str = sys.executable,
+                public: bool = False) -> list[str]:
+        """Server command line; `public=True` marks a deliberately public episode list (no missing-key warning)."""
         cmd = [python, "-m", "auditenv.server"]
         if grader_log:
             cmd += ["--grader-log", grader_log]
         if episodes:
             cmd += ["--episodes", episodes]
-        self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
+        if public:
+            cmd.append("--public")
+        return cmd
 
     def _call(self, req: dict) -> dict:
         self.proc.stdin.write(json.dumps(req) + "\n")

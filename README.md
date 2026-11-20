@@ -184,6 +184,9 @@ AUDITENV_SECRET="${GRADER_KEY:?Set GRADER_KEY in the organiser shell}" uv run py
 `hidden.json` uses the `configs/*.json` format (`{"episodes": [{"seed": int, "config": {...}}, ...]}`) or
 `{"seeds": [...], "config": {...}}`. Set the secret only in the server process: `auditenv.check` and the committed
 public episodes use the public key (with a secret set, the check runs its unit tests without it).
+Without the secret a policy can recover each hidden seed from `episode_id` by enumeration, so the server warns on
+stderr when `--episodes` is given and `AUDITENV_SECRET` is unset; `--public` silences the warning for lists that are
+public on purpose, as in the check's smoke test and the demo.
 
 `auditenv.server` communicates via JSON lines over stdin/stdout (`{"cmd": "reset"}`, `{"cmd": "step", "action": {...}}`, `{"cmd": "close"}`).
 `auditenv.client.RemoteEnv` manages the subprocess and speaks the same `reset/step` API; with `--episodes`

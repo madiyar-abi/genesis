@@ -158,17 +158,22 @@ exact amounts; naive's false positives stay false positives at 1 %). The default
 ## 7. Verification of data and truth (`auditenv/verify.py`)
 
 Independent of the generator, from the public tables and closed files only:
-1. structure — unique ids, manifest counts, base-currency one-sided integer ledger rows, size limits; the
-   policy agrees with the manifest and with the contract's chart of accounts, exponents and rounding;
+1. structure — unique ids, manifest counts, base-currency one-sided integer ledger rows, integer payment and
+   ref amounts, timestamps with a UTC offset, size limits; the policy agrees with the manifest and with the
+   contract's chart of accounts, exponents and rounding;
 2. **before the errors** — revert the provenance changes; every journal balances and the books
    have zero discrepancies (each in-period invoice booked once at the right rate, every payment
    cash/AR/2900 line exact, no duplicates, nothing out of period). In both books every account is
    allowed for its journal type (invoice 1200/4000, payment 1000/1200/2900/7900, expense Dr 6xxx /
    Cr 1000), entities match the invoices, payment rows carry the payment's instant, no invoice is
    booked before its issue, and invoice refs are positive, unique, same-currency and issued before
-   the payment. Credit notes are accepted only where the hard-mode policy publishes the rule;
+   the payment. Credit notes are accepted only where the hard-mode policy publishes the rule, and each
+   cancelled invoice needs a replacement with the same entity, currency and line items;
 3. **after the errors** — journals still balance and the discrepancies recomputed from the records
-   are exactly the truth (type, ids, amount): nothing undeclared, nothing unsupported;
+   are exactly the truth (type, ids, amount): nothing undeclared, nothing unsupported. A wrong booked
+   amount counts as an `fx_error` only if it is foreign and some published rate of the pair produces it;
+   scenario labels must match the books (I1 = allocation + FX error on one payment, I2 = cutoff + FX
+   error on one invoice, everything else `single`);
 4. **evidence** — every id exists in the public tables, each set covers the affected records, and
    the declared amount is recomputed from the records of each set alone (sufficiency).
 

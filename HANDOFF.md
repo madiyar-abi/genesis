@@ -12,7 +12,7 @@
 | [PR #36](https://github.com/madiyar-abi/genesis/pull/36) | Check both timestamps of invoice postings and reversals. Require the configured 20 public hard episodes and verify the hard export in CI. |
 | [PR #37](https://github.com/madiyar-abi/genesis/pull/37) | Reject ambiguous CSV headers and malformed invoice fields. Detect duplicate episode IDs and leftover episode directories before export writes. Check uniqueness of evidence IDs in schema tests. |
 
-PR #37 contains the commits from #35 and #36 and resolves their overlaps. For release, review #37 against main and check its GitHub Actions run. The combined checkout passed 393 tests on Python 3.11.18, verified 600/600 generated episodes and 40/40 committed exports, and found zero problems in the 3,000-episode fuzz sweep. The reward search found zero violations in 11,000 mutations on 20 seeds. To reproduce:
+PR #37 contains #35, #36 and [#38](https://github.com/madiyar-abi/genesis/pull/38). The merged verifier checks both invoice/truth structure and accounting semantics. For release, review #37 against main and check its GitHub Actions run. After integrating #38, local checks verified 600/600 generated episodes, matched all 80 golden hashes, and found zero violations across 11,000 reward mutations on 20 seeds. To reproduce:
 
 ```sh
 env -u AUDITENV_SECRET uv run python -m unittest tests.test_export tests.test_verify_dir tests.test_schemas tests.test_posting_period tests.test_load
@@ -28,6 +28,19 @@ The submission owner still has the video, deck, access checks and submission lis
 ## Export verifier follow-up
 
 Run `uv run python -m unittest tests.test_verify_dir` to reproduce the regressions for truth schema validation, index metadata consistency and evidence verification. The committed train, dev and hard exports pass from disk (10/10, 10/10 and 20/20). The hard split now needs 40 constructions of `Books` across 20 episodes, down from 133.
+
+
+[PR #38](https://github.com/madiyar-abi/genesis/pull/38) contributed the following independent audit. Its original branch passed 404 tests.
+
+## Independent audit (Chingiz, 20 November) — complete
+
+Branch `feature/hardening-r18-audit`. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` (all 404 tests and both 20-pair suites pass in ~39s).
+
+Summary of fixes and verification:
+- **Verifier (truth labels & semantics)**: Fixed 10 tamper vectors (`tests/test_verify_semantics.py`). `fx_error` now accepted only for foreign amounts producible by published rates. Scenario labels (`I1`/`I2`/`single`) must match the books. Unapplied cash rule tightened: account 2900 must hold exactly the unallocated portion at the payment-date rate. Cancelled invoices require matching replacement invoices. Strict type checking: payment/ref amounts must be integers, and timestamps require explicit UTC offsets.
+- **Server robustness**: Pipe closure with in-flight requests now reliably grades open and remaining unplayed hidden episodes as abandoned instead of crashing with `BrokenPipeError` (`tests/test_server_robust.py`). Hidden episode lists are validated at startup to fail fast on config typos (exit 2) instead of failing at close with empty logs. Resets without seeds return structured contract errors.
+- **Key protection & schemas**: Server warns on stderr if hidden episodes are served without `AUDITENV_SECRET` (flags seed leak via HMAC recovery; `--public` for intended public smoke tests). `docs/CONTRACT.md` and `schemas/findings.schema.json` document that `claimed_amount_minor` must be a JSON integer literal (rejecting `.0` floats).
+- **All checks pass**: 404/404 unit tests, 200/200 verifier episodes, 50/50 hard episodes, 20/20 paired tests pass cleanly.
 
 ## Round 17 complete
 
@@ -374,6 +387,8 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 
 ## Ideas to improve (for the next agent) / Идеи для улучшения
 
+H1 and E5 were explicitly deferred in the [round 2 decision](night/archive/r2-LOG.md). H1 adds a third generation and verification path; E5 requires a controlled rule-search experiment. The release covers default and hard.
+
 ### Rules first (do not break what scores today)
 - Interfaces in `docs/CONTRACT.md` are fixed: do not change the reset/step contract, actions, findings
   format or reward formula. New behaviour only behind new optional config keys (as `difficulty`).
@@ -418,8 +433,8 @@ Columns: what to do · why (jury criterion) · start in · how to check · risk.
 **Difficulty (part of data quality)**
 | # | what | why | start in | check | risk |
 |---|---|---|---|---|---|
-| H1 | Harder level so that even `reconcile_hard` is < 1.0 but an oracle-from-records still reaches 1.0: legitimate near-duplicates with changed quantities, weekend FX gaps with a "last available rate" rule in `policy.json`, more distractors | a jury may still call a script-solvable env easy | `generator.py` (`difficulty: "expert"`), `policies/reconcile.py` | new check gates like hard mode; stress test with an updated rule policy = 0 imperfect | high — keep it opt-in, keep the default untouched |
-| H2 ✓ | Step-budget margin: hard max is 58/100 steps; measure with 100 invoices + 12 issues + expert mode and keep max ≤ 80 | solvability within the budget | `fuzz.py --stress` | stress output | low |
+| H1 deferred | Harder level so that even `reconcile_hard` is < 1.0 but an oracle-from-records still reaches 1.0: legitimate near-duplicates with changed quantities, weekend FX gaps with a "last available rate" rule in `policy.json`, more distractors | a jury may still call a script-solvable env easy | `generator.py` (`difficulty: "expert"`), `policies/reconcile.py` | new check gates like hard mode; stress test with an updated rule policy = 0 imperfect | high — keep it opt-in, keep the default untouched |
+| H2 ✓ | Step-budget margin: hard used at most 57/100 steps on the 300-seed stress sweep with 100 invoices and 12 issues (target ≤ 80; see DESIGN §9) | solvability within the budget | `fuzz.py --stress` | stress output | low |
 
 **Reproducibility (15)**
 | # | what | why | start in | check | risk |
@@ -435,7 +450,7 @@ Columns: what to do · why (jury criterion) · start in · how to check · risk.
 | E2 ✓ | Timing benchmark (`check`, `fuzz`, one episode per policy) recorded in DESIGN | "измеренный разбор" | `fuzz.py` | numbers in DESIGN | low |
 | E3 ✓ | Hard-mode trajectories (`trajectories/train_hard_*.jsonl`), `make fuzz`/`make stress`, CI badge, Docker image pinned by digest | engineering polish | `run.py`, `Makefile`, README, `Dockerfile` | CI green | low |
 | E4 ✓ | Demo and pitch: asciinema/GIF of `auditenv.demo`, one chart of baseline returns (dev vs hard) for slide 7 | the video and slides score with humans | `docs/DEMO.md`, `docs/PITCH.md` | renders | low |
-| E5 | A learnable baseline without weights: a search over simple rule programs scored by the reward on train, reported on dev/hard (learning curve by iterations) — shows the env is learnable, not only scriptable. Skip if it looks like "training a model" to the jury | explanation | new `policies/rule_search.py` | dev/hard table | medium — time sink; do it last |
+| E5 deferred | A learnable baseline without weights: a search over simple rule programs scored by the reward on train, reported on dev/hard (learning curve by iterations) — shows the env is learnable, not only scriptable. Skip if it looks like "training a model" to the jury | explanation | new `policies/rule_search.py` | dev/hard table | medium — time sink; do it last |
 
 ## How to run
 ```bash

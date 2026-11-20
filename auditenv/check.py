@@ -263,7 +263,7 @@ def run_remote() -> bool:
         with open(hidden, "w") as fh:
             json.dump({"seeds": [7001, 7002], "config": HEAVY}, fh)
         leaked = False
-        with RemoteEnv(grader_log=log, episodes=hidden) as env:
+        with RemoteEnv(grader_log=log, episodes=hidden, public=True) as env:
             for _ in range(2):
                 obs, info = env.reset()
                 pol = make_policy("flag_all", None)

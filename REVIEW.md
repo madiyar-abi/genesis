@@ -277,3 +277,32 @@ for zero discovered tests and now fails.
 On the dev export (seed 2003), removing the scenario, blanking the issue ID or repeating an evidence ID still allowed verification to pass. Changing the seed or generation config in the split index also passed. The verifier now reports the affected field for each of these five independent corruptions. A valid control episode still passes. Run `uv run python -m unittest tests.test_verify_dir`.
 
 The hard export previously constructed 133 book indexes across 20 episodes because evidence alternatives rebuilt the same post-injection index. Verification now uses two per episode, one for each ledger state. The regression checks the constructor count during on-disk verification.
+
+
+## Independent audit (Chingiz, 20 November)
+
+Reproduced on origin/main b799231 before each fix; every regression failed first and passes after.
+
+- Verifier, truth labels. A base-currency invoice booked 500 too high, declared as `fx_error`, verified; so did
+  a foreign invoice booked at an amount no published rate produces. An `fx_error` is now accepted only for a
+  foreign amount that some published rate of the pair produces. Scenario labels were never checked: swapping
+  I1/I2, labelling both interacting pairs `single` or a single error `I1` all verified. Labels now have to
+  match the books (`tests/test_verify_semantics.py`).
+- Verifier, unapplied cash. With a one-minor-unit allocation shortfall, the whole reference could sit in 2900,
+  balanced by an invented 7900 loss, while truth declared a misstatement of 1. The 2900 rule accepted anything
+  up to the whole short reference; it now requires exactly the unallocated part of the reference at the
+  payment-date rate.
+- Verifier, hard mode. A full credit note on an invoice with no replacement wrote off revenue and verified with
+  unchanged truth. A cancelled invoice now needs a replacement with the same entity, currency and line items.
+- Verifier, public records. `amount_minor` 783500.75 on a payment and its ref, and payment timestamps without an
+  offset (read in the host time zone), verified. Payment and ref amounts must be integers and every ledger,
+  payment and invoice timestamp needs an offset.
+- Server. A policy that closed its pipes with a request in flight crashed the server with `BrokenPipeError`
+  before it graded the rest: 1 of 5 hidden episodes reached the grader log, so killing the pipe skipped hard
+  episodes. The server now grades every open and unplayed episode as abandoned on a broken pipe too
+  (`tests/test_server_robust.py`). One invalid config in the hidden list crashed the server at close with an
+  empty grader log; the list is now validated at start (exit 2, the episode named). A reset without a seed
+  returned `KeyError: 'seed'` and now gets the contract error `seed must be an int`.
+- Server, missing grader key. `auditenv.server --episodes` without `AUDITENV_SECRET` served silently and a
+  policy recovered seed 734211 from `episode_id` in 3.8 s. The server now warns on stderr; `--public` marks the
+  deliberately public smoke run and demo (`tests/test_server_secret.py`).

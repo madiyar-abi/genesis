@@ -63,7 +63,7 @@ class ServerTest(unittest.TestCase):
             hidden = os.path.join(d, "hidden.json")
             with open(hidden, "w") as fh:
                 json.dump({"seeds": [31, 32], "config": CFG}, fh)
-            with RemoteEnv(grader_log=log, episodes=hidden) as env:
+            with RemoteEnv(grader_log=log, episodes=hidden, public=True) as env:
                 for _ in range(2):
                     traj = play(env, 0, None)  # client seed is ignored
                     for obs, r, term, trunc, info in traj[1:]:

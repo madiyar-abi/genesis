@@ -56,7 +56,7 @@ class HardeningTest(unittest.TestCase):
             log, hidden = os.path.join(d, "g.jsonl"), os.path.join(d, "h.json")
             with open(hidden, "w") as fh:
                 json.dump({"seeds": [1, 2, 3], "config": {"errors": {"fx_error": 1}}}, fh)
-            with RemoteEnv(grader_log=log, episodes=hidden) as env:
+            with RemoteEnv(grader_log=log, episodes=hidden, public=True) as env:
                 env.reset()
                 env.step({"type": "list_records", "table": "ledger"})
                 env.reset()  # skip episode 1 mid-way
@@ -79,7 +79,8 @@ class HardeningTest(unittest.TestCase):
         root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         with tempfile.TemporaryDirectory() as d:
             log = os.path.join(d, "g.jsonl")
-            with RemoteEnv(grader_log=log, episodes=os.path.join(root, "configs", "eval_example.json")) as env:
+            with RemoteEnv(grader_log=log, episodes=os.path.join(root, "configs", "eval_example.json"),
+                           public=True) as env:
                 obs, info = env.reset()
                 self.assertEqual(info["mode"], "eval")
 
