@@ -4,7 +4,25 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Current state (20 November 2026).** Round 16 is on main. Round 17 is verified on `night/2026-11-20-r17`. The marathon handles its PR and CI before the 22 November 18:00 feature freeze.
+**Integration snapshot (20 November 2026).** Round 17 is on main at `b799231`. The following audit fixes were reviewed against that revision.
+
+| Branch or PR | What it covers |
+|---|---|
+| [PR #35](https://github.com/madiyar-abi/genesis/pull/35) | Validate grader truth, compare the split index with provenance and reuse ledger indexes. |
+| [PR #36](https://github.com/madiyar-abi/genesis/pull/36) | Check both timestamps of invoice postings and reversals. Require the configured 20 public hard episodes and verify the hard export in CI. |
+| `audit/export-and-input-validation` | Reject ambiguous CSV headers and malformed invoice fields. Detect duplicate episode IDs and leftover episode directories before export writes. Check uniqueness of evidence IDs in schema tests. |
+
+Local acceptance on the export/input branch: Python 3.11.18, 391 tests passed, 600/600 generated episodes and 40/40 committed exports verified, and 3,000 fuzz episodes completed with zero problems.
+
+The next maintainer should review the three branches and run the following from the combined checkout before merging or releasing. `HANDOFF.md`, `auditenv/verify.py` and the disk verifier tests receive changes across the branches. Preserve both the invoice and grader-truth checks when integrating.
+
+```sh
+env -u AUDITENV_SECRET uv run python -m unittest tests.test_export tests.test_verify_dir tests.test_schemas tests.test_posting_period tests.test_load
+env -u AUDITENV_SECRET uv run python -m auditenv.check
+env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999
+```
+
+The submission owner still has the video, deck, access checks and submission listed below. No model training was started.
 
 ## Round 17 complete
 

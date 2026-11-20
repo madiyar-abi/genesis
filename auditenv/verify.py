@@ -384,7 +384,38 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
         return [f"evidence set {s} is missing a record needed to reproduce the amount"]
 
 
+def _invoice_error(invoice: dict) -> str | None:
+    if not isinstance(invoice, dict):
+        return "invoice must be an object"
+    label = f"invoice {invoice.get('invoice_id', '<missing ID>')}"
+    for field in ("invoice_id", "doc_id", "entity_id", "currency"):
+        if not isinstance(invoice.get(field), str) or not invoice[field].strip():
+            return f"{label}: {field} must be a nonblank string"
+    for field in ("issued_at", "due_at"):
+        try:
+            instant = datetime_key(invoice.get(field))
+        except (TypeError, ValueError):
+            return f"{label}: invalid {field}"
+        if instant.tzinfo is None:
+            return f"{label}: {field} must include a timezone offset"
+    if type(invoice.get("total_minor")) is not int:
+        return f"{label}: total_minor must be an integer"
+    if not isinstance(invoice.get("line_items"), list):
+        return f"{label}: line_items must be an array"
+    for i, line in enumerate(invoice["line_items"]):
+        if not isinstance(line, dict) or not isinstance(line.get("description"), str):
+            return f"{label}: line_items[{i}].description must be a string"
+        for field in ("quantity", "unit_price_minor", "amount_minor"):
+            if type(line.get(field)) is not int:
+                return f"{label}: line_items[{i}].{field} must be an integer"
+    return None
+
+
 def verify_episode(ep: dict) -> list[str]:
+    for invoice in ep["tables"]["invoices"]:
+        error = _invoice_error(invoice)
+        if error:
+            return [error]
     problems = _structure(ep)
     m, t = ep["manifest"], ep["tables"]
     if ep["truth"].get("episode_id") != m["episode_id"]:

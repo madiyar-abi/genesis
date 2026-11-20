@@ -9,6 +9,10 @@ through the tools) and targeted data checks.
 
 Status legend: **OK** = checked, no problem; **ISSUE n** = see "Findings" below.
 
+## Public invoice, CSV and export validation
+
+Before the fix, a repeated debit column with conflicting values was accepted, as were a missing invoice due date and a floating-point total. The split exporter also reported success for duplicate episode IDs or when a smaller requested split left an old episode directory behind. The schema smoke checker accepted duplicate evidence IDs. Targeted regressions live in `tests/test_verify_dir.py`, `tests/test_export.py` and `tests/test_schemas.py`.
+
 ## 1.1 Contract and isolation (25)
 - `reset(seed, config) -> (observation, info)`; `step -> (obs, reward, terminated, truncated, info)`, JSON-only — OK (`env.py`, probe).
 - Exactly 5 actions; anything else → `unknown_action`, step consumed — OK.

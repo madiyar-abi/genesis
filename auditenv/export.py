@@ -26,8 +26,9 @@ import csv
 import json
 import os
 import sys
+from pathlib import Path
 
-from .generator import FX_FIELDS, LEDGER_FIELDS, generate
+from .generator import FX_FIELDS, LEDGER_FIELDS, episode_id_for, generate
 from .run import load_episodes
 
 
@@ -78,6 +79,19 @@ def export_episode(episode: dict, ep_dir: str) -> None:
 def export_split(config_path: str, out_dir: str) -> list[dict]:
     """Export all episodes defined in a config file into out_dir."""
     episodes = load_episodes(config_path)
+    if not episodes:
+        raise ValueError("cannot export an empty split")
+    expected = set()
+    for seed, cfg in episodes:
+        name = episode_id_for(seed, cfg)
+        if name in expected:
+            raise ValueError(f"duplicate episode {name} for seed {seed}")
+        expected.add(name)
+    dest = Path(out_dir)
+    if dest.exists():
+        stale = sorted(p.name for p in dest.iterdir() if (p / "public").is_dir() and p.name not in expected)
+        if stale:
+            raise ValueError(f"destination contains episodes outside the requested split: {', '.join(stale)}")
     os.makedirs(out_dir, exist_ok=True)
     index: list[dict] = []
 
@@ -99,7 +113,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", required=True, help="output directory (e.g. episodes/dev)")
     args = ap.parse_args(argv)
 
-    index = export_split(args.config, args.out)
+    try:
+        index = export_split(args.config, args.out)
+    except (OSError, ValueError) as exc:
+        print(f"Export failed: {exc}", file=sys.stderr)
+        return 1
     print(f"Exported {len(index)} episodes to {args.out}")
     return 0
 

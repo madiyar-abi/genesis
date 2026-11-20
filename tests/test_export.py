@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+from pathlib import Path
 import tempfile
 import unittest
 
@@ -47,6 +48,22 @@ class TestExport(unittest.TestCase):
 
             self.assertGreater(len(hashes1), 0)
             self.assertEqual(hashes1, hashes2, "Exported trees are not byte-identical")
+
+    def test_conflicting_export_leaves_existing_split_intact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            spec = Path(tmp) / "config.json"
+            out = Path(tmp) / "out"
+            spec.write_text(json.dumps({"seeds": [1, 2]}))
+            export_split(spec, out)
+            original = _dir_tree_hashes(out)
+            export_split(spec, out)
+            self.assertEqual(_dir_tree_hashes(out), original)
+            for seeds, reason in (([3, 3], "duplicate episode"), ([1], "outside the requested split")):
+                with self.subTest(seeds=seeds):
+                    spec.write_text(json.dumps({"seeds": seeds}))
+                    with self.assertRaisesRegex(ValueError, reason):
+                        export_split(spec, out)
+                    self.assertEqual(_dir_tree_hashes(out), original)
 
     def test_all_episodes_pass_verifier(self):
         """Every episode across train, dev, eval_example, and eval_hard passes the independent verifier."""
