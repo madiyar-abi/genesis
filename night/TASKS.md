@@ -138,7 +138,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
 - [x] G20 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 66000` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 9000-9299` — files:
   night/LOG.md — accept: summaries + wall times + max steps.
-- [ ] G21 (gemini2a) Resource-leak and warning run: `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning
+- [x] G21 (gemini2a) Resource-leak and warning run: `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning
   -m unittest discover -s tests -t . 2>&1 | tail -40` — files: night/LOG.md — accept: `Ran N tests` + OK/FAILED; every
   warning or error line (file:line) quoted verbatim, deduplicated with counts.
 - [ ] G22 (gemini2b) Optimized-mode run (asserts stripped): `env -u AUDITENV_SECRET uv run python -O -m auditenv.check`;
