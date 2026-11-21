@@ -2,3 +2,4 @@
 2026-11-21 23:41 lead — Demo seed 2003 reproduced four matches, 21 inspections and 0.958 return. Five Enter presses and the tab switch match the script. Clarified the difference between the 16-second preview and the full recording.
 2026-11-21 23:42 lead — Reviewed ten-slide outline against the check output. Corrected slide 8 split counts. Confirmed slide 7 metrics, paired checks, demo figures and archived 20k configuration sweep. Team credits await the human submission owner.
 2026-11-21 23:43 lead — Baseline full check passed 560 tests, default fuzz passed 3,000 episodes, and reward search passed 11,000 mutations. Recorded the two coverage gaps in REVIEW.md. Checking whether independent verification can catch early refunds.
+2026-11-21 23:44 gemini1b — Verified hard exports (auditenv.verify --dir episodes/hard): 20/20 episodes valid, 0 problems. Next: gemini1b-2.
