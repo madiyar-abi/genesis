@@ -11,6 +11,9 @@
 6. hard mode (configs/eval_hard.json): verifier on hard episodes, baseline table, gates: oracle 1.0,
    reconcile_hard (rules from the policy) solves it from the records, plain reconcile does not;
    20 more paired checks on hard episodes (replay with reconcile_hard/random, relabel/permute incl. FX rows)
+7. the jury's flow: the 20 jury scenarios D01-D20 through judge_adapter.py in closed mode, each baseline policy in
+   its own process behind the baseline-policy adapter (auditenv/jury_run.py): oracle 1.0, reconcile solves them,
+   flag-all and random are penalised, every episode within the 60 s limit
 Exit code 0 only if every gate passes.
 """
 
@@ -280,6 +283,21 @@ def run_remote() -> bool:
                  "policy saw no reward/truth; 2 results in the grader log")
 
 
+def run_jury_path() -> tuple[bool, dict]:
+    from .jury_run import run
+    rows = run()
+    for name, row in rows.items():
+        print(f"    {name:<16} P {row['precision']:.3f}  R {row['recall']:.3f}  F1 {row['f1']:.3f}  "
+              f"return {row['mean_return']:.3f}  steps {row['mean_steps']:.1f}  max time {row['max_time_s']:.2f} s")
+    ok = _gate("jury flow: oracle reaches the maximum reward", rows["oracle"]["mean_return"] == 1.0)
+    ok &= _gate("jury flow: reconcile solves D01-D20 from the records", rows["reconcile"]["f1"] == 1.0)
+    ok &= _gate("jury flow: flag-all and random are penalised",
+                rows["flag_all"]["mean_return"] < 0 and rows["random_explorer"]["mean_return"] < 0)
+    ok &= _gate("jury flow: every episode within the 60 s limit", max(r["max_time_s"] for r in rows.values()) < 60,
+                "20 scenarios x 4 policies through judge_adapter, policies in their own process")
+    return ok, rows
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--quick", action="store_true", help="fewer verifier seeds")
@@ -297,12 +315,14 @@ def main(argv=None) -> int:
     ok &= eval_ok
     ok &= run_paired(20)
     ok &= run_remote()
+    jury_ok, jury_table = run_jury_path()
+    ok &= jury_ok
     hard_ok, hard_table = run_hard(10 if args.quick else 25)
     ok &= hard_ok
     ok &= run_paired(20, hard=True)
     if args.json:
         with open(args.json, "w") as fh:
-            json.dump({"dev": table, "eval_example": eval_table, "hard": hard_table}, fh, indent=2, sort_keys=True)
+            json.dump({"dev": table, "eval_example": eval_table, "hard": hard_table, "jury": jury_table}, fh, indent=2, sort_keys=True)
     print(f"\n{'ALL CHECKS PASSED' if ok else 'SOME CHECKS FAILED'} in {time.monotonic() - t0:.1f} s")
     return 0 if ok else 1
 
