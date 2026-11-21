@@ -45,19 +45,19 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 | policy | split | P | R | F1 | return |
 |---|---|---|---|---|---|
 | oracle (grader-side) | dev | 1.000 | 1.000 | 1.000 | 1.000 |
-| reconcile (policy-aware) | dev | 1.000 | 1.000 | 1.000 | 0.957 |
-| naive reconcile | dev | 0.169 | 0.700 | 0.273 | −0.506 |
+| reconcile (policy-aware) | dev | 1.000 | 1.000 | 1.000 | 0.956 |
+| naive reconcile | dev | 0.177 | 0.733 | 0.286 | −0.480 |
 | random explorer | dev | 0.000 | 0.000 | 0.000 | −0.807 |
 | flag-everything | dev | 0.000 | 0.000 | 0.000 | −1.000 |
 | reconcile_hard | hard | 1.000 | 1.000 | 1.000 | 0.916 |
-| reconcile (default) | hard | 0.651 | 0.891 | 0.752 | 0.288 |
+| reconcile (default) | hard | 0.667 | 0.870 | 0.755 | 0.293 |
 | oracle (grader-side) | hard | 1.000 | 1.000 | 1.000 | 1.000 |
 
 - Both reconciliation policies averaged 43.2 actions on hard episodes. The default rules produced 22 false positives and missed five findings. With line normalization and credit-note handling, the policy found all 46 issues with zero false positives.
 
 ## 8. How the jury can reproduce the checks
 
-- Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. It compares policies on 20 default companies and reproduces the 40 exported episodes and committed trajectories byte for byte.
+- Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. It compares policies on 10 dev, 20 example evaluation, and 20 hard companies and reproduces the 40 exported episodes and committed trajectories byte for byte.
 - Paired checks cover 20 default and 20 hard episodes. They replay actions, compare each public record after translating its IDs, and check that the oracle earns the same reward on the shuffled records.
 - Run `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 20000` to vary company size, error mix and difficulty. Across 20,000 cases, including 8,037 hard cases, the verifier reported zero problems. The oracle and the rule policy for each difficulty reached F1 1.0 within 59 actions.
 - A separate mutation test, `uv run python scripts/mutate_reward.py`, caught 22 of 22 deliberately introduced matcher and reward changes.

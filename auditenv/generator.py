@@ -407,6 +407,7 @@ def _pay_date(st: State, inv: dict, lo: int = 2, hi: int = 30) -> date:
 def _build_payments(st: State, distractors: bool) -> None:
     rng = st.rng
     plans = []  # (date, currency, amount, [(inv, amt)], entity_id)
+    refund_dates = {}
     for inv in list(st.invoices):
         if inv["_cdate"] > st.pe:
             continue
@@ -426,7 +427,9 @@ def _build_payments(st: State, distractors: bool) -> None:
             extra = max(1, round(total * rng.uniform(0.01, 0.05)))
             d = _pay_date(st, inv, 2, 12)
             plans.append((d, cur, total + extra, [(inv, total)], ent))
-            plans.append((d + timedelta(days=rng.randint(2, 10)), cur, -extra, None, ent))
+            refund_date = d + timedelta(days=rng.randint(2, 10))
+            refund_dates[inv["invoice_id"]] = refund_date
+            plans.append((refund_date, cur, -extra, None, ent))
     plans = [p for p in plans if st.in_period(p[0])]
     if st.gen.get("ensure_distractors"):
         _ensure_split_and_refund(st, plans)
@@ -440,8 +443,13 @@ def _build_payments(st: State, distractors: bool) -> None:
             continue
         if (p[3] and len(p[3]) == 1 and (not preserve_overpayments or p[2] == p[3][0][1])
                 and rng.random() < 0.25):
+            # Merging moves the first receipt to the second one's date. The
+            # posting hours are sampled later, so even the refund day is too late.
+            refund_date = refund_dates.get(p[3][0][0]["invoice_id"])
             for j in range(i + 1, len(plans)):
                 q = plans[j]
+                if refund_date is not None and q[0] >= refund_date:
+                    break  # remaining plans are in date order
                 if (j not in used and q[3] and len(q[3]) == 1 and q[4] == p[4] and q[1] == p[1]
                         and (not preserve_overpayments or q[2] == q[3][0][1])
                         and q[3][0][0] is not p[3][0][0] and (q[0] - p[0]).days <= 10):

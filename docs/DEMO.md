@@ -1,9 +1,9 @@
 # Demo video script (2 min 40 s)
 
-Play the recorded public seed-2003 session (the demo config, `ep_c77b21f38d42`; seed 2003 in `configs/dev.json` is a different company) from the repository root with `asciinema play docs/demo.cast`.
+For a 16-second preview of tab B, replay the recorded public seed-2003 session (the demo config, `ep_c77b21f38d42`; seed 2003 in `configs/dev.json` is a different company) from the repository root with `asciinema play docs/demo.cast`.
 
 
-Before recording, open two terminal tabs in the repository root with Python 3.11 and `uv` installed. In tab A run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. Wait for `ALL CHECKS PASSED` and leave the results on screen. In tab B run the public example below and leave it at the first `[enter]` prompt. Both commands use the public companies even when the recording machine has a private grader key.
+To record the full 2-minute-40-second walkthrough, open two terminal tabs in the repository root with Python 3.11 and `uv` installed. In tab A run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. Wait for `ALL CHECKS PASSED` and leave the results on screen. In tab B run the public example below and leave it at the first `[enter]` prompt. Both commands use the public companies even when the recording machine has a private grader key.
 
 ```bash
 env -u AUDITENV_SECRET uv run python -m auditenv.demo --seed 2003 --pause

@@ -34,23 +34,24 @@ def run_server(args, secret=None):
 
 
 class ServerSecretTest(unittest.TestCase):
-    def test_hidden_list_without_secret_warns_and_is_recoverable(self):
+    def test_hidden_list_without_secret_uses_grader_key_and_warns(self):
         proc, first = run_server([])
         self.assertEqual(proc.returncode, 0)
         self.assertIn("observation", first)  # still serves: backwards compatible
         self.assertIn("AUDITENV_SECRET", proc.stderr)
-        # why the warning matters: the public key lets anyone map episode_id back to its seed
-        self.assertEqual(first["info"]["episode_id"], episode_id_for(734211, {**HIDDEN["config"], "mode": "eval"}))
+        # private grader key by default keeps hidden episodes unrecoverable
+        self.assertNotEqual(first["info"]["episode_id"], episode_id_for(734211, {**HIDDEN["config"], "mode": "eval"}))
 
     def test_secret_set_is_silent_and_unrecoverable(self):
         proc, first = run_server([], secret="test-only-grader-key")
         self.assertEqual(proc.stderr, "")
         self.assertNotEqual(first["info"]["episode_id"], episode_id_for(734211, {**HIDDEN["config"], "mode": "eval"}))
 
-    def test_public_flag_silences_the_warning(self):
+    def test_public_flag_silences_the_warning_and_uses_public_generator(self):
         proc, first = run_server(["--public"])
         self.assertEqual(proc.stderr, "")
         self.assertIn("observation", first)
+        self.assertEqual(first["info"]["episode_id"], episode_id_for(734211, {**HIDDEN["config"], "mode": "eval"}))
 
     def test_remote_env_public_passes_the_flag(self):
         self.assertIn("--public", RemoteEnv.command(episodes="h.json", public=True))

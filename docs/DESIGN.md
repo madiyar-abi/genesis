@@ -226,10 +226,10 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 
 | policy | seeds | P | R | F1 | return | steps | time s | exp. return* |
 |---|---|---|---|---|---|---|---|---|
-| random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.004 | −0.807 |
-| naive reconciliation | 2000–2009 | 0.169 | 0.700 | 0.273 | −0.506 | 17.2 | 0.004 | −0.539 |
-| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.957 | 22.5 | 0.005 | 0.957 |
-| flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.003 | −1.000 |
+| random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.005 | −0.807 |
+| naive reconciliation | 2000–2009 | 0.177 | 0.733 | 0.286 | −0.480 | 17.5 | 0.006 | −0.516 |
+| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.956 | 22.8 | 0.007 | 0.956 |
+| flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.004 | −1.000 |
 | oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.003 | 1.000 |
 
 Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30 truth issues).
@@ -290,9 +290,9 @@ and checks that every credit note is in the period and after its booking.
 | policy | P | R | F1 | return | steps | exp. return* |
 |---|---|---|---|---|---|---|
 | random explorer (seeded) | 0.000 | 0.000 | 0.000 | −0.806 | 33.1 | −0.806 |
-| naive reconciliation | 0.105 | 0.630 | 0.181 | −0.711 | 33.4 | −0.752 |
-| reconciliation (default rules) | 0.651 | 0.891 | 0.752 | 0.288 | 43.2 | 0.078 |
-| reconciliation + hard rules (`reconcile_hard`) | 1.000 | 1.000 | 1.000 | 0.916 | 43.2 | 0.916 |
+| naive reconciliation | 0.108 | 0.652 | 0.186 | −0.704 | 33.1 | −0.746 |
+| reconciliation (default rules) | 0.667 | 0.870 | 0.755 | 0.293 | 43.0 | 0.075 |
+| reconciliation + hard rules (`reconcile_hard`) | 1.000 | 1.000 | 1.000 | 0.916 | 43.0 | 0.916 |
 | flag-everything attack | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | −1.000 |
 | oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 1.000 |
 

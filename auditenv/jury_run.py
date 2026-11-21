@@ -57,6 +57,8 @@ def play(env, first: dict, policy_name: str, truth: dict | None = None, policy_i
             steps, done = steps + 1, terminated or truncated
     finally:
         proc.stdin.close()
+        if proc.stdout:
+            proc.stdout.close()
         proc.wait(timeout=30)
     return steps
 

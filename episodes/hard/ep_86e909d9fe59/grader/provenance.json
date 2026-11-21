@@ -34,32 +34,32 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "GBP",
-              "debit_minor": 517210,
-              "entity_id": "CUST64672",
-              "invoice_id": "F0170398",
+              "debit_minor": 1626500,
+              "entity_id": "CUST25721",
+              "invoice_id": "F0590096",
               "payment_id": null,
-              "row_id": "GL-001907",
-              "timestamp": "2026-09-08T21:06:00+05:30"
+              "row_id": "GL-002823",
+              "timestamp": "2026-09-18T14:01:00+05:30"
             },
             {
               "account": "4000",
-              "credit_minor": 517210,
+              "credit_minor": 1626500,
               "currency": "GBP",
               "debit_minor": 0,
-              "entity_id": "CUST64672",
-              "invoice_id": "F0170398",
+              "entity_id": "CUST25721",
+              "invoice_id": "F0590096",
               "payment_id": null,
-              "row_id": "GL-001908",
-              "timestamp": "2026-09-08T21:06:00+05:30"
+              "row_id": "GL-002824",
+              "timestamp": "2026-09-18T14:01:00+05:30"
             }
           ],
           "before": null,
-          "journal": "inv:F0170398"
+          "journal": "inv:F0590096"
         }
       ],
-      "description": "invoice F0084974 entered a second time as F0170398 and booked again",
+      "description": "invoice F0861004 entered a second time as F0590096 and booked again",
       "documents_added": [
-        "5a334d9f"
+        "501c1447"
       ],
       "issue_id": "ISS-1",
       "scenario": "single",
@@ -73,23 +73,23 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "GBP",
-              "debit_minor": 366115,
-              "entity_id": "CUST64672",
-              "invoice_id": "F0601647",
+              "debit_minor": 664752,
+              "entity_id": "CUST12221",
+              "invoice_id": "F0198825",
               "payment_id": null,
-              "row_id": "GL-001755",
-              "timestamp": "2026-09-05T10:39:00+05:30"
+              "row_id": "GL-002667",
+              "timestamp": "2026-09-13T18:48:00+05:30"
             },
             {
               "account": "4000",
-              "credit_minor": 366115,
+              "credit_minor": 664752,
               "currency": "GBP",
               "debit_minor": 0,
-              "entity_id": "CUST64672",
-              "invoice_id": "F0601647",
+              "entity_id": "CUST12221",
+              "invoice_id": "F0198825",
               "payment_id": null,
-              "row_id": "GL-001756",
-              "timestamp": "2026-09-05T10:39:00+05:30"
+              "row_id": "GL-002668",
+              "timestamp": "2026-09-13T18:48:00+05:30"
             }
           ],
           "before": [
@@ -97,29 +97,29 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "GBP",
-              "debit_minor": 364756,
-              "entity_id": "CUST64672",
-              "invoice_id": "F0601647",
+              "debit_minor": 669902,
+              "entity_id": "CUST12221",
+              "invoice_id": "F0198825",
               "payment_id": null,
-              "row_id": "GL-001755",
-              "timestamp": "2026-09-05T10:39:00+05:30"
+              "row_id": "GL-002667",
+              "timestamp": "2026-09-13T18:48:00+05:30"
             },
             {
               "account": "4000",
-              "credit_minor": 364756,
+              "credit_minor": 669902,
               "currency": "GBP",
               "debit_minor": 0,
-              "entity_id": "CUST64672",
-              "invoice_id": "F0601647",
+              "entity_id": "CUST12221",
+              "invoice_id": "F0198825",
               "payment_id": null,
-              "row_id": "GL-001756",
-              "timestamp": "2026-09-05T10:39:00+05:30"
+              "row_id": "GL-002668",
+              "timestamp": "2026-09-13T18:48:00+05:30"
             }
           ],
-          "journal": "inv:F0601647"
+          "journal": "inv:F0198825"
         }
       ],
-      "description": "invoice F0601647 converted with the 2026-09-08 rate instead of 2026-09-05",
+      "description": "invoice F0198825 converted with the 2026-09-18 rate instead of 2026-09-13",
       "documents_added": [],
       "issue_id": "ISS-2",
       "scenario": "single",
@@ -133,23 +133,23 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "GBP",
-              "debit_minor": 171305,
+              "debit_minor": 127951,
               "entity_id": "CUST64672",
-              "invoice_id": "F0083477",
+              "invoice_id": "F0668081",
               "payment_id": null,
-              "row_id": "GL-001656",
-              "timestamp": "2026-09-02T19:49:00+05:30"
+              "row_id": "GL-002495",
+              "timestamp": "2026-09-08T17:07:00+05:30"
             },
             {
               "account": "4000",
-              "credit_minor": 171305,
+              "credit_minor": 127951,
               "currency": "GBP",
               "debit_minor": 0,
               "entity_id": "CUST64672",
-              "invoice_id": "F0083477",
+              "invoice_id": "F0668081",
               "payment_id": null,
-              "row_id": "GL-001657",
-              "timestamp": "2026-09-02T19:49:00+05:30"
+              "row_id": "GL-002494",
+              "timestamp": "2026-09-08T17:07:00+05:30"
             }
           ],
           "before": [
@@ -157,29 +157,29 @@
               "account": "1200",
               "credit_minor": 0,
               "currency": "GBP",
-              "debit_minor": 171896,
+              "debit_minor": 126355,
               "entity_id": "CUST64672",
-              "invoice_id": "F0083477",
+              "invoice_id": "F0668081",
               "payment_id": null,
-              "row_id": "GL-001656",
-              "timestamp": "2026-09-02T19:49:00+05:30"
+              "row_id": "GL-002495",
+              "timestamp": "2026-09-08T17:07:00+05:30"
             },
             {
               "account": "4000",
-              "credit_minor": 171896,
+              "credit_minor": 126355,
               "currency": "GBP",
               "debit_minor": 0,
               "entity_id": "CUST64672",
-              "invoice_id": "F0083477",
+              "invoice_id": "F0668081",
               "payment_id": null,
-              "row_id": "GL-001657",
-              "timestamp": "2026-09-02T19:49:00+05:30"
+              "row_id": "GL-002494",
+              "timestamp": "2026-09-08T17:07:00+05:30"
             }
           ],
-          "journal": "inv:F0083477"
+          "journal": "inv:F0668081"
         }
       ],
-      "description": "invoice F0083477 converted with the 2026-08-31 rate instead of 2026-09-01",
+      "description": "invoice F0668081 converted with the 2026-09-15 rate instead of 2026-09-08",
       "documents_added": [],
       "issue_id": "ISS-3",
       "scenario": "single",

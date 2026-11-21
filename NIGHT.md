@@ -9,10 +9,10 @@ and branch (`night/<date>-<name>`); use exactly those names.
 
 ## Team
 - **lead** — main checkout. Plans, does the hard and cross-cutting work, reviews
-  and merges the workers' commits. The lead *engine rotates* (`--slots`): Codex
-  (GPT-6.2 Astra → Sol, 2 ChatGPT accounts) first, Claude Code as fallback; on a
-  usage limit the watchdog hands the lead role to the next free slot and goes
-  back to Codex when its limit resets. A lead that starts after another engine
+  and merges the workers' commits. The lead *engine rotates* (`--slots`): 2 Claude Code accounts
+  (`~/.claude-acc2` and `default`) rotate as the primary team leads; the 2 Codex accounts
+  (`~/.codex-acc1`, `~/.codex-acc2`, GPT-6.2 Astra → Sol) step in as lead ONLY if both Claude
+  accounts run out of quota (Gemini Flash as last-resort fallback). A lead that starts after another engine
   continues from `night/TASKS.md`, the end of `night/LOG.md` and `git status`
   (finish or cleanly revert the previous lead's uncommitted change first).
 - Workers (optional, each in its own git worktree, own quota — they keep going
@@ -146,10 +146,11 @@ every merge; features and polish come after. Keep README run steps true.
 # 1. put the spec into night/SPEC.md, commit it on the night branch, push
 B=night/$(date +%F)
 # 2. lead — detached, survives closing the terminal; Mac on the charger, lid open.
-#    Slots "engine|account|model" in preference order: Codex Astra/Sol on both accounts, Claude last.
-C1=$HOME/.codex-acc1; C2=$HOME/.codex-acc2
+#    Slots "engine|account|model" in preference order: both Claude accounts first (rotating leads),
+#    Codex Astra/Sol on both accounts only once both Claudes are out of quota.
+C1=$HOME/.codex-acc1; C2=$HOME/.codex-acc2; CL2=$HOME/.claude-acc2
 mkdir -p .night-logs && nohup scripts/night.sh --role lead --branch $B --workers "gemini" --until 07:00 \
-  --slots "codex|$C1|gpt-6.2-astra;codex|$C1|gpt-6.2-sol;codex|$C2|gpt-6.2-astra;codex|$C2|gpt-6.2-sol;claude|default|" \
+  --slots "claude|$CL2|;claude|default|;codex|$C1|gpt-6.2-astra;codex|$C1|gpt-6.2-sol;codex|$C2|gpt-6.2-astra;codex|$C2|gpt-6.2-sol" \
   > .night-logs/lead.out 2>&1 &
 # 3. worker for grunt work, in its own worktree
 git worktree add --detach ../genesis-gemini origin/$B && mkdir -p ../genesis-gemini/.night-logs

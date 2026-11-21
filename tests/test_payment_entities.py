@@ -58,7 +58,7 @@ class PaymentEntitiesTest(unittest.TestCase):
             total_postings += len(postings)
             problems = check_payment_entity_identity(ep)
             self.assertEqual(problems, [], f"Seed {seed} had payment entity identity problems: {problems}")
-        self.assertEqual(total_postings, 2565)
+        self.assertEqual(total_postings, 2563)
 
     def test_payment_entity_identity_heavy_hard(self):
         """100 heavy hard seeds have 0 entity mismatches on all payment receivables postings."""
@@ -72,7 +72,7 @@ class PaymentEntitiesTest(unittest.TestCase):
             total_postings += len(postings)
             problems = check_payment_entity_identity(ep)
             self.assertEqual(problems, [], f"Seed {seed} (hard) had payment entity identity problems: {problems}")
-        self.assertEqual(total_postings, 2583)
+        self.assertEqual(total_postings, 2576)
 
     def test_payment_entity_identity_clean_seeds(self):
         """Clean seeds also have 0 entity mismatches on all payment receivables postings."""
