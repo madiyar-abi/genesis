@@ -69,6 +69,18 @@ class JudgeScenariosTest(unittest.TestCase):
             self.assertEqual(allocated(self.episodes["D09", seed], missing), 0)
             self.assertGreater(allocated(self.episodes["D10", seed], partial), 0)
 
+    def test_clean_scenarios_hold_the_legitimate_lookalikes(self):
+        for n in range(1, 6):
+            for seed in SEEDS:
+                t = self.episodes[f"D{n:02d}", seed]["tables"]
+                with self.subTest(scenario=f"D{n:02d}", seed=seed):
+                    parts = [r["invoice_id"] for p in t["payments"] for r in p["invoice_refs"] or ()]
+                    self.assertTrue(any(parts.count(i) >= 2 for i in parts))  # D02: one invoice paid in two parts
+                    self.assertTrue(any(p["amount_minor"] < 0 for p in t["payments"]))  # D03: a refund
+                    totals = [(i["currency"], i["total_minor"]) for i in t["invoices"]]
+                    self.assertLess(len(set(totals)), len(totals))  # D04: equal amounts that are not duplicates
+                    self.assertTrue(any(p["invoice_refs"] is None for p in t["payments"]))
+
     def test_interacting_scenarios_vary_their_parameters(self):
         for names in (("D16", "D17", "D18"), ("D19", "D20")):
             amounts = {tuple(sorted(i["expected_amount_minor"] for i in self.episodes[n, s]["truth"]["issues"]))

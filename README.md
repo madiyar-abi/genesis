@@ -174,6 +174,87 @@ A policy in another language talks to `python -m auditenv.server` over JSON line
 The four baseline adapters live in `auditenv/policies/` (`random_explorer.py`, `reconcile.py`,
 `flag_all.py`, `oracle.py`; plus `naive_reconcile.py`).
 
+### Jury adapter (`judge_adapter.py`)
+
+The jury's single connection point ([check definitions](https://genesis-exe.com/fintech-checks.html), "Единый способ
+подключения") is `judge_adapter.py` in the repository root. Working directory: the repository root (`/app` in the
+container); it imports `auditenv` and needs nothing else. The adapter only translates names and shapes; the
+environment, matcher and reward are the ones described above.
+
+```python
+import judge_adapter as ja
+ja.generate_episode(seed, config, output_dir)       # writes public/ and grader/ of one episode into output_dir
+env = ja.make_env()
+obs, info = env.reset(0, {"mode": "closed", "episode_dir": output_dir, "team_config": {}})
+obs, reward, terminated, truncated, info = env.step({"name": "list_records",
+                                                     "args": {"table": "ledger", "cursor": None, "limit": 50}})
+ja.score_episode(output_dir, findings, inspection_steps)  # {"tp","fp","fn","precision","recall","f1","return"}
+```
+
+| call | behaviour |
+|---|---|
+| `generate_episode(seed, config, output_dir)` | our generator with the config of `docs/CONTRACT.md` §4; writes `public/` (task.txt, manifest.json, ledger.csv, invoices.jsonl, payments.jsonl, fx.csv, policy.json) and `grader/` (truth.json, provenance.json) |
+| `reset(seed, {"mode": "closed", "episode_dir": d, "team_config": {...}})` | serves the episode in `d` as it is (no generation, ids unchanged); a second reset restarts it. `team_config` may set `max_steps` and `time_limit_s` only. Reward to the policy is 0 on every step and `info` holds only `episode_id`, `mode`, `max_steps` (reset) or `{}` (steps) |
+| `reset(seed, {"mode": "train", "team_config": cfg})` | generates `generate(seed, cfg)`; with `episode_dir` it serves that episode. The terminal step returns the reward and `info` = `{valid, tp, fp, fn, precision, recall, f1, reward, inspection_steps}` |
+| `step({"name": ..., "args": {...}})` | first observation `{task, manifest, policy, remaining_steps: 100}`, then `{result, error, remaining_steps}` |
+| `score_episode(d, findings, inspection_steps)` | the shared matcher and reward on `d`'s truth; an invalid structure returns `return = -1` and nulls, and the reason goes to `judge_adapter.GRADER_LOG` (and to the JSON-lines file `$AUDITENV_GRADER_LOG`, if set) |
+
+| `name` | `args` | `result` |
+|---|---|---|
+| `list_records` | `table` (`ledger`, `invoices`, `payments`, `fx`), `cursor` (null first), `limit` (≤ 50) | `{"records": [...], "next_cursor": str or null}`; invoice rows in listings omit `line_items` |
+| `get_record` | `table`, `id` (row_id, invoice_id, payment_id or fx_id) | the record |
+| `get_document` | `doc_id` | the invoice or payment document |
+| `calculator` | `expression` (`+ - * / ( )` and decimals) | a decimal string, e.g. `"0.3"` for `0.1+0.2` |
+| `submit` | `findings` (the findings.json object, §5 of the case) | `{"accepted": true}` with no correctness signal; it ends the episode |
+
+Errors are `{"code", "message"}` with no paths, seeds or truth, and every one costs a step: `unknown_action` (also a
+malformed envelope), `bad_params`, `unknown_table`, `not_found`, `calc_error`, `time_limit`, `episode_over`, and in
+train mode `invalid_findings`. The submit is one of the 100 actions but not an inspection step; every earlier step,
+including failed ones, is. 100 actions without a submit, or 60 s from reset (policy time included), end the
+episode as truncated with empty findings.
+
+The four error types (`type` in truth and findings; amounts in base-currency minor units):
+
+| case | `type` | `affected_ids` (a set) | expected amount |
+|---|---|---|---|
+| duplicate invoice | `duplicate_invoice` | original and duplicate invoice_id | AR debit of the later copy |
+| missing or partial payment allocation | `payment_allocation` | invoice_id and payment_id | expected AR credit − credit posted |
+| wrong conversion date or rate | `fx_error` | the invoice_id or payment_id | abs(posted − correct) |
+| period error | `period_cutoff` | the invoice_id | AR debit posted out of period |
+
+Matching follows the jury's exact conventions: ids, type and currency are compared as exact strings, `affected_ids`
+and `evidence_ids` as sets, an evidence id that is not a public record or document makes the finding a false
+positive, the amount tolerance is `policy.findings.tolerance_minor` (0 in every episode), and the one-to-one
+assignment is a maximum matching with the deterministic tie rule of the definitions (`auditenv/matcher.py`,
+`docs/CONTRACT.md` §6).
+
+Block 2 scenarios through the generator's config (`auditenv/jury.py`; the jury chooses the seeds):
+
+| scenarios | config |
+|---|---|
+| D01–D05 clean | `{"errors": {}, "interacting": {"I1": 0, "I2": 0}, "ensure_distractors": true}` — guarantees an invoice paid in two parts (D02) and a refunded overpayment (D03); equal invoice totals (D04), unidentified receipts, foreign currencies and records on the period's first and last day (D05) are present anyway |
+| D06–D08 duplicate invoice | `{"errors": {"duplicate_invoice": 1}, "interacting": {"I1": 0, "I2": 0}}` |
+| D09 missing allocation | `{"errors": {"payment_allocation": 1}, "interacting": {"I1": 0, "I2": 0}, "allocation": "missing"}` |
+| D10 partial allocation | the same with `"allocation": "partial"` |
+| D11 either | the same without `"allocation"`: the variant is drawn, 60 % partial |
+| D12–D13 conversion date or rate | `{"errors": {"fx_error": 1}, "interacting": {"I1": 0, "I2": 0}}` |
+| D14–D15 period | `{"errors": {"period_cutoff": 1}, "interacting": {"I1": 0, "I2": 0}}` |
+| D16–D18 interaction I1 | `{"errors": {}, "interacting": {"I1": 1, "I2": 0}}` — period-end foreign payment, partially allocated and converted at the wrong date |
+| D19–D20 interaction I2 | `{"errors": {}, "interacting": {"I1": 0, "I2": 1}}` — next-period foreign invoice booked in the period at the wrong rate |
+
+Any count up to 12 issues in total, `"difficulty": "hard"`, `n_invoices` and `distractors` combine with these.
+`grader/provenance.json` records `generator_version`, `seed`, the normalised `config`, the `company` (currencies,
+timezone, entities) and one entry per injection: `issue_id`, `type`, `scenario`, `description`, `documents_added`
+and `changes`, each `{journal, before, after}` with the full ledger rows before and after (journal keys:
+`inv:<invoice_id>`, `pay:<payment_id>`), so the books before the error can be rebuilt and checked independently
+(`auditenv/verify.py` does exactly that). For the paired checks rename `row_id`, `doc_id`, `invoice_id`,
+`payment_id`, `entity_id` consistently, including `invoice_refs`, truth and these journal keys; `fx_id` is the
+key `date:source:target` and stays.
+
+Run the jury's four blocks locally: `uv run python -m unittest tests.test_judge_contract tests.test_judge_reward
+tests.test_judge_scenarios tests.test_judge_paired` (C01–C20; Block 3 rows 1–20 and M01–M12; D01–D20; P01–P20).
+They are part of `auditenv.check`.
+
 ### Out-of-process evaluation (closed run)
 
 ```bash

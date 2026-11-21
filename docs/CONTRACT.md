@@ -101,7 +101,10 @@ default "train"), `max_steps` (100), `time_limit_s` (60), `errors`
 (`{type: count}`), `interacting` (`{"I1": n, "I2": n}`; both must be objects — both omitted → random mix,
 either given → exactly the listed counts, the rest 0), `n_invoices` (10–100), `distractors`
 (bool), `transform_seed` (int | null: benign relabel/permutation), `difficulty` ("default" |
-"hard"; default "default" — absent from the normalised config, so default episodes are unchanged).
+"hard"; default "default" — absent from the normalised config, so default episodes are unchanged), `allocation`
+("partial" | "missing" | null: which variant an injected `payment_allocation` takes; null = drawn, 60 % partial),
+`ensure_distractors` (bool, default false: at least one invoice paid in two legitimate parts and one refunded
+overpayment). The last two are also absent from the normalised config unless set (jury scenarios, `auditenv/jury.py`).
 Hard mode pads the ledger to a target of 900–1 400 rows before injection and selects up to three eligible invoices for credit-note reissues. Duplicates may be re-typed. The task text and `policy.ledger.credit_note` give the extra rules.
 
 A rejected seed or config raises `ValueError` (over `auditenv.server`: a bounded `{"error": ...}`) and leaves
