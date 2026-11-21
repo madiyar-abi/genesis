@@ -150,10 +150,10 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
 - [x] G24 (gemini3b) Regenerate the committed trajectories exactly as README says into /tmp/r20-gemini3b/ and
   `diff` them against `trajectories/` and `trajectories.jsonl` — files: night/LOG.md — accept: the commands used, diff
   exit codes, any differing file named.
-- [ ] Z3 (rb) Semantic review of docs/CHECKS.md: for 25 rows spread over all blocks, open the cited test and state
+- [x] Z3 (rb) Semantic review of docs/CHECKS.md: for 25 rows spread over all blocks, open the cited test and state
   whether it actually asserts what the row claims (not only that it exists) — files: night/LOG.md — accept: per row
   "row id → test → asserts yes/no/partly + one-line reason"; every no/partly listed at the end.
-- [ ] Z4 (rb) Hand-driven stdio server session as README/CONTRACT describe (`auditenv.server`): send reset, a
+- [x] Z4 (rb) Hand-driven stdio server session as README/CONTRACT describe (`auditenv.server`): send reset, a
   list_records, a get_record, a malformed line, submit and one step after submit; compare each response with the
   documented example/shape — files: night/LOG.md — accept: every request/response pair quoted; any difference from
   the docs called out with doc file:line.

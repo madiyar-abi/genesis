@@ -379,3 +379,161 @@ Unexplained violations line:
 unexplained violations: 46 (0 in clean configs)
 2026-11-22 01:54 lead — Applied codex2 Y2/Y3 doc corrections (subagent re-verified each; skipped rewording-only items and the CONTRACT:7 TASKS remark). check 563 tests pass, sync_docs no drift, doc tests 19 OK. Commit c8b8d70.
 2026-11-22 01:57 gemini2a — G33: Post-doc-fixes check and sync_docs validation. auditenv.check --json /tmp/r20-gemini2a/c.json: exit code 0, wall time 51.51s, last line: ALL CHECKS PASSED in 51.4 s. scripts/sync_docs.py --check --json /tmp/r20-gemini2a/c.json: exit code 0, wall time 0.04s, last line: All documentation tables match measured data.
+2026-11-22 02:03 rb — Z3 semantic review of docs/CHECKS.md: 25 rows spread over all six blocks (jury definitions C/B3/M/P, blocks 1–5). Opened every cited test and checked what it actually asserts, not just that it exists. Evidence run: `env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_paired tests.test_env tests.test_jury tests.test_fuzz tests.test_server tests.test_verify tests.test_hardening tests.test_mutate_reward tests.test_golden tests.test_hashseed tests.test_readme_snippets tests.test_trajectory_files` → Ran 174 tests, OK, 11.1 s, exit 0; `... tests.test_reward_attacks` → Ran 18 tests, OK, 2.8 s, exit 0.
+Per row (row → test → verdict + reason):
+| Row | Cited test (opened) | Asserts? | Reason |
+|---|---|---|---|
+| C05/C06 | test_judge_contract.py:114 test_c05_c06_pages_cover_the_table_and_repeat | yes | asserts seen row_ids == full ledger order (no gaps/repeats, ≥101 rows) and two replays of cursor[1] give identical results |
+| C10 | test_judge_contract.py:148 test_c10_calculator_refuses_code | yes | 3 code/file-access expressions each give bounded calc_error; asserts no "root:" in the response |
+| C16 | test_judge_contract.py:199 test_c16_submit_as_action_100 | yes | 99 non-truncating steps then submit → (terminated, truncated, accepted)=(True,False,True), inspection_steps=99, tp=1 |
+| C18 | test_judge_contract.py:221 test_c18_time_limit_truncates_with_empty_findings | yes | injected clock jumps to 60.5 s → truncated with time_limit error, grader log end=time_limit tp=0 (empty answer graded) |
+| C20 | test_judge_contract.py:266 test_c20_no_closed_data_in_any_policy_channel | yes | walks all 4 tables, 10 docs, error paths and submit on both fixtures; asserts FORBIDDEN_KEYS absent, tmp path absent, every truth issue_id absent |
+| B3-12 | test_judge_reward.py:95 test_b3_12_five_records_times_four_types | yes | 20 brute-force findings; assertScore exact TP=1 FP=19 F1=2/21 reward=Fraction(-871,1050) |
+| M10 | test_judge_reward.py:168 test_m10_maximum_matching_not_greedy | yes | asserts TP=2 (greedy gives 1) and the exact assignment {finding0→B, finding1→A} |
+| P01–P20 | test_judge_paired.py:116 test_pairs | yes | per pair: copy re-verifies, replay byte-identical, oracle back-maps to original answer, metrics equal at 0/6/37 steps, broken evidence gives fn=1 on both sides |
+| 1 Reset/step lifecycle | test_env.py:56 test_reset_observation_and_info (+ :107 isolates) | yes | exact obs key set, steps_remaining=100, info episode_id matches, exactly the 5 tool types; calculator leaves 99 |
+| 1 Bounded errors | test_jury.py:62 test_invalid_action_name (+ invalid_table, test_env bad_limit/bad_cursor) | yes | assertBoundedError checks code, message ≤200 chars, step consumed, reward 0, no termination |
+| 1 Action fuzz ≥20,000 | test_fuzz.py:125 test_seeded_actions_preserve_step_contract | yes | 205 episodes × 100 steps; asserts ≥20,000 actions, schema match == is_valid for every action, obs schema + json.dumps(allow_nan=False), bounded error codes |
+| 1 Step limit 100/101 | test_jury.py:119 test_step_101_and_actions_after_truncated | yes | truncated only at k=100 with reward -1; step 101 (calc and submit) → episode_over, step stays 100 |
+| 1 Out-of-process isolation | test_server.py:60 eval_mode_hides_reward (+ :130 oversized, :175 subprocess utf8) | yes | every remote reward 0.0 and info {}, no truth/provenance/seed keys, 2 grader-log records with reward+f1; 10 MB line → "request too large", bad UTF-8 → error, server keeps serving, exit 0 |
+| 2 Double-entry balance | test_jury.py:285 test_balanced_before_and_after_errors | yes | per journal debit==credit on reverted AND injected tables; pre-injection discrepancies == [] |
+| 2 Truth re-derivation | test_verify.py:11 test_generated_episodes_verify (+ :52 truth currency) | yes | 60 seeds × 4 configs verify_episode == []; tampered truth currency detected. (The row's 600/600 figure comes from the cited verify CLI, not this test's 240 episodes — command column is correct) |
+| 2 Evidence sufficiency | test_jury.py:295 every_evidence_id_reachable + test_hardening.py:105/:150 | yes | every evidence id reachable via get_document/get_record; duplicate test asserts 4 evidence sets, each independently grades TP=1 FP=0; partial-allocation test asserts the posted AR credit is required |
+| 2 Accounting edge cases | test_jury.py:345/:350/:357 EdgeCaseDataTests | yes | asserts hits exist (JPY, refunds, splits, unidentified, multi-payment, midnight crossing) and each hit has empty truth and 0 discrepancies; JPY exponent 0 |
+| 3 Duplicate claims | test_jury.py:224 test_duplicate_finding_is_one_tp_and_one_fp | yes | tp==len(correct), fp==1, reward strictly lower than without the duplicate |
+| 3 Clean silence max 1.0 | test_jury.py:229 + test_reward_attacks.py:131 | yes | jury test asserts F1=1.0 reward=0.98 at 10 steps; attacks test asserts reward exactly 1.0 at 0 steps and fabricated accusations fp≥6 — together they cover the row's claim |
+| 3 Mutation testing 22/22 | test_mutate_reward.py:9 test_patterns_match_exactly_once | partly | the test only asserts each of the 22 mutation patterns occurs exactly once in current source (definitions not stale); it does NOT run the mutants. The kill count is enforced by the cited command scripts/mutate_reward.py:92 `return int(killed != len(MUTANTS))` — row is honest because the command column carries the claim, but the test alone doesn't assert "22/22 killed" |
+| 3 Attack search 11,000 | test_reward_attacks.py:495 test_handoff_r1_automatic_attack_search | yes | asserts passed, ≥10,000 mutations, 0 violations, 20 seeds (≥4 clean, ≥10 dirty), all 10 MUTATION_FAMILIES non-empty; exact 11,000 is the measured run output |
+| 4 Golden hashes 80 | test_golden.py:21 test_generator_golden_hashes | yes | asserts count==80 (20 seeds × 4 configs) and mismatches==[] against committed tests/golden_hashes.json |
+| 4 Hash-seed independence | test_hashseed.py:35 test_hashseed_independence | yes | 3 subprocesses (PYTHONHASHSEED 0/1/4242) each print 7 sha256 digests; asserts the whole line identical → all 7 equal |
+| 5 README snippets "3 of 3" | test_readme_snippets.py:42 test_readme_python_snippets | partly | executes every extracted ```python snippet (currently 3) and checks the reward range only for the snippet under heading "Using the environment"; asserts len ≥ 2, not exactly 3, and "the first" is by heading, not position. Claim is true today (3 blocks in README) but the count is measured, not asserted |
+| 5 Trajectory logs | test_trajectory_files.py:26/:47/:108 + CaseTrajectoriesTest:132/:153 | yes | exact 7 keys, trajectory schema, 10 episodes/file, consecutive steps, zero intermediate reward, terminal last step, no truth markers; full action replay compares every obs/reward/flag; all 7 files + trajectories.jsonl regenerate byte-for-byte; case file = concatenation of the two named parts, 20 episodes, 10 hard |
+Summary: 23 yes, 2 partly, 0 no. The two "partly" rows (Reward mutation testing; README run steps) are still backed by their cited commands — the gap is only that the cited unit test asserts less than the row's measured-result text. No row cites a missing or misnamed test. Assumption: "25 rows spread over all blocks" satisfied with 8 jury-definition rows + 5/4/4/2/2 rows from blocks 1–5.
+## Z4 (rb) — hand-driven `auditenv.server` stdio session — 2026-11-22 02:19
+
+The six requests the task names (reset, list_records, get_record, a malformed line, submit, one step after
+submit) plus `close`, piped to the server's stdin. Public mode: `AUDITENV_SECRET` unset (public key → a
+deterministic episode), eval, seed 2001, `errors.fx_error=1`, `interacting.I1=I2=0`. Two runs of the same input
+gave byte-identical stdout (`cmp` exit 0), so every id below is reproducible; the `get_record` id and the
+`episode_id` in the submit are the ones the server itself returned in a reset+list probe with the same seed
+(`ep_3cf976410457`, first ledger row `GL-000321`).
+
+```bash
+env -u AUDITENV_SECRET uv run python -m auditenv.server \
+  < /tmp/r20-rb/z4b/session.in > /tmp/r20-rb/z4b/session3.out 2> /tmp/r20-rb/z4b/session2.err
+```
+
+Exit code **0** · wall time **0.035 s** (`date +%s.%N` around the process) · stderr **0 bytes** ·
+**6 response lines for 7 request lines**: `close` returns nothing.
+
+### Request/response pairs, verbatim
+
+**1. `reset`** — first observation + reset info
+
+request:
+```json
+{"cmd": "reset", "seed": 2001, "config": {"mode": "eval", "errors": {"fx_error": 1}, "interacting": {"I1": 0, "I2": 0}}}
+```
+response:
+```json
+{"observation": {"task": "You are auditing one company for one reporting period. Find misstatements in the ledger caused by: duplicate_invoice (the same invoice entered twice: same entity, currency and identical line items), payment_allocation (a payment's remittance says it pays an invoice but the ledger credits less to that invoice's receivable), fx_error (a foreign-currency amount converted with a rate of the wrong date), period_cutoff (an invoice issued outside the period booked in this period). The books may be clean. Split payments, partial payments, refunds, unidentified receipts and recurring equal amounts can be legitimate. Use the tools to read records (max 50 rows per page) and submit findings once; every action costs a step (max 100 including submit).", "manifest": {"schema_version": "1.0", "generator_version": "1.0.0", "episode_id": "ep_3cf976410457", "base_currency": "KZT", "period_start": "2026-05-01", "period_end": "2026-05-31", "timezone": "+05:30", "counts": {"ledger": 240, "invoices": 37, "payments": 18, "fx": 318, "documents": 55}, "rounding": "ROUND_HALF_UP", "amount_exponents": {"EUR": 2, "JPY": 0, "KZT": 2, "USD": 2}}, "policy": {"base_currency": "KZT", "timezone": "+05:30", "period": {"start": "2026-05-01", "end": "2026-05-31", "rule": "a record belongs to the period iff its timestamp converted to the company timezone has a date in [start, end] (inclusive)"}, "fx": {"rate_date": "transaction date in the company timezone (invoice: issued_at; payment: timestamp)", "direction": "rate = units of target_currency per 1 unit of source_currency (major units)", "conversion": "base_minor = round_half_up(amount_minor / 10^exp_src * rate * 10^exp_base)"}, "rounding": "ROUND_HALF_UP to integer minor units", "ledger": {"currency": "every ledger row is in base_currency", "accounts": {"1000": "Cash", "1200": "Accounts receivable", "2900": "Unapplied cash", "4000": "Revenue", "6100": "Rent", "6200": "Payroll", "6300": "Software", "6400": "Bank fees", "7900": "FX gain/loss"}, "invoice": "Dr 1200 / Cr 4000 at the invoice issue-date rate, only for invoices issued in the period", "payment": "Dr 1000 at the payment-date rate; Cr 1200 per invoice_ref at that invoice's issue-date rate; remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; difference to 7900; negative amount = refund (Dr 2900 / Cr 1000)", "expense": "Dr 6xxx / Cr 1000"}, "findings": {"amount": "misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the AR debit of the later-issued copy; fx_error: abs(posted - correct); period_cutoff: the AR debit posted; payment_allocation: expected AR credit for the ref - AR credit posted", "tolerance": "abs(claimed - expected) <= tolerance_minor; tolerance_minor is 0, so the amount must be exact", "tolerance_minor": 0, "affected_ids": {"duplicate_invoice": "[original_invoice_id, duplicate_invoice_id]", "payment_allocation": "[invoice_id, payment_id]", "fx_error": "[invoice_id] or [payment_id]", "period_cutoff": "[invoice_id]"}, "evidence": "doc_id / row_id / fx_id values; must include at least one full acceptable evidence set: duplicate_invoice: both invoice docs + one AR (or revenue) row of each invoice, the original and the later copy; payment_allocation: payment doc + invoice doc + the AR credit row of that invoice in the payment (or, if nothing was allocated to it, the 2900 row) + the invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row + the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row"}}, "tools": [{"type": "list_records", "params": {"table": "ledger|invoices|payments|fx", "cursor": "null|str", "limit": "int<=50"}, "returns": "{rows, next_cursor, total}; invoice rows omit line_items"}, {"type": "get_record", "params": {"table": "ledger|invoices|payments|fx", "id": "str"}, "returns": "{record}"}, {"type": "get_document", "params": {"doc_id": "str"}, "returns": "{kind, document}"}, {"type": "calculator", "params": {"expression": "str: + - * / ( ) and decimals only"}, "returns": "{value}"}, {"type": "submit", "params": {"findings": "{episode_id, findings:[...]}"}, "returns": "ends the episode"}], "steps_remaining": 100}, "info": {"episode_id": "ep_3cf976410457", "mode": "eval", "max_steps": 100}}
+```
+
+**2. `list_records`** — `limit: 3` honoured, stable cursor
+
+request:
+```json
+{"cmd": "step", "action": {"type": "list_records", "table": "ledger", "cursor": null, "limit": 3}}
+```
+response:
+```json
+{"observation": {"step": 1, "steps_remaining": 99, "result": {"rows": [{"row_id": "GL-000321", "timestamp": "2026-05-01T08:51:00+05:30", "account": "4000", "debit_minor": 0, "credit_minor": 63879463, "currency": "KZT", "entity_id": "E2159", "invoice_id": "F0173607", "payment_id": null}, {"row_id": "GL-000322", "timestamp": "2026-05-01T08:51:00+05:30", "account": "1200", "debit_minor": 63879463, "credit_minor": 0, "currency": "KZT", "entity_id": "E2159", "invoice_id": "F0173607", "payment_id": null}, {"row_id": "GL-000323", "timestamp": "2026-05-01T10:59:00+05:30", "account": "1000", "debit_minor": 0, "credit_minor": 2818744, "currency": "KZT", "entity_id": null, "invoice_id": null, "payment_id": null}], "next_cursor": "ledger:3", "total": 240}, "error": null}, "reward": 0.0, "terminated": false, "truncated": false, "info": {}}
+```
+
+**3. `get_record`** — record for the id just listed
+
+request:
+```json
+{"cmd": "step", "action": {"type": "get_record", "table": "ledger", "id": "GL-000321"}}
+```
+response:
+```json
+{"observation": {"step": 2, "steps_remaining": 98, "result": {"record": {"row_id": "GL-000321", "timestamp": "2026-05-01T08:51:00+05:30", "account": "4000", "debit_minor": 0, "credit_minor": 63879463, "currency": "KZT", "entity_id": "E2159", "invoice_id": "F0173607", "payment_id": null}}, "error": null}, "reward": 0.0, "terminated": false, "truncated": false, "info": {}}
+```
+
+**4. `malformed line`** — line 4 is `{"cmd": "step", "action": {"type": "list_records", "table": "ledger"` — no closing braces
+
+request:
+```json
+{"cmd": "step", "action": {"type": "list_records", "table": "ledger"}
+```
+response:
+```json
+{"error": "invalid json"}
+```
+
+**5. `submit`** — empty findings (eval) — terminates
+
+request:
+```json
+{"cmd": "step", "action": {"type": "submit", "findings": {"episode_id": "ep_3cf976410457", "findings": []}}}
+```
+response:
+```json
+{"observation": {"step": 3, "steps_remaining": 97, "result": {"submitted": true}, "error": null}, "reward": 0.0, "terminated": true, "truncated": false, "info": {}}
+```
+
+**6. `step after submit`** — `calculator` after the terminal submit
+
+request:
+```json
+{"cmd": "step", "action": {"type": "calculator", "expression": "1+1"}}
+```
+response:
+```json
+{"observation": {"step": 3, "steps_remaining": 97, "result": null, "error": {"code": "episode_over", "message": "episode has ended; call reset()"}}, "reward": 0.0, "terminated": true, "truncated": false, "info": {}}
+```
+
+**7. `close`** — no response line (see the doc note below)
+
+request:
+```json
+{"cmd": "close"}
+```
+
+### Comparison with the docs
+
+Machine-checked shape assertions (all pass): the reset response's top level is exactly
+`{observation, info}`, its observation exactly `{task, manifest, policy, tools, steps_remaining}`, its info
+exactly `{episode_id, mode, max_steps}`; every step response is exactly
+`{observation, reward, terminated, truncated, info}`, every step observation exactly
+`{step, steps_remaining, result, error}`; all rewards `0.0`, every step `info` `{}` (eval mode),
+`truncated` false throughout.
+
+| pair | documented shape | verdict |
+|---|---|---|
+| 1 reset | `docs/CONTRACT.md:122-123` — first observation `{task, manifest, policy, tools, steps_remaining}`, reset `info` = `{episode_id, mode, max_steps}` | matches, key for key |
+| 1 reset | `auditenv/server.py:15` — reset response is `{"observation", "info"}` (no reward/terminated/truncated) | matches |
+| 2 list_records | `docs/CONTRACT.md:130` — → `{rows, next_cursor, total}`, max 50 rows, cursor `table:offset` | matches: 3 rows for `limit: 3`, `next_cursor` `"ledger:3"`, `total` 240 = `manifest.counts.ledger` |
+| 3 get_record | `docs/CONTRACT.md:132` — → `{record}` | matches: `{"record": {row_id, timestamp, account, debit_minor, credit_minor, currency, entity_id, invoice_id, payment_id}}` |
+| 4 malformed line | `auditenv/server.py:16,163` — `{"error": "..."}`, here `{"error": "invalid json"}` | matches, and it costs **no** step (the submit that follows is step 3, not 4), so the counter still follows `docs/CONTRACT.md:126` |
+| 5 submit | `docs/CONTRACT.md:135` (→ terminates), `:142` (in eval the policy sees `{"submitted": true}`), `:144-145` (reward 0.0, result only to the grader log) | matches: `result {"submitted": true}`, `terminated: true`, `reward 0.0`, `info {}` |
+| 6 step after submit | `docs/CONTRACT.md:143` — every later action returns `episode_over` without consuming a step, counter and outcome preserved | matches: `{"code": "episode_over", "message": "episode has ended; call reset()"}`, step 3, 97 steps left, `terminated` still true |
+| 7 close | `auditenv/server.py:12-16` — `close` is a request; the response list has only reset/step/error shapes | matches: no response line, process exits 0 |
+
+No behavioural difference from the docs. Two documentation gaps found (this task's file list is `night/LOG.md`
+only, so recorded here instead of fixed):
+
+- `README.md:367` lists `{"cmd": "close"}` among the JSON-line commands but never says it produces no response;
+  a client that reads one line after `close` waits forever. Only `auditenv/server.py:15-16`, whose response list
+  omits `close`, implies it.
+- Framing-level errors are undocumented outside the module: `{"error": "invalid json"}` and its siblings
+  (`"request too large"`, `"invalid utf-8"`, `"invalid input type"`, `"request must be a JSON object"`,
+  `"unknown cmd"` — `auditenv/server.py:138-166,193`) appear nowhere in `docs/CONTRACT.md` (its error section,
+  `:137-142`, lists action error codes only) or in README; `docs/CONTRACT.md:112` covers only a rejected
+  seed/config. A client in another language needs the framing errors spelled out — suggested for a `(lead)` doc pass.
+
+Assumption: public mode is the right setting for this evidence task — without `--episodes` there is no hidden
+queue, the run is reproducible, and the closed (`--episodes`) path is already covered by `tests/test_server.py`
+and by the round-19 closed-mode evidence. Assumption: `close` was added as a seventh request so the session ends
+explicitly; EOF ends it the same way (exit 0, 0 bytes on stderr).
