@@ -128,3 +128,47 @@ Failing tests: 0 (none). No flakiness or timezone/hashseed sensitivity found acr
   FUZZ PASSED
 Problems: 0 problem lines across 6,000 episodes (default + hard).
 Next: T41 (jury_run baseline evaluation on seed bases 10000, 11000, 12000, 13000, 14000).
+
+2026-11-21 22:04 gemini1b — T41: jury_run baseline evaluation on seed bases 10000, 11000, 12000, 13000, 14000.
+Command: `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r18-gemini1b/j<B>.json`
+- Seed base 10000 (exit 0, wall 2.09s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.030   0.033
+reconcile         1.000  1.000  1.000    0.960    21.0    24    0.033   0.035
+flag_all          0.000  0.000  0.000   -1.000     3.7     4    0.028   0.030
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.003   0.004
+
+- Seed base 11000 (exit 0, wall 2.06s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.710    33.0    33    0.030   0.032
+reconcile         1.000  1.000  1.000    0.961    20.4    24    0.031   0.033
+flag_all          0.000  0.000  0.000   -1.000     3.4     4    0.028   0.029
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.004   0.004
+
+- Seed base 12000 (exit 0, wall 2.10s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.031   0.032
+reconcile         1.000  1.000  1.000    0.959    21.4    24    0.031   0.033
+flag_all          0.000  0.000  0.000   -1.000     3.6     4    0.027   0.028
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.004   0.004
+
+- Seed base 13000 (exit 0, wall 2.04s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.030   0.031
+reconcile         1.000  1.000  1.000    0.962    20.1    25    0.031   0.033
+flag_all          0.000  0.000  0.000   -1.000     3.3     4    0.027   0.028
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.003   0.004
+
+- Seed base 14000 (exit 0, wall 2.07s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.030   0.031
+reconcile         1.000  1.000  1.000    0.960    20.9    24    0.031   0.033
+flag_all          0.000  0.000  0.000   -1.000     3.6     4    0.028   0.030
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.004   0.004
+
+Checks:
+- Oracle F1 = 1.000 on all runs (none < 1).
+- Reconcile F1 = 1.000 on all runs (none < 1).
+- Random explorer return <= -0.710 on all runs (none > -0.5).
+- Flag_all return = -1.000 on all runs (none > -0.5).
+Next: T42 (stress reconcile and reconcile_hard on seeds 6000-6299).
