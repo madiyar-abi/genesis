@@ -1,16 +1,19 @@
 """Tests for episode export and configuration splits (T16)."""
 
+from contextlib import redirect_stdout
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
-from auditenv.export import export_split, main
+from auditenv.export import export_episode, export_split, main
 from auditenv.generator import FX_FIELDS, LEDGER_FIELDS, generate
 from auditenv.run import load_episodes
-from auditenv.verify import verify_episode
+from auditenv.verify import main as verify_main, verify_episode
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -64,6 +67,82 @@ class TestExport(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, reason):
                         export_split(spec, out)
                     self.assertEqual(_dir_tree_hashes(out), original)
+
+    def test_failed_export_leaves_destination_untouched(self):
+        """A generation error, a write error or a failed swap leaves every path and byte as before (audit f270e4d)."""
+        real_export, real_replace = export_episode, os.replace
+
+        def failing_write():
+            calls = [0]
+
+            def write(ep, ep_dir):
+                calls[0] += 1
+                real_export(ep, ep_dir)
+                if calls[0] == 2:
+                    raise OSError("disk full")
+            return mock.patch("auditenv.export.export_episode", side_effect=write)
+
+        def failing_swap(n):  # 6 renames here: old episode 1 and index out, episodes 1-3 and the index in
+            calls = [0]
+
+            def replace(src, dst):
+                calls[0] += 1
+                if calls[0] == n:
+                    raise OSError("rename failed")
+                return real_replace(src, dst)
+            return mock.patch("auditenv.export.os.replace", side_effect=replace)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            spec, out = Path(tmp) / "config.json", Path(tmp) / "out"
+            spec.write_text(json.dumps({"seeds": [1]}))
+            export_split(spec, out)
+            (out / "notes.txt").write_text("not an episode\n")  # foreign files must survive too
+            original = _dir_tree_hashes(out)
+            spec.write_text(json.dumps({"episodes": [{"seed": 1}, {"seed": 2},
+                                                     {"seed": 3, "config": {"errors": {"fx_error": 13}}}]}))
+            with self.assertRaisesRegex(ValueError, "at most 12 issues"):
+                export_split(spec, out)
+            self.assertEqual(_dir_tree_hashes(out), original)
+            spec.write_text(json.dumps({"seeds": [1, 2, 3]}))
+            for name, failure in (("write", failing_write()), ("first swap", failing_swap(1)),
+                                  ("middle swap", failing_swap(3)), ("last swap", failing_swap(6))):
+                with self.subTest(failure=name):
+                    with failure, self.assertRaises(OSError):
+                        export_split(spec, out)
+                    self.assertEqual(_dir_tree_hashes(out), original)
+                    self.assertEqual(sorted(os.listdir(tmp)), ["config.json", "out"], "temporary directory left")
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(verify_main(["--dir", str(out)]), 0)
+
+            # a valid retry publishes the new split and keeps the foreign file
+            index = export_split(spec, out)
+            self.assertEqual([e["seed"] for e in index], [1, 2, 3])
+            self.assertEqual((out / "notes.txt").read_text(), "not an episode\n")
+            self.assertEqual(sorted(os.listdir(tmp)), ["config.json", "out"])
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(verify_main(["--dir", str(out)]), 0)
+            fresh = Path(tmp) / "fresh"
+            export_split(spec, fresh)
+            retried = _dir_tree_hashes(out)
+            del retried["notes.txt"]
+            self.assertEqual(retried, _dir_tree_hashes(fresh))
+
+    def test_failed_export_to_new_destination_creates_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            spec, out = Path(tmp) / "config.json", Path(tmp) / "new" / "split"
+            spec.write_text(json.dumps({"episodes": [{"seed": 1}, {"seed": 3, "config": {"errors": {"fx_error": 13}}}]}))
+            with self.assertRaisesRegex(ValueError, "at most 12 issues"):
+                export_split(spec, out)
+            self.assertEqual(os.listdir(tmp), ["config.json"])
+            spec.write_text(json.dumps({"seeds": [1]}))
+            with mock.patch("auditenv.export.export_episode", side_effect=OSError("disk full")), \
+                    self.assertRaises(OSError):
+                export_split(spec, out)
+            self.assertFalse(out.exists())
+            self.assertEqual(os.listdir(out.parent), [], "temporary directory left")
+            export_split(spec, out)
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(verify_main(["--dir", str(out)]), 0)
 
     def test_all_episodes_pass_verifier(self):
         """Every episode across train, dev, eval_example, and eval_hard passes the independent verifier."""
