@@ -31,8 +31,11 @@ _ORACLE = [
 ]
 
 
+_KNOWN = {"doc_small", "doc_large"}
+
+
 def _grade(truth, findings, steps=0):
-    return grade(truth, {"episode_id": _EPISODE_ID, "findings": findings}, _EPISODE_ID, steps)
+    return grade(truth, {"episode_id": _EPISODE_ID, "findings": findings}, _EPISODE_ID, steps, _KNOWN)
 
 
 class ExperimentalRewardTests(unittest.TestCase):
@@ -59,15 +62,15 @@ class ExperimentalRewardTests(unittest.TestCase):
         findings = [*_ORACLE, {**_ORACLE[0], "claimed_amount_minor": 500}]
         result = _grade(_TRUTH, findings, steps=10)
         original = copy.deepcopy(result)
-        self.assertEqual(experimental_reward(result, _TRUTH, findings), 0.58)
+        self.assertAlmostEqual(experimental_reward(result, _TRUTH, findings), 0.58, delta=1e-9)
         self.assertEqual(result, original)
         self.assertEqual(_grade(_TRUTH, findings, steps=10), original)
-        self.assertEqual(result["reward"], 0.58)  # Both F1 scores happen to be 0.8 here.
+        self.assertAlmostEqual(result["reward"], 0.58, delta=1e-9)  # Both F1 scores happen to be 0.8 here.
 
         findings[-1]["claimed_amount_minor"] = 2000
         larger_fp = _grade(_TRUTH, findings, steps=10)
         self.assertEqual(larger_fp["reward"], original["reward"])
-        self.assertEqual(experimental_reward(larger_fp, _TRUTH, findings), -0.02)
+        self.assertAlmostEqual(experimental_reward(larger_fp, _TRUTH, findings), -0.02, delta=1e-9)
 
     def test_zero_amount_junk_is_not_free(self):
         # Red-team round 9: claimed_amount_minor 0 made false positives weightless (oracle + junk = 1.0).
@@ -92,5 +95,5 @@ class ExperimentalRewardTests(unittest.TestCase):
         self.assertLessEqual(experimental_reward(result, _TRUTH, with_oracle), result["reward"])
 
     def test_invalid_submission_keeps_fixed_penalty(self):
-        result = grade(_TRUTH, None, _EPISODE_ID, 0)
+        result = grade(_TRUTH, None, _EPISODE_ID, 0, _KNOWN)
         self.assertEqual(experimental_reward(result, _TRUTH, []), -1.0)

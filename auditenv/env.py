@@ -9,7 +9,7 @@ import time
 from . import calculator
 from .generator import generate
 from .experimental import experimental_reward
-from .matcher import grade, public_summary
+from .matcher import grade, public_ids, public_summary, tolerance_of
 
 TABLES = {"ledger": "row_id", "invoices": "invoice_id", "payments": "payment_id", "fx": "fx_id"}
 PAGE_MAX = 50
@@ -97,6 +97,8 @@ class AuditEnv:
         self._index = {name: {r[key]: r for r in t[name]} for name, key in TABLES.items()}
         self._docs = {d["doc_id"]: ("invoice", d) for d in t["invoices"]}
         self._docs.update({d["doc_id"]: ("payment", d) for d in t["payments"]})
+        self._known_ids = public_ids(t)
+        self._tolerance = tolerance_of(self._ep["policy"])
         self._steps = 0
         self._done = False
         self._terminated = self._truncated = False
@@ -168,7 +170,8 @@ class AuditEnv:
 
     # ------------------------------------------------------------------ internals
     def _finish(self, submission, inspection_steps: int, how: str, error: str | None = None) -> dict:
-        res = grade(self._ep["truth"], None if error else submission, self.episode_id, inspection_steps)
+        res = grade(self._ep["truth"], None if error else submission, self.episode_id, inspection_steps,
+                    self._known_ids, self._tolerance)
         if error:  # grade(None) is the invalid-submission result; keep the real reason
             res["error"] = error
         # experimental materiality-weighted reward: grader-side only, reported next to the shared one

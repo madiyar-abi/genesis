@@ -7,23 +7,38 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-TESTS = ("tests.test_matcher", "tests.test_reward_attacks", "tests.test_jury", "tests.test_metrics")
+TESTS = ("tests.test_matcher", "tests.test_reward_attacks", "tests.test_jury", "tests.test_metrics",
+         "tests.test_judge_reward")
 MUTANTS = (
-    ("matcher", "exclusive amount boundary", "<= tolerance(", "< tolerance("),
-    ("matcher", "wider tolerance", "expected_minor // 1000", "expected_minor // 100"),
-    ("matcher", "zero tolerance floor", "max(1, expected_minor", "max(0, expected_minor"),
+    ("matcher", "exclusive amount boundary", "\"]) <= tolerance,", "\"]) < tolerance,"),
+    ("matcher", "off-by-one tolerance", "\"]) <= tolerance,", "\"]) <= tolerance + 1,"),
+    ("matcher", "default tolerance one", '.get("tolerance_minor", 0)', '.get("tolerance_minor", 1)'),
     ("matcher", "ignore type", 'f["type"] == issue["type"]', "True"),
-    ("matcher", "ignore identifiers", 'f["affected_ids"] == sorted(issue["affected_ids"])', "True"),
+    ("matcher", "ignore identifiers", 'set(f["affected_ids"]) == set(issue["affected_ids"])', "True"),
     ("matcher", "ignore currency", 'f["currency"] == issue["currency"]', "True"),
-    ("matcher", "ignore amount", "<= tolerance(issue[\"expected_amount_minor\"])", ">= 0"),
-    ("matcher", "ignore evidence", 'any(set(s) <= set(f["evidence_ids"]) for s in issue["evidence_sets"])', "True"),
-    ("matcher", "reject extra evidence", 'set(s) <= set(f["evidence_ids"])', 'set(s) == set(f["evidence_ids"])'),
-    ("matcher", "allow repeat matches", "if ii not in matched and all(", "if all("),
+    ("matcher", "ignore amount", 'abs(f["claimed_amount_minor"] - issue["expected_amount_minor"]) <= tolerance',
+     "True"),
+    ("matcher", "ignore evidence", 'any(set(s) <= evidence for s in issue["evidence_sets"])', "True"),
+    ("matcher", "reject extra evidence", "set(s) <= evidence for", "set(s) == evidence for"),
+    ("matcher", "accept unknown evidence", "evidence <= known_ids and ", ""),
+    ("matcher", "greedy first fit", "if len(fixed) + 1 + _max_matching(adj, rest, set(fixed.values()) | {f}) == best:",
+     "if True:"),
+    ("matcher", "tie-break in truth order", 'order = sorted(range(len(issues)), key=lambda ii: issues[ii]["issue_id"])',
+     "order = list(range(len(issues)))"),
+    ("matcher", "credit repeat findings", "tp = len(matched)",
+     "tp = sum(1 for fi in range(len(norm)) if any(fi in a for a in adj.values()))"),
+    ("schema", "strip ids", '"affected_ids": sorted(set(f["affected_ids"])),',
+     '"affected_ids": sorted({a.strip() for a in f["affected_ids"]}),'),
+    ("schema", "uppercase currency", '"currency": f["currency"],', '"currency": f["currency"].upper(),'),
+    ("schema", "evidence limit after dedupe", 'if len(f["evidence_ids"]) > MAX_EVIDENCE:',
+     'if len(set(f["evidence_ids"])) > MAX_EVIDENCE:'),
     ("metrics", "swap precision and recall", "return precision, recall, f1", "return recall, precision, f1"),
     ("metrics", "wrong empty F1", "if predicted or actual else 1.0", "if predicted or actual else 0.0"),
     ("metrics", "ignore false negatives in F1", "(predicted + actual)", "(predicted + predicted)"),
     ("metrics", "increase step cost", "0.002 * inspection_steps", "0.005 * inspection_steps"),
     ("metrics", "remove lower reward bound", "max(-1.0, min(1.0, reward))", "min(1.0, reward)"),
+    ("metrics", "round reward to six places", "return max(-1.0, min(1.0, reward))",
+     "return round(max(-1.0, min(1.0, reward)), 6)"),
 )
 
 

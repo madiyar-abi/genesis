@@ -4,7 +4,7 @@ import unittest
 
 from auditenv.env import AuditEnv
 from auditenv.generator import generate
-from auditenv.matcher import match
+from auditenv.matcher import match, public_ids
 from auditenv.policies.reconcile import Reconcile, reconcile_findings
 from auditenv.run import run_episode
 
@@ -21,7 +21,7 @@ class TestReconcileFindings(unittest.TestCase):
         for seed in range(5):
             ep = generate(seed, cfg)
             findings = reconcile_findings(ep["manifest"], ep["tables"])
-            res = match(ep["truth"]["issues"], findings)
+            res = match(ep["truth"]["issues"], findings, public_ids(ep["tables"]))
             self.assertEqual(len(findings), 0, f"Expected 0 findings on clean seed {seed}, got {len(findings)}")
             self.assertEqual(res["f1"], 1.0)
 
@@ -31,7 +31,7 @@ class TestReconcileFindings(unittest.TestCase):
         for seed in range(2000, 2010):
             ep = generate(seed)
             findings = reconcile_findings(ep["manifest"], ep["tables"])
-            res = match(ep["truth"]["issues"], findings)
+            res = match(ep["truth"]["issues"], findings, public_ids(ep["tables"]))
             f1_scores.append(res["f1"])
             self.assertGreaterEqual(res["recall"], 0.8, f"Seed {seed} recall low: {res['recall']}")
         mean_f1 = sum(f1_scores) / len(f1_scores)

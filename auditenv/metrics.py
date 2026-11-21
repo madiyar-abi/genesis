@@ -12,6 +12,6 @@ def prf1(tp: int, fp: int, fn: int) -> tuple[float, float, float]:
 
 
 def terminal_reward(f1: float, inspection_steps: int) -> float:
-    """Subtract inspection cost, clip the reward, and round to six places."""
+    """Subtract inspection cost and clip the reward. Not rounded: the jury compares to 1e-9."""
     reward = 2 * f1 - 1 - 0.002 * inspection_steps
-    return round(max(-1.0, min(1.0, reward)), 6)
+    return max(-1.0, min(1.0, reward))

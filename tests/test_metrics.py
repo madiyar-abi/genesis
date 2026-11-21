@@ -31,5 +31,7 @@ class MetricsTests(unittest.TestCase):
     def test_upper_clip(self):
         self.assertEqual(terminal_reward(1.1, 0), 1.0)
 
-    def test_rounding(self):
-        self.assertEqual(terminal_reward(1 / 3, 1), -0.335333)
+    def test_not_rounded(self):
+        # the jury compares rewards to 1e-9 (47/150 = 0.31333...), so no rounding to six places
+        self.assertNotEqual(terminal_reward(1 / 3, 1), -0.335333)
+        self.assertAlmostEqual(terminal_reward(1 / 3, 1), -1006 / 3000, delta=1e-12)

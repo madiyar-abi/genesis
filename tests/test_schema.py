@@ -4,7 +4,6 @@ import unittest
 
 from auditenv.schema import (
     ISSUE_TYPES,
-    MAX_AFFECTED,
     MAX_EVIDENCE,
     MAX_EXPLANATION,
     MAX_FINDINGS,
@@ -33,7 +32,9 @@ def _wrap(findings, episode_id="ep_test"):
 
 
 class TestValidateFindings(unittest.TestCase):
-    """≥ 15 cases per acceptance criterion."""
+    """Structural checks only (jury rule 8): wrong value type, missing required field, unknown key or a limit.
+    Wrong values in the right type (unknown type string, negative amount, odd currency, blank ids) are valid here
+    and become false positives in the matcher."""
 
     # --- valid cases ---
 
@@ -98,11 +99,9 @@ class TestValidateFindings(unittest.TestCase):
 
     # --- amount: negative ---
 
-    def test_negative_amount(self):
+    def test_negative_amount_is_structurally_valid(self):
         obj = _wrap([_good_finding(claimed_amount_minor=-5)])
-        err = validate_findings(obj, "ep_test")
-        self.assertIsNotNone(err)
-        self.assertIn(">= 0", err)
+        self.assertIsNone(validate_findings(obj, "ep_test"))
 
     # --- amount: float ---
 
@@ -114,19 +113,15 @@ class TestValidateFindings(unittest.TestCase):
 
     # --- lowercase currency ---
 
-    def test_lowercase_currency(self):
+    def test_lowercase_currency_is_structurally_valid(self):
         obj = _wrap([_good_finding(currency="usd")])
-        err = validate_findings(obj, "ep_test")
-        self.assertIsNotNone(err)
-        self.assertIn("uppercase", err)
+        self.assertIsNone(validate_findings(obj, "ep_test"))
 
     # --- unknown type ---
 
-    def test_unknown_type(self):
+    def test_unknown_type_is_structurally_valid(self):
         obj = _wrap([_good_finding(type="fraud")])
-        err = validate_findings(obj, "ep_test")
-        self.assertIsNotNone(err)
-        self.assertIn("unknown type", err)
+        self.assertIsNone(validate_findings(obj, "ep_test"))
 
     # --- non-dict submission ---
 
@@ -182,20 +177,16 @@ class TestValidateFindings(unittest.TestCase):
 
     # --- empty affected_ids ---
 
-    def test_empty_affected_ids(self):
+    def test_empty_affected_ids_is_structurally_valid(self):
         obj = _wrap([_good_finding(affected_ids=[])])
-        err = validate_findings(obj, "ep_test")
-        self.assertIsNotNone(err)
-        self.assertIn("non-empty", err)
+        self.assertIsNone(validate_findings(obj, "ep_test"))
 
     # --- too many affected_ids ---
 
-    def test_too_many_affected_ids(self):
-        ids = [f"INV-{i}" for i in range(MAX_AFFECTED + 1)]
+    def test_many_affected_ids_is_structurally_valid(self):
+        ids = [f"INV-{i}" for i in range(11)]
         obj = _wrap([_good_finding(affected_ids=ids)])
-        err = validate_findings(obj, "ep_test")
-        self.assertIsNotNone(err)
-        self.assertIn("too many", err)
+        self.assertIsNone(validate_findings(obj, "ep_test"))
 
     # --- extra unknown keys ---
 
@@ -233,31 +224,27 @@ class TestValidateFindings(unittest.TestCase):
 
     # --- affected_ids contains empty string ---
 
-    def test_affected_ids_empty_string(self):
+    def test_affected_ids_empty_string_is_structurally_valid(self):
         obj = _wrap([_good_finding(affected_ids=[""])])
-        err = validate_findings(obj, "ep_test")
-        self.assertIsNotNone(err)
+        self.assertIsNone(validate_findings(obj, "ep_test"))
 
     # --- evidence_ids contains empty string ---
 
-    def test_evidence_ids_empty_string(self):
+    def test_evidence_ids_empty_string_is_structurally_valid(self):
         obj = _wrap([_good_finding(evidence_ids=[""])])
-        err = validate_findings(obj, "ep_test")
-        self.assertIsNotNone(err)
+        self.assertIsNone(validate_findings(obj, "ep_test"))
 
     # --- currency wrong length ---
 
-    def test_currency_two_letters(self):
+    def test_currency_two_letters_is_structurally_valid(self):
         obj = _wrap([_good_finding(currency="US")])
-        err = validate_findings(obj, "ep_test")
-        self.assertIsNotNone(err)
+        self.assertIsNone(validate_findings(obj, "ep_test"))
 
     # --- currency numeric ---
 
-    def test_currency_numeric(self):
+    def test_currency_numeric_is_structurally_valid(self):
         obj = _wrap([_good_finding(currency="123")])
-        err = validate_findings(obj, "ep_test")
-        self.assertIsNotNone(err)
+        self.assertIsNone(validate_findings(obj, "ep_test"))
 
     # --- amount zero (valid) ---
 
@@ -271,6 +258,21 @@ class TestValidateFindings(unittest.TestCase):
         obj = _wrap([_good_finding() for _ in range(MAX_FINDINGS)])
         self.assertIsNone(validate_findings(obj, "ep_test"))
 
+    def test_evidence_limit_counts_repeats(self):
+        """The limit applies to the raw list, before duplicates are dropped (jury M05)."""
+        obj = _wrap([_good_finding(evidence_ids=["D-1"] * MAX_EVIDENCE + ["D-2"])])
+        self.assertIn("too many", validate_findings(obj, "ep_test"))
+
+    def test_non_string_values(self):
+        for key, value in (("type", 1), ("currency", None), ("explanation", 5), ("evidence_ids", "D-1"),
+                           ("evidence_ids", ["D-1", 2]), ("claimed_amount_minor", "1234")):
+            with self.subTest(key=key, value=value):
+                self.assertIsNotNone(validate_findings(_wrap([_good_finding(**{key: value})]), "ep_test"))
+
+    def test_explanation_limit_in_code_points(self):
+        self.assertIsNone(validate_findings(_wrap([_good_finding(explanation="ж" * MAX_EXPLANATION)]), "ep_test"))
+        self.assertIsNotNone(validate_findings(_wrap([_good_finding(explanation="ж" * 1001)]), "ep_test"))
+
     def test_exactly_10_evidence(self):
         ids = [f"E-{i}" for i in range(MAX_EVIDENCE)]
         obj = _wrap([_good_finding(evidence_ids=ids)])
@@ -280,10 +282,9 @@ class TestValidateFindings(unittest.TestCase):
 class TestNormalizeFinding(unittest.TestCase):
     """Tests for normalize_finding."""
 
-    def test_uppercase_currency(self):
-        f = _good_finding(currency="usd")
-        n = normalize_finding(f)
-        self.assertEqual(n["currency"], "USD")
+    def test_currency_kept_exactly(self):
+        for cur in ("usd", " USD", "USD "):
+            self.assertEqual(normalize_finding(_good_finding(currency=cur))["currency"], cur)
 
     def test_sort_affected_ids(self):
         f = _good_finding(affected_ids=["B", "A", "C"])
@@ -295,20 +296,20 @@ class TestNormalizeFinding(unittest.TestCase):
         n = normalize_finding(f)
         self.assertEqual(n["affected_ids"], ["A", "B"])
 
-    def test_strip_affected_ids(self):
+    def test_affected_ids_not_stripped(self):
         f = _good_finding(affected_ids=[" A ", "B "])
         n = normalize_finding(f)
-        self.assertEqual(n["affected_ids"], ["A", "B"])
+        self.assertEqual(n["affected_ids"], [" A ", "B "])
 
     def test_sort_dedupe_evidence_ids(self):
         f = _good_finding(evidence_ids=["Z", "A", "Z"])
         n = normalize_finding(f)
         self.assertEqual(n["evidence_ids"], ["A", "Z"])
 
-    def test_strip_evidence_ids(self):
+    def test_evidence_ids_not_stripped(self):
         f = _good_finding(evidence_ids=[" D-1 "])
         n = normalize_finding(f)
-        self.assertEqual(n["evidence_ids"], ["D-1"])
+        self.assertEqual(n["evidence_ids"], [" D-1 "])
 
     def test_default_explanation(self):
         f = _good_finding()
