@@ -66,6 +66,14 @@ Assumptions: use the public manifest for episode ID and currency exponents, comp
   Run 4: Ran 73 tests in 2.249s, OK, exit 0, wall time 2s
   Run 5: Ran 73 tests in 2.528s, OK, exit 0, wall time 3s
   Total: 365 tests, 0 failures. Next: G14.
+2026-11-22 03:42 gemini3a — G14: Ran attack search and sensitivity analysis. Both passed cleanly (exit 0).
+  - auditenv.attack: PASSED, 20 seeds evaluated (5 clean, 15 dirty), 11,000 mutations tested across 10 families, 0 violations detected, elapsed 0.360 s, exit 0, wall time 0s.
+  - scripts/sensitivity.py: PASSED, evaluated dev (10 episodes) and hard (20 episodes) across varied step cost (0.001, 0.002, 0.005) and amount tolerance (0, 1, 100 units). Ranking unchanged across all settings: dev (oracle > reconcile > naive_reconcile > random > flag_all), hard (oracle > reconcile_hard > reconcile > naive_reconcile > random > flag_all). Re-grade with default parameters reproduced every env reward exactly in 2.1 s, exit 0, wall time 3s. Next: G15.
+2026-11-22 03:42 gemini3b — G16 complete: verified all splits under episodes/ (dev: 10/10 valid, exit 0, 0.13s; hard: 20/20 valid, exit 0, 0.35s; train: 10/10 valid, exit 0, 0.11s). Next: G17.
+2026-11-22 03:47 gemini3a — G15: Ran full unit test suite under two hashseed/timezone settings. Both passed cleanly (0 failures).
+  - Run 1 (PYTHONHASHSEED=7 TZ=America/St_Johns): Ran 563 tests in 106.623s, OK, exit code: 0, wall time: 107s
+  - Run 2 (PYTHONHASHSEED=99 TZ=Pacific/Chatham): Ran 563 tests in 116.834s, OK, exit code: 0, wall time: 117s
+  All G13-G15 tasks for gemini3a complete.
 2026-11-22 03:42 gemini3b — G16 complete: verified all splits under episodes/ (dev: 10/10 valid, exit 0, 0.13s; hard: 20/20 valid, exit 0, 0.35s; train: 10/10 valid, exit 0, 0.11s). Next: G17.
 2026-11-22 03:51 gemini2b — G11 complete:
 - `uv run python scripts/golden.py --check` (exit 0, wall time 1.262s): "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json."

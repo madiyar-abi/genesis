@@ -114,7 +114,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   run `Ran N tests` + result.
 - [x] G14 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
   — accept: summaries + exit codes.
-- [ ] G15 (gemini3a) Full suite under `PYTHONHASHSEED=7 TZ=America/St_Johns env -u AUDITENV_SECRET uv run python -m
+- [x] G15 (gemini3a) Full suite under `PYTHONHASHSEED=7 TZ=America/St_Johns env -u AUDITENV_SECRET uv run python -m
   unittest discover -s tests -t .` and `PYTHONHASHSEED=99 TZ=Pacific/Chatham ...` — accept: `Ran N tests`,
   OK/FAILED, wall time; failures verbatim.
 
