@@ -200,3 +200,20 @@ Next: T42 (stress reconcile and reconcile_hard on seeds 6000-6299).
   Summary: reconcile_hard on 1200 hard episodes (seeds 6000-6299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 57, truncated 0 (41.7 s)
 Result: 0 imperfect, 0 truncated across 2,400 episodes. Max steps: 32 (default), 57 (hard).
 All assigned gemini1b tasks (T4, T5, T6, T40, T41, T42) complete.
+2026-11-21 22:06 gemini2a — T8: ran four jury test modules (`tests.test_judge_contract`, `tests.test_judge_reward`, `tests.test_judge_scenarios`, `tests.test_judge_paired`) 5 times consecutively.
+Command: `env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired`
+- Run 1: exit code 0, wall time 2.34 s -> `Ran 71 tests in 2.256s`, `OK`
+- Run 2: exit code 0, wall time 2.34 s -> `Ran 71 tests in 2.254s`, `OK`
+- Run 3: exit code 0, wall time 2.39 s -> `Ran 71 tests in 2.304s`, `OK`
+- Run 4: exit code 0, wall time 2.71 s -> `Ran 71 tests in 2.624s`, `OK`
+- Run 5: exit code 0, wall time 2.98 s -> `Ran 71 tests in 2.872s`, `OK`
+Result: 0 differing runs, 0 failures across all 5 runs (71 tests each). No flakiness detected in the jury modules. Next: T9.
+
+2026-11-21 22:17 gemini2a — T9: ran `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice under background load from `auditenv.fuzz --seeds 0-999`.
+- Background load: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999` (PID 4443, active across both check runs, finished with exit code 0 in 113.90 s; summary: 3000 episodes, 0 problems, FUZZ PASSED).
+- Check Run 1: exit code 0, wall time 58.56 s (check reported 58.5 s), last line: `ALL CHECKS PASSED in 58.5 s`
+- Check Run 2: exit code 0, wall time 53.32 s (check reported 53.2 s), last line: `ALL CHECKS PASSED in 53.2 s`
+- Failures: 0 timeout or timing-related failures (C18, clock all passed cleanly on both runs).
+All assigned gemini2a tasks (T7, T8, T9) complete.
+
+
