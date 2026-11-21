@@ -363,3 +363,10 @@ Current discrepancies and suggested text:
 | PITCH.md:24 | On 200 explicitly clean default episodes the public probe found a split on 186 and a refund on 148, with checkable generators at auditenv/generator.py:424–481. | “Clean books can include split payments, refunds and recurring charges.” |
 | PITCH.md:43 | The deterministic table matches fresh check JSON, but the referenced docs/baselines.svg still shows older means. Y1 chart comparisons named four drifted labels. | “Use the chart regenerated from this revision’s check JSON.” |
 2026-11-22 01:47 lead — Merged G25-G30 and codex2 Y1-Y3. Fix re-tests green (chronology 600 more seeds 0 unexplained in clean configs; fuzz 0-999 both difficulties; config sweep 3000; verify 0-1999 6000/6000; check x2; exports and trajectories byte-identical). codex2 found docs/baselines.svg stale (pre-r18 returns) — regenerated; sync_docs now renders the chart and reports drift (test_stale_chart_is_drift). Y1: 36/36 eligible README commands exit 0. Y2/Y3 doc discrepancies (stale numbers in prose, seed-2003 worked example ids, sensitivity rows, refund remittance/posting in CONTRACT, ensure_distractors wording, key defaults) delegated to a lead subagent that re-verifies each before editing.
+2026-11-22 01:55 gemini1b — G32 complete (chronology check on seeds 36000-36599).
+Command: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 36000-36599`
+Exit code: 0, wall time: 171.19 s
+Totals line:
+totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=6132, e_fx_missing=0, f_inv_booked_before_issue=5177, f_pay_posted_before_doc=0, f_ar_before_booking=46, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=10061, c_tie=3
+Unexplained violations line:
+unexplained violations: 46 (0 in clean configs)
