@@ -471,7 +471,7 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 - Data: `configs/{train,dev,eval_example}.json`, `episodes/{train,dev,hard}` (10+10+20 exported),
   `trajectories/train_*.jsonl`.
 - Docs: `README.md`, `docs/CONTRACT.md`, `docs/DESIGN.md` (with measured results), `docs/DEMO.md`, `docs/PITCH.md`.
-- Hard mode (`difficulty: "hard"`, `configs/eval_hard.json`, `reconcile_hard`): reconcile F1 1.0 → 0.752, oracle 1.0.
+- Hard mode (`difficulty: "hard"`, `configs/eval_hard.json`, `reconcile_hard`): reconcile F1 1.0 → 0.755, oracle 1.0.
 - Jury review (`REVIEW.md`): self-sufficient `payment_allocation` evidence (episodes re-exported), `tests/test_jury.py`
   (jury checklist as 33 tests), `auditenv.fuzz` (seed sweep + `--stress`), CI with Docker, verify totals, docs pass.
 

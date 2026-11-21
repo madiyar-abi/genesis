@@ -370,3 +370,4 @@ Current discrepancies and suggested text:
     default/default seed=35012 ids=['PAY-609369', 'SI-2026-820954', 'GL-001535'] ar credit 2026-11-03T21:12:00+05:30 booking 2026-11-04T12:49:00+05:30
     hard/hard seed=35325 ids=['RCPT0071974', 'F0102081', 'R4524'] ar credit 2026-02-02T18:50:00+01:00 booking 2026-02-04T17:51:00+01:00
     D14/default seed=35043 ids=['RCPT0721714', 'INV-456057', 'R4120'] ar credit 2025-10-04T09:07:00+09:00 booking 2025-10-04T21:38:00+09:00
+2026-11-22 01:54 lead — Applied codex2 Y2/Y3 doc corrections (subagent re-verified each; skipped rewording-only items and the CONTRACT:7 TASKS remark). check 563 tests pass, sync_docs no drift, doc tests 19 OK. Commit c8b8d70.
