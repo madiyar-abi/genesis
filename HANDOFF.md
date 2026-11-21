@@ -21,6 +21,9 @@ Check: `uv run python -m unittest tests.test_grader_key` (failed 4 of 6 before t
 
 **Current state (21 November 2026).** PR #42 merged the jury adapter checks and public scenario runs into `main`. The follow-up below fixes a C18 failure found on that revision and adds an isolated run for C20. Before submission the team still needs to revoke the DeepSeek key, make the repository public, record the video, and share the materials and submit the Drive folder link. See “Deadline & submission”.
 
+
+> **Organizer update (fetched 22 Nov):** submit **one Google Drive folder** (everything from §09 incl. the demo mp4; presentation optional), deadline **22 Nov 23:59 Astana**; jury checks via `judge_adapter.py` — details in `night/CASE_UPDATES.md`.
+
 ## C18 and C20 follow-up (Khasuetolog)
 
 On `3180fe4`, 11 seconds spent loading an episode followed by 50 seconds of policy time still allowed an action. Reset now starts the episode clock before loading or generating data. Run `uv run python -m unittest tests.test_judge_contract` to check both paths.

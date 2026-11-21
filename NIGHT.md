@@ -104,7 +104,8 @@ next round. The round's goal is in `night/ROUND.md` (read it first).
   Commit and push after every subtask — a lead that hits its limit loses nothing pushed.
 - **Open improvement round** (lead): there is no fixed spec beyond SPEC.md, so
   find the work yourself:
-  1. Read `night/archive/` (previous rounds' TASKS/LOG/ROUND), `REVIEW.md`,
+  1. Read `night/CASE_UPDATES.md` (organizer check definitions + submission rules — they override
+     older assumptions; verify `judge_adapter.py` against them). Read `night/archive/` (previous rounds' TASKS/LOG/ROUND), `REVIEW.md`,
      `docs/CHECKS.md`, HANDOFF "Ideas". Don't repeat done or rejected work.
   2. Review the repo against SPEC §10 (jury criteria, points) like a strict
      jury member: run `auditenv.check`, `auditenv.fuzz`, `auditenv.attack`,
