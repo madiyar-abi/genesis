@@ -263,6 +263,16 @@ class TestSyncDocs(unittest.TestCase):
         errors = check_docs(self.repo_root, SAMPLE_METRICS)
         self.assertEqual(errors, [])
 
+    def test_stale_chart_is_drift(self):
+        # docs/baselines.svg (slide 7) is rendered from the same metrics; an old rendering is drift
+        sync_all(self.repo_root, SAMPLE_METRICS)
+        chart = os.path.join(self.repo_root, "docs", "baselines.svg")
+        with open(chart, "w", encoding="utf-8") as f:
+            f.write("<svg>old</svg>\n")
+        self.assertEqual(check_docs(self.repo_root, SAMPLE_METRICS), ["baselines.svg: chart differs from measured data"])
+        sync_all(self.repo_root, SAMPLE_METRICS)
+        self.assertEqual(check_docs(self.repo_root, SAMPLE_METRICS), [])
+
     def test_idempotence(self):
         # First sync
         sync_all(self.repo_root, SAMPLE_METRICS)
