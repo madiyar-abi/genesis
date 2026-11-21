@@ -43,7 +43,7 @@ Lead review findings are added as T30+ below.
 - [x] T12 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 2000-2999` — files: night/LOG.md — accept: last line in LOG.
 
 - [x] T56 (gemini2b) Attack search on seeds 7000-7019: build `/tmp/r18-gemini2b/a7000.json` and `a7000h.json` exactly like T11 (seeds 7000..7019), run `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config <file> --seeds 7000-7019 --steps 0` and `--steps 40` for both files — files: night/LOG.md — accept: per run exit code + summary lines in LOG.
-- [ ] T57 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999` — files: night/LOG.md — accept: last line in LOG.
+- [x] T57 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999` — files: night/LOG.md — accept: last line in LOG.
 
 ## gemini3a — docs link and path integrity (evidence only, files: night/LOG.md)
 - [x] T13 (gemini3a) For every relative markdown link `[text](path)` and every backticked repo path (like `auditenv/env.py`, `tests/test_x.py`, `configs/dev.json`, `schemas/*.json`) in README.md, docs/CHECKS.md, docs/DESIGN.md, docs/CONTRACT.md, docs/DEMO.md, docs/PITCH.md: check the file exists (`test -e`). Write the check as a throwaway script under /tmp/r18-gemini3a/ — files: night/LOG.md — accept: in LOG the script's command, the number of links/paths checked per file, and every missing one with file:line verbatim (or "0 missing").
