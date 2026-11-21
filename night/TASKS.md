@@ -42,7 +42,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   docs/CONTRACT.md (skip docker, git clone of GitHub, asciinema, the organiser server and commands needing
   `AUDITENV_SECRET` unless they say how to set it) — files: night/LOG.md — accept: LOG table: command, exit code,
   wall time; every non-zero exit or output that differs from what the doc says it prints quoted verbatim.
-- [ ] Y2 (codex2) Claims audit of README.md sections "For the jury" and "Jury adapter" and docs/CONTRACT.md: for every
+- [x] Y2 (codex2) Claims audit of README.md sections "For the jury" and "Jury adapter" and docs/CONTRACT.md: for every
   factual claim (a number, a behaviour, an error code, a key name, a default) find the code line or run the command
   that proves it. — files: night/LOG.md — accept: LOG lists each wrong or unprovable claim with the file:line of the
   doc, the evidence (code file:line or command output) and the correct text; "0 wrong claims" is a valid result
