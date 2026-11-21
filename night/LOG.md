@@ -1,0 +1,1 @@
+2026-11-21 23:41 lead — Pushed worker queues. Review identified two separate defects: implicit public generation for hidden server queues and a default clean refund dated before its receipt. Default and hard baseline measurements underway.
