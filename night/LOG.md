@@ -151,3 +151,6 @@ Exit code: 0, wall time: 31.35 s
 Summary: `reconcile_hard on 1200 hard episodes (seeds 9000-9299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 57, truncated 0 (31.3 s)`
 Max steps: 57
 Problems: 0
+2026-11-22 01:05 gemini2b — G22: Ran optimized-mode check and audited product code for assertions. Commands and results:
+  - `env -u AUDITENV_SECRET uv run python -O -m auditenv.check`: exit 0, wall 53.591s (50.69s user, 2.18s system). Last line: "ALL CHECKS PASSED in 53.4 s" (562 unit tests, 200/200 verifier, all baselines/gates passed).
+  - `grep -n "^\s*assert " auditenv/*.py auditenv/policies/*.py judge_adapter.py`: exit 1 (0 matches). Product code contains 0 assertions (proper exception handling throughout; python -O removes nothing required for validation).
