@@ -26,7 +26,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   lead-readable classification of each missed or extra finding: (a) auditor bug, (b) the text does not state the rule
   needed (quote the missing rule), or (c) truth label looks wrong (seed, config, record ids, why). Exit 0 always;
   this is evidence, not a gate.
-- [ ] X2 (codex1) Independent double-entry and balance re-derivation. Write `night/r21/ledger_identity.py` (public
+- [x] X2 (codex1) Independent double-entry and balance re-derivation. Write `night/r21/ledger_identity.py` (public
   data only): per journal (group rows by `timestamp` + entity for journals without ids, see CLAUDE.md gotchas) Dr =
   Cr; per invoice the AR (1200) balance in time order never below 0 and at period end equals total − applied cash −
   credit notes (at the documented rates); per customer the 2900 balance in time order never below 0; every 7900 row
