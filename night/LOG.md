@@ -604,3 +604,15 @@ Checks:
 - Random explorer return <= -0.806 on all runs (none > -0.5).
 - Flag_all return = -1.000 on all runs (none > -0.5).
 Next: T53 (stress reconcile and reconcile_hard on seeds 7000-7299).
+
+2026-11-21 22:45 gemini1b — T53: stress solvability on seeds 7000-7299.
+- Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 7000-7299`
+  Exit code: 0
+  Wall time: 13.57 s
+  Summary: reconcile on 1200 default episodes (seeds 7000-7299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 35, truncated 0 (13.5 s)
+- Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 7000-7299`
+  Exit code: 0
+  Wall time: 32.23 s
+  Summary: reconcile_hard on 1200 hard episodes (seeds 7000-7299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 56, truncated 0 (32.2 s)
+Result: 0 imperfect, 0 truncated across 2,400 episodes. Max steps: 35 (default), 56 (hard).
+All assigned gemini1b tasks (T4, T5, T6, T40, T41, T42, T52, T53) complete.
