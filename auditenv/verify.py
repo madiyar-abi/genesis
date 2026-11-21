@@ -188,7 +188,7 @@ class Books:
                         and (o["entity_id"], o["currency"], line_key(o["line_items"])) == key), None)
             if new is None:
                 problems.append(f"credit-noted invoice {iid} has no replacement invoice with the same line items, "
-                                f"booked in the period after the credit note")
+                                f"issued at or after the credit note and booked in the period")
             else:
                 used.add(new["invoice_id"])
         # duplicates: same entity, currency, same line items (re-typed text allowed) -> later copy;
@@ -278,28 +278,14 @@ def datetime_key(ts: str):
     return parse_ts(ts)
 
 
-@lru_cache(maxsize=1)
-def _manifest_schema():
-    path = Path(__file__).resolve().parents[1] / "schemas/manifest.schema.json"
-    return json.loads(path.read_text(encoding="utf-8"))
+RATE = re.compile(r"[0-9]+(\.[0-9]+)?")  # plain ASCII decimal, as the generator writes it (no sign, exponent, _)
 
 
 def _structure(ep: dict) -> list[str]:
+    error = _schema_error(ep.get("manifest"), _schema("manifest.schema.json"), "manifest")
+    if error:
+        return [error]  # the checks below index the manifest's fields
     problems = []
-    schema = _manifest_schema()
-    m = ep.get("manifest")
-    if not isinstance(m, dict):
-        m = {}
-    for name in schema.get("required", []):
-        if name not in m:
-            problems.append(f"manifest.{name}: required")
-    for name in ("schema_version", "generator_version", "episode_id"):
-        if name in m:
-            val = m[name]
-            if not isinstance(val, str) or not val.strip():
-                problems.append(f"manifest.{name}: must be a non-empty string")
-    if problems:
-        return problems
     if not isinstance(ep.get("task"), str) or not ep["task"].strip():
         problems.append("public task text must contain instructions")
     m, t = ep["manifest"], ep["tables"]
@@ -312,6 +298,8 @@ def _structure(ep: dict) -> list[str]:
     ids = [r["row_id"] for r in t["ledger"]] + [d["doc_id"] for d in t["invoices"] + t["payments"]]
     if len(ids) != len(set(ids)):
         problems.append("duplicate row_id/doc_id")
+    if not all(isinstance(i, str) and i.strip() for i in ids):
+        problems.append("row_id/doc_id must be a non-empty string")
     for key, rows in (("invoice_id", t["invoices"]), ("payment_id", t["payments"]), ("fx_id", t["fx"])):
         if len({r[key] for r in rows}) != len(rows):
             problems.append(f"duplicate {key}")
@@ -323,12 +311,11 @@ def _structure(ep: dict) -> list[str]:
         rate_keys.add(key)
         if rate["fx_id"] != ":".join(key):
             problems.append(f"fx_id differs from date and currency pair: {rate['fx_id']}")
-        try:  # every published rate, used or not: a reader must be able to convert with any of them
-            value = Decimal(rate["rate"]) if isinstance(rate.get("rate"), str) else None
-        except ArithmeticError:  # decimal.InvalidOperation
-            value = None
-        if value is None or not value.is_finite() or value <= 0:
-            problems.append(f"fx rate {rate['fx_id']}: rate must be a finite positive decimal")
+        # every published rate, used or not: a reader must be able to convert with any of them; above 10^9 is no
+        # real currency pair and would exceed the conversion's decimal precision
+        value = rate.get("rate")
+        if not isinstance(value, str) or not RATE.fullmatch(value) or not 0 < Decimal(value) < 10 ** 9:
+            problems.append(f"fx rate {rate['fx_id']}: rate must be a positive decimal below 10^9")
     pol = ep["policy"]
     if (pol["base_currency"], pol["timezone"], pol["period"]["start"], pol["period"]["end"]) != \
             (m["base_currency"], m["timezone"], m["period_start"], m["period_end"]):
@@ -360,6 +347,8 @@ def _structure(ep: dict) -> list[str]:
                 not isinstance(refs, list)
                 or any(not isinstance(r, dict) or type(r.get("amount_minor")) is not int for r in refs))):
             problems.append(f"payment {p.get('payment_id')}: amount_minor must be an integer")
+        elif refs and any(not isinstance(r.get("invoice_id"), str) for r in refs):
+            problems.append(f"payment {p.get('payment_id')}: invoice_refs invoice_id must be a string")
     stamps = [(f"ledger row {r['row_id']}", r["timestamp"]) for r in t["ledger"]]
     stamps += [(f"payment {p['payment_id']}", p["timestamp"]) for p in t["payments"]]
     stamps += [(f"invoice {i['invoice_id']}", i[k]) for i in t["invoices"] for k in ("issued_at", "due_at")]
@@ -526,42 +515,56 @@ def _invoice_error(invoice: dict) -> str | None:
     return None
 
 
-@lru_cache(maxsize=1)
-def _truth_schema():
-    path = Path(__file__).resolve().parents[1] / "schemas/truth.schema.json"
+@lru_cache(maxsize=None)
+def _schema(name: str) -> dict:
+    path = Path(__file__).resolve().parents[1] / "schemas" / name
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _truth_error(value, schema, path="truth"):
-    """Check the keywords used in truth.schema.json, reporting the first invalid field."""
+def _schema_error(value, schema, path):
+    """Check the keywords used in truth.schema.json and manifest.schema.json, reporting the first invalid field.
+    An object field not in `properties` must match `additionalProperties`; without it, it is unexpected."""
     kind = schema.get("type")
     types = {"object": dict, "array": list, "string": str, "integer": int}
     if kind and type(value) is not types[kind]:
         return f"{path}: expected {kind}"
+    if "const" in schema and (type(value) is not type(schema["const"]) or value != schema["const"]):
+        return f"{path}: must be {schema['const']!r}"
     if "enum" in schema and value not in schema["enum"]:
         return f"{path}: invalid choice"
     if kind == "object":
-        fields = schema["properties"]
-        for name in schema["required"]:
+        for name in schema.get("required", ()):
             if name not in value:
                 return f"{path}.{name}: required"
         for name, item in value.items():
-            if name not in fields:
+            if "propertyNames" in schema:
+                error = _schema_error(name, schema["propertyNames"], f"{path} key {name!r}")
+                if error:
+                    return error
+            sub = schema.get("properties", {}).get(name, schema.get("additionalProperties", False))
+            if sub is False:
                 return f"{path}.{name}: unexpected field"
-            error = _truth_error(item, fields[name], f"{path}.{name}")
+            error = _schema_error(item, sub, f"{path}.{name}") if isinstance(sub, dict) else None
             if error:
                 return error
     if kind == "array":
         if len(value) < schema.get("minItems", 0):
             return f"{path}: empty list"
         for index, item in enumerate(value):
-            error = _truth_error(item, schema["items"], f"{path}[{index}]")
+            error = _schema_error(item, schema["items"], f"{path}[{index}]")
             if error:
                 return error
         if schema.get("uniqueItems") and len(set(value)) != len(value):
             return f"{path}: duplicate ID"
     if "pattern" in schema and not re.search(schema["pattern"], value):
         return f"{path}: invalid string"
+    if schema.get("format") == "date":
+        try:  # fromisoformat alone also takes the basic form 20250301
+            valid = re.fullmatch(r"\d{4}-\d{2}-\d{2}", value) and date.fromisoformat(value)
+        except ValueError:
+            valid = False
+        if not valid:
+            return f"{path}: invalid date"
     if "minimum" in schema and value < schema["minimum"]:
         return f"{path}: below minimum"
     return None
@@ -597,13 +600,15 @@ def verify_episode(ep: dict) -> list[str]:
         error = _invoice_error(invoice)
         if error:
             return [error]
-    error = _truth_error(ep.get("truth"), _truth_schema())
+    error = _schema_error(ep.get("truth"), _schema("truth.schema.json"), "truth")
     if error:
         return [error]
     problems = _structure(ep)
-    if any("must be an integer" in p or "timestamp must be" in p
-           or "fx rate " in p or "manifest." in p for p in problems):
-        return problems  # the bookkeeping checks below assume int amounts and offset-aware timestamps
+    # the bookkeeping checks below assume a valid manifest, int amounts, string refs, offset-aware timestamps
+    # and convertible rates
+    if any(p.startswith(("manifest.", "manifest:", "manifest key")) or "must be an integer" in p
+           or "timestamp must be" in p or "fx rate " in p or "invoice_id must be" in p for p in problems):
+        return problems
     m, t = ep["manifest"], ep["tables"]
     if ep["truth"].get("episode_id") != m["episode_id"]:
         problems.append("truth episode_id differs from manifest")

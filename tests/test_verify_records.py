@@ -110,13 +110,7 @@ class TestVerifyRecords(unittest.TestCase):
                 self.assertNotIn("Traceback (most recent call last)", out)
 
     def test_manifest_string_fields(self):
-        # generator_version: optional, but if present must be a non-blank string
-        sample = deepcopy(self.ep)
-        del sample["manifest"]["generator_version"]
-        self.assertEqual(verify_episode(sample), [])
-        code, _ = _run_cli(sample)
-        self.assertEqual(code, 0)
-
+        # generator_version (required, CONTRACT §2) must be a non-blank string
         for bad_val in ("", 42):
             sample = deepcopy(self.ep)
             sample["manifest"]["generator_version"] = bad_val
@@ -150,6 +144,77 @@ class TestVerifyRecords(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn(row_id, out)
         self.assertNotIn("Traceback (most recent call last)", out)
+
+
+class TestReviewTampers(unittest.TestCase):
+    """Single-record tampers from the adversarial review of the audit fixes: each must be reported as a problem
+    (never raised) by the API, and rejected by the CLI on an exported copy."""
+
+    def setUp(self):
+        self.ep = generate(2000, {"errors": {}})
+
+    def assertRejected(self, edit, words):
+        sample = deepcopy(self.ep)
+        edit(sample)
+        problems = verify_episode(sample)
+        self.assertTrue(any(words in p for p in problems), problems)
+        code, out = _run_cli(sample)
+        self.assertEqual(code, 1, out)
+        self.assertIn(words, out)
+
+    def test_manifest_schema_beyond_required_fields(self):
+        def put(path, value):
+            def edit(ep):
+                node = ep["manifest"]
+                for key in path[:-1]:
+                    node = node[key]
+                node[path[-1]] = value
+            return edit
+        cases = [(("seed",), 2000, "manifest.seed: unexpected"),  # grader data must not ride in the manifest
+                 (("counts", "expenses"), 3, "manifest.counts.expenses: unexpected"),
+                 (("counts", "ledger"), 355.0, "manifest.counts.ledger: expected integer"),
+                 (("counts",), [1, 2], "manifest.counts: expected object"),
+                 (("timezone",), "+5:00", "manifest.timezone: invalid string"),
+                 (("timezone",), "Z", "manifest.timezone: invalid string"),
+                 (("period_start",), "2025-13-01", "manifest.period_start: invalid date"),
+                 (("period_start",), "20250501", "manifest.period_start: invalid date"),
+                 (("period_start",), 20250501, "manifest.period_start: expected string"),
+                 (("base_currency",), "usd", "manifest.base_currency: invalid string"),
+                 (("rounding",), "ROUND_DOWN", "manifest.rounding: must be"),
+                 (("amount_exponents", "usd"), 2, "manifest.amount_exponents key 'usd'"),
+                 (("amount_exponents", "USD"), -1, "manifest.amount_exponents.USD: below minimum")]
+        for path, value, words in cases:
+            with self.subTest(path=path, value=value):
+                self.assertRejected(put(path, value), words)
+        self.assertRejected(lambda ep: ep["manifest"]["counts"].pop("ledger"), "manifest.counts.ledger: required")
+
+    def test_fx_rate_spellings_a_reader_may_not_parse(self):
+        for fx_id in ("2025-03-28:GBP:USD", "2025-03-02:GBP:USD"):  # used by an invoice, and unused
+            for rate in ("1.2_9169", " 1.29169", "129169e-5", "+1.29169", "１.２９", "1e30", "1" + "0" * 30):
+                with self.subTest(fx_id=fx_id, rate=rate):
+                    def edit(ep):
+                        next(r for r in ep["tables"]["fx"] if r["fx_id"] == fx_id)["rate"] = rate
+                    self.assertRejected(edit, f"fx rate {fx_id}")
+
+    def test_invoice_ref_without_a_string_invoice_id(self):
+        pid = next(p["payment_id"] for p in self.ep["tables"]["payments"] if p["invoice_refs"])
+        for name, change in (("missing", lambda ref: ref.pop("invoice_id")),
+                             ("list", lambda ref: ref.update(invoice_id=["x"])),
+                             ("int", lambda ref: ref.update(invoice_id=7))):
+            with self.subTest(name):
+                def edit(ep):
+                    change(next(p for p in ep["tables"]["payments"] if p["payment_id"] == pid)["invoice_refs"][0])
+                self.assertRejected(edit, f"payment {pid}: invoice_refs invoice_id must be a string")
+
+    def test_blank_record_ids(self):
+        def blank_row(ep):
+            ep["tables"]["ledger"][0]["row_id"] = ""
+
+        def blank_doc(ep):  # invoice doc_ids are checked by _invoice_error already
+            ep["tables"]["payments"][0]["doc_id"] = " "
+        for edit in (blank_row, blank_doc):
+            with self.subTest(edit.__name__):
+                self.assertRejected(edit, "row_id/doc_id must be a non-empty string")
 
 
 if __name__ == "__main__":

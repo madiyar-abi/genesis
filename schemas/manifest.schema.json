@@ -81,6 +81,7 @@
   },
   "required": [
     "schema_version",
+    "generator_version",
     "episode_id",
     "base_currency",
     "period_start",
