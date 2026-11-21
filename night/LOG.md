@@ -575,3 +575,23 @@ hard reconcile submissions: P=0.780478 R=0.909893 F1=0.840232 (TP=1959 FP=551 FN
   Wall time: 49.77 s
   Last line: 'ALL CHECKS PASSED in 49.6 s' (539 unit tests pass on Python 3.13)
 Removed clone2 worktree. Next: T61.
+
+2026-11-21 22:44 gemini3b — T61: Verified golden hashes, reward mutations, and shortcut miner on seeds 1000-1499.
+- Command: `env -u AUDITENV_SECRET uv run python scripts/golden.py --check`
+  Exit code: 0
+  Last line: `All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini3b/tests/golden_hashes.json.`
+- Command: `env -u AUDITENV_SECRET uv run python scripts/mutate_reward.py`
+  Exit code: 0
+  Last line: `22/22 mutants killed.`
+- Command: `env -u AUDITENV_SECRET uv run python scripts/shortcut_miner.py --report-only --seeds 1000-1499`
+  Exit code: 0 (14.3 s)
+  Summary:
+  # Shortcut miner: default mode, 500 seeds x random_mix/heavy = 1000 episodes (14.3 s)
+  Records: ledger 336122, invoices 54245, payments 26662. Support >= 30. Flag: precision > 0.5.
+  ## Max precision per issue type
+  | type | affected max P | evidence max P | flagged (aff/ev) |
+  | duplicate_invoice | 0.997 | 0.997 | 2/2 |
+  | payment_allocation | 0.932 | 0.932 | 9/1 |
+  | fx_error | 0.701 | 0.311 | 3/0 |
+  | period_cutoff | 0.470 | 0.470 | 0/0 |
+Next: none queued for gemini3b.
