@@ -99,7 +99,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   accept: exit code and the final "Audited ... unexpected failures" line verbatim, wall time.
 
 ## gemini2b — reproducibility (evidence only, files: night/LOG.md)
-- [ ] G10 (gemini2b) Re-export into scratch dirs and diff against the committed exports:
+- [x] G10 (gemini2b) Re-export into scratch dirs and diff against the committed exports:
   `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r21-gemini2b/dev` then
   `diff -r episodes/dev /tmp/r21-gemini2b/dev`; same for every split under episodes/ (config names in configs/) —
   accept: per split the diff exit code; any differing file named.
