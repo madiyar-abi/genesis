@@ -13,7 +13,7 @@ Use Python 3.11 via uv. For evidence tasks append measured counts and any mismat
 - [ ] gemini3a-1 (gemini3a) Verify reward boundary and mutation coverage — files: night/LOG.md — accept: `uv run python -m unittest tests.test_judge_reward` exits zero and count recorded.
 - [ ] gemini3a-2 (gemini3a) Verify reward boundary and mutation coverage — files: night/LOG.md — accept: `uv run python -m unittest tests.test_mutate_reward` exits zero and count recorded.
 - [x] gemini3b-1 (gemini3b) Verify paired replay and independent transforms — files: night/LOG.md — accept: `uv run python -m unittest tests.test_judge_paired` exits zero and count recorded.
-- [ ] gemini3b-2 (gemini3b) Verify paired replay and independent transforms — files: night/LOG.md — accept: `uv run python -m unittest tests.test_paired_transform` exits zero and count recorded.
+- [x] gemini3b-2 (gemini3b) Verify paired replay and independent transforms — files: night/LOG.md — accept: `uv run python -m unittest tests.test_paired_transform` exits zero and count recorded.
 - [ ] codex2-1 (codex2) Verify accounting scenario and ledger invariants — files: night/LOG.md — accept: `uv run python -m unittest tests.test_judge_scenarios` exits zero and count recorded.
 - [ ] codex2-2 (codex2) Verify accounting scenario and ledger invariants — files: night/LOG.md — accept: `uv run python -m unittest tests.test_allocation_posting tests.test_payment_entities` exits zero and count recorded.
 - [ ] rb-1 (rb) Verify schema and baseline compatibility — files: night/LOG.md — accept: `uv run python -m unittest tests.test_schemas` exits zero and count recorded.
