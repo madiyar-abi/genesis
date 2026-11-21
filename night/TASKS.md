@@ -103,7 +103,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r21-gemini2b/dev` then
   `diff -r episodes/dev /tmp/r21-gemini2b/dev`; same for every split under episodes/ (config names in configs/) —
   accept: per split the diff exit code; any differing file named.
-- [ ] G11 (gemini2b) `uv run python scripts/golden.py --check` and `uv run python scripts/mutate_reward.py` —
+- [x] G11 (gemini2b) `uv run python scripts/golden.py --check` and `uv run python scripts/mutate_reward.py` —
   accept: both summary lines and exit codes.
 - [ ] G12 (gemini2b) `uv run python scripts/shortcut_miner.py --seeds 5000-5999 --report-only` and the same with
   `--hard` — accept: printed tables; any value with precision > 0.5 that is NOT listed in docs/DESIGN.md §10 called out.

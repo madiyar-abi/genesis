@@ -14,3 +14,7 @@ All 40 exported episodes across all three splits are byte-for-byte identical to 
   Run 5: Ran 73 tests in 2.528s, OK, exit 0, wall time 3s
   Total: 365 tests, 0 failures. Next: G14.
 2026-11-22 03:42 gemini3b — G16 complete: verified all splits under episodes/ (dev: 10/10 valid, exit 0, 0.13s; hard: 20/20 valid, exit 0, 0.35s; train: 10/10 valid, exit 0, 0.11s). Next: G17.
+2026-11-22 03:51 gemini2b — G11 complete:
+- `uv run python scripts/golden.py --check` (exit 0, wall time 1.262s): "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json."
+- `uv run python scripts/mutate_reward.py` (exit 0, wall time 407.340s): "22/22 mutants killed."
+Next: G12.
