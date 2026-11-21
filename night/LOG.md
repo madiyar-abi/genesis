@@ -838,3 +838,67 @@ The new public-entry tests cover a minimal policy with optional jury files absen
 2026-11-21 23:00 lead — Merged gemini1a–3b (T50–T58, T60, T61: 0 failures; new red-team tests 10/10 runs clean; 539 tests clean under 3 hash seeds/TZ; closed-reset error cases path-free), rb (T26, T27: doc command/flag and link tests) and codex1 (T62 CollidingIdPairTest — fails 6/6 with 0f33a0f reverted; T63 loader audit: relaxed policy/FX-rate spellings and expense-journal grouping by instant for loaded copies, strict export checks unchanged). check ALL PASSED, golden 80/80, verify 600/600, file-level jury transform 40/40. codex2 rate-limited since 21:40 (limit keeps moving, now 23:58) → retagged T22/T24 to codex1, T23 to lead (subagent running: independent matcher reimplementation vs matcher.grade). rb: T64 (error-code list in README == codes in source). README "Jury adapter" now states that closed reset validates the directory; CHECKS 72 jury block tests.
 
 2026-11-21 23:04 lead — T23 done (subagent): independent reference grader vs matcher.grade, 60 000 + 6 000 (adapter) submissions, 0 disagreements; mutation sanity check of the harness 5/5 caught. No code change. REVIEW updated.
+
+2026-11-21 23:15 codex1 — T22. `env -u AUDITENV_SECRET PYTHONPATH=. uv run python -u /tmp/r18-codex1/t22.py` independently classified visible accounting records, compared recovered identity/type/amount with truth only after classification, and checked each scenario's special promise. Used 10000–10199 per scenario, both difficulties, 8,000 episodes. Initial run exited 1: 10 D03 payments had a matching refund dated before the corresponding overpayment. In seed 10086 the JPY 91,831 refund was posted Sep 10 and the merged overpayment Sep 14. The merge now leaves overpayments separate for the opt-in ensure_distractors config. Regression JudgeScenariosTest.test_refunds_follow_their_posted_overpayments failed on default 10086 and hard 10066 before the fix and passes after it.
+
+Before:
+```text
+VIOLATION default D03 seed=10086: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10093: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10106: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10114: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10129: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10151: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10192: ['no posted refund matching an earlier overpayment']
+VIOLATION hard D03 seed=10066: ['no posted refund matching an earlier overpayment']
+VIOLATION hard D03 seed=10120: ['no posted refund matching an earlier overpayment']
+VIOLATION hard D03 seed=10153: ['no posted refund matching an earlier overpayment']
+```
+After (exit 0):
+```text
+default D01: 200 checked, 0 violations
+default D02: 200 checked, 0 violations
+default D03: 200 checked, 0 violations
+default D04: 200 checked, 0 violations
+default D05: 200 checked, 0 violations
+default D06: 200 checked, 0 violations
+default D07: 200 checked, 0 violations
+default D08: 200 checked, 0 violations
+default D09: 200 checked, 0 violations; missing=200 partial=0
+default D10: 200 checked, 0 violations; missing=0 partial=200
+default D11: 200 checked, 0 violations; missing=77 partial=123
+default D12: 200 checked, 0 violations
+default D13: 200 checked, 0 violations
+default D14: 200 checked, 0 violations
+default D15: 200 checked, 0 violations
+default D16: 200 checked, 0 violations; missing=0 partial=200
+default D17: 200 checked, 0 violations; missing=0 partial=200
+default D18: 200 checked, 0 violations; missing=0 partial=200
+default D19: 200 checked, 0 violations
+default D20: 200 checked, 0 violations
+hard D01: 200 checked, 0 violations
+hard D02: 200 checked, 0 violations
+hard D03: 200 checked, 0 violations
+hard D04: 200 checked, 0 violations
+hard D05: 200 checked, 0 violations
+hard D06: 200 checked, 0 violations
+hard D07: 200 checked, 0 violations
+hard D08: 200 checked, 0 violations
+hard D09: 200 checked, 0 violations; missing=200 partial=0
+hard D10: 200 checked, 0 violations; missing=0 partial=200
+hard D11: 200 checked, 0 violations; missing=92 partial=108
+hard D12: 200 checked, 0 violations
+hard D13: 200 checked, 0 violations
+hard D14: 200 checked, 0 violations
+hard D15: 200 checked, 0 violations
+hard D16: 200 checked, 0 violations; missing=0 partial=200
+hard D17: 200 checked, 0 violations; missing=0 partial=200
+hard D18: 200 checked, 0 violations; missing=0 partial=200
+hard D19: 200 checked, 0 violations
+hard D20: 200 checked, 0 violations
+Total: 0 violating episodes
+real 51.92
+user 51.64
+sys 0.16
+```
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` exit 0 (ALL CHECKS PASSED in 56.6 s); `scripts/golden.py --check` 80/80 and `auditenv.verify --seeds 0-199` 600/600. Next: T24.
