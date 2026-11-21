@@ -162,7 +162,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
 - [x] G25 (gemini1a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 33000-33299` —
   files: night/LOG.md — accept: exit code, the totals line and the "unexplained violations" line verbatim.
 - [x] G26 (gemini1b) Same as G25 with `--seeds 34000-34299` — files: night/LOG.md — accept: as G25.
-- [ ] G27 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999` and the same with `--hard` —
+- [x] G27 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999` and the same with `--hard` —
   files: night/LOG.md — accept: both summaries + wall times.
 - [ ] G28 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 0` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 0-1999` — files: night/LOG.md — accept: summaries.
