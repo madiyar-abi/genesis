@@ -4,6 +4,23 @@
 - train: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/train.json --out /tmp/r21-gemini2b/train` (exit 0, wall time 0.120s, "Exported 10 episodes to /tmp/r21-gemini2b/train") && `diff -r episodes/train /tmp/r21-gemini2b/train` (exit 0, 0 files differ).
 - hard: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/eval_hard.json --out /tmp/r21-gemini2b/hard` (exit 0, wall time 0.374s, "Exported 20 episodes to /tmp/r21-gemini2b/hard") && `diff -r episodes/hard /tmp/r21-gemini2b/hard` (exit 0, 0 files differ).
 All 40 exported episodes across all three splits are byte-for-byte identical to the committed exports (0 differing files). Next: G11.
+2026-11-22 03:49 rb — Z1 done. Fresh-seed reruns of the round-20 independent checkers (no product changes).
+  (1) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 42000-42299` → exit 0, wall 111 s.
+  `episodes checked: 12600 (seeds 42000-42299, 42 configs)`
+  Totals line verbatim: `totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3057, e_fx_missing=0, f_inv_booked_before_issue=2615, f_pay_posted_before_doc=0, f_ar_before_booking=21, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5042, c_tie=1`
+  `unexplained violations: 21 (0 in clean configs)` — all 21 are `f_ar_before_booking` in configs that inject period_cutoff
+  (default/default 5, hard/hard 4, D14/default 2, D14/hard 4, D15/default 2, D15/hard 4), matching the lead's round-20
+  explanation (night/archive/r20-LOG.md 02:44: remaining hits are the prior-period invoice itself). Clean D01–D05: 0.
+  Sample reproductions verbatim:
+    default/default seed=42089 f_ar_before_booking ids=['RCPT0400010', '2507-414083', 'L01292'] ar credit 2025-07-02T23:50:00+00:00 booking 2025-07-04T20:53:00+00:00
+    hard/hard seed=42045 f_ar_before_booking ids=['BNK-318927', 'INV-908173', 'R163'] ar credit 2026-10-02T13:16:00+03:00 booking 2026-10-03T21:26:00+03:00
+    D14/default seed=42037 f_ar_before_booking ids=['RCPT0739458', 'F0922045', 'GL-003378'] ar credit 2025-11-02T15:55:00+03:00 booking 2025-11-03T16:40:00+03:00
+    D15/hard seed=42228 f_ar_before_booking ids=['RCPT0737735', '2511-562760', 'R185'] ar credit 2025-11-02T19:26:00+03:00 booking 2025-11-02T21:22:00+03:00
+  Full output kept at /tmp/r21-rb/z1_chronology.out (all 21 lines listed there).
+  (2) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 42000-42199` → exit 0, wall 157 s.
+  Final line verbatim: `Audited 8400 episodes across 42 configurations; 33043340 checks, 0 unexpected failures.`
+  Next: Z2 (scenarios_adapter on seeds 43000–43004). Assumption: the 21 non-clean f_ar_before_booking hits are the known
+  period_cutoff pattern, not a new defect — flagged for lead confirmation, no product code touched.
 
 2026-11-22 03:47 codex1 — X1 text-only auditor. `env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor` → exit 0, 150.76 s, 4,200 episodes.
 
@@ -2046,3 +2063,94 @@ Values with precision > 0.5 called out:
 All other 11 values match the documented hard-mode cues in DESIGN §10 (2900 amount_count>=4 at 0.840, 2900 end-0 at 0.765, 2900 9-digits at 0.730, 2900 6-digits at 0.562, fx_error 2900 end-0 at 0.668, fx_error 7900 end-0 at 0.551).
 All tasks for gemini2b in Round 21 finished.
 2026-11-22 03:46 gemini3b — G18 complete: ran `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r21-gemini3b/c.json` (exit 0, ALL CHECKS PASSED in 137.7 s; 563 unit tests, 200/200 verifier, 20/20 paired, 50/50 hard verifier, 20/20 hard paired) then `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c.json` (exit 0, verbatim output: "All documentation tables match measured data.", zero drift). All gemini3b tasks (G16, G17, G18) completed.
+2026-11-22 03:53 rb — Z2 done. scenarios_adapter has no seed flag (argparse absent; --help is ignored and it runs), so per task
+  copied night/r20/scenarios_adapter.py → night/r21/scenarios_adapter_43000.py. Edits beyond the seed constant
+  (assumptions, minimal): SEEDS range(32000,32005)→range(43000,43005); SCRATCH /tmp/r20-rb→/tmp/r21-rb (round rule:
+  scratch only under /tmp/r21-rb/); the printed header's seed-range label 32000-32004→43000-43004 so the evidence
+  is not mislabeled. No other logic changed (diff is 3 lines).
+  Command: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r21/scenarios_adapter_43000.py` → exit 0, wall 12 s.
+  Header: `Z1: 20 scenarios x 2 difficulties x 5 seeds (43000-43004) x 2 policies = 400 closed runs through judge_adapter, 12.2 s total`
+  FLAGS (0): none — every reconcile/reconcile_hard episode F1 = 1.000, every flag_all return = -1.000, no invalid
+  submissions, no episode ≥ 60 s (max 0.040 s). Table (reconcile = reconcile on default / reconcile_hard on hard;
+  steps = max adapter steps of reconcile; full 80-row output at /tmp/r21-rb/z2_scenarios.out, JSON /tmp/r21-rb/z1.json):
+  | scenario | difficulty | reconcile mean return | mean F1 | min F1 | flag_all mean return | max steps |
+  |---|---|---|---|---|---|---|
+  | D01 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D01 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D02 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D02 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D03 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D03 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D04 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D04 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D05 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D05 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D06 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D06 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D07 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D07 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D08 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D08 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D09 | default | 0.962 | 1.000 | 1.000 | -1.000 | 22 |
+  | D09 | hard | 0.915 | 1.000 | 1.000 | -1.000 | 46 |
+  | D10 | default | 0.960 | 1.000 | 1.000 | -1.000 | 22 |
+  | D10 | hard | 0.922 | 1.000 | 1.000 | -1.000 | 44 |
+  | D11 | default | 0.963 | 1.000 | 1.000 | -1.000 | 23 |
+  | D11 | hard | 0.912 | 1.000 | 1.000 | -1.000 | 48 |
+  | D12 | default | 0.962 | 1.000 | 1.000 | -1.000 | 22 |
+  | D12 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 45 |
+  | D13 | default | 0.962 | 1.000 | 1.000 | -1.000 | 22 |
+  | D13 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 45 |
+  | D14 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D14 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 44 |
+  | D15 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D15 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 44 |
+  | D16 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D16 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D17 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D17 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D18 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D18 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D19 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D19 | hard | 0.921 | 1.000 | 1.000 | -1.000 | 45 |
+  | D20 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D20 | hard | 0.921 | 1.000 | 1.000 | -1.000 | 45 |
+  Called out per accept: no reconcile F1 < 1 and no flag_all > 0. NOTES (22): all hard reconcile_hard per-scenario
+  mean returns 0.912–0.922 and D19/D20 default 0.959 are below the README jury_run mean 0.959 — expected: README's
+  number is a 20-scenario default-difficulty mean on seeds 3001-3020; hard uses ~2x inspection steps at 0.002/step.
+  Same pattern as round 20 (archive r20-LOG Z1); not a defect. Next: Z3 (jury_run on seed bases 24000-27000).
+2026-11-22 03:55 rb — Z3 done. `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r21-rb/j<B>.json`
+  for B in 24000, 25000, 26000, 27000: all exit 0; wall 3 s, 2 s, 2 s, 3 s. Policy tables verbatim:
+  --- B=24000 (seeds 24001-24020) ---
+  20 jury scenarios D01-D20 (seeds 24001-24020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.032   0.033
+  reconcile         1.000  1.000  1.000    0.961    20.4    23    0.033   0.035
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.029   0.031
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  --- B=25000 (seeds 25001-25020) ---
+  20 jury scenarios D01-D20 (seeds 25001-25020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.038   0.045
+  reconcile         1.000  1.000  1.000    0.960    21.1    23    0.033   0.038
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.030   0.031
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  --- B=26000 (seeds 26001-26020) ---
+  20 jury scenarios D01-D20 (seeds 26001-26020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.033   0.034
+  reconcile         1.000  1.000  1.000    0.961    20.7    24    0.034   0.037
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.030   0.031
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  --- B=27000 (seeds 27001-27020) ---
+  20 jury scenarios D01-D20 (seeds 27001-27020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.033   0.036
+  reconcile         1.000  1.000  1.000    0.960    21.1    25    0.034   0.036
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.030   0.034
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  Accept check: oracle F1 = 1.000 and reconcile F1 = 1.000 in all four runs; random_explorer returns -1.000/-1.000/
+  -0.903/-0.903 and flag_all -1.000 everywhere — none > -0.5, nothing to call out. Note: random_explorer -0.903 on
+  B=26000/27000 comes from fewer false positives (fp=38 vs flag_all's 600 across 20 episodes), so the FP penalty is
+  smaller; P/R/F1 still 0.000. Not a defect. JSON at /tmp/r21-rb/j{24000,25000,26000,27000}.json.
+  All rb tasks (Z1, Z2, Z3) done and pushed; no unchecked (rb) tasks remain — going IDLE.
