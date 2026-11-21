@@ -25,3 +25,39 @@ Semantically equivalent rewrite discrepancies: 0. Combined uses compact JSON, al
   Run 5: Ran 73 tests in 2.528s, OK, exit 0, wall time 3s
   Total: 365 tests, 0 failures. Next: G14.
 2026-11-22 03:42 gemini3b — G16 complete: verified all splits under episodes/ (dev: 10/10 valid, exit 0, 0.13s; hard: 20/20 valid, exit 0, 0.35s; train: 10/10 valid, exit 0, 0.11s). Next: G17.
+
+2026-11-22 03:51 codex2 — Y2: timed the four jury modules and closed jury runner under macOS low QoS, six parallel hard fuzz sweeps, and both conditions together.
+
+Commands below are run from the repo root and prefixed with `/usr/bin/time -p`. Measured elapsed wall time is the `real` value. Set `TMPDIR=/tmp/r21-codex2 AUDITENV_KEY_FILE=/tmp/r21-codex2/timing.key` and unset `AUDITENV_GRADER_LOG` for scratch isolation.
+
+```sh
+taskpolicy -c background env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired
+taskpolicy -c background env -u AUDITENV_SECRET uv run python -m auditenv.jury_run
+env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired
+env -u AUDITENV_SECRET uv run python -m auditenv.jury_run
+env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard
+```
+
+The two normal-priority commands were launched concurrently with six background copies of the last command. I also launched both low-QoS commands together while all six fuzz processes were active. macOS 26.6, four performance and six efficiency cores. Low QoS is the requested scheduling proxy.
+
+| Condition | Run | Exit | Wall seconds | Summary |
+|---|---|---:|---:|---|
+| Low QoS | Four jury test modules | 0 | 7.32 | Ran 73 tests in 7.096s; OK |
+| Low QoS | Jury runner | 0 | 7.32 | 20 jury scenarios D01-D20; maximum episode 0.451 s |
+| Six fuzz processes | Four jury test modules | 0 | 7.40 | Ran 73 tests in 7.154s; OK |
+| Six fuzz processes | Jury runner | 0 | 3.27 | 20 jury scenarios D01-D20; maximum episode 0.052 s |
+| Low QoS plus fuzz | Four jury test modules | 0 | 423.94 | Ran 73 tests in 370.886s; OK |
+| Low QoS plus fuzz | Jury runner | 0 | 424.04 | 20 jury scenarios D01-D20; maximum episode 54.050 s |
+
+No timing-related failure appeared. The combined run's slowest episode was random_explorer at 54.050 s (5.950 s short of the 60 s episode limit), while reconcile peaked at 3.097 s. In all three runs, reconcile and oracle had F1 1.000 and mean returns 0.959 and 1.000 respectively; random_explorer and flag_all returned -1.000.
+
+| Fuzz process | Exit | Wall seconds | Summary |
+|---|---:|---:|---|
+| 1 | 0 | 447.61 | 3000 episodes, 0 problems, FUZZ PASSED |
+| 2 | 0 | 445.33 | 3000 episodes, 0 problems, FUZZ PASSED |
+| 3 | 0 | 445.17 | 3000 episodes, 0 problems, FUZZ PASSED |
+| 4 | 0 | 444.75 | 3000 episodes, 0 problems, FUZZ PASSED |
+| 5 | 0 | 447.61 | 3000 episodes, 0 problems, FUZZ PASSED |
+| 6 | 0 | 448.35 | 3000 episodes, 0 problems, FUZZ PASSED |
+
+Next: Y3 fresh-clone README walkthrough.

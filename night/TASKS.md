@@ -51,7 +51,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   the reference answer + `score_episode`. Script `night/r21/jury_copy.py`. — files: night/r21/jury_copy.py,
   night/LOG.md — accept: table variant → accepted / rejected (error text) / score equal to the original; every
   rejection of a semantically identical file called out (the lead decides whether to accept it).
-- [ ] Y2 (codex2) Hidden-run timing on a slow machine: run the four jury modules and `auditenv.jury_run` under
+- [x] Y2 (codex2) Hidden-run timing on a slow machine: run the four jury modules and `auditenv.jury_run` under
   `taskpolicy -c background` (macOS low-QoS, slower cores) and with 6 parallel copies of
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard` as background load. — files:
   night/LOG.md — accept: per run exit code + wall time + any timing-related failure quoted verbatim (60 s limit,
