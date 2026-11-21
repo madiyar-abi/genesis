@@ -406,3 +406,14 @@ evidence tasks (night/TASKS.md, night/LOG.md).
   period edge (holds on 40/40 seeds 900–939). Two readings left as designed, no published check exercises them: a
   closed-mode invalid submit answers `{"accepted": true}` (graded −1 grader-side, as documented), and an unknown key
   in a finding is a structural error although the page lists only wrong type, missing field and limit.
+- Loader and server hardening (codex1, T45/T46): 123 corrupted-export cases and 93 hostile wire requests; fixed path
+  echoes, silent acceptance of symlinks/NUL/empty/header-only files, duplicate JSON keys, nonfinite numbers, blank
+  lines without a response and a train-mode hidden list exposing scores (`tests/test_load_redteam.py`,
+  `tests/test_server_redteam.py`). Lead review of that change: the stricter loader rejected a row_id equal to a
+  doc_id, which the published paired definitions allow ("different id spaces are handled separately") — a jury copy
+  renamed per space would have failed closed reset; loaded episodes now need uniqueness per id space only. The
+  server again answers any unexpected exception with a bounded `internal error` instead of exiting.
+- Multi-cue cheater (codex1, T47): rules over position, id patterns, timestamps, amount digits and wording, fit on
+  seeds 0–499 and scored on 5000–5499 through the adapter: F1 0.163 (default) / 0.153 (hard) vs reconcile 1.000 /
+  0.840. Its strongest cues (I1 payment is the last-evening payment; cutoff bookings at the period start) are the
+  ones DESIGN §10 already lists.
