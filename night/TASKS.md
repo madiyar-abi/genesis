@@ -17,7 +17,7 @@ import `auditenv.generator` (to generate), `auditenv.jury` (config list), `judge
 must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies/`.
 
 ## codex1 — independent defect hunts (strong)
-- [ ] X1 (codex1) Independent text-only auditor. Write `night/r21/text_auditor.py`: an audit policy implemented ONLY
+- [x] X1 (codex1) Independent text-only auditor. Write `night/r21/text_auditor.py`: an audit policy implemented ONLY
   from `public/task.txt` + `policy.json` + the public tables (do not open auditenv/policies/, inject.py, verify.py,
   matcher.py). It derives findings for every issue type the task text defines. Run it through `judge_adapter`
   (`generate_episode` to a temp dir, then `score_episode` on its findings) on seeds 40000–40099 × default, hard and
