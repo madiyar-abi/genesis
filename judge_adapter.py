@@ -41,7 +41,7 @@ def generate_episode(seed: int, config: dict, output_dir: str) -> None:
     export_episode(generate(seed, config or None, grader_key()), output_dir)
 
 
-def grader_key() -> str:
+def grader_key(*, warn: bool = True) -> str:
     """The key of closed episodes: AUDITENV_SECRET if set, else a random key read from the grader key file, which is
     created on first use (atomically, mode 0600). A public constant would let a policy recover the seed from
     episode_id or the records and regenerate the truth with this open-source generator. If the file cannot be
@@ -58,7 +58,7 @@ def grader_key() -> str:
         key = _PROCESS_KEY
         note = (f"grader key file {path} is unusable ({exc}); closed episodes are keyed by a random key of this "
                 "process and do not reproduce in another one")
-    if not _WARNED:
+    if warn and not _WARNED:
         _WARNED = True
         print(f"judge_adapter: AUDITENV_SECRET is not set; {note}. Keep the key out of the policy's reach.",
               file=sys.stderr, flush=True)
@@ -119,7 +119,7 @@ class JudgeEnv:
             obs, info = self._env.reset_episode(load_episode(config["episode_dir"]), {**limits, "mode": env_mode},
                                                 started_at=started_at)
         else:
-            key = grader_key() if mode == "closed" else None  # open mode: the public generator
+            key = grader_key(warn=False) if mode == "closed" else None  # open mode: the public generator
             obs, info = self._env.reset(seed, {**team, "mode": env_mode}, started_at=started_at, key=key)
         first = {"task": obs["task"], "manifest": obs["manifest"], "policy": obs["policy"],
                  "remaining_steps": obs["steps_remaining"]}

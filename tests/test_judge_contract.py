@@ -359,6 +359,19 @@ class JudgeContractTest(unittest.TestCase):
         self.assertEqual((result["tp"], result["fp"], result["fn"]), (1, 0, 0))
         self.assertEqual(load_episode(fixture)["tables"]["fx"], self.e["tables"]["fx"])
 
+    def test_closed_reset_keeps_key_path_off_stderr(self):
+        import contextlib
+        import io
+        from unittest import mock
+
+        for path in (os.path.join(self.tmp, "fixture.key"), self.tmp):
+            with self.subTest(path=path), mock.patch.object(ja, "_WARNED", False), mock.patch.dict(
+                    os.environ, {"AUDITENV_SECRET": "", "AUDITENV_KEY_FILE": path}):
+                err = io.StringIO()
+                with contextlib.redirect_stderr(err):
+                    ja.make_env().reset(3, {"mode": "closed"})
+                self.assertNotIn(path, err.getvalue())
+
     def test_generate_warns_without_the_secret(self):
         import contextlib
         import io

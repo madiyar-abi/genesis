@@ -201,7 +201,7 @@ step 3 by recomputing every discrepancy from the full ledger. We keep the set mi
 
 A jury-style review (separate agent, before submission) found and we fixed: seed recovery from a
 plain-hash `episode_id` (now HMAC + grader key in the RNG); a crash/overrun on non-string `table`
-(now a bounded error, 100-step cap holds — plus a 20 312-action fuzz test); a telltale timezone on the
+(now a bounded error, 100-step cap holds — plus a 20 319-action fuzz test); a telltale timezone on the
 I1 payment, a timestamp-mismatch shortcut for cutoff, a telltale hour on duplicate copies (removed,
 measured with the shortcut's precision: 1.00 → undefined / 0.09 / 0.02); evidence sets that did not
 contain the FX rate or the invoice document; skipping hidden episodes in server mode (now graded as
@@ -249,7 +249,7 @@ explorer and flag-everything through the env, 3 configs per seed): 3 000 episode
 clean) — 0 exceptions, 0 verifier problems, oracle 1.0 on every episode; the random explorer
 scores > 0 on 245 episodes, all clean books where it submitted nothing (the correct answer), never on
 dirty books; flag-everything is negative on 3 000/3 000. Hard mode, seeds 0–199: 600 episodes, 0 problems,
-random > 0 only on 50 clean episodes, flag-everything negative on 600/600. CI runs both sweeps.
+random > 0 only on 47 clean episodes, flag-everything negative on 600/600. CI runs both sweeps.
 
 **Measured failure analysis** (`uv run python -m auditenv.analyze --policy <p> --config configs/dev.json`):
 
@@ -338,7 +338,7 @@ to explore.
 | the 100th action is not a submit / 60 s elapsed | `truncated`, empty answer graded | `test_env`, `test_jury` |
 | the 100th action is the submit | it is a submit (`terminated`) | `test_env.test_submit_on_last_step_is_submit` |
 | action after the end, resubmission | `episode_over`, nothing changes, the first grade stays | `test_jury` |
-| malformed actions (None, lists, nested dicts, huge strings, unicode digits in cursors) | bounded error, step consumed, never an exception | `test_fuzz` (20 312 episode actions) |
+| malformed actions (None, lists, nested dicts, huge strings, unicode digits in cursors) | bounded error, step consumed, never an exception | `test_fuzz` (20 319 episode actions) |
 | cursor exactly at the end / past the end | empty page / `bad_params` | `test_jury` |
 | JPY (exponent 0), refunds (negative payment), multi-invoice and split payments, overpayments, unidentified receipts | correct postings, verifier finds 0 discrepancies | `test_jury.EdgeCaseDataTests`, seed sweep |
 | documents near midnight in other timezones | period and rate date decided in the company timezone | `test_jury.EdgeCaseDataTests`, naive baseline FPs |
@@ -359,7 +359,9 @@ to explore.
   seeds: invoices and re-issues are now keyed in by hand too). Left, measured: in default mode "same entity,
   currency and total exactly twice" finds duplicates (0.996) — it is the duplicate definition, but default mode
   has no near-miss decoys (hard mode has: 0.358); I1 payments are always on the last day, so a 2900/7900 row on
-  the last day hints at fx_error (0.70) and a large 2900 amount at payment_allocation (0.75–0.78). Each hint names
+  the last day hints at fx_error (0.70) and a large 2900 amount at payment_allocation (0.75–0.78);
+  a 2900 row whose amount occurs in four or more ledger rows points at payment_allocation too (0.964, 217 of
+  225 rows). Each hint names
   a record, not the claimed amount — scoring still needs the reconciliation.
 - Cutoff of a next-period invoice is booked *before* its issue instant; a policy can learn that
   direction-of-lag cue, but it is exactly the audit rule (document date outside the period).
