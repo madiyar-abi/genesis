@@ -47,7 +47,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   that proves it. — files: night/LOG.md — accept: LOG lists each wrong or unprovable claim with the file:line of the
   doc, the evidence (code file:line or command output) and the correct text; "0 wrong claims" is a valid result
   only with the number of claims checked.
-- [ ] Y3 (codex2) Same as Y2 for docs/DESIGN.md and docs/PITCH.md (numbers must come from
+- [x] Y3 (codex2) Same as Y2 for docs/DESIGN.md and docs/PITCH.md (numbers must come from
   `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r20-codex2/c.json`, `auditenv.analyze`,
   `auditenv.fuzz`). — files: night/LOG.md — accept: as Y2.
 
