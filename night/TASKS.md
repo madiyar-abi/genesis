@@ -157,3 +157,17 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   list_records, a get_record, a malformed line, submit and one step after submit; compare each response with the
   documented example/shape — files: night/LOG.md — accept: every request/response pair quoted; any difference from
   the docs called out with doc file:line.
+
+## Top-up 2 (01:15) — evidence on the generator fix `299c5e7` (merge origin/night/2026-11-22-r20 first!)
+- [ ] G25 (gemini1a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 33000-33299` —
+  files: night/LOG.md — accept: exit code, the totals line and the "unexplained violations" line verbatim.
+- [ ] G26 (gemini1b) Same as G25 with `--seeds 34000-34299` — files: night/LOG.md — accept: as G25.
+- [ ] G27 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999` and the same with `--hard` —
+  files: night/LOG.md — accept: both summaries + wall times.
+- [ ] G28 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 0` and
+  `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 0-1999` — files: night/LOG.md — accept: summaries.
+- [ ] G29 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice and
+  `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning -m unittest discover -s tests -t .` — files:
+  night/LOG.md — accept: exit codes, last lines, wall times.
+- [ ] G30 (gemini3b) Repeat G10 (export diff of dev/train/hard) and G24 (trajectory regeneration diff) on the fix —
+  files: night/LOG.md — accept: every diff exit code; any differing file named.
