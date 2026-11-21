@@ -95,7 +95,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
 - [x] G7 (gemini2a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 37000-37299` —
   accept: exit code, totals line and "unexplained violations" line verbatim, wall time.
 - [x] G8 (gemini2a) Same as G7 with `--seeds 37300-37599`.
-- [ ] G9 (gemini2a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 38000-38199` —
+- [x] G9 (gemini2a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 38000-38199` —
   accept: exit code and the final "Audited ... unexpected failures" line verbatim, wall time.
 
 ## gemini2b — reproducibility (evidence only, files: night/LOG.md)
