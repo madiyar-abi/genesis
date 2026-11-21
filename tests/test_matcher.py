@@ -4,9 +4,11 @@ import copy
 import json
 import unittest
 
-from auditenv.matcher import grade, match, public_summary, tolerance
+from auditenv.matcher import grade, match, public_ids, public_summary, tolerance_of
 
 EP = "ep_x"
+# every id the hand-built issues and findings below cite as evidence exists in the (imagined) public tables
+KNOWN = {"D-1", "D-2", "D-3", "D-4", "D-9", "L-1", "L-2", "L-3", "L-4", "L-9", "L-10", "L-99", "X-1"}
 
 DUP = {"issue_id": "ISS-1", "type": "duplicate_invoice", "affected_ids": ["INV-1", "INV-2"],
        "expected_amount_minor": 5000, "currency": "USD",
@@ -34,8 +36,8 @@ def sub(*findings, episode_id=EP):
 
 
 class MatcherTests(unittest.TestCase):
-    def g(self, t, s, steps=0):
-        return grade(t, s, EP, steps)
+    def g(self, t, s, steps=0, tolerance=0):
+        return grade(t, s, EP, steps, KNOWN, tolerance)
 
     # ---------------------------------------------------------------- TP / FP basics
     def test_exact_tp(self):
@@ -46,14 +48,21 @@ class MatcherTests(unittest.TestCase):
         self.assertEqual(r["reward"], 1.0)
         self.assertEqual(r["labels"], [{"finding": 0, "tp": True, "issue_id": "ISS-1"}])
 
-    def test_affected_ids_order_whitespace_duplicates_normalised(self):
-        f = finding(DUP, affected_ids=[" INV-2 ", "INV-1", "INV-1\t"])
+    def test_affected_ids_order_and_duplicates_normalised(self):
+        f = finding(DUP, affected_ids=["INV-2", "INV-1", "INV-1"])
         r = self.g(truth(DUP), sub(f))
         self.assertEqual((r["tp"], r["fp"], r["fn"]), (1, 0, 0))
 
-    def test_evidence_ids_whitespace_normalised(self):
+    def test_affected_ids_whitespace_is_significant(self):
+        f = finding(DUP, affected_ids=[" INV-2 ", "INV-1", "INV-1\t"])
+        r = self.g(truth(DUP), sub(f))
+        self.assertEqual((r["tp"], r["fp"], r["fn"]), (0, 1, 1))
+
+    def test_evidence_ids_whitespace_is_significant(self):
         f = finding(DUP, evidence_ids=[" D-2", "D-1 "])
-        self.assertEqual(self.g(truth(DUP), sub(f))["tp"], 1)
+        r = self.g(truth(DUP), sub(f))
+        self.assertEqual(r["tp"], 0)
+        self.assertEqual(r["labels"][0]["reason"], "unknown_evidence")
 
     def test_wrong_affected_ids_is_fp(self):
         r = self.g(truth(DUP), sub(finding(DUP, affected_ids=["INV-1"])))
@@ -71,24 +80,25 @@ class MatcherTests(unittest.TestCase):
         self.assertEqual(r["labels"][0]["reason"], "wrong_currency")
 
     # ---------------------------------------------------------------- amount tolerance
-    def test_tolerance_formula(self):
-        self.assertEqual(tolerance(0), 1)
-        self.assertEqual(tolerance(500), 1)
-        self.assertEqual(tolerance(1999), 1)
-        self.assertEqual(tolerance(2000), 2)
-        self.assertEqual(tolerance(1234567), 1234)
+    def test_tolerance_of_policy(self):
+        self.assertEqual(tolerance_of({"findings": {}}), 0)
+        self.assertEqual(tolerance_of({"findings": {"tolerance_minor": 0}}), 0)
+        self.assertEqual(tolerance_of({"findings": {"tolerance_minor": 1234}}), 1234)
+        for bad in (True, -1, 1.0, "1", None):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                tolerance_of({"findings": {"tolerance_minor": bad}})
 
-    def test_amount_tolerance_large(self):
+    def test_amount_published_tolerance(self):
         exp = FX["expected_amount_minor"]
         for claimed, tp in ((exp + 1234, 1), (exp - 1234, 1), (exp + 1235, 0), (exp - 1235, 0)):
             with self.subTest(claimed=claimed):
-                r = self.g(truth(FX), sub(finding(FX, claimed_amount_minor=claimed)))
+                r = self.g(truth(FX), sub(finding(FX, claimed_amount_minor=claimed)), tolerance=1234)
                 self.assertEqual((r["tp"], r["fp"]), (tp, 1 - tp))
                 if not tp:
                     self.assertEqual(r["labels"][0]["reason"], "wrong_amount")
 
-    def test_amount_tolerance_min_one(self):
-        for claimed, tp in ((501, 1), (499, 1), (502, 0), (498, 0)):
+    def test_amount_exact_by_default(self):
+        for claimed, tp in ((500, 1), (501, 0), (499, 0), (502, 0)):
             with self.subTest(claimed=claimed):
                 r = self.g(truth(CUT), sub(finding(CUT, claimed_amount_minor=claimed)))
                 self.assertEqual(r["tp"], tp)
@@ -118,23 +128,27 @@ class MatcherTests(unittest.TestCase):
         self.assertEqual(r["labels"][1], {"finding": 1, "tp": False, "reason": "duplicate"})
         self.assertLess(r["reward"], 1.0)
 
-    def test_greedy_one_to_one_submission_order(self):
+    def test_maximum_matching_independent_of_submission_order(self):
         # Two truth issues with the same fields, differing only in evidence.
         x = {"issue_id": "ISS-X", "type": "fx_error", "affected_ids": ["PAY-1"],
              "expected_amount_minor": 100, "currency": "USD", "evidence_sets": [["D-9", "L-9"]]}
         y = dict(x, issue_id="ISS-Y", evidence_sets=[["D-9", "L-10"]])
         both = finding(x, evidence_ids=["D-9", "L-9", "L-10"])  # satisfies X and Y
         only_x = finding(x, evidence_ids=["D-9", "L-9"])        # satisfies only X
-        # "both" first: takes the first unmatched truth issue (X); "only_x" then has nothing left.
-        r = match(truth(x, y)["issues"], [both, only_x])
-        self.assertEqual((r["tp"], r["fp"], r["fn"]), (1, 1, 1))
-        self.assertEqual(r["labels"][0]["issue_id"], "ISS-X")
-        self.assertEqual(r["labels"][1]["reason"], "duplicate")
-        self.assertEqual(r["missed"], [{"issue_id": "ISS-Y", "type": "fx_error"}])
-        # Reverse submission order: both issues get matched.
-        r = match(truth(x, y)["issues"], [only_x, both])
+        # "both" first: a greedy first fit would give it X and leave Y unmatched; the maximum matching gets both.
+        r = match(truth(x, y)["issues"], [both, only_x], KNOWN)
+        self.assertEqual((r["tp"], r["fp"], r["fn"]), (2, 0, 0))
+        self.assertEqual([lab["issue_id"] for lab in r["labels"]], ["ISS-Y", "ISS-X"])
+        self.assertEqual(r["missed"], [])
+        # Reverse submission order: same counts, the smallest (issue_id, finding index) pairs win.
+        r = match(truth(x, y)["issues"], [only_x, both], KNOWN)
         self.assertEqual((r["tp"], r["fp"], r["fn"]), (2, 0, 0))
         self.assertEqual([lab["issue_id"] for lab in r["labels"]], ["ISS-X", "ISS-Y"])
+
+    def test_public_ids(self):
+        tables = {"ledger": [{"row_id": "R1", "invoice_id": "INV-REF"}],
+                  "invoices": [{"invoice_id": "I1", "doc_id": "D1"}], "payments": [{"payment_id": "P1", "doc_id": "D2"}], "fx": [{"fx_id": "2026-01-01:USD:KZT"}]}
+        self.assertEqual(public_ids(tables), {"R1", "I1", "D1", "P1", "D2", "2026-01-01:USD:KZT"})
 
     def test_mixed_counts(self):
         s = sub(finding(DUP), finding(CUT, claimed_amount_minor=900), finding(FX))

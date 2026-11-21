@@ -26,12 +26,12 @@ from auditenv.run import load_episodes, make_policy, run_episode  # noqa: E402
 
 DEFAULT_COST = 0.002  # auditenv/metrics.py terminal_reward
 STEP_COSTS = (0.001, DEFAULT_COST, 0.005)
-TOLERANCES = {  # label -> tolerance(expected_minor) in minor units; "0.1 %" is the real matcher.tolerance
-    "0 (exact)": lambda expected: 0,
-    "0.1 %": matcher.tolerance,
-    "1 %": lambda expected: max(1, expected // 100),
+TOLERANCES = {  # label -> fixed amount tolerance in minor units; "0 (exact)" is the published policy value
+    "0 (exact)": 0,
+    "1 unit": 1,
+    "100 units": 100,
 }
-DEFAULT_TOL = "0.1 %"
+DEFAULT_TOL = "0 (exact)"
 SPLITS = [
     ("dev", "configs/dev.json", ("oracle", "reconcile", "naive_reconcile", "random", "flag_all")),
     ("hard", "configs/eval_hard.json",
@@ -41,22 +41,22 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _reward(cost: float):
-    """metrics.terminal_reward with the per-step cost as a parameter (same formula, clip and rounding)."""
+    """metrics.terminal_reward with the per-step cost as a parameter (same formula and clip)."""
     def terminal_reward(f1: float, inspection_steps: int) -> float:
         reward = 2 * f1 - 1 - cost * inspection_steps
-        return round(max(-1.0, min(1.0, reward)), 6)
+        return max(-1.0, min(1.0, reward))
     return terminal_reward
 
 
 @contextlib.contextmanager
-def params(cost: float, tol):
-    """Temporarily swap the matcher's tolerance and reward functions; always restored."""
-    saved = matcher.tolerance, matcher.terminal_reward
-    matcher.tolerance, matcher.terminal_reward = tol, _reward(cost)
+def params(cost: float):
+    """Temporarily swap the matcher's reward function; always restored."""
+    saved = matcher.terminal_reward
+    matcher.terminal_reward = _reward(cost)
     try:
         yield
     finally:
-        matcher.tolerance, matcher.terminal_reward = saved
+        matcher.terminal_reward = saved
 
 
 def play(env: AuditEnv, name: str, seed: int, cfg: dict) -> dict:
@@ -69,16 +69,19 @@ def play(env: AuditEnv, name: str, seed: int, cfg: dict) -> dict:
     else:  # truncated: the env grades an empty submission with all steps
         submission, steps = {"episode_id": env.episode_id, "findings": []}, last["step"]
     return {"truth": env._ep["truth"], "submission": submission, "episode_id": env.episode_id,
-            "steps": steps, "reward": env.result["reward"]}
+            "steps": steps, "reward": env.result["reward"], "known_ids": matcher.public_ids(env._ep["tables"]),
+            "tolerance": matcher.tolerance_of(env._ep["policy"])}
 
 
-def regrade(run: dict, cost: float, tol) -> float:
-    with params(cost, tol):
-        return matcher.grade(run["truth"], run["submission"], run["episode_id"], run["steps"])["reward"]
+def regrade(run: dict, cost: float, tol: int) -> float:
+    with params(cost):
+        return matcher.grade(run["truth"], run["submission"], run["episode_id"], run["steps"], run["known_ids"],
+                             tol)["reward"]
 
 
 def check_default(runs: list[dict]) -> None:
     for run in runs:
+        assert run["tolerance"] == TOLERANCES[DEFAULT_TOL], f"{run['episode_id']}: policy publishes another tolerance"
         got = regrade(run, DEFAULT_COST, TOLERANCES[DEFAULT_TOL])
         assert got == run["reward"], f"{run['episode_id']}: re-grade {got} != env reward {run['reward']}"
 
@@ -150,7 +153,7 @@ def main(argv=None) -> int:
         parts.append(markdown(split, len(episodes), report[split]))
     print("\n\n".join(parts))
     print(f"\n(re-grade with default parameters reproduced every env reward exactly; "
-          f"tolerance '0 (exact)' = 0 minor units, '1 %' = max(1, expected // 100); "
+          f"tolerances are fixed minor units: abs(claimed - expected) <= 0, 1 or 100; "
           f"{time.monotonic() - t0:.1f} s)")
     if args.json:
         with open(args.json, "w") as fh:

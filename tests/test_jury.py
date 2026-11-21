@@ -13,7 +13,7 @@ import unittest
 from auditenv.env import AuditEnv
 from auditenv.generator import ISSUE_TYPES, SCENARIOS, generate
 from auditenv.load import load_episode
-from auditenv.matcher import grade
+from auditenv.matcher import grade_episode, tolerance_of
 from auditenv.metrics import terminal_reward
 from auditenv.run import make_policy, run_episode
 from auditenv.verify import Books, revert
@@ -193,8 +193,8 @@ class RewardTests(unittest.TestCase):
         cls.eid, cls.truth = cls.ep["episode_id"], cls.ep["truth"]
         cls.correct = _oracle_findings(cls.truth)
 
-    def grade(self, findings, steps=0, truth=None):
-        return grade(truth or self.truth, {"episode_id": self.eid, "findings": findings}, self.eid, steps)
+    def grade(self, findings, steps=0):
+        return grade_episode(self.ep, {"episode_id": self.eid, "findings": findings}, steps)
 
     def one(self, **change):
         f = copy.deepcopy(self.correct[0])
@@ -208,7 +208,7 @@ class RewardTests(unittest.TestCase):
     def test_each_wrong_field_is_a_false_positive(self):
         other = next(t for t in ISSUE_TYPES if t != self.correct[0]["type"])
         exp = self.correct[0]["claimed_amount_minor"]
-        for bad in (self.one(type=other), self.one(claimed_amount_minor=exp + max(1, exp // 1000) + 1),
+        for bad in (self.one(type=other), self.one(claimed_amount_minor=exp + tolerance_of(self.ep["policy"]) + 1),
                     self.one(currency="ZZZ" if self.correct[0]["currency"] != "ZZZ" else "YYY"),
                     self.one(evidence_ids=self.correct[0]["evidence_ids"][:1]),
                     self.one(affected_ids=["GUESSED-ID"])):
@@ -228,9 +228,9 @@ class RewardTests(unittest.TestCase):
 
     def test_clean_company_silence_vs_accusation(self):
         ep = generate(56, CLEAN)
-        silent = grade(ep["truth"], {"episode_id": ep["episode_id"], "findings": []}, ep["episode_id"], 10)
+        silent = grade_episode(ep, {"episode_id": ep["episode_id"], "findings": []}, 10)
         self.assertEqual((silent["f1"], silent["reward"]), (1.0, 0.98))
-        accuse = grade(ep["truth"], {"episode_id": ep["episode_id"], "findings": [self.one()]}, ep["episode_id"], 10)
+        accuse = grade_episode(ep, {"episode_id": ep["episode_id"], "findings": [self.one()]}, 10)
         self.assertEqual(accuse["f1"], 0.0)
         self.assertLess(accuse["reward"], 0)
 
@@ -392,7 +392,7 @@ class PolicyTextTests(unittest.TestCase):
                         "type": "duplicate_invoice", "affected_ids": iss["affected_ids"],
                         "claimed_amount_minor": iss["expected_amount_minor"], "currency": iss["currency"],
                         "evidence_ids": ev}]}
-                    self.assertEqual(grade(ep["truth"], sub, eid, 0)["tp"], 1, (mode, seed, ev))
+                    self.assertEqual(grade_episode(ep, sub, 0)["tp"], 1, (mode, seed, ev))
                     checked += 1
         self.assertGreater(checked, 20)
 

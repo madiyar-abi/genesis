@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from auditenv.check import HEAVY, run_paired
 from auditenv.generator import generate
-from auditenv.matcher import grade
+from auditenv.matcher import grade_episode
 from auditenv.transform import transform
 
 
@@ -58,11 +58,11 @@ class TestPairedTransform(unittest.TestCase):
             for iss in ep1["truth"]["issues"]
         ]
         # Against transformed truth: old IDs must earn 0 TP
-        m_trans = grade(ep2["truth"], {"episode_id": ep2["episode_id"], "findings": untranslated}, ep2["episode_id"], 0)
+        m_trans = grade_episode(ep2, {"episode_id": ep2["episode_id"], "findings": untranslated}, 0)
         self.assertEqual(m_trans["tp"], 0)
 
         # Against original truth: untranslated findings are the full answer
-        m_orig = grade(ep1["truth"], {"episode_id": ep1["episode_id"], "findings": untranslated}, ep1["episode_id"], 0)
+        m_orig = grade_episode(ep1, {"episode_id": ep1["episode_id"], "findings": untranslated}, 0)
         self.assertEqual(m_orig["tp"], len(ep1["truth"]["issues"]))
         self.assertEqual(m_orig["fp"], 0)
         self.assertEqual(m_orig["fn"], 0)

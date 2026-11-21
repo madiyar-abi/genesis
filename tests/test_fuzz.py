@@ -23,7 +23,7 @@ _TABLES = tuple(_BRANCHES["list_records"]["properties"]["table"]["enum"])
 _CALC_MAX_LEN = _BRANCHES["calculator"]["properties"]["expression"]["maxLength"]
 
 _FINDINGS_ITEMS = _FINDINGS_SCHEMA["properties"]["findings"]["items"]["properties"]
-_ISSUE_TYPES = tuple(_FINDINGS_ITEMS["type"]["enum"])
+_ISSUE_TYPES = tuple(_FINDINGS_ITEMS["type"]["examples"])
 
 _INPUTS = (
     None, True, False, 0, -1, 3.5, [], ["ledger"], {"a": {"b": 1}},
@@ -111,10 +111,11 @@ def _make_invalid_action(kind, rng, episode_id, seen_records, seen_docs):
             {"type": "submit", "findings": "not_a_dict"},
             {"type": "submit", "findings": {"findings": []}},
             {"type": "submit", "findings": {"episode_id": episode_id, "findings": None}},
-            {"type": "submit", "findings": {"episode_id": episode_id, "findings": [{"type": "bad_type", "affected_ids": ["g"], "claimed_amount_minor": 10, "currency": "USD", "evidence_ids": []}]}},
-            {"type": "submit", "findings": {"episode_id": episode_id, "findings": [{"type": rng.choice(_ISSUE_TYPES), "affected_ids": [], "claimed_amount_minor": 10, "currency": "USD", "evidence_ids": []}]}},
-            {"type": "submit", "findings": {"episode_id": episode_id, "findings": [{"type": rng.choice(_ISSUE_TYPES), "affected_ids": ["g"], "claimed_amount_minor": -10, "currency": "USD", "evidence_ids": []}]}},
-            {"type": "submit", "findings": {"episode_id": episode_id, "findings": [{"type": rng.choice(_ISSUE_TYPES), "affected_ids": ["g"], "claimed_amount_minor": 10, "currency": "usd", "evidence_ids": []}]}},
+            {"type": "submit", "findings": {"episode_id": episode_id, "findings": [{"type": 7, "affected_ids": ["g"], "claimed_amount_minor": 10, "currency": "USD", "evidence_ids": []}]}},
+            {"type": "submit", "findings": {"episode_id": episode_id, "findings": [{"type": rng.choice(_ISSUE_TYPES), "affected_ids": "g", "claimed_amount_minor": 10, "currency": "USD", "evidence_ids": []}]}},
+            {"type": "submit", "findings": {"episode_id": episode_id, "findings": [{"type": rng.choice(_ISSUE_TYPES), "affected_ids": ["g"], "claimed_amount_minor": "10", "currency": "USD", "evidence_ids": []}]}},
+            {"type": "submit", "findings": {"episode_id": episode_id, "findings": [{"type": rng.choice(_ISSUE_TYPES), "affected_ids": ["g"], "claimed_amount_minor": 10, "evidence_ids": []}]}},
+            {"type": "submit", "findings": {"episode_id": episode_id, "findings": [{"type": rng.choice(_ISSUE_TYPES), "affected_ids": ["g"], "claimed_amount_minor": 10, "currency": "USD", "evidence_ids": ["e"] * 11}]}},
             {"type": "submit", "findings": {"episode_id": episode_id, "findings": [{"type": rng.choice(_ISSUE_TYPES), "affected_ids": ["g"], "claimed_amount_minor": 10, "currency": "USD", "evidence_ids": [], "extra": 1}]}},
         ])
     raise ValueError(f"Unknown action kind: {kind}")

@@ -14,38 +14,37 @@
         "type": "object",
         "properties": {
           "type": {
-            "enum": [
+            "type": "string",
+            "examples": [
               "duplicate_invoice",
               "payment_allocation",
               "fx_error",
               "period_cutoff"
-            ]
+            ],
+            "description": "One of the four documented types (examples). Any other string is structurally valid but never matches (false positive)."
           },
           "affected_ids": {
             "type": "array",
             "items": {
-              "type": "string",
-              "pattern": "\\S"
+              "type": "string"
             },
-            "minItems": 1,
-            "maxItems": 10
+            "description": "A set: order and repeats do not matter. Ids are compared exactly (case and whitespace count); a TP needs exactly the issue's set."
           },
           "claimed_amount_minor": {
             "type": "integer",
-            "minimum": 0,
-            "description": "Write a JSON integer literal (1234). JSON Schema also counts 1234.0 as an integer, but the environment parses it as a float and rejects the submission (reward -1)."
+            "description": "Write a JSON integer literal (1234). JSON Schema also counts 1234.0 as an integer, but the environment parses it as a float and rejects the submission (reward -1). A wrong or negative amount is valid but does not match."
           },
           "currency": {
             "type": "string",
-            "pattern": "^[A-Z]{3}$"
+            "description": "Compared exactly with the issue currency: no case change, no trimming, no conversion."
           },
           "evidence_ids": {
             "type": "array",
             "items": {
-              "type": "string",
-              "pattern": "\\S"
+              "type": "string"
             },
-            "maxItems": 10
+            "maxItems": 10,
+            "description": "At most 10 entries counted before repeats are dropped; then a set. Every id must exist in the episode's public data, else the finding does not match."
           },
           "explanation": {
             "type": "string",

@@ -7,7 +7,7 @@ import unittest
 from auditenv import matcher, metrics
 from auditenv.env import AuditEnv
 from auditenv.run import load_episodes
-from scripts.sensitivity import DEFAULT_COST, DEFAULT_TOL, SPLITS, STEP_COSTS, TOLERANCES, params, play, regrade
+from scripts.sensitivity import DEFAULT_COST, DEFAULT_TOL, SPLITS, STEP_COSTS, TOLERANCES, play, regrade
 
 DEV_POLICIES = SPLITS[0][2]
 
@@ -34,13 +34,12 @@ class SensitivityTest(unittest.TestCase):
 
     def test_tolerance_override_is_live_and_restored(self):
         run = copy.deepcopy(self.runs["oracle"][0])
+        self.assertEqual(run["tolerance"], TOLERANCES[DEFAULT_TOL])  # the published policy value is the default
         f = run["submission"]["findings"][0]
-        self.assertGreaterEqual(f["claimed_amount_minor"], 10_000)
-        f["claimed_amount_minor"] += f["claimed_amount_minor"] // 200  # 0.5 % off: outside 0.1 %, inside 1 %
-        self.assertLess(regrade(run, DEFAULT_COST, TOLERANCES["0 (exact)"]), 1.0)
+        f["claimed_amount_minor"] += 50  # outside 0 and 1 minor unit, inside 100
         self.assertLess(regrade(run, DEFAULT_COST, TOLERANCES[DEFAULT_TOL]), 1.0)
-        self.assertEqual(regrade(run, DEFAULT_COST, TOLERANCES["1 %"]), 1.0)
-        self.assertIs(matcher.tolerance, TOLERANCES[DEFAULT_TOL])
+        self.assertLess(regrade(run, DEFAULT_COST, TOLERANCES["1 unit"]), 1.0)
+        self.assertEqual(regrade(run, DEFAULT_COST, TOLERANCES["100 units"]), 1.0)
         self.assertIs(matcher.terminal_reward, metrics.terminal_reward)
 
 
