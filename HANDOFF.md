@@ -4,6 +4,13 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
+**Round 18 in progress (21 November, night, branch `night/2026-11-21-r18`).** Open improvement round: red-team
+and evidence tasks for the jury blocks run on the workers (`night/TASKS.md`, results in `night/LOG.md`, findings in
+`REVIEW.md` → "Round 18"). Fixed so far: closed `reset` printed the grader key path to stderr; ten wrong doc claims;
+the D05 scenario condition is now asserted. The published check page was re-read line by line: all 92 checks met.
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` → ALL CHECKS PASSED. The marathon opens the PR into `main`
+after `night/DONE`.
+
 **Grader key by default (21 November, evening, branch `feature/ten-of-ten`).** The jury runs every team the same
 way and will not set our `AUDITENV_SECRET`; its rules treat a seed leak as blocking. Before this change
 `generate_episode` without the variable gave `episode_id = HMAC(public constant, seed)` and public-RNG records, so a
