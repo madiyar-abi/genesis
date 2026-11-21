@@ -98,22 +98,37 @@ def export_split(config_path: str, out_dir: str) -> list[dict]:
     generated = [(seed, cfg, generate(seed, cfg)) for seed, cfg in episodes]
     index = [{"config": cfg, "episode_id": ep["episode_id"], "seed": seed} for seed, cfg, ep in generated]
 
-    # write into a sibling directory (same filesystem, so the swap is renames only), then publish
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    work = Path(tempfile.mkdtemp(prefix=f".{dest.name}.export-", dir=dest.parent))
+    # write into a working directory on dest's filesystem, so publishing is renames only. An existing dest holds
+    # it itself: dest must be writable anyway, its parent need not be, and dest may be a mount point. It has no
+    # public/, so neither the stale check nor `verify --dir` takes it for an episode, and _swap_entries moves only
+    # the names written into it.
+    if dest.exists():
+        work = Path(tempfile.mkdtemp(prefix=f".{dest.name}.export-", dir=dest))
+    else:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        work = Path(tempfile.mkdtemp(prefix=f".{dest.name}.export-", dir=dest.parent))
+    old = work / "old"
     try:
         new = work / "new"
         for _, _, ep in generated:
             export_episode(ep, os.path.join(new, ep["episode_id"]))
         _write_json(os.path.join(new, "index.json"), index)
         if dest.exists():
-            _swap_entries(dest, new, work / "old")
+            _swap_entries(dest, new, old)
         else:
             os.replace(new, dest)
-    except BaseException:
-        if (work / "old").exists():  # a failed rollback left the previous files here: keep them, name the path
+    except BaseException as exc:
+        if not (old.is_dir() and any(old.iterdir())):
+            shutil.rmtree(work, ignore_errors=True)
             raise
-        shutil.rmtree(work, ignore_errors=True)
+        # the rollback failed or was interrupted (exc; the export failure is its context): keep the previous files
+        # and say where they are
+        causes = [str(e) or type(e).__name__ for e in (exc.__context__, exc) if e is not None]
+        message = f"export to {dest} failed and was not undone ({'; then '.join(causes)}); " \
+                  f"the previous files are in {old}"
+        if isinstance(exc, Exception):
+            raise OSError(message) from exc
+        print(message, file=sys.stderr)  # e.g. a second Ctrl-C: keep the interrupt, but name the path
         raise
     shutil.rmtree(work, ignore_errors=True)
     return index
@@ -133,13 +148,10 @@ def _swap_entries(dest: Path, new: Path, old: Path) -> None:
         for name in names:
             os.replace(new / name, dest / name)
             done.append((new / name, dest / name))
-    except BaseException as exc:
-        try:
-            for src, dst in reversed(done):
-                os.replace(dst, src)
-        except OSError as undo:
-            raise OSError(f"export failed ({exc}) and restoring {dest} failed ({undo}); "
-                          f"the previous files are in {old}") from exc
+    except BaseException:
+        # any failure or interrupt from here on leaves files in `old`; export_split then keeps it and names it
+        for src, dst in reversed(done):
+            os.replace(dst, src)
         old.rmdir()  # empty again; rmdir cannot remove anything that was restored too late
         raise
 

@@ -37,6 +37,10 @@ __pycache__/
 .venv/
 venv/
 
+# --- Export working directory (.<split>.export-XXXXXXXX inside or beside the split): left behind only when a
+#     rollback fails (its old/ then holds the previous files) or the process is killed ---
+.*.export-*/
+
 # --- Night-run watchdog logs (local only) ---
 .night-logs/
 
