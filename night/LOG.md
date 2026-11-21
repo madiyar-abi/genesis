@@ -560,3 +560,47 @@ hard reconcile submissions: P=0.780478 R=0.909893 F1=0.840232 (TP=1959 FP=551 FN
 `env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0. ALL CHECKS PASSED in 52.1 s.
 
 2026-11-21 22:31 lead — Merged gemini1a/1b/2a/2b/3a/3b (all evidence tasks done, 0 problems; miner/cheater cues match DESIGN §10) and codex1 T45–T47 (loader + server hardening, multi-cue cheater F1 0.163 default / 0.153 hard vs reconcile 1.000 / 0.840). Review of codex1: (1) its stricter loader rejected a ledger row_id equal to a doc_id; the published paired definitions rename each id space separately and expect equal strings across tables → an independent file-level jury transform failed closed reset after the merge; fixed in 0f33a0f (uniqueness per id space in loaded episodes, strict for our exports), harness 40/40 again, regression test SeparateIdSpaces. (2) T46 narrowed the server's except to ValueError/RuntimeError, so any other exception would end the server → restored a message-free catch-all ({"error": "internal error"}) with a test. (3) jury_run --policy-image without docker printed a raw traceback → clean error, exit 2 (test). Also D05 now asserted (b45cd76). check ALL PASSED, golden 80/80, verify 600/600, load 2.5 ms/episode. Queued T50–T61 (gemini, re-verify the tip) and T62–T63 (codex1: committed colliding-id paired test, loader strictness audit). Assumption: the loader's new validation is acceptable because jury fixtures come from generate_episode or transforms of our exports.
+
+2026-11-21 22:43 gemini1b — T52: jury_run baseline evaluation on seed bases 15000, 16000, 17000, 18000, 19000.
+Command: `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r18-gemini1b/j<B>.json`
+- Seed base 15000 (exit 0, wall 2.47s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.036   0.040
+reconcile         1.000  1.000  1.000    0.960    20.8    24    0.036   0.039
+flag_all          0.000  0.000  0.000   -1.000     3.7     4    0.033   0.036
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+
+- Seed base 16000 (exit 0, wall 2.50s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.036   0.044
+reconcile         1.000  1.000  1.000    0.960    21.1    23    0.037   0.041
+flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.033   0.039
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+
+- Seed base 17000 (exit 0, wall 2.53s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.037   0.040
+reconcile         1.000  1.000  1.000    0.959    21.2    26    0.037   0.039
+flag_all          0.000  0.000  0.000   -1.000     3.4     4    0.034   0.041
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+
+- Seed base 18000 (exit 0, wall 2.57s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.806    33.0    33    0.037   0.041
+reconcile         1.000  1.000  1.000    0.960    21.2    24    0.037   0.043
+flag_all          0.000  0.000  0.000   -1.000     3.7     4    0.034   0.042
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+
+- Seed base 19000 (exit 0, wall 2.58s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.806    33.0    33    0.038   0.048
+reconcile         1.000  1.000  1.000    0.959    21.5    25    0.039   0.045
+flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.034   0.036
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+
+Checks:
+- Oracle F1 = 1.000 on all runs (none < 1).
+- Reconcile F1 = 1.000 on all runs (none < 1).
+- Random explorer return <= -0.806 on all runs (none > -0.5).
+- Flag_all return = -1.000 on all runs (none > -0.5).
+Next: T53 (stress reconcile and reconcile_hard on seeds 7000-7299).
