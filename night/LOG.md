@@ -537,3 +537,4 @@ Assumption: public mode is the right setting for this evidence task — without 
 queue, the run is reproducible, and the closed (`--episodes`) path is already covered by `tests/test_server.py`
 and by the round-19 closed-mode evidence. Assumption: `close` was added as a seventh request so the session ends
 explicitly; EOF ends it the same way (exit 0, 0 bytes on stderr).
+2026-11-22 02:44 lead — Merged G31-G33, Z3, Z4. Chronology on 1,200 more seeds: 0 unexplained in clean configs (the remaining f_ar_before_booking hits are all in configs that inject period_cutoff: the prior-period invoice itself). Z3: 23/25 CHECKS rows fully asserted by the cited test, 2 partly (mutation kill count and README snippet count are enforced by the cited command, not the unit test) — no fix needed. Z4: server session matches CONTRACT key for key; documented the two gaps rb found (close has no response line; framing error strings) in CONTRACT §4 and README.

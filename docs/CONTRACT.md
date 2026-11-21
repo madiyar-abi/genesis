@@ -111,6 +111,10 @@ Hard mode pads the ledger to a target of 900–1 400 rows before injection and s
 
 A rejected seed or config raises `ValueError` (over `auditenv.server`: a bounded `{"error": ...}`) and leaves
 the current episode unchanged. A successful server reset grades an open episode as abandoned (empty answer).
+Server framing: one JSON object per line and one response line per `reset`/`step`; `{"cmd": "close"}` ends the
+session without a response. A line the server cannot handle gets `{"error": ...}` without consuming a step:
+`request too large`, `invalid utf-8`, `invalid input type`, `invalid json`, `request must be a JSON object`,
+`unknown cmd`, `no more episodes` (hidden queue exhausted), `RuntimeError: call reset() first`, `internal error`.
 
 Grader secret: if the env var `AUDITENV_SECRET` is set (grader process only), it keys both the
 generator RNG and the HMAC `episode_id`, so a policy cannot recover the seed or regenerate the

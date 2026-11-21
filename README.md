@@ -364,7 +364,7 @@ When `AUDITENV_SECRET` is unset, the server keys hidden episodes by default usin
 a reminder on stderr. `--public` uses the public generator without warning for lists that are public on purpose,
 as in the check's smoke test and the demo.
 
-`auditenv.server` communicates via JSON lines over stdin/stdout (`{"cmd": "reset"}`, `{"cmd": "step", "action": {...}}`, `{"cmd": "close"}`).
+`auditenv.server` communicates via JSON lines over stdin/stdout (`{"cmd": "reset"}`, `{"cmd": "step", "action": {...}}`, `{"cmd": "close"}`, which ends the session without a response line; framing errors: CONTRACT §4).
 `auditenv.client.RemoteEnv` manages the subprocess and speaks the same `reset/step` API; with `--episodes`
 the client cannot choose seeds, rewards are 0.0 and results are written only to `grader.jsonl`.
 
