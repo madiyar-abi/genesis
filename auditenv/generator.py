@@ -105,9 +105,10 @@ def gen_config(config: dict) -> dict:
     return gen
 
 
-def episode_id_for(seed: int, config: dict) -> str:
+def episode_id_for(seed: int, config: dict, key: str | None = None) -> str:
+    """`key` overrides AUDITENV_SECRET (judge_adapter passes its grader key); empty -> the public key."""
     msg = f"{GENERATOR_VERSION}|{seed}|{canonical(gen_config(config))}|{config.get('transform_seed')}"
-    key = (secret() or "auditenv-public").encode()
+    key = ((secret() if key is None else key) or "auditenv-public").encode()
     return "ep_" + hmac.new(key, msg.encode(), hashlib.sha256).hexdigest()[:12]
 
 
@@ -119,12 +120,13 @@ def _month_end(d: date) -> date:
 class State:
     """Mutable hidden history of one company. Internal fields start with '_'."""
 
-    def __init__(self, seed: int, config: dict):
+    def __init__(self, seed: int, config: dict, key: str | None = None):
         self.seed = seed
         self.config = config
         self.gen = gen_config(config)
         self.hard = self.gen.get("difficulty") == "hard"
-        self.rng = random.Random(f"auditenv|{secret()}|{GENERATOR_VERSION}|{seed}|{canonical(self.gen)}")
+        key = secret() if key is None else key
+        self.rng = random.Random(f"auditenv|{key}|{GENERATOR_VERSION}|{seed}|{canonical(self.gen)}")
         rng = self.rng
         self.base = rng.choice(BASES)
         pool = [c for c in USD_VALUE if c != self.base]
@@ -671,16 +673,16 @@ TASK_HARD = (
 )
 
 
-def generate(seed: int, config: dict | None = None) -> dict:
-    """Generate one episode: public tables + grader-only truth and provenance."""
+def generate(seed: int, config: dict | None = None, key: str | None = None) -> dict:
+    """Generate one episode: public tables + grader-only truth and provenance. `key` overrides AUDITENV_SECRET."""
     from . import inject  # local import: inject uses State
 
     config = dict(config or {})
-    st = State(int(seed), config)
+    st = State(int(seed), config, key)
     build_history(st)
     errors, inter = _plan(st)
     inject.apply(st, errors, inter)
-    episode = render(st, episode_id_for(int(seed), config))
+    episode = render(st, episode_id_for(int(seed), config, key))
     episode["task"] = TASK_TEXT + (TASK_HARD if st.hard else "")
     if config.get("transform_seed") is not None:
         from .transform import transform

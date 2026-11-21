@@ -8,15 +8,17 @@ repository root (the container's WORKDIR, /app), for example:
 print(env.reset(0, {'mode': 'closed', 'episode_dir': '/tmp/ep7'})[0]['remaining_steps'])"
 
 Grader side only (the jury process): `generate_episode`, `score_episode`, episode paths, seeds, truth and provenance.
-A policy runs in its own process and receives only what `reset` and `step` return. Set `AUDITENV_SECRET` in the jury
-process that generates hidden episodes: without it `episode_id` is keyed by a public constant and a policy can
-recover the seed and regenerate the truth (a warning is printed on stderr).
+A policy runs in its own process and receives only what `reset` and `step` return. Closed episodes are keyed so that
+neither `episode_id` nor the records reveal the seed: by `AUDITENV_SECRET` if the jury sets it, otherwise by a random
+grader key created once in `~/.auditenv/grader.key` (or `$AUDITENV_KEY_FILE`), mode 0600. The same seed and config
+then give the same episode again on that machine; keep the key file and the variable out of the policy's process.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import secrets
 import sys
 
 from auditenv.env import AuditEnv
@@ -28,6 +30,7 @@ from auditenv.matcher import grade, public_ids, tolerance_of
 ACTIONS = ("list_records", "get_record", "get_document", "calculator", "submit")
 LIMIT_KEYS = ("max_steps", "time_limit_s")  # the only team_config keys that apply to a loaded episode
 _WARNED = False
+_PROCESS_KEY = ""  # fallback grader key when the key file cannot be used
 GRADER_LOG: list[dict] = []  # grader-side journal of score_episode; also appended to $AUDITENV_GRADER_LOG if set
 
 
@@ -35,13 +38,51 @@ def generate_episode(seed: int, config: dict, output_dir: str) -> None:
     """Write one episode into `output_dir`: public/ (task.txt, manifest.json, ledger.csv, invoices.jsonl,
     payments.jsonl, fx.csv, policy.json) and grader/ (truth.json, provenance.json). `config` is the generator
     config of CONTRACT §4 (errors, interacting, n_invoices, distractors, difficulty, ...)."""
-    global _WARNED
-    if not secret() and not _WARNED:
+    export_episode(generate(seed, config or None, grader_key()), output_dir)
+
+
+def grader_key() -> str:
+    """The key of closed episodes: AUDITENV_SECRET if set, else a random key read from the grader key file, which is
+    created on first use (atomically, mode 0600). A public constant would let a policy recover the seed from
+    episode_id or the records and regenerate the truth with this open-source generator. If the file cannot be
+    used (read-only home, empty file), a random key for this process keeps the seed hidden instead."""
+    global _WARNED, _PROCESS_KEY
+    if secret():
+        return secret()
+    path = os.path.expanduser(os.environ.get("AUDITENV_KEY_FILE") or os.path.join("~", ".auditenv", "grader.key"))
+    try:
+        key = _key_file(path)
+        note = f"closed episodes are keyed by the grader key in {path} and reproduce on this machine"
+    except (OSError, ValueError) as exc:
+        _PROCESS_KEY = _PROCESS_KEY or secrets.token_hex(32)
+        key = _PROCESS_KEY
+        note = (f"grader key file {path} is unusable ({exc}); closed episodes are keyed by a random key of this "
+                "process and do not reproduce in another one")
+    if not _WARNED:
         _WARNED = True
-        print("judge_adapter: warning: AUDITENV_SECRET is not set, so generated episodes are public: a policy can "
-              "recover the seed from episode_id and regenerate the truth. Set it in the jury process that calls "
-              "generate_episode (never in the policy's process).", file=sys.stderr, flush=True)
-    export_episode(generate(seed, config or None), output_dir)
+        print(f"judge_adapter: AUDITENV_SECRET is not set; {note}. Keep the key out of the policy's reach.",
+              file=sys.stderr, flush=True)
+    return key
+
+
+def _key_file(path: str) -> str:
+    if not os.path.exists(path):
+        os.makedirs(os.path.dirname(path) or ".", mode=0o700, exist_ok=True)
+        tmp = f"{path}.{os.getpid()}.tmp"
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        try:
+            with os.fdopen(fd, "w", encoding="ascii") as fh:
+                fh.write(secrets.token_hex(32) + "\n")
+            os.link(tmp, path)  # never a half-written key; if another process won the race, its key is used
+        except FileExistsError:
+            pass
+        finally:
+            os.unlink(tmp)
+    with open(path, encoding="ascii") as fh:
+        key = fh.read().strip()
+    if not key:
+        raise ValueError("empty file")
+    return key
 
 
 def make_env() -> "JudgeEnv":
@@ -78,7 +119,8 @@ class JudgeEnv:
             obs, info = self._env.reset_episode(load_episode(config["episode_dir"]), {**limits, "mode": env_mode},
                                                 started_at=started_at)
         else:
-            obs, info = self._env.reset(seed, {**team, "mode": env_mode}, started_at=started_at)
+            key = grader_key() if mode == "closed" else None  # open mode: the public generator
+            obs, info = self._env.reset(seed, {**team, "mode": env_mode}, started_at=started_at, key=key)
         first = {"task": obs["task"], "manifest": obs["manifest"], "policy": obs["policy"],
                  "remaining_steps": obs["steps_remaining"]}
         return first, {"episode_id": info["episode_id"], "mode": mode, "max_steps": info["max_steps"]}
