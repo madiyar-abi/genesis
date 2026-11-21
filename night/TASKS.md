@@ -114,7 +114,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
 ## gemini3b — verify on exports and demo (evidence only, files: night/LOG.md)
 - [x] G16 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/
   — files: night/LOG.md — accept: per split the `N/N episodes valid` line.
-- [ ] G17 (gemini3b) `uv run python -m auditenv.demo` piped with enough newlines (`yes '' | ...`), and
+- [x] G17 (gemini3b) `uv run python -m auditenv.demo` piped with enough newlines (`yes '' | ...`), and
   `uv run python -m auditenv.demo --help` — files: night/LOG.md — accept: exit code, the final reward/score lines
   quoted; compare them with the numbers in docs/DEMO.md and call out any difference.
 - [ ] G18 (gemini3b) `uv run python scripts/sync_docs.py --check --json /tmp/r20-gemini3b/c.json` after
