@@ -105,3 +105,36 @@ Next: T2 (config fuzz sweep: 3000 configs starting at 40000).
 Failing tests: 0 (none). No flakiness or timezone/hashseed sensitivity found across 523 tests.
 
 2026-11-21 22:00 lead (Claude, took over from the previous lead engine) — Merged gemini2a's WIP commit (T7; its LOG.md carried stash conflict markers — removed, kept every entry, dropped one duplicated codex1 T20 line). codex1 was idle: queued T45 (loader red-team via adapter/verify --dir), T46 (JSON-lines server red-team over a pipe), T47 (multi-cue shortcut cheater, evidence only — a generator fix would change default episodes). Started a lead subagent that re-reads the published jury check page line by line against judge_adapter + tests/test_judge_*. Next: merge workers every ~30 min. Assumption: marathon workers all alive (ps shows all 9 night.sh workers).
+
+2026-11-21 22:10 gemini2b — T10 complete: golden hashes check, reward mutation test, and shortcut miner reports (default + hard).
+- Command 1: `env -u AUDITENV_SECRET uv run python scripts/golden.py --check`
+  Exit code: 0
+  Wall time: 0.88 s
+  Output: All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json.
+- Command 2: `env -u AUDITENV_SECRET uv run python scripts/mutate_reward.py`
+  Exit code: 0
+  Wall time: 213.75 s
+  Output: 22/22 mutants killed.
+- Command 3: `env -u AUDITENV_SECRET uv run python scripts/shortcut_miner.py --report-only`
+  Exit code: 0
+  Wall time: 32.09 s
+  Summary:
+  # Shortcut miner: default mode, 1000 seeds x random_mix/heavy = 2000 episodes (32.0 s)
+  Records: ledger 676452, invoices 108407, payments 53516. Support >= 30. Flag: precision > 0.5.
+  Max precision per issue type:
+  - duplicate_invoice: affected max P 0.996, evidence max P 0.996, flagged 2/2
+  - payment_allocation: affected max P 0.964, evidence max P 0.964, flagged 8/1
+  - fx_error: affected max P 0.695, evidence max P 0.308, flagged 3/0
+  - period_cutoff: affected max P 0.451, evidence max P 0.451, flagged 0/0
+- Command 4: `env -u AUDITENV_SECRET uv run python scripts/shortcut_miner.py --report-only --hard`
+  Exit code: 0
+  Wall time: 96.04 s
+  Summary:
+  # Shortcut miner: hard mode, 1000 seeds x random_mix/heavy = 2000 episodes (96.0 s)
+  Records: ledger 2327386, invoices 113843, payments 53618. Support >= 30. Flag: precision > 0.5.
+  Max precision per issue type:
+  - duplicate_invoice: affected max P 0.449, evidence max P 0.449, flagged 0/0
+  - payment_allocation: affected max P 0.813, evidence max P 0.813, flagged 8/1
+  - fx_error: affected max P 0.700, evidence max P 0.312, flagged 2/0
+  - period_cutoff: affected max P 0.453, evidence max P 0.453, flagged 0/0
+Next: T11 (attack search on seeds 6000–6019).
