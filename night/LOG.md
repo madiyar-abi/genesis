@@ -2195,3 +2195,52 @@ Assumptions: the percentage denominator is the absolute base-minor debit for the
   - default (reconcile): 1200 episodes (seeds 11000-11299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (7.3 s), exit code 0, wall time 8s.
   - hard (reconcile_hard): 1200 hard episodes (seeds 11000-11299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (18.6 s), exit code 0, wall time 18s.
 2026-11-22 04:18 gemini3b — G24 complete: ran `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r21-gemini3b/c2.json` (exit 0, last line: "ALL CHECKS PASSED in 51.9 s"; 563 unit tests, 200/200 verifier, 20/20 paired, 50/50 hard verifier, 20/20 hard paired) then `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c2.json` (exit 0, last line: "All documentation tables match measured data."). Both exit codes 0; zero doc drift. All gemini3b tasks complete.
+
+2026-11-22 04:30 codex1 — X5 fresh text-only audit. `env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds 45000-45099` → exit 0, 81.30 s, 4,200 episodes. Same local default grader key and zero inspection steps as X1.
+
+| Config | Difficulty | Scored | Mean F1 | Mean precision | Mean recall |
+|---|---|---:|---:|---:|---:|
+| baseline | default | 100 | 1.000000 | 0.990000 | 0.990000 |
+| baseline | hard | 100 | 1.000000 | 0.990000 | 0.990000 |
+| D01 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D01 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D02 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D02 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D03 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D03 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D04 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D04 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D05 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D05 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D06 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D06 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D07 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D07 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D08 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D08 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D09 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D09 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D10 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D10 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D11 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D11 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D12 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D12 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D13 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D13 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D14 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D14 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D15 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D15 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D16 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D16 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D17 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D17 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D18 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D18 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D19 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D19 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D20 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D20 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+
+Discrepancy entries: 0

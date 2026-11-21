@@ -148,7 +148,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   night/r21/ledger_identity.py, night/LOG.md — accept: LOG counts per class × config, max |residue| for (a) in base
   minor units and as % of the refund, and every class (c) item quoted with seed and row ids ("0 other" is the hoped
   result, only with the totals).
-- [ ] X5 (codex1) `env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor` on seeds 45000–45099 (add a
+- [x] X5 (codex1) `env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor` on seeds 45000–45099 (add a
   `--seeds` flag if missing) — files: night/r21/text_auditor.py, night/LOG.md — accept: the table + discrepancy count.
 - [ ] Y4 (codex2) After the lead's README commit "README: first-read fixes (Y3)" lands (merge first; if it is not
   there yet, do Y5 first): fresh clone at origin/night/2026-11-22-r21, run every command in the README sections the
