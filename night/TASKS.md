@@ -157,7 +157,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   3 times, and record per policy the max wall time; then the same with `--seed-base 5000` — files: night/LOG.md —
   accept: table run → policy → max s; note whether the 54 s outlier repeats and what part is process startup (time
   `uv run python -c pass` under the same load).
-- [ ] Z4 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` and
+- [x] Z4 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` and
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` — files: night/LOG.md — accept: exit codes
   + summary lines (reproduction of codex1/codex2 results by another worker).
 - [ ] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 15000-15999` and the same with
