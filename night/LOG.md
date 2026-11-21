@@ -281,3 +281,84 @@ Next: T12 (auditenv.verify --seeds 2000-2999).
   Wall time: 18.44 s
   Summary: 3000/3000 episodes valid; episodes with problems: 0
 All assigned gemini2b tasks (T10, T11, T12) complete.
+2026-11-21 22:12 gemini3a — T43 complete: README walkthrough on current branch tip (`origin/night/2026-11-21-r18` merged).
+Ran every `uv run ...` line inside README.md fenced code blocks in order, verbatim, each prefixed with `env -u AUDITENV_SECRET` (32 commands executed; redirecting `--out`/`--json` to /tmp/r18-gemini3a/).
+Results by README line:
+- Line 30: `uv run python -m auditenv.check` -> exit 0 (73.26 s), last line: "ALL CHECKS PASSED in 73.2 s"
+- Line 54: `uv run python -m auditenv.jury_run --policy-image genesis-policy` -> exit 1 (0.28 s), last line: "FileNotFoundError: [Errno 2] No such file or directory: 'docker'"
+  Non-zero output verbatim:
+  Traceback (most recent call last):
+    File "<frozen runpy>", line 198, in _run_module_as_main
+    File "<frozen runpy>", line 88, in _run_code
+    File "/Users/caliskan/Projects/genesis-gemini3a/auditenv/jury_run.py", line 120, in <module>
+      raise SystemExit(main())
+                       ^^^^^^
+    File "/Users/caliskan/Projects/genesis-gemini3a/auditenv/jury_run.py", line 106, in main
+      rows = run(args.seed_base, args.policy_image)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/Users/caliskan/Projects/genesis-gemini3a/auditenv/jury_run.py", line 82, in run
+      steps.append(play(env, first, policy_name, truth, policy_image))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/Users/caliskan/Projects/genesis-gemini3a/auditenv/jury_run.py", line 47, in play
+      proc = subprocess.Popen(command, cwd=ROOT,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/Users/caliskan/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/subprocess.py", line 1026, in __init__
+      self._execute_child(args, executable, preexec_fn, close_fds,
+    File "/Users/caliskan/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/subprocess.py", line 1955, in _execute_child
+      raise child_exception_type(errno_num, err_msg, err_filename)
+  FileNotFoundError: [Errno 2] No such file or directory: 'docker'
+  (Note: Expected on macOS local host without Docker installed; see CLAUDE.md: "Docker not installed locally").
+- Line 184: `uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/r18-gemini3a/dev_reconcile.jsonl` -> exit 0 (0.18 s), last line: "ep_e7bf8f4e24b3   1.00  1.00  1.00   0.962    20   0.01"
+- Line 185: `uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval` -> exit 0 (0.16 s), last line: "ep_cc22f883e36f   0.00  0.00  0.00  -1.000    29   0.01"
+- Line 200: `uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out /tmp/r18-gemini3a/trajectories.jsonl` -> exit 0 (0.49 s), last line: "ep_9b7c728aea6d   1.00  1.00  1.00   0.914    44   0.03"
+- Line 334: `uv run python -m auditenv.jury_run` -> exit 0 (2.50 s), last line: "oracle            1.000  1.000  1.000    1.000     1.0     1    0.004   0.005"
+- Line 371: `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` -> exit 0 (0.14 s), last line: "[PASS] out-of-process eval run — policy saw no reward/truth; 2 results in the grader log"
+- Line 379: `uv run python -m unittest discover -s tests -t .` -> exit 0 (63.72 s), last line: "All documentation tables match measured data."
+- Line 380: `uv run python -m unittest tests.test_env` -> exit 0 (0.26 s), last line: "OK"
+- Line 381: `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` -> exit 0 (0.12 s), last line: "[PASS] out-of-process eval run — policy saw no reward/truth; 2 results in the grader log"
+- Line 382: `uv run python -m auditenv.verify --seeds 0-199` -> exit 0 (5.39 s), last line: "600/600 episodes valid; episodes with problems: 0"
+- Line 383: `uv run python -m auditenv.verify --dir episodes/train` -> exit 0 (0.10 s), last line: "10/10 episodes valid; episodes with problems: 0"
+- Line 384: `uv run python -m auditenv.verify --dir episodes/dev` -> exit 0 (0.10 s), last line: "10/10 episodes valid; episodes with problems: 0"
+- Line 385: `uv run python -m auditenv.verify --dir episodes/hard` -> exit 0 (0.28 s), last line: "20/20 episodes valid; episodes with problems: 0"
+- Line 386: `uv run python -m auditenv.attack` -> exit 0 (0.48 s), last line: "Elapsed time: 0.438 s"
+- Line 387: `uv run python -m tests.test_fuzz` -> exit 0 (1.14 s), last line: "Python 3.11.14, 20319 episode actions, 20524 total step calls in 1.091 s"
+- Line 388: `uv run python -m auditenv.check --json /tmp/r18-gemini3a/auditenv-metrics.json` -> exit 0 (65.53 s), last line: "ALL CHECKS PASSED in 65.5 s"
+- Line 389: `uv run python scripts/sync_docs.py --check --json /tmp/r18-gemini3a/auditenv-metrics.json` -> exit 0 (0.03 s), last line: "All documentation tables match measured data."
+- Line 390: `uv run python -m auditenv.fuzz --seeds 0-999` -> exit 0 (90.24 s), last line: "FUZZ PASSED"
+- Line 391: `uv run python -m auditenv.fuzz --configs 3000` -> exit 0 (152.54 s), last line: "FUZZ PASSED"
+- Line 392: `uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299` -> exit 0 (9.83 s), last line: "reconcile on 1200 default episodes (seeds 0-299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (9.8 s)"
+- Line 393: `uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json` -> exit 0 (0.11 s), last line: "| Total | 103 |"
+- Line 394: `uv run python -m auditenv.demo` -> exit 0 (0.13 s), last line: "Done. Full check: uv run python -m auditenv.check"
+- Line 395: `uv run python -m auditenv.export --config configs/dev.json --out /tmp/r18-gemini3a/episodes/dev` -> exit 0 (0.09 s), last line: "Exported 10 episodes to /tmp/r18-gemini3a/episodes/dev"
+- Line 396: `uv run python -m auditenv.export --config configs/train.json --out /tmp/r18-gemini3a/episodes/train` -> exit 0 (0.09 s), last line: "Exported 10 episodes to /tmp/r18-gemini3a/episodes/train"
+- Line 397: `uv run python -m auditenv.export --config configs/eval_hard.json --out /tmp/r18-gemini3a/episodes/hard` -> exit 0 (0.33 s), last line: "Exported 20 episodes to /tmp/r18-gemini3a/episodes/hard"
+- Line 398: `uv run python scripts/mutate_reward.py` -> exit 0 (163.21 s), last line: "22/22 mutants killed."
+- Line 399: `uv run python scripts/sensitivity.py` -> exit 0 (3.03 s), last line: "(re-grade with default parameters reproduced every env reward exactly; tolerances are fixed minor units: abs(claimed - expected) <= 0, 1 or 100; 3.0 s)"
+- Line 400: `uv run python scripts/shortcut_miner.py --report-only` -> exit 0 (27.87 s), last line: "| ledger | entity_id | E9977 | 47 |"
+- Line 401: `uv run python scripts/golden.py --check` -> exit 0 (0.79 s), last line: "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini3a/tests/golden_hashes.json."
+- Line 402: `uv run python scripts/bench.py` -> exit 0 (12.97 s), last line: "| flag_all | hard | 10.62 | 4 | -1.000 | 0.000 |"
+- Line 403: `uv run python scripts/chart.py` -> exit 0 (0.05 s), last line: "wrote /Users/caliskan/Projects/genesis-gemini3a/docs/baselines.svg"
+Working directory clean (`git status` clean, 0 tracked files modified).
+Next: T44.
+
+2026-11-21 22:14 gemini3a — T44 complete: Error-code table check through the jury adapter.
+Script: /tmp/r18-gemini3a/errors.py run via `env -u AUDITENV_SECRET uv run python /tmp/r18-gemini3a/errors.py` (exit 0).
+Provoked each error code listed in README.md "Jury adapter" through `JudgeEnv`:
+
+| Action / Input                                                              | Code               | Steps Before | Steps After  | Cost (Delta) |
+|-----------------------------------------------------------------------------|--------------------|--------------|--------------|--------------|
+| malformed envelope `{"x": 1}`                                               | unknown_action     | 100          | 99           | 1            |
+| unknown action name `{"name": "unknown", "args": {}}`                       | unknown_action     | 99           | 98           | 1            |
+| bad_params `{"name": "list_records", "args": {"table": "ledger", "limit": -1}}` | bad_params         | 98           | 97           | 1            |
+| unknown_table `{"name": "list_records", "args": {"table": "nonexistent"}}`  | unknown_table      | 97           | 96           | 1            |
+| not_found `{"name": "get_record", "args": {"table": "ledger", "id": "NONEXISTENT"}}` | not_found          | 96           | 95           | 1            |
+| not_found `{"name": "get_document", "args": {"doc_id": "NONEXISTENT"}}`     | not_found          | 95           | 94           | 1            |
+| calc_error `{"name": "calculator", "args": {"expression": "1/0"}}`          | calc_error         | 94           | 93           | 1            |
+| invalid_findings `{"name": "submit", "args": {"findings": {"episode_id": "x", "findings": "no"}}}` | invalid_findings   | 100          | 99           | 1            |
+| episode_over (action after submit)                                          | episode_over       | 99           | 99           | 0            |
+| time_limit `{"name": "calculator", "args": {"expression": "1+1"}}` (after timeout) | time_limit         | 100          | 99           | 1            |
+
+Comparison with README:
+README states: "Errors are {"code", "message"} with no paths, seeds or truth, and every one costs a step: unknown_action (also a malformed envelope), bad_params, unknown_table, not_found, calc_error, time_limit, and in train mode invalid_findings. Only episode_over (any action after the episode ended) is free and changes nothing."
+All provoked error codes cost exactly 1 step (delta = 1), except `episode_over` which costs 0 steps (free, delta = 0). 0 rows disagree.
+All assigned gemini3a tasks in Round 18 (T13, T14, T15, T43, T44) complete.
