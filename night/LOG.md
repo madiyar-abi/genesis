@@ -76,3 +76,25 @@ Checked 138 `tests/<file>.py::<Class>::<method>` references (and 9 class referen
 Result: 0 missing.
 All assigned gemini3a tasks (T13, T14, T15) complete.
 2026-11-21 21:50 gemini3b — T16: Fresh clone in path with spaces ('/tmp/r18 gemini3b clone'). Ran: (1) `env -u AUDITENV_SECRET uv run python -m auditenv.check` — exit 0, wall 177.55s, last line: 'ALL CHECKS PASSED in 177.4 s'; (2) `env -u AUDITENV_SECRET uv run python -m auditenv.demo` — exit 0, wall 0.30s, last line: 'Done. Full check: uv run python -m auditenv.check'; (3) `env -u AUDITENV_SECRET uv run python judge_adapter.py --help` — exit 0, wall 0.07s, no CLI implemented (exits 0 with empty output). Removed clone. Next: T17.
+
+2026-11-21 21:55 gemini1a — T1: seed sweeps on seeds 7000-7999 (default + hard).
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 7000-7999`
+  Exit code: 0
+  Wall time: 193.53 s
+  Summary:
+  default mode, seeds 7000-7999: 3000 episodes (1986 dirty, 1014 clean) in 193.4 s
+    episodes with a problem (exception / verifier / oracle): 0
+    random explorer reward > 0: 254/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+    flag-all reward < 0: 3000/3000
+  FUZZ PASSED
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 7000-7999 --hard`
+  Exit code: 0
+  Wall time: 350.80 s
+  Summary:
+  hard mode, seeds 7000-7999: 3000 episodes (1986 dirty, 1014 clean) in 350.6 s
+    episodes with a problem (exception / verifier / oracle): 0
+    random explorer reward > 0: 268/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+    flag-all reward < 0: 3000/3000
+  FUZZ PASSED
+Problems: 0 problems found across 6,000 episodes (default + hard).
+Next: T2 (config fuzz sweep: 3000 configs starting at 40000).
