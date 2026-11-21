@@ -49,3 +49,6 @@ venv/
 
 # --- Python packaging output ---
 *.egg-info/
+
+# --- Agent work notes for a big task (local only) ---
+.work/
