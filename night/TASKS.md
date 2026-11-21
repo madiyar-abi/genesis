@@ -91,7 +91,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   exit codes, last lines, wall times.
 
 ## gemini2b — golden and export reproducibility (evidence only, files: night/LOG.md)
-- [ ] G10 (gemini2b) Re-export into scratch dirs and diff against the committed exports:
+- [x] G10 (gemini2b) Re-export into scratch dirs and diff against the committed exports:
   `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r20-gemini2b/dev`
   then `diff -r episodes/dev /tmp/r20-gemini2b/dev`; same for train, train_hard and eval_hard (use the `--out` dirs
   and the committed dir names from README) — files: night/LOG.md — accept: per split the diff exit code; any
