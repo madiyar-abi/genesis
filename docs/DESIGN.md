@@ -298,8 +298,8 @@ and checks that every credit note is in the period and after its booking.
 
 Gates in the check: hard verifier 50/50 episodes valid; oracle 1.0; `reconcile_hard` F1 ≥ 0.95;
 default `reconcile` F1 ≤ 0.8; flag-everything < 0. Failure analysis of the default rules
-(`auditenv.analyze --policy reconcile --config configs/eval_hard.json`): duplicate recall 3/8 (re-typed
-copies missed), all other types 100 %; 22 false positives, all `no_matching_issue` — the credit-note
+(`auditenv.analyze --policy reconcile --config configs/eval_hard.json`): duplicate recall 2/8 (re-typed
+copies missed), all other types 100 %; 20 false positives, all `no_matching_issue` — the credit-note
 reissues flagged as duplicates. `reconcile_hard` is the same script plus the two policy rules: it shows
 the level is solvable from the records, not that a learning agent finds those rules.
 Stress test of `reconcile_hard` (`auditenv.fuzz --stress reconcile_hard --seeds 0-299 --hard`, 1 200 hard

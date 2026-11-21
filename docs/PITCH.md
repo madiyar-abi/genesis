@@ -53,7 +53,7 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 | reconcile (default) | hard | 0.667 | 0.870 | 0.755 | 0.293 |
 | oracle (grader-side) | hard | 1.000 | 1.000 | 1.000 | 1.000 |
 
-- Both reconciliation policies averaged 43.2 actions on hard episodes. The default rules produced 22 false positives and missed five findings. With line normalization and credit-note handling, the policy found all 46 issues with zero false positives.
+- Both reconciliation policies averaged 43 actions on hard episodes. The default rules produced 20 false positives and missed six duplicate invoices. With line normalization and credit-note handling, the policy found all 46 issues with zero false positives.
 
 ## 8. How the jury can reproduce the checks
 
