@@ -140,7 +140,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   every number matches.
 
 ## Top-up 1 (04:30) — same rules as above
-- [ ] X4 (codex1) Classify every clean-config (D01–D05, both difficulties) violation of `night/r21/ledger_identity.py`
+- [x] X4 (codex1) Classify every clean-config (D01–D05, both difficulties) violation of `night/r21/ledger_identity.py`
   on seeds 41000–41299: add a `--classify` flag that sorts each into (a) `unapplied_running` caused only by a refund
   debited at the refund-date rate while its receipt credited 2900 at the receipt-date rate (same customer, same
   document currency, document-currency credit never negative), (b) `ar_running`/`ar_close` off by at most the number

@@ -2157,3 +2157,23 @@ All tasks for gemini2b in Round 21 finished.
 2026-11-22 04:06 lead — Merged all worker branches (G1–G18, X1–X3, Y1–Y3, Z1–Z3 done). X1 text-only auditor F1 1.000 on 4,200 episodes, 0 disagreements. X3: 300 extreme configs valid with exact counts, >12 issues rejected with ValueError. X2: 1,335 clean-config violations; lead inspected the largest (D01 seed 41006, E0342, −500,336 KZT minor): a full refund debited to 2900 at the refund-date rate after the receipt credited it at the receipt-date rate. This follows the documented CONTRACT rule (refund Dr 2900 / Cr 1000 at payment-date rate); the document-currency credit is exactly 0 (chronology c_neg_credit = 0). Decision: no posting-rule change 13 h before freeze (would change policy text, every export and golden hashes); measure (X4) and document as a limitation in DESIGN §10 / README. Y3: README fixes by lead next (incl. real defect #13: closed-server command aborts in bash when GRADER_KEY is unset). Top-up 1 queued.
 2026-11-22 04:08 lead — README: first-read fixes (Y3 items 1–4, 6, 7, 9, 10, 12–14). #13 was a real defect: the closed-server command `AUDITENV_SECRET="${GRADER_KEY:?...}"` aborted in bash without GRADER_KEY although the server keys hidden episodes by default since round 19; now the plain command (verified: starts, warns about the key file, exit 0). Skipped #5 (mode key text already says eval hides the reward), #8 (export commands are labelled as re-export after a generator change), #11 (the README 199/200 sentence is per difficulty in its own table). check exit 0 50.7 s; sync_docs no drift.
 2026-11-22 04:08 lead — Correction to the previous entry: Y3 #11 was valid (README D01–D05 row gave 199/200 without saying it is the default count); now '199/200 default and 200/200 hard' per codex2's probe.
+
+2026-11-22 04:28 codex1 — X4 clean balance classification. `env -u AUDITENV_SECRET uv run python -m night.r21.ledger_identity --classify` → exit 0, 30.771 s.
+
+| Config | Difficulty | FX refund (a) | AR rounding (b) | Other (c) | Max (a) base minor | Max (a) % |
+|---|---|---:|---:|---:|---:|---:|
+| D01 | default | 104 | 33 | 0 | 500336 | 1.860974% |
+| D01 | hard | 80 | 50 | 0 | 279331 | 7.345768% |
+| D02 | default | 104 | 33 | 0 | 500336 | 1.860974% |
+| D02 | hard | 80 | 50 | 0 | 279331 | 7.345768% |
+| D03 | default | 104 | 33 | 0 | 500336 | 1.860974% |
+| D03 | hard | 80 | 50 | 0 | 279331 | 7.345768% |
+| D04 | default | 104 | 33 | 0 | 500336 | 1.860974% |
+| D04 | hard | 80 | 50 | 0 | 279331 | 7.345768% |
+| D05 | default | 104 | 33 | 0 | 500336 | 1.860974% |
+| D05 | hard | 80 | 50 | 0 | 279331 | 7.345768% |
+
+Classified 1335 clean violations: (a) 920, (b) 415, (c) 0.
+
+Assumptions: the percentage denominator is the absolute base-minor debit for the latest refund as of the observed row. The classifier requires every 2900 posting through that row to match its own payment-date conversion and every document-currency running balance to remain nonnegative. AR rounding requires the amount to match the difference between separately rounded applications and a single conversion of their sum. D01–D05 share the same clean config, so the aggregate includes repeats across scenarios.
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, ALL CHECKS PASSED in 93.8 s

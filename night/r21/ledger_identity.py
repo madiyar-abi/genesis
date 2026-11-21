@@ -3,6 +3,7 @@ import argparse
 from collections import Counter, defaultdict
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
+from fractions import Fraction
 
 from auditenv.generator import generate
 from auditenv.jury import SCENARIOS
@@ -135,6 +136,109 @@ def audit(tables, manifest, policy):
     return counts, violations
 
 
+def classify(tables, manifest, policy, violations):
+    """Yield class, absolute base residue, refund debit and the original violation."""
+    payments = {doc["payment_id"]: doc for doc in tables["payments"]}
+    invoices = {doc["invoice_id"]: doc for doc in tables["invoices"]}
+    rows = {row["row_id"]: row for row in tables["ledger"]}
+    account_rows = defaultdict(list)
+    for row in rows.values():
+        key = row["entity_id"] if row["account"] == "2900" else row["invoice_id"]
+        account_rows[row["account"], key].append(row)
+    zone = datetime.fromisoformat("2000-01-01T00:00:00" + policy["timezone"]).tzinfo
+    base = policy["base_currency"]
+    rates = {(row["date"], row["source_currency"]): Decimal(row["rate"]) for row in tables["fx"]
+             if row["target_currency"] == base}
+
+    def convert(value, currency, timestamp):
+        day = datetime.fromisoformat(timestamp).astimezone(zone).date().isoformat()
+        if currency == base:
+            return value
+        shift = manifest["amount_exponents"][base] - manifest["amount_exponents"][currency]
+        result = (Decimal(value) * rates[day, currency]).scaleb(shift)
+        return int(result.to_integral_value(rounding=ROUND_HALF_UP))
+
+    for violation in violations:
+        check, ids, actual, expected, key, _ = violation
+        residue = abs(actual - expected)
+        category, refund = "c", 0
+        if check == "unapplied_running":
+            ordered = sorted(account_rows["2900", rows[ids]["entity_id"]],
+                             key=lambda row: (datetime.fromisoformat(row["timestamp"]), amount(row)))
+            currency_credit = Counter()
+            last_refund = 0
+            for row in ordered:
+                doc = payments[row["payment_id"]]
+                currency = doc["currency"]
+                refs = doc["invoice_refs"] or []
+                remainder = doc["amount_minor"] - sum(ref["amount_minor"] for ref in refs)
+                currency_credit[currency] += remainder
+                if -amount(row) != convert(remainder, currency, doc["timestamp"]) or currency_credit[currency] < 0:
+                    break
+                if remainder < 0:
+                    last_refund = amount(row)
+                if row["row_id"] == ids:
+                    if last_refund:
+                        category, refund = "a", last_refund
+                    break
+        elif check in {"ar_running", "ar_close"}:
+            invoice = invoices[key]
+            ordered = sorted(account_rows["1200", key],
+                             key=lambda row: (datetime.fromisoformat(row["timestamp"]), -amount(row)))
+            applied = []
+            matches = True
+            for row in ordered:
+                if row["payment_id"]:
+                    doc = payments[row["payment_id"]]
+                    values = [ref["amount_minor"] for ref in doc["invoice_refs"] or [] if ref["invoice_id"] == key]
+                    if row["credit_minor"] != sum(convert(value, invoice["currency"], invoice["issued_at"])
+                                                  for value in values):
+                        matches = False
+                        break
+                    applied.extend(values)
+                if check == "ar_running" and row["row_id"] == ids:
+                    break
+            if matches and applied and residue <= len(applied) and sum(applied) <= invoice["total_minor"]:
+                separate = sum(convert(value, invoice["currency"], invoice["issued_at"]) for value in applied)
+                combined = convert(sum(applied), invoice["currency"], invoice["issued_at"])
+                if residue == abs(separate - combined):
+                    category = "b"
+        yield category, residue, refund, violation
+
+
+def classify_clean(lo, hi):
+    print("| Config | Difficulty | FX refund (a) | AR rounding (b) | Other (c) | Max (a) base minor | Max (a) % |")
+    print("|---|---|---:|---:|---:|---:|---:|")
+    total = Counter()
+    other = []
+    for name in ("D01", "D02", "D03", "D04", "D05"):
+        for difficulty in ("default", "hard"):
+            counts = Counter()
+            max_minor, max_percent = 0, Fraction(0)
+            for seed in range(lo, hi + 1):
+                episode = generate(seed, {**SCENARIOS[name], "difficulty": difficulty})
+                tables, manifest, policy = (episode[key] for key in ("tables", "manifest", "policy"))
+                _, violations = audit(tables, manifest, policy)
+                for category, residue, refund, violation in classify(tables, manifest, policy, violations):
+                    counts[category] += 1
+                    if category == "a":
+                        max_minor = max(max_minor, residue)
+                        max_percent = max(max_percent, Fraction(100 * residue, refund))
+                    elif category == "c":
+                        check, ids, actual, expected, detail, _ = violation
+                        other.append(f"- {name}/{difficulty} seed {seed} {check} ({ids}): "
+                                     f"observed {actual}, expected {expected}; {detail}")
+            total.update(counts)
+            print(f"| {name} | {difficulty} | {counts['a']} | {counts['b']} | {counts['c']} | "
+                  f"{max_minor} | {float(max_percent):.6f}% |", flush=True)
+    print(f"\nClassified {sum(total.values())} clean violations: (a) {total['a']}, (b) {total['b']}, (c) {total['c']}.")
+    if other:
+        print("\nOther violations:")
+        print("\n".join(other))
+    return bool(other)
+
+
+
 def allowed(config):
     if "errors" not in config:
         return {"duplicate_invoice", "period_cutoff", "fx_error", "payment_allocation"}
@@ -150,8 +254,11 @@ def allowed(config):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seeds", default="41000-41299")
+    parser.add_argument("--classify", action="store_true", help="classify violations in clean D01–D05 scenarios")
     args = parser.parse_args()
     lo, hi = map(int, args.seeds.split("-"))
+    if args.classify:
+        return classify_clean(lo, hi)
     failures = 0
     clean = []
     examples = {}
