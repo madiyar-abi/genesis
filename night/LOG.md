@@ -1029,3 +1029,5 @@ Assumptions (instead of asking):
 rb queue empty again (T25, T26, T27, T64 all [x]). Next: IDLE until the lead queues more (rb) tasks.
 
 2026-11-21 23:28 lead — Reviewed T64 and added coverage for named module constants. All 8 returned codes match README. Seven tests passed, and a temporary undocumented code caused the expected failure with its source location. Reconciled the worker log conflict and integrated its final branch.
+
+2026-11-21 23:29 lead — Closed round 18 following the final SPEC review. All assigned tasks are checked and all published worker tips integrated. Final offline check passed 560 tests and all gates in 51.9 s; sync_docs found no drift. The recording and external submission belong to the human team per SPEC. Created night/DONE for the marathon.
