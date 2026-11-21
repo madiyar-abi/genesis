@@ -112,7 +112,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   night/LOG.md — accept: per run `Ran N tests` + OK/FAILED + wall time.
 
 ## gemini3b — verify on exports and demo (evidence only, files: night/LOG.md)
-- [ ] G16 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/
+- [x] G16 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/
   — files: night/LOG.md — accept: per split the `N/N episodes valid` line.
 - [ ] G17 (gemini3b) `uv run python -m auditenv.demo` piped with enough newlines (`yes '' | ...`), and
   `uv run python -m auditenv.demo --help` — files: night/LOG.md — accept: exit code, the final reward/score lines
