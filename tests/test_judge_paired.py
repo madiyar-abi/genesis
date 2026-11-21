@@ -18,6 +18,8 @@ from auditenv.export import export_episode
 from auditenv.load import load_episode
 from auditenv.verify import verify_episode
 
+ja._WARNED = True  # public test seeds: the grader-key warning is tested on its own
+
 SCENARIOS = list(jury.SCENARIOS.values())  # D01-D20 of Block 2 (README "Jury adapter")
 ID_FIELDS = {"row_id": "R", "doc_id": "D", "invoice_id": "I", "payment_id": "P", "entity_id": "E"}
 

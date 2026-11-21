@@ -14,6 +14,8 @@ import judge_adapter as ja
 from auditenv.load import load_episode
 from auditenv.matcher import public_ids
 
+ja._WARNED = True  # public test seeds: the grader-key warning is tested on its own
+
 ONLY = {"I1": 0, "I2": 0}
 FORBIDDEN_KEYS = {"truth", "provenance", "seed", "evidence_sets", "expected_amount_minor", "issue_id", "scenario",
                   "issues", "transform_seed", "labels", "missed"}
@@ -344,6 +346,7 @@ class JudgeContractTest(unittest.TestCase):
         with mock.patch.dict(os.environ, {"AUDITENV_SECRET": "k"}), contextlib.redirect_stderr(err):
             ja.generate_episode(3, {}, os.path.join(self.tmp, "keyed"))
         self.assertEqual(err.getvalue(), "")
+        ja._WARNED = True
 
     def test_score_episode(self):
         good = ja.score_episode(self.e_dir, oracle_findings(self.e), 10)

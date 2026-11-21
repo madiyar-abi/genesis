@@ -69,6 +69,11 @@ brute-forced from the id nor the episode regenerated from the open-source code. 
   of the booking date or an earlier fallback day (1, 2, or 4 days earlier when the booking-date conversion
   differs from the correct invoice value by less than 10 base-currency minor units; period_cutoff + fx_error on the same invoice).
 
+In `I2` the two amounts measure two different rule breaks on one booking, so they are not a split of one total:
+`period_cutoff` is the whole AR debit posted for an invoice that belongs to the next period (it should not be in
+these books at all), and `fx_error` is how far that posted amount is from the policy's rate for the invoice date
+(the misvaluation an auditor must also report). A policy that finds only one of them gets partial credit.
+
 Every type is independently configurable (`errors: {type: count}`), injectors never touch an
 already-affected document, and amounts are the real ledger misstatement — not a "suspicious row".
 
@@ -365,6 +370,8 @@ to explore.
   paid one. A lookalike pair whose earlier invoice is already paid is a duplicate with precision 0.995 (recall
   432/830, 1 000 hard seeds) without reading the ledger; the credit-note rows in the ledger separate all pairs.
 - Expense journals carry no ids (the schema has no journal id); checks group them by timestamp.
+- A wrong conversion is always the published rate of another date (the document's local or UTC date, nearby days,
+  the bank's date); a rate value that appears on no date, or a wrong currency pair, is not modelled.
 - The verifier does not bound the total settled on one invoice across payments: an extra future payment of 5×
   an invoice's total verifies (the generator never over-settles: 0 of 9 386 settled invoices on seeds 0–199,
   default and hard). The free-text rules in `policy.json` and `task.txt` are checked only where the books depend

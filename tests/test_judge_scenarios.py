@@ -14,6 +14,8 @@ from auditenv.load import load_episode
 from auditenv.matcher import public_ids
 from auditenv.verify import verify_episode
 
+ja._WARNED = True  # public test seeds: the grader-key warning is tested on its own
+
 SEEDS = range(900, 904)  # stand-ins for the jury's hidden seeds
 EXPECTED = {**{f"D{n:02d}": [] for n in range(1, 6)},
             **{f"D{n:02d}": [("duplicate_invoice", "single")] for n in range(6, 9)},
