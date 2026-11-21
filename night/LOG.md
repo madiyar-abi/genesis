@@ -136,3 +136,11 @@ Comparison with `docs/DESIGN.md` §10: Exactly 16 flagged values in default mode
   JSON tables: /tmp/r20-rb/j{20000,21000,22000,23000}.json; raw outputs j<B>.out. Both rb tasks (Z1, Z2) done.
 2026-11-22 00:48 lead — Merged gemini1a/1b/2a/2b/3a/3b and rb: all evidence green (fuzz 6k+6k+3k+3k episodes, verify 3000/3000, stress 0 imperfect max 58 steps, suite 561 OK under 3 hashseeds/TZs and 2 locales, exports byte-identical, golden 80/80, mutants 22/22, miner 16 flagged = DESIGN §10, jury modules 5x, red-team 10x, D01-D20 through adapter F1 1.000 on 400 runs, jury_run 4 seed bases). No defect. Topped up queues (G19-G24, Z3-Z4). codex1 rate-limited until 02:41, codex2 until 01:04: X1 retagged lead (subagent).
 2026-11-22 00:52 lead — X3 (subagent): night/r20/adapter_reality.py, 20/20 checks pass twice: fresh HOME (key 0600, same episode_id across processes), read-only/missing HOME (per-process fallback, cross-process scoring still agrees), 8-process race x 20 rounds (one key, no partial file), relative/space/non-ASCII/NFD/symlink/trailing-slash episode_dir, leak scan of every observation (no key, path, seed or truth field), two JudgeEnv interleaved. No defect. Noted: with unwritable HOME closed episodes are not reproducible across processes (documented in README); stderr warning names the key path (grader-side only, documented).
+2026-11-22 01:00 gemini3b — G24: regenerated committed trajectories into /tmp/r20-gemini3b/. Commands:
+  env -u AUDITENV_SECRET uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out /tmp/r20-gemini3b/trajectories.jsonl
+  for p in random naive_reconcile reconcile; do env -u AUDITENV_SECRET uv run python -m auditenv.run --policy $p --config configs/train.json --out /tmp/r20-gemini3b/trajectories/train_$p.jsonl; done
+  for p in random naive_reconcile reconcile reconcile_hard; do env -u AUDITENV_SECRET uv run python -m auditenv.run --policy $p --config configs/train_hard.json --out /tmp/r20-gemini3b/trajectories/train_hard_$p.jsonl; done
+Diffs:
+  diff -u trajectories.jsonl /tmp/r20-gemini3b/trajectories.jsonl -> exit 0 (identical)
+  diff -ru trajectories /tmp/r20-gemini3b/trajectories -> exit 0 (all 7 files identical)
+Differing files: none.

@@ -147,7 +147,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
 - [ ] G23 (gemini3a) Order independence: run every test module alone, `for f in tests/test_*.py; do m=$(basename $f .py);
   env -u AUDITENV_SECRET uv run python -m unittest tests.$m >/tmp/r20-gemini3a/$m.out 2>&1; echo "$m $?"; done` —
   files: night/LOG.md — accept: number of modules, every module with a non-zero exit and its failure quoted.
-- [ ] G24 (gemini3b) Regenerate the committed trajectories exactly as README says into /tmp/r20-gemini3b/ and
+- [x] G24 (gemini3b) Regenerate the committed trajectories exactly as README says into /tmp/r20-gemini3b/ and
   `diff` them against `trajectories/` and `trajectories.jsonl` — files: night/LOG.md — accept: the commands used, diff
   exit codes, any differing file named.
 - [ ] Z3 (rb) Semantic review of docs/CHECKS.md: for 25 rows spread over all blocks, open the cited test and state
