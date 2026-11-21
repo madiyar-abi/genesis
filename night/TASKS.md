@@ -57,5 +57,5 @@ Lead review findings are added as T30+ below.
 
 ## lead
 - [ ] T30 (lead) Jury-style review of the r18 base: run check, fuzz, attack, miner; read README/CHECKS/DESIGN for wrong claims; record findings in REVIEW.md → "Round 18"; add fix tasks below — files: REVIEW.md, night/TASKS.md — accept: REVIEW.md "Round 18" section with evidence.
-- [ ] T98 (lead) `docs/DEMO.md` (2–3 min demo-video script) re-checked against a fresh `auditenv.demo --seed 2003` run — files: docs/DEMO.md — accept: every number in the script equals the fresh output.
-- [ ] T99 (lead) `docs/PITCH.md` (10-slide outline: problem → solution → live demo → how it works → results → what's next → team) re-checked against fresh `auditenv.check --json` metrics — files: docs/PITCH.md — accept: `scripts/sync_docs.py --check` clean and no untraced number.
+- [x] T98 (lead) `docs/DEMO.md` (2–3 min demo-video script) re-checked against a fresh `auditenv.demo --seed 2003` run — files: docs/DEMO.md — accept: every number in the script equals the fresh output.
+- [x] T99 (lead) `docs/PITCH.md` (10-slide outline: problem → solution → live demo → how it works → results → what's next → team) re-checked against fresh `auditenv.check --json` metrics — files: docs/PITCH.md — accept: `scripts/sync_docs.py --check` clean and no untraced number.
