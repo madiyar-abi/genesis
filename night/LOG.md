@@ -589,3 +589,28 @@ Assumptions (instead of asking):
 - `python`, `python3` and `python3.11` spellings are all recognised.
 
 Next: T27 (tests/test_doc_links.py).
+
+## 2026-11-21 22:37 — rb — T27 done (tests/test_doc_links.py)
+
+New `tests/test_doc_links.py`: extracts every inline `[text](path)` markdown link (images included)
+from README.md, HANDOFF.md and docs/*.md, strips `#anchor` fragments, skips external URLs
+(scheme-prefixed and protocol-relative `//`) and pure anchors, and asserts the target exists.
+Relative paths resolve against the document's own directory, root-relative `/path` against the repo
+root. 5 tests: real docs clean; broken link detected; anchor stripping / pure anchors; external links
+skipped; per-document base dir.
+
+Evidence:
+- `env -u AUDITENV_SECRET uv run python -m unittest tests.test_doc_links -v` → Ran 5 tests in 0.002 s, OK.
+- Link census: 19 inline links in scope, 17 relative file links + 2 pure anchors; **0 broken links** —
+  no `expectedFailure` needed, nothing for the lead to fix.
+- `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, ALL CHECKS PASSED in 48.8 s.
+
+Assumptions (instead of asking):
+- Existence check uses `Path.exists()` (a link to a directory would also pass, matching GitHub's
+  rendering); all 17 current targets are files anyway.
+- Links are scanned on every line, including fenced code blocks (none currently contain link syntax);
+  reference-style `[x][ref]` links are out of scope — the task specifies inline `[x](path)` only, and
+  the docs use none.
+- Optional link titles `(path "title")` and angle-bracket targets `(<path>)` are tolerated by the regex.
+
+rb queue empty (T25, T26, T27 all [x]). Next: IDLE until the lead queues more (rb) tasks.
