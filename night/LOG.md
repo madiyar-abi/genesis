@@ -184,3 +184,7 @@ unexplained violations: 13 (0 in clean configs)
   - `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 0`: exit 0, wall 1:28.40 (88.4 s). Summary: "config sweep, cases 0-2999: 3000 random configs (1186 hard) in 88.4 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56" / "FUZZ PASSED".
   - `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 0-1999`: exit 0, wall 38.463s. Summary: "6000/6000 episodes valid; episodes with problems: 0".
   0 problems across 3,000 random configs and 6,000 generated episodes on seeds 0-1999.
+2026-11-22 01:25 gemini3a — G29: Ran `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice and `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning -m unittest discover -s tests -t .`:
+  - `auditenv.check` Run 1: exit 0, wall 51.27s, last line: "ALL CHECKS PASSED in 51.2 s"
+  - `auditenv.check` Run 2: exit 0, wall 51.32s, last line: "ALL CHECKS PASSED in 51.2 s"
+  - `python -X dev -W error::ResourceWarning -m unittest discover -s tests -t .`: exit 0, wall 50.67s, last line: "OK" (Ran 562 tests in 50.666s, zero ResourceWarnings or errors).
