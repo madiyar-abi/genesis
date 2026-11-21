@@ -57,7 +57,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   `flag_all`; write `night/r20/scenarios_adapter.py`. — files: night/r20/scenarios_adapter.py, night/LOG.md — accept:
   table in LOG: scenario × difficulty → mean grader score of each policy; call out any scenario where reconcile
   scores < the documented value in README or flag_all scores > 0.
-- [ ] Z2 (rb) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r20-rb/j<B>.json`
+- [x] Z2 (rb) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r20-rb/j<B>.json`
   for B in 20000, 21000, 22000, 23000 — files: night/LOG.md — accept: per run the policy table in LOG; call out any run
   where oracle F1 < 1, reconcile F1 < 1, or random/flag_all return > -0.5.
 

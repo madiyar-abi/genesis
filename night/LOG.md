@@ -39,3 +39,25 @@
   off-limits for workers — isolation is equivalent (the policy object receives only reset/step observations);
   "documented value in README" taken as the jury_run table (reconcile return 0.959 / F1 1.000, flag_all −1.000).
   Full per-seed results: /tmp/r20-rb/z1.json, full output /tmp/r20-rb/z1.out. Next: Z2.
+2026-11-22 00:31 rb — Z2 done: `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B>
+  --json /tmp/r20-rb/j<B>.json` for B = 20000, 21000, 22000, 23000. All four exit 0; wall times (time -p real):
+  2.75 s, 2.87 s, 2.74 s, 2.83 s. Policy tables (P/R/F1 micro, mean return, mean steps, max steps, mean/max s):
+  B=20000 (seeds 20001–20020): random_explorer 0.000/0.000/0.000 −1.000 33.0/33 0.040/0.045;
+    reconcile 1.000/1.000/1.000 0.960 20.8/24 0.041/0.048; flag_all 0.000/0.000/0.000 −1.000 3.5/4 0.036/0.040;
+    oracle 1.000/1.000/1.000 1.000 1.0/1 0.006/0.008.
+  B=21000 (seeds 21001–21020): random_explorer 0.000/0.000/0.000 −0.903 33.0/33 0.041/0.049;
+    reconcile 1.000/1.000/1.000 0.960 21.1/23 0.044/0.052; flag_all 0.000/0.000/0.000 −1.000 3.6/4 0.037/0.043;
+    oracle 1.000/1.000/1.000 1.000 1.0/1 0.006/0.008.
+  B=22000 (seeds 22001–22020): random_explorer 0.000/0.000/0.000 −1.000 33.0/33 0.039/0.043;
+    reconcile 1.000/1.000/1.000 0.960 21.0/24 0.040/0.045; flag_all 0.000/0.000/0.000 −1.000 3.6/4 0.036/0.041;
+    oracle 1.000/1.000/1.000 1.000 1.0/1 0.006/0.008.
+  B=23000 (seeds 23001–23020): random_explorer 0.000/0.000/0.000 −0.903 33.0/33 0.042/0.049;
+    reconcile 1.000/1.000/1.000 0.960 20.9/25 0.042/0.055; flag_all 0.000/0.000/0.000 −1.000 3.6/4 0.037/0.040;
+    oracle 1.000/1.000/1.000 1.000 1.0/1 0.006/0.008.
+  Flags: 0 — oracle F1 = 1.000 and reconcile F1 = 1.000 in all four runs (tp/fp/fn 20/0/0 each); no run's
+  random/flag_all mean return > −0.5 (worst −0.903). Note (explained, not a defect): random_explorer's mean
+  −0.9032 at B=21000 and B=23000 = 19×(−1) + one clean scenario where it submitted empty findings, the correct
+  answer on clean books (F1 1.0, reward 0.936 = 1 − 0.002×32 inspections). Reproduced with a scratch replay
+  (/tmp/r20-rb/z2_random_check.py, public generator as jury_run uses): B=21000 → D01 seed 21001, B=23000 → D04
+  seed 23004, both 0/0/0, reward 0.9360. Micro F1 stays 0.000 because a clean episode contributes no tp/fp/fn.
+  JSON tables: /tmp/r20-rb/j{20000,21000,22000,23000}.json; raw outputs j<B>.out. Both rb tasks (Z1, Z2) done.
