@@ -102,7 +102,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   printed table in LOG; any column with precision > 0.5 that is NOT listed in docs/DESIGN.md §10 called out.
 
 ## gemini3a — jury modules repeat (evidence only, files: night/LOG.md)
-- [ ] G13 (gemini3a) Four jury modules 5 times in a row: `env -u AUDITENV_SECRET uv run python -m unittest
+- [x] G13 (gemini3a) Four jury modules 5 times in a row: `env -u AUDITENV_SECRET uv run python -m unittest
   tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` — files:
   night/LOG.md — accept: per run `Ran N tests` + result; any differing run verbatim.
 - [ ] G14 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and
