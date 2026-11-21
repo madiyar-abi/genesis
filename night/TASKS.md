@@ -42,7 +42,7 @@ Lead review findings are added as T30+ below.
 - [x] T11 (gemini2b) Attack search on new seeds: write `/tmp/r18-gemini2b/a6000.json` = `{"config_version": "1.0", "split": "attack_6000", "episodes": [{"seed": s, "config": {}} for s in 6000..6019]}` and `/tmp/r18-gemini2b/a6000h.json` the same with `"config": {"difficulty": "hard"}`; run `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config <file> --seeds 6000-6019 --steps 0` and `--steps 40` for both files (4 runs) — files: night/LOG.md — accept: per run command, wall time, mutation count, violation count; any violation verbatim.
 - [x] T12 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 2000-2999` — files: night/LOG.md — accept: last line in LOG.
 
-- [ ] T56 (gemini2b) Attack search on seeds 7000-7019: build `/tmp/r18-gemini2b/a7000.json` and `a7000h.json` exactly like T11 (seeds 7000..7019), run `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config <file> --seeds 7000-7019 --steps 0` and `--steps 40` for both files — files: night/LOG.md — accept: per run exit code + summary lines in LOG.
+- [x] T56 (gemini2b) Attack search on seeds 7000-7019: build `/tmp/r18-gemini2b/a7000.json` and `a7000h.json` exactly like T11 (seeds 7000..7019), run `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config <file> --seeds 7000-7019 --steps 0` and `--steps 40` for both files — files: night/LOG.md — accept: per run exit code + summary lines in LOG.
 - [ ] T57 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999` — files: night/LOG.md — accept: last line in LOG.
 
 ## gemini3a — docs link and path integrity (evidence only, files: night/LOG.md)

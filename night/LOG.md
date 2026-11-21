@@ -560,3 +560,24 @@ hard reconcile submissions: P=0.780478 R=0.909893 F1=0.840232 (TP=1959 FP=551 FN
 `env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0. ALL CHECKS PASSED in 52.1 s.
 
 2026-11-21 22:31 lead — Merged gemini1a/1b/2a/2b/3a/3b (all evidence tasks done, 0 problems; miner/cheater cues match DESIGN §10) and codex1 T45–T47 (loader + server hardening, multi-cue cheater F1 0.163 default / 0.153 hard vs reconcile 1.000 / 0.840). Review of codex1: (1) its stricter loader rejected a ledger row_id equal to a doc_id; the published paired definitions rename each id space separately and expect equal strings across tables → an independent file-level jury transform failed closed reset after the merge; fixed in 0f33a0f (uniqueness per id space in loaded episodes, strict for our exports), harness 40/40 again, regression test SeparateIdSpaces. (2) T46 narrowed the server's except to ValueError/RuntimeError, so any other exception would end the server → restored a message-free catch-all ({"error": "internal error"}) with a test. (3) jury_run --policy-image without docker printed a raw traceback → clean error, exit 2 (test). Also D05 now asserted (b45cd76). check ALL PASSED, golden 80/80, verify 600/600, load 2.5 ms/episode. Queued T50–T61 (gemini, re-verify the tip) and T62–T63 (codex1: committed colliding-id paired test, loader strictness audit). Assumption: the loader's new validation is acceptable because jury fixtures come from generate_episode or transforms of our exports.
+
+2026-11-21 22:40 gemini2b — T56 complete: attack search on seeds 7000–7019 (default and hard, steps 0 and 40).
+Wrote config files `/tmp/r18-gemini2b/a7000.json` (seeds 7000-7019, default config) and `/tmp/r18-gemini2b/a7000h.json` (seeds 7000-7019, difficulty: hard).
+- Run 1: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a7000.json --seeds 7000-7019 --steps 0`
+  Exit code: 0
+  Wall time: 0.81 s
+  Summary: Seeds evaluated: 20 (clean: 1, dirty: 19), Total mutations tested: 11000, Total violations detected: 0
+- Run 2: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a7000.json --seeds 7000-7019 --steps 40`
+  Exit code: 0
+  Wall time: 0.81 s
+  Summary: Seeds evaluated: 20 (clean: 1, dirty: 19), Total mutations tested: 11000, Total violations detected: 0
+- Run 3: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a7000h.json --seeds 7000-7019 --steps 0`
+  Exit code: 0
+  Wall time: 0.85 s
+  Summary: Seeds evaluated: 20 (clean: 1, dirty: 19), Total mutations tested: 11000, Total violations detected: 0
+- Run 4: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a7000h.json --seeds 7000-7019 --steps 40`
+  Exit code: 0
+  Wall time: 0.86 s
+  Summary: Seeds evaluated: 20 (clean: 1, dirty: 19), Total mutations tested: 11000, Total violations detected: 0
+Total violations across all 4 runs (44,000 mutations): 0 violations.
+Next: T57 (auditenv.verify --seeds 3000-3999).
