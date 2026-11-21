@@ -338,3 +338,24 @@ code before its fix (checked by running the new tests on the previous commit) an
   id (fixed in `3a2f013`, regression in `tests/test_verify_records.py`). A ref without a string `invoice_id`
   raised `KeyError` and blank `row_id` / payment `doc_id` values verified; both are now reported.
 - Measured, not fixed: the total settled on one invoice across payments is not bounded (DESIGN §10).
+
+## Jury check definitions (genesis-exe.com/fintech-checks.html, 21 November)
+
+The organisers published how the jury checks every team (adapter, blocks 1–4, exact matcher conventions). Each item
+below failed on `main` at `87b1b4c` against a test that replays the definitions, and passes now.
+
+- Matcher. 13 of the 36 Block 3 / M01–M12 cases failed: the tolerance `max(1, expected // 1000)` matched 10001 for
+  10000 (row 8, M07); greedy first fit lost a TP that a maximum matching keeps (M10, M11 in reverse truth order);
+  ids were stripped and the currency upper-cased (M06); an evidence id absent from the data still matched (M04); the
+  reward was rounded to 6 places, 0.313333 for 47/150 (rows 5, 12, 13); an unknown type string, a negative amount or
+  a lowercase currency made the whole submission invalid instead of one false positive (rule 8).
+- Verifier. After the jury's consistent id renaming the truth's `affected_ids` are no longer sorted, and a correct
+  transformed copy failed with "truth mismatch"; they are now compared as a set (`tests/test_judge_paired.py`).
+- Data. A clean episode held an invoice paid in two parts in 93 % and a refund in 74 % of seeds 0–199, so D02/D03 could
+  miss on a hidden seed; `ensure_distractors` guarantees both (300/300). A missing vs partial allocation (D09/D10)
+  could not be requested; `allocation` selects it (40/40 each).
+- Env. A loaded episode with an invalid published tolerance was rejected only after the env had switched to it.
+- Adapter review (a jury-style harness written independently): with `AUDITENV_SECRET` unset in the generating
+  process, a policy recovered the seed from `episode_id` in 3.2 s and scored 1.0; `generate_episode` now warns and the
+  README requires the key. A fixture with only the listed files (no task.txt, provenance.json or fx_id column) could
+  not be graded; it can now.

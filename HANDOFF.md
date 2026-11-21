@@ -4,10 +4,41 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Current state (21 November 2026).** Branch `feature/audit-defects-r19` (PR into `main`, needs a teammate's
-review and merge) closes the five audit defects from [PR #39](https://github.com/madiyar-abi/genesis/pull/39),
-which it contains, and the findings of an adversarial review of those fixes. Engineering is done: what is left
-before the deadline (22 November, 22:00 Astana) is the human submission checklist under "Deadline & submission".
+**Current state (21 November 2026, evening).** Branch `feature/jury-checks` (PR into `main`) makes the environment
+pass the jury's published check definitions ([genesis-exe.com/fintech-checks.html](https://genesis-exe.com/fintech-checks.html),
+20 November): the adapter `judge_adapter.py`, the matcher conventions, the 20 scenario configs and tests that replay
+all four blocks. PR #40 (the five PR #39 audit defects) is merged. What is left before the deadline is the human
+submission checklist under "Deadline & submission".
+
+## Jury check definitions (published 20 November) — implemented
+
+The jury connects every team through one thin Python adapter and four blocks of checks. Ours: `judge_adapter.py`
+(README "Jury adapter" — read it before the submission, it is what the jury runs).
+
+| Block (points) | What the jury runs | Ours | Tests |
+|---|---|---|---|
+| 1. Contract, 25 | C01–C20 through the adapter: shapes, paging, calculator, bounded errors, budget, submit at 100, truncation, 60 s, closed reward 0, no leaks | `judge_adapter.py`, `AuditEnv.reset_episode` (serves `episode_dir` as given) | `tests/test_judge_contract.py` |
+| 2. Data, 25 | D01–D20 from our documented generator settings | `auditenv/jury.py`; new opt-in keys `allocation` (missing / partial) and `ensure_distractors` (split payment + refund in clean books) | `tests/test_judge_scenarios.py` |
+| 3. Reward, 25 | rows 1–20 and M01–M12 with exact numbers | matcher rewritten to their conventions (below) | `tests/test_judge_reward.py` |
+| 4. Paired, 15 | their own copy with permuted records and renamed ids in every reference, served via `episode_dir` | verifier compares truth `affected_ids` as a set | `tests/test_judge_paired.py` |
+
+Matcher and reward changes (all required by the definitions; 13 of their 36 cases failed on the old code):
+the amount tolerance is the published `policy.findings.tolerance_minor` = 0 (was `max(1, expected // 1000)`),
+a maximum-cardinality matching with their deterministic tie rule replaces greedy first fit, ids and currency are
+compared exactly (no strip, no upper-casing), an evidence id that is not a public record makes the finding a FP,
+only a wrong value type / missing field / unknown key / limit is a structural error (an unknown type, odd currency or
+negative amount is now a FP), and the reward is no longer rounded to 6 places. The policy text changed, so all 40
+exported episodes, the 7 trajectory files and the 80 golden hashes were regenerated; no measured number changed.
+
+An adversarial review that played the jury with its own harness passed all four blocks and found one blocker, now
+handled: **the jury must set `AUDITENV_SECRET` in the process that calls `generate_episode`**, otherwise a policy
+recovers the seed from `episode_id` in seconds (the adapter warns on stderr; README says so in bold).
+
+Verified on the branch head (Python 3.11): `env -u AUDITENV_SECRET uv run python -m auditenv.check` → 512 tests, all
+gates pass; `sync_docs --check` no drift; `verify --seeds 0-199` 600/600 and the three splits 10/10, 10/10, 20/20;
+`fuzz --seeds 0-999` and `--hard` pass; `attack` 0 violations; `golden.py --check` 80/80; `mutate_reward.py` 22/22.
+Run the four blocks alone: `uv run python -m unittest tests.test_judge_contract tests.test_judge_reward
+tests.test_judge_scenarios tests.test_judge_paired`.
 
 ## Five audit defects from PR #39 — fixed (21 November)
 
@@ -95,12 +126,13 @@ Run `uv run python -m unittest tests.test_posting_period tests.test_load`. Both 
 
 ## Deadline & submission
 Genesis Hackathon, online stage. **Cases are published on the hackathon site on
-2026-11-19 at 12:00.** **Final deadline: 2026-11-22, 22:00 (Astana; the PDF says 23:59, we plan for 22:00).**
+2026-11-19 at 12:00.** **Final deadline: 2026-11-22, 23:59 Astana** (organisers, 21 November; we plan to be done by 22:00).
 Results: 7 teams per case (14 finalists) go to the offline final in Astana,
 planned for 2026-11-28/29 (exact dates and venue TBA).
 
 Submit via the personal account on the hackathon site: a link to **one Google
-Docs document** with three links in it — GitHub repo, demo video, presentation.
+Docs document** with the links — GitHub repo and demo video (a presentation is optional since the organisers'
+message of 21 November: the jury looks at §09 of the case — code, README, demo video and description).
 Every material must be viewable by anyone with the link. (The earlier
 `submit.exe` form asked for a Google Drive folder; the organizers' latest
 message says a Google Doc — follow the latest, re-check the form before submitting.)
@@ -110,9 +142,10 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] GitHub repo viewable by the jury — **it's private now**: make it public
       (or otherwise give access) before submitting
 - [ ] Demo video: short demo + explanation of the solution — script: `docs/DEMO.md`
-- [ ] Presentation — 10-slide outline with numbers: `docs/PITCH.md` (fill in the Team slide)
-- [ ] Google Doc with the 3 links (repo, video, presentation); the Doc and all
-      three materials shared as **"Anyone with the link — Viewer"**
+- [ ] (Optional) presentation — 10-slide outline with numbers: `docs/PITCH.md`; add it to the Doc only if made
+- [ ] Google Doc with the links (repo, video, presentation if any); the Doc and all
+      materials shared as **"Anyone with the link — Viewer"**
+- [ ] Read README "Jury adapter" once more: it is how the jury runs us (`judge_adapter.py`)
 - [ ] Doc link submitted in the personal account on the site
 - [ ] **Before the repo goes public: revoke the ReformBoss (DeepSeek) API key** — it is in git
       history (commit `b8249ac`, removed in `5e73918` but still readable). Issue a new key and pass
