@@ -103,7 +103,7 @@ contains legitimate look-alikes:
 | weekly retainers | same entity, same amount, 4×/month | line items name different service weeks |
 | midnight documents | written date ≠ accounting date | period/rate use the company timezone |
 | next-period invoices in the document set | issued after the period end | correctly *not* booked |
-| posting lag | ledger timestamp 1–3 days after the invoice | still inside the period; issue-date rate used |
+| posting lag | ledger timestamp 1–3 days after the invoice | still inside the period and never after a payment applied to it; issue-date rate used |
 
 ## 5. Environment contract and isolation
 

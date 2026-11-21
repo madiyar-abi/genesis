@@ -164,3 +164,4 @@ Diffs:
   diff -ru trajectories /tmp/r20-gemini3b/trajectories -> exit 0 (all 7 files identical)
 Differing files: none.
 2026-11-22 01:14 lead — Merged top-up 1 (G19-G24): all green (hard fuzz 3000, stress 0 imperfect max 57/32 steps, config sweep 3000 max 58, -X dev 0 ResourceWarnings, -O check passes and 0 product asserts, 71 modules pass alone, trajectories byte-identical). Queued G25-G30 to re-test the generator fix.
+2026-11-22 01:15 lead — L1 done. REVIEW.md Round 20, HANDOFF header, DESIGN posting-lag row updated. L2 waits for codex X2/Y1-Y3.
