@@ -7,6 +7,7 @@ import shutil
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import judge_adapter
@@ -165,6 +166,49 @@ class ExportLoaderRedTeam(unittest.TestCase):
                     self.check_case(filename, lambda p: p.write_text(
                         contents if contents else "\n".join([p.read_text().splitlines()[0], *p.read_text().splitlines()[:-1]]) + "\n"
                     ))
+
+
+    def test_minimal_policy_and_optional_jury_files(self):
+        shutil.copytree(self.example, self.episode)
+        public = self.episode / "public"
+        (public / "task.txt").unlink()
+        (self.episode / "grader" / "provenance.json").unlink()
+
+        def omit_fx_id(rows):
+            index = rows[0].index("fx_id")
+            for row in rows:
+                del row[index]
+
+        csv_edit(public / "fx.csv", omit_fx_id)
+        policy = public / "policy.json"
+        policy.write_text('  { "findings": { "tolerance_minor": 1 } } \n', encoding="utf-8")
+        first, _ = judge_adapter.make_env().reset(0, {**RESET, "episode_dir": self.episode})
+        fx = public / "fx.csv"
+        fx.write_text(" \t\n" + fx.read_text(encoding="utf-8") + "  \t\n", encoding="utf-8")
+        again, _ = judge_adapter.make_env().reset(0, {**RESET, "episode_dir": self.episode})
+        self.assertEqual(again, first)
+        self.assertEqual(first["task"], "")
+        self.assertEqual(first["policy"], {"findings": {"tolerance_minor": 1}})
+        answer = {"episode_id": first["manifest"]["episode_id"], "findings": []}
+        self.assertGreater(judge_adapter.score_episode(self.episode, answer, 0)["fn"], 0)
+
+    def test_grading_accepts_finite_positive_decimal_spellings(self):
+        for rate in (" +1.25 ", ".125", "1.25e-1", "1000000000"):
+            with self.subTest(rate=rate):
+                self.check_case("public/fx.csv", lambda p: csv_cell(p, "rate", rate), adapter_ok=True)
+        for rate in ("NaN", "Infinity", "0", "-0.1", "1_000"):
+            with self.subTest(rate=rate):
+                self.check_case("public/fx.csv", lambda p: csv_cell(p, "rate", rate))
+
+    def test_expense_timestamp_can_use_an_equivalent_timezone_offset(self):
+        def shift_expense(rows):
+            timestamp, invoice, payment = [rows[0].index(name) for name in ("timestamp", "invoice_id", "payment_id")]
+            row = next(row for row in rows[1:] if not row[invoice] and not row[payment])
+            instant = datetime.fromisoformat(row[timestamp])
+            offset = timezone(timedelta(hours=1) if instant.utcoffset() != timedelta(hours=1) else timedelta())
+            row[timestamp] = instant.astimezone(offset).isoformat()
+
+        self.check_case("public/ledger.csv", lambda p: csv_edit(p, shift_expense), adapter_ok=True, verify_ok=True)
 
 
 class SeparateIdSpaces(unittest.TestCase):

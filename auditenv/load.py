@@ -74,16 +74,15 @@ def _read_csv(path: Path, columns: tuple[str, ...]) -> list[dict]:
     rows = []
     reader = csv.reader(io.StringIO(_read_text(path), newline=""), strict=True)
     try:
-        header = next(reader, [])
+        records = (row for row in reader if row and (len(row) > 1 or row[0].strip()))
+        header = next(records, [])
         duplicates = sorted({name for name in columns if header.count(name) > 1})
         if duplicates:
             raise ValueError(f"{path.name}: duplicate CSV columns: {', '.join(duplicates)}")
         expected = _FX_WITHOUT_ID if columns == FX_FIELDS and "fx_id" not in header else columns
         if len(header) != len(expected) or set(header) != set(expected):
             raise ValueError(f"{path.name}: missing or unexpected CSV columns")
-        for values in reader:
-            if not values:
-                continue
+        for values in records:
             if len(values) != len(header):
                 raise ValueError(f"{path.name}: wrong number of cells in row {reader.line_num}")
             row = dict(zip(header, values))
