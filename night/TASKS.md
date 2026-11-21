@@ -75,7 +75,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   night/LOG.md — accept: per command the summary line + wall time in LOG.
 - [x] G5 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 11000-11999` and the same with
   `--hard` — files: night/LOG.md — accept: both summaries + wall times; any problem line verbatim.
-- [ ] G6 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 63000` — files:
+- [x] G6 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 63000` — files:
   night/LOG.md — accept: summary + wall time + max steps in LOG.
 
 ## gemini2a — determinism (evidence only, files: night/LOG.md)
