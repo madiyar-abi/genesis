@@ -88,7 +88,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   accept: per command the summary line + wall time.
 - [x] G5 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 14000-14999` and the same with
   `--hard` — accept: both summaries + wall times; any problem line verbatim.
-- [ ] G6 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 72000` — accept:
+- [x] G6 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 72000` — accept:
   summary + wall time + max steps.
 
 ## gemini2a — chronology on new seeds (evidence only, files: night/LOG.md)
