@@ -165,3 +165,12 @@ Diffs:
 Differing files: none.
 2026-11-22 01:14 lead — Merged top-up 1 (G19-G24): all green (hard fuzz 3000, stress 0 imperfect max 57/32 steps, config sweep 3000 max 58, -X dev 0 ResourceWarnings, -O check passes and 0 product asserts, 71 modules pass alone, trajectories byte-identical). Queued G25-G30 to re-test the generator fix.
 2026-11-22 01:15 lead — L1 done. REVIEW.md Round 20, HANDOFF header, DESIGN posting-lag row updated. L2 waits for codex X2/Y1-Y3.
+2026-11-22 01:21 gemini3b — G30: repeated G10 (export diff of dev/train/hard) and G24 (trajectory regeneration diff) on generator fix 299c5e7.
+  Export diffs:
+  - episodes/dev vs /tmp/r20-gemini3b/dev: diff exit code 0 (identical)
+  - episodes/train vs /tmp/r20-gemini3b/train: diff exit code 0 (identical)
+  - episodes/hard vs /tmp/r20-gemini3b/hard: diff exit code 0 (identical)
+  Trajectory diffs:
+  - trajectories.jsonl vs /tmp/r20-gemini3b/trajectories.jsonl: diff exit code 0 (identical)
+  - trajectories/ vs /tmp/r20-gemini3b/trajectories/: diff exit code 0 (all 7 files identical)
+  Differing files: none.
