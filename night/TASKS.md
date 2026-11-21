@@ -79,14 +79,14 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   night/LOG.md — accept: summary + wall time + max steps in LOG.
 
 ## gemini2a — determinism (evidence only, files: night/LOG.md)
-- [ ] G7 (gemini2a) Full unit suite three times: `PYTHONHASHSEED=1 TZ=UTC env -u AUDITENV_SECRET uv run python -m
+- [x] G7 (gemini2a) Full unit suite three times: `PYTHONHASHSEED=1 TZ=UTC env -u AUDITENV_SECRET uv run python -m
   unittest discover -s tests -t .`, then `PYTHONHASHSEED=4242 TZ=Asia/Almaty ...`, then `PYTHONHASHSEED=random
   TZ=Pacific/Kiritimati ...` — files: night/LOG.md — accept: per run `Ran N tests`, OK/FAILED, wall time; failures
   verbatim.
-- [ ] G8 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice while
+- [x] G8 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice while
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard` runs in the background — files:
   night/LOG.md — accept: both exit codes, last lines, wall times; any timing failure verbatim.
-- [ ] G9 (gemini2a) `LC_ALL=C LANG=C env -u AUDITENV_SECRET uv run python -m auditenv.check` and
+- [x] G9 (gemini2a) `LC_ALL=C LANG=C env -u AUDITENV_SECRET uv run python -m auditenv.check` and
   `LC_ALL=tr_TR.UTF-8 env -u AUDITENV_SECRET uv run python -m auditenv.check` — files: night/LOG.md — accept: both
   exit codes, last lines, wall times.
 

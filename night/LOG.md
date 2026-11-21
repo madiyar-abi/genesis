@@ -36,3 +36,6 @@ Summary: `config sweep, cases 63000-65999: 3000 random configs (1170 hard) in 15
 Max steps: 57
 FUZZ PASSED
 Problems: 0
+2026-11-22 00:31 gemini2a — G7: full unit suite 3 times under different PYTHONHASHSEED and TZ. Run 1 (PYTHONHASHSEED=1 TZ=UTC): Ran 561 tests, OK, wall time 55.17s. Run 2 (PYTHONHASHSEED=4242 TZ=Asia/Almaty): Ran 561 tests, OK, wall time 65.54s. Run 3 (PYTHONHASHSEED=random TZ=Pacific/Kiritimati): Ran 561 tests, OK, wall time 64.02s. 0 failures across all 3 runs.
+2026-11-22 00:35 gemini2a — G8: auditenv.check twice with auditenv.fuzz --seeds 0-999 --hard in background. Run 1: exit code 0, wall time 86.15s, last line: ALL CHECKS PASSED in 86.1 s. Run 2: exit code 0, wall time 80.31s, last line: ALL CHECKS PASSED in 80.2 s. Timing failures: none (0 timing failures). Background fuzz process was actively running throughout and terminated cleanly.
+2026-11-22 00:37 gemini2a — G9: auditenv.check under locales LC_ALL=C LANG=C and LC_ALL=tr_TR.UTF-8. Run 1 (LC_ALL=C LANG=C): exit code 0, wall time 50.78s, last line: ALL CHECKS PASSED in 50.7 s. Run 2 (LC_ALL=tr_TR.UTF-8): exit code 0, wall time 50.36s, last line: ALL CHECKS PASSED in 50.3 s. 0 failures.
