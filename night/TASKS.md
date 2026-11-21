@@ -170,6 +170,6 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   night/LOG.md — accept: last line + wall time.
 - [x] G23 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 11000-11299`
   and `... --hard --stress reconcile_hard --seeds 11000-11299` — files: night/LOG.md — accept: summaries + wall times.
-- [ ] G24 (gemini3b) After the lead's README commit lands: `env -u AUDITENV_SECRET uv run python -m auditenv.check
+- [x] G24 (gemini3b) After the lead's README commit lands: `env -u AUDITENV_SECRET uv run python -m auditenv.check
   --json /tmp/r21-gemini3b/c2.json` then `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c2.json`
   — files: night/LOG.md — accept: both exit codes and last lines.
