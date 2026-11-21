@@ -134,3 +134,4 @@ Comparison with `docs/DESIGN.md` §10: Exactly 16 flagged values in default mode
   (/tmp/r20-rb/z2_random_check.py, public generator as jury_run uses): B=21000 → D01 seed 21001, B=23000 → D04
   seed 23004, both 0/0/0, reward 0.9360. Micro F1 stays 0.000 because a clean episode contributes no tp/fp/fn.
   JSON tables: /tmp/r20-rb/j{20000,21000,22000,23000}.json; raw outputs j<B>.out. Both rb tasks (Z1, Z2) done.
+2026-11-22 00:48 lead — Merged gemini1a/1b/2a/2b/3a/3b and rb: all evidence green (fuzz 6k+6k+3k+3k episodes, verify 3000/3000, stress 0 imperfect max 58 steps, suite 561 OK under 3 hashseeds/TZs and 2 locales, exports byte-identical, golden 80/80, mutants 22/22, miner 16 flagged = DESIGN §10, jury modules 5x, red-team 10x, D01-D20 through adapter F1 1.000 on 400 runs, jury_run 4 seed bases). No defect. Topped up queues (G19-G24, Z3-Z4). codex1 rate-limited until 02:41, codex2 until 01:04: X1 retagged lead (subagent).
