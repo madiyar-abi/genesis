@@ -171,3 +171,10 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   night/LOG.md — accept: exit codes, last lines, wall times.
 - [x] G30 (gemini3b) Repeat G10 (export diff of dev/train/hard) and G24 (trajectory regeneration diff) on the fix —
   files: night/LOG.md — accept: every diff exit code; any differing file named.
+
+## Top-up 3 (02:00)
+- [ ] G31 (gemini1a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 35000-35599` — files:
+  night/LOG.md — accept: exit code, totals line and "unexplained violations" line verbatim.
+- [ ] G32 (gemini1b) Same as G31 with `--seeds 36000-36599` — files: night/LOG.md — accept: as G31.
+- [ ] G33 (gemini2a) After the lead's doc fixes land (merge first): `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r20-gemini2a/c.json`
+  then `uv run python scripts/sync_docs.py --check --json /tmp/r20-gemini2a/c.json` — files: night/LOG.md — accept: both exit codes and last lines.
