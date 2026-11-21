@@ -37,17 +37,17 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   LOG; any crash, disagreement or leak of a path/key into an observation quoted with a reproduction.
 
 ## codex2 — docs claims and fresh-clone runs (strong)
-- [ ] Y1 (codex2) Fresh-clone sweep: `git clone /Users/caliskan/Projects/genesis /tmp/r20-codex2/clone` at
+- [x] Y1 (codex2) Fresh-clone sweep: `git clone /Users/caliskan/Projects/genesis /tmp/r20-codex2/clone` at
   origin/night/2026-11-22-r20, then run every shell command in fenced blocks of README.md, docs/DEMO.md and
   docs/CONTRACT.md (skip docker, git clone of GitHub, asciinema, the organiser server and commands needing
   `AUDITENV_SECRET` unless they say how to set it) — files: night/LOG.md — accept: LOG table: command, exit code,
   wall time; every non-zero exit or output that differs from what the doc says it prints quoted verbatim.
-- [ ] Y2 (codex2) Claims audit of README.md sections "For the jury" and "Jury adapter" and docs/CONTRACT.md: for every
+- [x] Y2 (codex2) Claims audit of README.md sections "For the jury" and "Jury adapter" and docs/CONTRACT.md: for every
   factual claim (a number, a behaviour, an error code, a key name, a default) find the code line or run the command
   that proves it. — files: night/LOG.md — accept: LOG lists each wrong or unprovable claim with the file:line of the
   doc, the evidence (code file:line or command output) and the correct text; "0 wrong claims" is a valid result
   only with the number of claims checked.
-- [ ] Y3 (codex2) Same as Y2 for docs/DESIGN.md and docs/PITCH.md (numbers must come from
+- [x] Y3 (codex2) Same as Y2 for docs/DESIGN.md and docs/PITCH.md (numbers must come from
   `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r20-codex2/c.json`, `auditenv.analyze`,
   `auditenv.fuzz`). — files: night/LOG.md — accept: as Y2.
 
