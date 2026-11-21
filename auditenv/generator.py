@@ -391,11 +391,28 @@ def build_history(st: State) -> None:
                 st.book_invoice(inv)
 
     _build_payments(st, distractors)
+    _post_before_payment(st)
     if st.hard:
         _build_reissues(st)
     while len(st.invoices) + len(st.payments) < 22:  # keep >= 20 documents after any injection
         st.book_invoice(st.new_invoice(rng.choice(st.entities), st.ps + timedelta(days=rng.randrange(st.ndays))))
     _build_expenses(st)
+
+
+def _post_before_payment(st: State) -> None:
+    """A receipt cannot settle a receivable the ledger has not booked yet: an invoice whose first payment comes
+    before its lagged posting is posted at its issue instant instead (rows moved in place, no new random draws)."""
+    first = {}
+    for jid, rows in st.journals.items():
+        if jid.startswith("pay:"):
+            for r in rows:
+                if r["account"] == "1200" and r["invoice_id"]:
+                    first[r["invoice_id"]] = min(r["_dt"], first.get(r["invoice_id"], r["_dt"]))
+    for inv in st.invoices:
+        rows = st.journals.get("inv:" + inv["invoice_id"])
+        if rows and inv["invoice_id"] in first and rows[0]["_dt"] > first[inv["invoice_id"]]:
+            for r in rows:
+                r["_dt"], r["timestamp"] = inv["_dt"], iso(inv["_dt"].astimezone(st.tz))
 
 
 def _pay_date(st: State, inv: dict, lo: int = 2, hi: int = 30) -> date:

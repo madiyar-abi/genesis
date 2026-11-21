@@ -15,7 +15,7 @@ Audit scripts go under `night/r20/` (one file per task, named in the task) and m
 files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inject.py or policies.
 
 ## codex1 — independent defect hunts (strong)
-- [ ] X1 (lead, was codex1: rate-limited until 02:41) Chronology and causality audit. Write `night/r20/chronology.py`: generate episodes in memory via
+- [x] X1 (lead, was codex1: rate-limited until 02:41) Chronology and causality audit. Write `night/r20/chronology.py`: generate episodes in memory via
   `auditenv.generator` (public tables only) for default, `--hard` and every D01–D20 config in `auditenv/jury.py`
   (both difficulties), seeds 30000–30299. Check from the public tables only: every payment / credit note / refund /
   reversal is dated on or after the document it references; a reversal follows its original posting; every
