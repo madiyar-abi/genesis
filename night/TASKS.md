@@ -62,7 +62,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   where oracle F1 < 1, reconcile F1 < 1, or random/flag_all return > -0.5.
 
 ## gemini1a — seed sweeps (evidence only, files: night/LOG.md)
-- [ ] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 10000-10999` and the same with
+- [x] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 10000-10999` and the same with
   `--hard` — files: night/LOG.md — accept: both summaries + wall times in LOG; any problem line verbatim.
 - [ ] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 60000` — files:
   night/LOG.md — accept: summary + wall time + max steps in LOG.
