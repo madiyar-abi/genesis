@@ -6,7 +6,7 @@ them and promises that no error carries paths, seeds or truth. An undocumented c
 broken promise, a documented code that no longer exists is a wrong claim.
 
 The source side is collected with `ast` (not a hand-maintained list) from `auditenv/env.py`,
-`auditenv/calculator.py` and `judge_adapter.py`: every string literal used as the `code` value
+`auditenv/calculator.py` and `judge_adapter.py`: every string literal or module constant used as the `code` value
 of an error object (`{"code": "<x>", ...}`) or passed to `ToolError("<x>", ...)`. The dynamic
 `{"code": e.code, ...}` path takes its value from those `ToolError` literals, so it is covered
 too. The README side is the "Errors are ..." paragraph of the "Jury adapter" section; only
@@ -51,18 +51,36 @@ def error_codes_in_source(source, filename="<string>"):
     literal, and the first positional (or `code=`) argument of a `ToolError(...)` call. A computed
     value such as `e.code` is skipped: its values come from the `ToolError` literals collected here.
     """
+    tree = ast.parse(source, filename=filename)
+    constants = {}
+    for statement in tree.body:
+        if isinstance(statement, ast.Assign):
+            targets = statement.targets
+        elif isinstance(statement, ast.AnnAssign):
+            targets = [statement.target]
+        else:
+            continue
+        for target in targets:
+            if isinstance(target, ast.Name):
+                constants[target.id] = _string_constant(statement.value)
+
+    def resolve(node):
+        if isinstance(node, ast.Name):
+            return constants.get(node.id)
+        return _string_constant(node)
+
     found = {}
-    for node in ast.walk(ast.parse(source, filename=filename)):
+    for node in ast.walk(tree):
         code = None
         if isinstance(node, ast.Dict):
             for key, value in zip(node.keys, node.values):
                 if _string_constant(key) == CODE_KEY:
-                    code = _string_constant(value)
+                    code = resolve(value)
         elif isinstance(node, ast.Call) and _call_name(node) == ERROR_CTOR:
-            code = _string_constant(node.args[0]) if node.args else None
+            code = resolve(node.args[0]) if node.args else None
             for keyword in node.keywords:
                 if keyword.arg == CODE_KEY:
-                    code = _string_constant(keyword.value)
+                    code = resolve(keyword.value)
         if code is not None:
             found.setdefault(code, node.lineno)
     return found
@@ -142,6 +160,16 @@ class ErrorCodesDocTests(unittest.TestCase):
             "other = {'message': 'delta_code'}\n"
         )
         self.assertEqual(error_codes_in_source(source), {"alpha_code": 1, "beta_code": 2, "gamma_code": 3})
+
+    def test_named_constants_at_error_sites(self):
+        source = (
+            "TOOL_CODE: str = 'from_tool'\n"
+            "DICT_CODE = 'from_dict'\n"
+            "UNRELATED = 'other'\n"
+            "raise ToolError(code=TOOL_CODE, message='message')\n"
+            "error = {'code': DICT_CODE, 'message': 'message'}\n"
+        )
+        self.assertEqual(error_codes_in_source(source), {"from_tool": 4, "from_dict": 5})
 
     def test_documented_codes_ignore_the_shape_and_stop_at_the_section(self):
         text = (

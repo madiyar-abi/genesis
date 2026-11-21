@@ -1027,3 +1027,5 @@ Assumptions (instead of asking):
   is optional; not added to avoid touching files other owners may edit.
 
 rb queue empty again (T25, T26, T27, T64 all [x]). Next: IDLE until the lead queues more (rb) tasks.
+
+2026-11-21 23:28 lead — Reviewed T64 and added coverage for named module constants. All 8 returned codes match README. Seven tests passed, and a temporary undocumented code caused the expected failure with its source location. Reconciled the worker log conflict and integrated its final branch.
