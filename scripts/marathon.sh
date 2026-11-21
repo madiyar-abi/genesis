@@ -15,14 +15,14 @@ C1=$HOME/.codex-acc1; C2=$HOME/.codex-acc2; A2=$HOME/.agy-acc2; A3=$HOME/.agy-ac
 LEAD_SLOTS="${LEAD_SLOTS:-claude|default|;codex|$C1|gpt-6.2-astra;codex|$C1|gpt-6.2-sol;codex|$C2|gpt-6.2-astra;codex|$C2|gpt-6.2-sol}"
 GEM="Gemini 3.8 Flash (High)"
 # Workers "name@slots", each in its own worktree ../genesis-<name>. Two chats per Google account
-# (gemini* = monotonous/mechanical tasks), both Codex accounts in parallel (codex* = hard tasks),
+# (gemini* = monotonous/mechanical tasks), both Codex accounts in parallel (codex* = hard tasks, on Sol; Astra is kept for Codex as the lead),
 # ReformBoss (rb = medium tasks). WORKERS_OFF="name,name" disables some.
 WORKER_SPECS=(
   "gemini1a@agy|default|$GEM" "gemini1b@agy|default|$GEM"
   "gemini2a@agy|$A2|$GEM"     "gemini2b@agy|$A2|$GEM"
   "gemini3a@agy|$A3|$GEM"     "gemini3b@agy|$A3|$GEM"
-  "codex1@codex|$C1|gpt-6.2-astra;codex|$C1|gpt-6.2-sol"
-  "codex2@codex|$C2|gpt-6.2-astra;codex|$C2|gpt-6.2-sol"
+  "codex1@codex|$C1|gpt-6.2-sol"
+  "codex2@codex|$C2|gpt-6.2-sol"
   "rb@deepseek|default|qwen4-max;deepseek|default|deepseek-v4.1-flash"
 )
 WORKERS_OFF="${WORKERS_OFF:-}"
