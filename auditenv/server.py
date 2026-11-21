@@ -31,6 +31,7 @@ import sys
 
 from .env import AuditEnv
 from .generator import secret
+from .grader_key import grader_key
 from .run import load_episodes
 
 MAX_LINE: int = 1 << 20  # 1 MiB
@@ -88,9 +89,12 @@ def _lines(inp):
             yield line
 
 
-def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dict]] | None = None) -> None:
+def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dict]] | None = None,
+          key: str | None = None) -> None:
     env = AuditEnv()
     queue = list(episodes) if episodes is not None else None
+    if queue is not None and key is None:
+        key = grader_key(warn=False, caller="auditenv.server")
     logged = 0
 
     def flush_log():
@@ -113,13 +117,13 @@ def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dic
             raise _ClientGone from e
 
     try:
-        _serve_lines(inp, env, queue, flush_log, send_resp)
+        _serve_lines(inp, env, queue, flush_log, send_resp, key=key)
     except _ClientGone:
         pass  # graded below like a close: the policy cannot skip episodes by killing its pipes
     finally:
         env.abandon()  # close / EOF with an open episode: graded as truncated, empty answer
         for seed, config in queue or ():  # hidden episodes never reset: graded the same way, so none is skipped
-            env.reset(seed, _hidden_config(config))
+            env.reset(seed, _hidden_config(config), key=key)
             env.abandon()
         flush_log()
 
@@ -128,7 +132,7 @@ class _ClientGone(Exception):
     """The policy closed its end of the pipe; stop serving and grade what is left."""
 
 
-def _serve_lines(inp, env, queue, flush_log, send_resp) -> None:
+def _serve_lines(inp, env, queue, flush_log, send_resp, key: str | None = None) -> None:
     for line in _lines(inp):
         if line is TOO_LARGE:
             send_resp({"error": "request too large"})
@@ -172,9 +176,10 @@ def _serve_lines(inp, env, queue, flush_log, send_resp) -> None:
                         continue
                     seed, config = queue.pop(0)
                     config = _hidden_config(config)
+                    obs, info = env.reset(seed, config, abandon_open=True, key=key)
                 else:
                     seed, config = req.get("seed"), req.get("config")
-                obs, info = env.reset(seed, config, abandon_open=True)  # a rejected reset keeps the open episode
+                    obs, info = env.reset(seed, config, abandon_open=True)
                 flush_log()
                 resp = {"observation": obs, "info": info}
             elif cmd == "step":
@@ -202,10 +207,12 @@ def main(argv=None) -> int:
     ap.add_argument("--public", action="store_true",
                     help="the episode list is public on purpose: no warning when AUDITENV_SECRET is unset")
     args = ap.parse_args(argv)
-    if args.episodes and not secret() and not args.public:
-        print("auditenv.server: warning: AUDITENV_SECRET is not set, so these episodes are public: a policy can "
-              "recover each seed from episode_id and regenerate the truth. Set it in the grader process "
-              "(README, closed run) or pass --public for a deliberately public list.", file=sys.stderr, flush=True)
+    key = None
+    if args.episodes:
+        if args.public:
+            key = secret() or ""
+        else:
+            key = grader_key(warn=True, caller="auditenv.server")
     try:
         episodes = load_episodes(args.episodes) if args.episodes else None
     except (OSError, ValueError, KeyError, TypeError, RecursionError):
@@ -213,7 +220,7 @@ def main(argv=None) -> int:
         return 2
     for i, (seed, config) in enumerate(episodes or (), start=1):  # fail fast: a typo must not surface at close
         try:
-            AuditEnv().reset(seed, _hidden_config(config))
+            AuditEnv().reset(seed, _hidden_config(config), key=key)
         except ValueError as e:
             print(f"auditenv.server: hidden episode {i}: {_validation_error(e)}", file=sys.stderr, flush=True)
             return 2
@@ -222,7 +229,7 @@ def main(argv=None) -> int:
         if args.grader_log:
             with open(args.grader_log, "a"):
                 pass
-        serve(inp, sys.stdout, args.grader_log, episodes)
+        serve(inp, sys.stdout, args.grader_log, episodes, key=key)
     except OSError:
         print("auditenv.server: cannot write the grader log or response", file=sys.stderr, flush=True)
         return 2

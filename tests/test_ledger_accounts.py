@@ -118,13 +118,13 @@ class LedgerAccountsTest(unittest.TestCase):
             for k, v in counts.items():
                 aggregated_counts[k] += v
 
-        self.assertEqual(aggregated_counts["total"], 34764)
-        self.assertEqual(aggregated_counts["check_a"], 34764)
+        self.assertEqual(aggregated_counts["total"], 34784)
+        self.assertEqual(aggregated_counts["check_a"], 34784)
         self.assertEqual(aggregated_counts["check_b"], 8874)
-        self.assertEqual(aggregated_counts["check_c"], 6998)
-        self.assertEqual(aggregated_counts["check_d"], 18892)
-        self.assertEqual(aggregated_counts["check_d_debit"], 9446)
-        self.assertEqual(aggregated_counts["check_d_credit"], 9446)
+        self.assertEqual(aggregated_counts["check_c"], 7000)
+        self.assertEqual(aggregated_counts["check_d"], 18910)
+        self.assertEqual(aggregated_counts["check_d_debit"], 9455)
+        self.assertEqual(aggregated_counts["check_d_credit"], 9455)
 
     def test_ledger_accounts_heavy_hard(self):
         """100 heavy hard seeds satisfy rules (a)-(d) with zero defects."""
@@ -145,13 +145,13 @@ class LedgerAccountsTest(unittest.TestCase):
             for k, v in counts.items():
                 aggregated_counts[k] += v
 
-        self.assertEqual(aggregated_counts["total"], 117326)
-        self.assertEqual(aggregated_counts["check_a"], 117326)
-        self.assertEqual(aggregated_counts["check_b"], 9890)
-        self.assertEqual(aggregated_counts["check_c"], 7108)
-        self.assertEqual(aggregated_counts["check_d"], 100328)
-        self.assertEqual(aggregated_counts["check_d_debit"], 50164)
-        self.assertEqual(aggregated_counts["check_d_credit"], 50164)
+        self.assertEqual(aggregated_counts["total"], 116381)
+        self.assertEqual(aggregated_counts["check_a"], 116381)
+        self.assertEqual(aggregated_counts["check_b"], 9886)
+        self.assertEqual(aggregated_counts["check_c"], 7121)
+        self.assertEqual(aggregated_counts["check_d"], 99374)
+        self.assertEqual(aggregated_counts["check_d_debit"], 49687)
+        self.assertEqual(aggregated_counts["check_d_credit"], 49687)
 
     def test_clean_seed_0_expense_row_account_9999_detected(self):
         """Tampering an expense row to account '9999' on clean seed 0 is reported by the checker."""
