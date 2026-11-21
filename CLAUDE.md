@@ -34,7 +34,7 @@ every finished task.
 - Test: `uv run python -m unittest discover -s tests -t .`; one module: `uv run python -m unittest tests.test_env`.
 - Verifier: `uv run python -m auditenv.verify --seeds 0-199`. Demo: `uv run python -m auditenv.demo`.
 - Re-export episodes after any generator change: `uv run python -m auditenv.export --config configs/dev.json --out episodes/dev`
-  (same for train), then regenerate `trajectories/` (see README) — committed files must match the code.
+  (same for train), then regenerate `trajectories/` and `trajectories.jsonl` (see README) — committed files must match the code.
 - Lint/format: none configured; match the surrounding style (PEP 8, 120 cols).
 
 ## Where things live
@@ -59,7 +59,7 @@ every finished task.
 - Personal notes for the agent go in `CLAUDE.local.md` (ignored), not here.
 
 ## Do NOT touch
-- `night/SPEC.md`, `night/case.pdf` (the case — never edit). `episodes/`, `trajectories/` only via their generators.
+- `night/SPEC.md`, `night/case.pdf` (the case — never edit). `episodes/`, `trajectories/`, `trajectories.jsonl` only via their generators.
 
 ## Gotchas
 - `uv run` does not install the package (`package = false`): run modules from the repo root (`python -m auditenv.x`).
