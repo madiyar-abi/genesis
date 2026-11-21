@@ -60,9 +60,11 @@ timezones) are part of every split. Worked examples with real ids: [`docs/DESIGN
 
 ## Reward
 
-A finding is a true positive iff type, canonical `affected_ids`, currency, amount within
-`max(1, expected // 1000)` and at least one complete acceptable evidence set all match; matching is
-one-to-one (repeats are false positives). `P = TP/(TP+FP)`, `R = TP/(TP+FN)`, `F1 = 2TP/(2TP+FP+FN)`
+A finding is a true positive iff type, the exact set of canonical `affected_ids`, currency (exact string),
+amount within the published `policy.findings.tolerance_minor` (0: exact) and at least one complete acceptable
+evidence set all match, with every evidence id present in the episode's public data; matching is a one-to-one
+maximum matching with a published tie rule (repeats are false positives). Only a wrong JSON type, a missing
+field or an exceeded limit makes a submission invalid; a wrong value is a false positive. `P = TP/(TP+FP)`, `R = TP/(TP+FN)`, `F1 = 2TP/(2TP+FP+FN)`
 (F1 = 1 when truth and answer are both empty), terminal reward
 `clip(2·F1 − 1 − 0.002·inspection_steps, −1, 1)`, 0 on every other step. An invalid submission ends
 the episode with −1. Code: `auditenv/matcher.py`, `metrics.py`.
