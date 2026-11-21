@@ -4,26 +4,44 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-## Next participant: five open audit defects
+**Current state (21 November 2026).** Branch `feature/audit-defects-r19` (PR into `main`, needs a teammate's
+review and merge) closes the five audit defects from [PR #39](https://github.com/madiyar-abi/genesis/pull/39),
+which it contains, and the findings of an adversarial review of those fixes. Engineering is done: what is left
+before the deadline (22 November, 22:00 Astana) is the human submission checklist under "Deadline & submission".
 
-Baseline: `main` at `f270e4d`, after [PR #37](https://github.com/madiyar-abi/genesis/pull/37) merged. Python and offline Docker passed on [the merge commit](https://github.com/madiyar-abi/genesis/actions/runs/44785710113). All five cases below were reproduced separately from the passing test suite. Fixes are pending.
+## Five audit defects from PR #39 — fixed (21 November)
 
-| Priority | Reproduction and observed result | Suggested change and acceptance test |
-|---|---|---|
-| High — export consistency | Start with a valid seed-1 split. Export seeds 1, 2 and 3 to the same directory, requesting 13 FX issues for seed 3. Generation rejects seed 3 after seed 2 has been written. The old index remains, and the previously valid split fails verification. | Start in `auditenv/export.py`. Prepare the full export before publishing it. Compare hashes and paths before and after a failed export, verify the original split and test a successful retry. |
-| Medium — unused FX rates | In clean seed 2000, replace the rate for `2025-03-02:GBP:USD` with `not-a-rate`. The on-disk verifier reports 1/1 valid. | In `auditenv/verify.py`, validate every published rate as a finite positive decimal before any conversion. Report its FX ID. Test an unused rate as well as a valid control. |
-| Medium — payment references outside the period | Add a future payment with no posting. The control passes. Give it a nonexistent invoice reference and an allocation exceeding the payment. It still passes because verification skips reference checks outside the period. | Check document-level reference integrity independently of posting-period rules. Test the two corruptions individually and retain the valid future-payment control. |
-| Medium — manifest version | Remove the required `schema_version` from the exported manifest. Directory verification reports 1/1 valid. | Check required manifest fields against `schemas/manifest.schema.json` and identify the missing field. Verify an intact export still passes. |
-| Low — timestamp diagnostics | Set a ledger timestamp to `not-a-date`. Direct `verify_episode()` raises `ValueError`. The CLI rejects the episode but its message omits the row ID. | Finish structural validation before doing date arithmetic. Assert that the API returns a problem with the row ID and field and that the CLI exits 1 with the same diagnostic. |
+Baseline `main` at `f270e4d`. Each regression failed on the code before its fix and passes after it; details
+and reproductions are in `REVIEW.md` → "Audit defects from PR #39 and their review".
 
-From the repository root, run the reproducer on temporary copies and then the existing test modules:
+| Priority | Defect | Fix | Regression tests |
+|---|---|---|---|
+| High | A failed `export_split` left new episodes next to the old `index.json`, so a valid split failed `verify --dir` | `auditenv/export.py`: generate every episode first, write into a working directory on the destination's filesystem, swap in by renames, undo on failure | `tests/test_export.py` |
+| Medium | An unused FX rate `not-a-rate` verified | every published rate must be a plain decimal, 0 < rate < 10^9 (`_structure`) | `tests/test_verify_records.py` |
+| Medium | An out-of-period payment skipped every reference check | `Books.ref_problems` checks every payment document | `tests/test_payment_refs.py` |
+| Medium | A manifest without `schema_version` verified | the manifest is checked against `schemas/manifest.schema.json` (now also requires `generator_version`, as CONTRACT §2 lists it) | `tests/test_verify_records.py` |
+| Low | `not-a-date` in a ledger timestamp raised `ValueError` | already fixed in `3a2f013`; regression added | `tests/test_verify_records.py` |
 
-```sh
-env -u AUDITENV_SECRET uv run python night/archive/audit-f270e4d.py
-env -u AUDITENV_SECRET uv run python -m unittest tests.test_export tests.test_verify_dir tests.test_verify_semantics
-```
+The review of these fixes (a second, read-only pass) also found and the branch fixes: extra or wrong-typed
+manifest fields (a `seed` field would leak the grader's seed), rate spellings such as `1.2_9169` or `1e30`,
+a ref without a string `invoice_id` (`KeyError`), blank `row_id` / payment `doc_id`, and an export regression
+(a read-only parent and a mounted destination, `EXDEV`). Measured and left as documented limitations
+(DESIGN §10): the total settled on one invoice across payments is not bounded (0 of 9,386 settled invoices
+over-settled on seeds 0–199), and the free-text rules in `policy.json` / `task.txt` are checked only where the
+books depend on them.
 
-Read the individual CLI statuses printed by the reproducer. On this baseline the control and the three malformed FX, remittance and manifest examples all return 0. The malformed ledger timestamp and the split left behind by the failed export return 1. The 25 existing tests passed. Add a focused regression for each fix and run the full acceptance commands below.
+Verified on the branch head, Python 3.11:
+
+| Command | Result |
+|---|---|
+| `env -u AUDITENV_SECRET uv run python -m auditenv.check` | 437 tests, all gates pass, 42.8 s |
+| `uv run python scripts/sync_docs.py --check --json <check json>` | no drift |
+| `uv run python -m auditenv.verify --seeds 0-199` and `--dir episodes/{train,dev,hard}` | 600/600, 10/10, 10/10, 20/20 |
+| `auditenv.fuzz --seeds 0-999` / `--seeds 0-199 --hard` | 3,000 and 600 episodes, 0 problems |
+| `auditenv.attack` | 11,000 mutations on 20 seeds, 0 violations |
+| `scripts/golden.py --check` | 80/80 hashes match (generator output unchanged) |
+| `night/archive/audit-f270e4d.py` | control 0; the four malformed episodes 1; the split after a failed export 0 |
+| every README command on a fresh clone (at `0b7989c`, before the review fixes) | 33 of 34 run exit 0; `python3.11 -m auditenv.check` exits 127 only where `python3.11` is not on `PATH` (passes with uv's 3.11 on `PATH`); Docker, `git clone` and the organiser server were not run |
 
 ## Integrated work
 
