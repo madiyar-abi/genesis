@@ -538,3 +538,112 @@ queue, the run is reproducible, and the closed (`--episodes`) path is already co
 and by the round-19 closed-mode evidence. Assumption: `close` was added as a seventh request so the session ends
 explicitly; EOF ends it the same way (exit 0, 0 bytes on stderr).
 2026-11-22 02:44 lead — Merged G31-G33, Z3, Z4. Chronology on 1,200 more seeds: 0 unexplained in clean configs (the remaining f_ar_before_booking hits are all in configs that inject period_cutoff: the prior-period invoice itself). Z3: 23/25 CHECKS rows fully asserted by the cited test, 2 partly (mutation kill count and README snippet count are enforced by the cited command, not the unit test) — no fix needed. Z4: server session matches CONTRACT key for key; documented the two gaps rb found (close has no response line; framing error strings) in CONTRACT §4 and README.
+
+2026-11-22 02:46 codex1 — X2 complete: public policy text audit.
+
+Command: `env -u AUDITENV_SECRET uv run python -m night.r20.policy_text`. Exit 0, wall time 56.36 s.
+
+Inputs and scope: 5 default and 5 hard discovery seeds (31000–31004), and 10 scenario discovery episodes (D02, D04, …, D20 at default seed 31000). The sweep covers D01–D20 in both difficulties, plus unconfigured default and hard, on seeds 31000–31199 inclusive. Identical jury settings are counted under each published scenario. The script reads in-memory equivalents of the public files including the manifest. It derives candidates and evidence independently, using the scenario's configured issue counts as controls. It does not compare candidates or evidence to generated truth.
+
+How the quoted clauses map to the counted checks and observations below:
+
+- Task introduction and policy currency/timezone/period fields → `company_period` compares policy to manifest, `period_rule` classifies each posting in the company timezone against inclusive bounds, `invoice_required` and `payment_period` check document membership against posting presence.
+- Task duplicate, allocation, FX and cutoff definitions → `issue_types` and `scenario_findings`; duplicate candidates group booked invoices by entity, currency and item multiset and exclude fully reversed invoices. `later_copy` checks issue-order, `ar_credit` checks a remittance's per-invoice allocation, `wrong_date_explains` checks that an alternate published date can produce each incorrect invoice AR debit or payment cash posting, and a posting for an out-of-period issue date gives a cutoff candidate. The per-type observations count candidates and `clean_episodes` counts episodes with none.
+- Task legitimate split/partial payments, refunds, unidentified receipts and recurring amounts → observations for multiple remittances per invoice, remittances below invoice face value, signed refunds, receipts with no remittance and same-entity/currency equal totals; clean scenario counts check these patterns add no false findings. The public payment document has no entity field, so receipts without remittance are counted rather than assumed to be unidentified.
+- Task hard-mode sentence and `ledger.credit_note` → `hard_ledger_larger` compares each paired seed/config, `hard_text` checks which policies publish the extra rule, `credit_note` and `reissue` check for full same-invoice reversal and a later separately booked equivalent invoice, and the retyped observations count unequal literal item lists that match after ignoring order, case and punctuation.
+- `fx.direction`, `fx.rate_date`, `fx.conversion`, `rounding` → `rate_direction`, `rate_date`, `rounding`, `conversion`, `wrong_date_explains`, `ar_credit` and `unapplied_payment_date`. The script independently scales public source and base exponents and uses Decimal half-up rounding at local issue/payment dates.
+- `ledger.accounts`, `ledger.currency`, `ledger.expense`, `ledger.invoice`, `ledger.payment` → `account_legend`, `accounts`, `ledger_base_currency`, `minor_units`, `expense`, `invoice_shape`, `invoice_balance`, `payment_shape`, `payment_balance`, `refs`, `ref_currency`, `ar_credit`, `unapplied_payment_date`, `refund`. The 7900 balance line is checked by restricting journal accounts and reconciling the signed total to zero.
+- `findings.amount`, `findings.affected_ids`, `findings.evidence` → candidate tuples in the four per-type evidence checks, with the stated invoice/payment IDs, later AR debit, local-rate valuation gap, posted out-of-period invoice debit or per-ref AR credit shortfall. The checker constructs one public evidence alternative for each candidate and tests distinct IDs and positive integer base-minor amounts. It does not establish grader acceptance of each generated evidence alternative.
+- `findings.tolerance` and the task's page cap, final submit and action cost/cap are interface rules. The public policy tolerance is checked on every episode. Separate command `env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward` exited 0 in 0.22 s, `Ran 63 tests in 0.158s`, `OK`. Relevant tests include C05/C06, C14, C15, C16 and reward B3-08/M07. There is no payment-term rule in the sampled task or policy text.
+
+Wording gap observed in expected allocation findings: policy says “remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate” without saying whether the remainder follows remittances or amounts actually credited. D10/hard seed 31000, PAY-655914 (DOC0140581), invoice F0954418 (DOC0438583), provides a base-GBP example. Cash debit 678900 (GL-001546) equals the two refs (130400 + 548500), leaving no remainder as instructed on the remittance. AR credits are 45454 (GL-001547) and 548500 (GL-001549); GL-001548 credits 84946 to 2900, exactly the shortfall. This is the expected allocation finding rather than an extra issue. The distinction matters when interpreting 2900 entries. The text could state explicitly that diverted amounts can appear on 2900 in misallocated journals and that the per-invoice remittance and AR posting establish the finding.
+
+Hard-mode normalization example: D06/hard seed 31003, earlier F0482348 (DOC0454912, AR R871) and later F0451339 (DOC0090426, AR R1058). “DATA MIGRATION - PO/2246” and “data migration - po/2246” match after the stated case relaxation, regardless of line order. The checker used the same lowercase ASCII alphanumeric description key in all hard-mode comparisons. No additional normalization rule was needed to recover the scenario counts on this sample.
+
+Also opened the public task.txt/policy.json pairs for the first five sorted dev export IDs, first five sorted hard export IDs, and the ten generated scenario samples above (public text files materialized under scratch). All 20 pairs read successfully.
+
+Exact sweep output:
+
+```text
+Read task and policy from 20 discovery samples.
+CLAIM You are auditing one company for one reporting period. Find misstatements in the ledger caused by: duplicate_invoice (the same invoice entered twice: same entity, currency and identical line items), payment_allocation (a payment's remittance says it pays an invoice but the ledger credits less to that invoice's receivable), fx_error (a foreign-currency amount converted with a rate of the wrong date), period_cutoff (an invoice issued outside the period booked in this period). The books may be clean. Split payments, partial payments, refunds, unidentified receipts and recurring equal amounts can be legitimate. Use the tools to read records (max 50 rows per page) and submit findings once; every action costs a step (max 100 including submit).
+CLAIM You are auditing one company for one reporting period. Find misstatements in the ledger caused by: duplicate_invoice (the same invoice entered twice: same entity, currency and identical line items), payment_allocation (a payment's remittance says it pays an invoice but the ledger credits less to that invoice's receivable), fx_error (a foreign-currency amount converted with a rate of the wrong date), period_cutoff (an invoice issued outside the period booked in this period). The books may be clean. Split payments, partial payments, refunds, unidentified receipts and recurring equal amounts can be legitimate. Use the tools to read records (max 50 rows per page) and submit findings once; every action costs a step (max 100 including submit). Hard mode: the ledger is larger; line items keyed in by hand (some invoices, re-issues and duplicate copies) may be re-typed (other order, case and punctuation of the descriptions) with the same products, quantities and prices; an invoice cancelled by a full credit note and re-issued with the same line items is legitimate.
+CLAIM findings.affected_ids.duplicate_invoice: [original_invoice_id, duplicate_invoice_id]
+CLAIM findings.affected_ids.fx_error: [invoice_id] or [payment_id]
+CLAIM findings.affected_ids.payment_allocation: [invoice_id, payment_id]
+CLAIM findings.affected_ids.period_cutoff: [invoice_id]
+CLAIM findings.amount: misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the AR debit of the later-issued copy; fx_error: abs(posted - correct); period_cutoff: the AR debit posted; payment_allocation: expected AR credit for the ref - AR credit posted
+CLAIM findings.evidence: doc_id / row_id / fx_id values; must include at least one full acceptable evidence set: duplicate_invoice: both invoice docs + one AR (or revenue) row of each invoice, the original and the later copy; payment_allocation: payment doc + invoice doc + the AR credit row of that invoice in the payment (or, if nothing was allocated to it, the 2900 row) + the invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row + the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row
+CLAIM findings.tolerance: abs(claimed - expected) <= tolerance_minor; tolerance_minor is 0, so the amount must be exact
+CLAIM findings.tolerance_minor: 0
+CLAIM fx.conversion: base_minor = round_half_up(amount_minor / 10^exp_src * rate * 10^exp_base)
+CLAIM fx.direction: rate = units of target_currency per 1 unit of source_currency (major units)
+CLAIM fx.rate_date: transaction date in the company timezone (invoice: issued_at; payment: timestamp)
+CLAIM ledger.accounts.1000: Cash
+CLAIM ledger.accounts.1200: Accounts receivable
+CLAIM ledger.accounts.2900: Unapplied cash
+CLAIM ledger.accounts.4000: Revenue
+CLAIM ledger.accounts.6100: Rent
+CLAIM ledger.accounts.6200: Payroll
+CLAIM ledger.accounts.6300: Software
+CLAIM ledger.accounts.6400: Bank fees
+CLAIM ledger.accounts.7900: FX gain/loss
+CLAIM ledger.credit_note: a cancelled invoice is reversed in full: Dr 4000 / Cr 1200 with the same invoice_id and no payment_id; a re-issued replacement is booked as a new invoice
+CLAIM ledger.currency: every ledger row is in base_currency
+CLAIM ledger.expense: Dr 6xxx / Cr 1000
+CLAIM ledger.invoice: Dr 1200 / Cr 4000 at the invoice issue-date rate, only for invoices issued in the period
+CLAIM ledger.payment: Dr 1000 at the payment-date rate; Cr 1200 per invoice_ref at that invoice's issue-date rate; remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; difference to 7900; negative amount = refund (Dr 2900 / Cr 1000)
+CLAIM period.rule: a record belongs to the period iff its timestamp converted to the company timezone has a date in [start, end] (inclusive)
+CLAIM rounding: ROUND_HALF_UP to integer minor units
+CHECK account_legend: 8400
+CHECK accounts: 6220986
+CHECK ar_credit: 217152
+CHECK company_period: 8400
+CHECK conversion: 557606
+CHECK credit_note: 10494
+CHECK evidence_duplicate_invoice: 1502
+CHECK evidence_fx_error: 3366
+CHECK evidence_payment_allocation: 2856
+CHECK evidence_period_cutoff: 2049
+CHECK expense: 2455961
+CHECK hard_ledger_larger: 4200
+CHECK hard_text: 8400
+CHECK invoice_balance: 335490
+CHECK invoice_required: 111697
+CHECK invoice_shape: 447187
+CHECK issue_types: 8400
+CHECK later_copy: 1502
+CHECK ledger_base_currency: 6220986
+CHECK minor_units: 6220986
+CHECK payment_balance: 222116
+CHECK payment_period: 222116
+CHECK payment_shape: 222116
+CHECK period_rule: 6220986
+CHECK positive_base_minor: 9773
+CHECK rate_date: 400268
+CHECK rate_direction: 2200561
+CHECK ref_currency: 217152
+CHECK refs: 222116
+CHECK refund: 12897
+CHECK reissue: 10494
+CHECK rounding: 8400
+CHECK scenario_findings: 32000
+CHECK tolerance: 8400
+CHECK unapplied_payment_date: 219260
+CHECK wrong_date_explains: 3366
+OBSERVED allocation_remainder_departures: 2856
+OBSERVED clean_episodes: 2011
+OBSERVED duplicate_invoice: 1502
+OBSERVED fx_balance_adjustments: 79041
+OBSERVED fx_error: 3366
+OBSERVED partial_remittances: 84791
+OBSERVED payment_allocation: 2856
+OBSERVED period_cutoff: 2049
+OBSERVED receipts_without_remittance: 12741
+OBSERVED recurring_equal_amounts: 18943
+OBSERVED refunds: 12897
+OBSERVED retyped_duplicates: 347
+OBSERVED retyped_reissues: 5238
+OBSERVED split_payments: 24733
+Audited 8400 episodes across 42 configurations; 33079641 checks, 0 unexpected failures.
+```

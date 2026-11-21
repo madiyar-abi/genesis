@@ -23,7 +23,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   within the period or is explicitly a cutoff/period error the policy text describes; an FX rate exists for every
   (date, currency) the policy says to use. — files: night/r20/chronology.py, night/LOG.md — accept: script exits 0
   when no violation; LOG lists counts per check × config and every violation with config, seed and record ids.
-- [ ] X2 (codex1) Policy text vs data audit. Read task.txt and policy.json of 5 default + 5 hard + 10 scenario
+- [x] X2 (codex1) Policy text vs data audit. Read task.txt and policy.json of 5 default + 5 hard + 10 scenario
   episodes. For every sentence that states a rule or a fact (terms, tolerance, currency, period, which rate to use,
   what counts as an issue), write a check in `night/r20/policy_text.py` that tests the statement against the public
   data on seeds 31000–31199 of each config. — files: night/r20/policy_text.py, night/LOG.md — accept: LOG lists every
