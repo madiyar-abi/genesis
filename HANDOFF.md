@@ -4,7 +4,23 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Current state (21 November 2026).** PR #42 merged the jury adapter checks and public scenario runs into `main`. The follow-up below fixes a C18 failure found on that revision and adds an isolated run for C20. Before submission the team still needs to revoke the DeepSeek key, make the repository public, record the video, and share and submit the Google Doc. See “Deadline & submission”.
+**Current state (21 November 2026, evening).** [PR #43](https://github.com/madiyar-abi/genesis/pull/43) merged into `main` at `2f08025`. The post-merge [main CI](https://github.com/madiyar-abi/genesis/actions/runs/44920065040) passed on Python and Docker. The fixes and evidence are below. The team still owns video, credential revocation, jury access and submission.
+
+## Release follow-up in progress (Khasuetolog)
+
+The team authorized implementing and merging the policy watchdog, E5 and H1 after checks. The integration branch is `feature/jury-completion`. The three workers share the Genesis checkout. Orca Run `run_8d929c444cbb` tracks the following assignments.
+
+| Work | Dispatch | Acceptance |
+|---|---|---|
+| Policy process deadline | `ctx_758559a519aa` | A silent or partial-line worker times out, one empty result is graded, and the next episode starts. |
+| E5 rule search | `ctx_0cac681683dc` | Select using training rewards only, freeze the program, report reproducible train curve, dev/hard F1 and return. |
+| H1 expert difficulty | `ctx_8a2fe2afc31e` | Public weekend FX and duplicate rules, independent verification, perfect records-only expert policy within budget, weaker hard baseline, legacy exports and trajectories byte-identical. |
+
+**Quota handoff, 21 November, 20:42 Astana.** The shared five-hour Codex window reported 7% remaining. PR #43 is merged and its main CI is green. The three follow-ups have local implementation in progress. The watchdog edits are in `env.py`, `judge_adapter.py` and `jury_run.py`. Expert changes include generator, injector, verifier, runner and reconciliation. E5 has a new `auditenv/policies/rule_search.py` and `tests/test_rule_search.py`; a local snapshot passed all five focused tests with `uv run python -m unittest tests.test_rule_search`. Recheck final worker revisions. Feature acceptance, regression runs, review and merge for those three tasks are outstanding. The overnight crew's release checklist remains with the team.
+
+For continuation, inspect the Git status and the worker run before editing files. Run `orca orchestration worker-list --run run_8d929c444cbb --json`. Confirm each worker's actual test results before marking its feature complete. The workers are writing in `/Users/arystan/orca/projects/GENESIS`. Their uncommitted edits exist in that checkout; a fresh GitHub checkout of the handoff branch contains only the saved handoff until the code is reviewed.
+
+Before merging, re-export train, dev and hard into a temporary directory and compare against the tracked episodes, regenerate all seven trajectories and compare the bytes, run `uv run python scripts/golden.py --check`, then run the focused feature tests, the full `auditenv.check`, and `auditenv.fuzz --seeds 0-999`. Check the CI result on the exact PR head. Continue through a PR to main; the team authorized merging verified work.
 
 ## C18 and C20 follow-up (Khasuetolog)
 
@@ -14,7 +30,7 @@ For C20, use the isolated baseline run in README. CI builds a public-only Docker
 
 Verified locally with Python 3.11.18 on this branch. The four jury test modules passed all 70 tests, the full check passed all 515 tests and gates, and the default fuzz sweep passed 3,000 episodes across seeds 0–999. On the implementation commit `744d79a`, Linux CI passed the isolated run. Each public baseline ran on all 20 scenarios. Reconcile reached F1 1.000 with at most 26 actions, and the grader-side oracle reached F1 1.000. [CI evidence](https://github.com/madiyar-abi/genesis/actions/runs/44918123574)
 
-**Next owner.** Review [PR #43](https://github.com/madiyar-abi/genesis/pull/43) before integration. The public-rubric estimate for this branch is 100/100. Hidden cases and the engineering marks are decided by the jury. After integration, continue the human submission checklist below.
+The public-rubric estimate for PR #43 was 100/100. Hidden cases and engineering marks are decided by the jury. The human submission checklist is below.
 
 **Case §13 source check.** Section 04 adopts the JSON reset/step contract and makes Python Env inheritance optional. In `judge_adapter.py`, reset returns the initial observation and info. Step returns separate termination and truncation flags for submission and external limits. Run `uv run python -m unittest tests.test_judge_contract` (26 tests passed). [Gymnasium Env API](https://gymnasium.farama.org/api/env/)
 
