@@ -83,7 +83,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
 - [ ] G3 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999` — accept: last line.
 
 ## gemini1b — stress solvability (evidence only, files: night/LOG.md)
-- [ ] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 10000-10299` and
+- [x] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 10000-10299` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 10000-10299` —
   accept: per command the summary line + wall time.
 - [ ] G5 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 14000-14999` and the same with
@@ -119,7 +119,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   OK/FAILED, wall time; failures verbatim.
 
 ## gemini3b — exports, demo, docs drift (evidence only, files: night/LOG.md)
-- [ ] G16 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
+- [x] G16 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
   accept: per split the `N/N episodes valid` line.
 - [ ] G17 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, the final reward/score lines
   quoted; compare them with the numbers in docs/DEMO.md and call out any difference.
