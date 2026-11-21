@@ -101,7 +101,10 @@ default "train"), `max_steps` (100), `time_limit_s` (60), `errors`
 (`{type: count}`), `interacting` (`{"I1": n, "I2": n}`; both must be objects — both omitted → random mix,
 either given → exactly the listed counts, the rest 0), `n_invoices` (10–100), `distractors`
 (bool), `transform_seed` (int | null: benign relabel/permutation), `difficulty` ("default" |
-"hard"; default "default" — absent from the normalised config, so default episodes are unchanged).
+"hard"; default "default" — absent from the normalised config, so default episodes are unchanged), `allocation`
+("partial" | "missing" | null: which variant an injected `payment_allocation` takes; null = drawn, 60 % partial),
+`ensure_distractors` (bool, default false: at least one invoice paid in two legitimate parts and one refunded
+overpayment). The last two are also absent from the normalised config unless set (jury scenarios, `auditenv/jury.py`).
 Hard mode pads the ledger to a target of 900–1 400 rows before injection and selects up to three eligible invoices for credit-note reissues. Duplicates may be re-typed. The task text and `policy.ledger.credit_note` give the extra rules.
 
 A rejected seed or config raises `ValueError` (over `auditenv.server`: a bounded `{"error": ...}`) and leaves
@@ -142,24 +145,33 @@ only in `mode="train"`; in `"eval"` it is 0.0 and the result goes to the grader 
   "claimed_amount_minor": 1234, "currency": "USD", "evidence_ids": ["D-1","L-7"],
   "explanation": "short reason"}]}
 ```
-Limits: ≤ 30 findings, ≤ 10 evidence_ids, explanation ≤ 1000 chars, `type` ∈ the 4
-types, `affected_ids` non-empty list of non-empty strings (≤ 10), amount int ≥ 0
-(not bool; a JSON integer literal — `1234.0` is a float here, although JSON Schema calls it an integer),
-currency 3 uppercase letters, `episode_id` must equal the episode's.
+Structure (anything else here makes the submission invalid): top-level keys exactly `episode_id` (must equal
+the episode's) and `findings`; ≤ 30 findings; each finding a dict with the keys above, all required except
+`explanation`, and no others; `type` and `currency` strings, `affected_ids` and `evidence_ids` lists of
+strings, `claimed_amount_minor` an int (not bool; a JSON integer literal — `1234.0` is a float here, although
+JSON Schema calls it an integer), `explanation` a string. Limits are checked on the raw values: ≤ 10
+`evidence_ids` counted before repeats are dropped, explanation ≤ 1000 code points.
 Invalid structure → episode ends, reward −1, error recorded in the grader log.
+Wrong values of the right type are *not* structural errors: an unknown `type` string, a negative or wrong
+amount, a currency that is not the issue's (`"usd"`, `" USD"`), empty or unknown ids are a valid finding that
+does not match (a false positive).
 
 ## 6. Matching & reward (`auditenv/matcher.py`, `auditenv/metrics.py`)
-- Normalise: strip ids, dedupe + sort affected_ids and evidence_ids (ids are case-sensitive;
-  currency must be exactly `[A-Z]{3}` or the submission is invalid). Top-level keys other than
-  `episode_id` and `findings` are invalid.
-- TP iff type equal, normalised affected_ids equal, currency equal,
-  `abs(claimed − expected) <= max(1, expected // 1000)`, and `set(evidence_ids)`
-  ⊇ some evidence set.
-- One-to-one, greedy in submission order: each finding takes the first unmatched truth
-  issue (truth order) it satisfies; otherwise FP. Unmatched truth = FN.
+- Normalise: nothing is stripped, case-folded or converted — ids and currency compare as exact strings.
+  `affected_ids` and `evidence_ids` are sets (order and repeats do not matter).
+- Edge finding → issue iff type equal, `set(affected_ids) == set(issue.affected_ids)`, currency equal,
+  `abs(claimed − expected) <= tolerance`, every evidence id is a public id of the episode
+  (`matcher.public_ids`: ledger `row_id`, invoice/payment `doc_id`, `invoice_id`, `payment_id`, `fx_id`), and
+  `set(evidence_ids)` ⊇ some evidence set. An unknown evidence id makes the finding unmatched.
+- Tolerance: `policy.findings.tolerance_minor` (a fixed non-negative int, `matcher.tolerance_of`; default 0).
+  Generated episodes publish 0, so the amount must be exact.
+- One-to-one: a maximum-cardinality matching of findings (repeats included) to truth issues. Among maximum
+  matchings, issue ids are sorted by code point and the lexicographically smallest sorted sequence of
+  (issue_id, finding index) pairs wins, so submission order never changes TP/FP/FN. TP = matched pairs,
+  FP = findings − TP (repeats included), FN = issues − TP.
 - `P=TP/(TP+FP)`, `R=TP/(TP+FN)` (0 if denominator 0), `F1=2TP/(2TP+FP+FN)`;
   truth and findings both empty → F1=1; truth empty, findings non-empty → F1=0.
-- `reward = clip(2*F1 − 1 − 0.002*inspection_steps, −1, 1)`; inspection_steps =
+- `reward = clip(2*F1 − 1 − 0.002*inspection_steps, −1, 1)`, not rounded; inspection_steps =
   steps taken before the submit (the submit itself is not counted).
 
 ## 7. Policies (`auditenv/policies/`)

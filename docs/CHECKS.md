@@ -4,6 +4,79 @@ Mapping of the five evaluation criteria from `night/SPEC.md` §10 (100 points to
 
 ---
 
+## Jury check definitions (genesis-exe.com/fintech-checks.html, published 20 November)
+
+The jury connects through `judge_adapter.py` (README "Jury adapter").
+
+| jury check | what it requires (≤ 15 words) | our test (module::Class::method) |
+|---|---|---|
+| C01 | reset returns JSON-serializable (observation, info) tuple | `tests/test_judge_contract.py::JudgeContractTest::test_c01_reset_returns_json_pair` |
+| C02 | Initial observation has task, manifest, policy, remaining steps 100, no leaks | `tests/test_judge_contract.py::JudgeContractTest::test_c02_first_observation` |
+| C03 | Manifest contains required metadata fields and counts exactly matching actual data | `tests/test_judge_contract.py::JudgeContractTest::test_c03_manifest_matches_the_data` |
+| C04 | step returns 5-tuple with boolean flags and JSON-serializable observation | `tests/test_judge_contract.py::JudgeContractTest::test_c04_step_tuple` |
+| C05 | Cursor pagination traverses table without gaps or repeats, covering all rows | `tests/test_judge_contract.py::JudgeContractTest::test_c05_c06_pages_cover_the_table_and_repeat` |
+| C06 | Replaying the same cursor returns identical records in identical order | `tests/test_judge_contract.py::JudgeContractTest::test_c05_c06_pages_cover_the_table_and_repeat` |
+| C07 | get_record returns exact record matching table row without extraneous fields | `tests/test_judge_contract.py::JudgeContractTest::test_c07_get_record` |
+| C08 | get_document returns exact invoice or payment document matching doc_id | `tests/test_judge_contract.py::JudgeContractTest::test_c08_get_document` |
+| C09 | calculator evaluates arithmetic expressions returning exact decimal string | `tests/test_judge_contract.py::JudgeContractTest::test_c09_calculator_decimal` |
+| C10 | calculator safely rejects non-arithmetic code and file access with bounded error | `tests/test_judge_contract.py::JudgeContractTest::test_c10_calculator_refuses_code` |
+| C11 | get_record with unknown ID consumes step and returns bounded not_found error | `tests/test_judge_contract.py::JudgeContractTest::test_c11_c12_unknown_ids` |
+| C12 | get_document with unknown ID consumes step and returns bounded not_found error | `tests/test_judge_contract.py::JudgeContractTest::test_c11_c12_unknown_ids` |
+| C13 | Unknown action consumes one step and returns bounded error without terminating | `tests/test_judge_contract.py::JudgeContractTest::test_c13_unknown_action` |
+| C14 | Both valid and erroneous actions decrement remaining step budget by one | `tests/test_judge_contract.py::JudgeContractTest::test_c14_errors_cost_one_step_and_do_not_break_access` |
+| C15 | submit terminates episode; subsequent actions return episode_over without modifying outcome | `tests/test_judge_contract.py::JudgeContractTest::test_c15_submit_is_final` |
+| C16 | submit executed as 100th action is accepted and terminates episode | `tests/test_judge_contract.py::JudgeContractTest::test_c16_submit_as_action_100` |
+| C17 | 100 inspection actions without submit truncate episode with empty findings | `tests/test_judge_contract.py::JudgeContractTest::test_c17_hundred_inspections_truncate` |
+| C18 | 60-second wall-clock timeout truncates episode with empty findings | `tests/test_judge_contract.py::JudgeContractTest::test_c18_time_limit_truncates_with_empty_findings` |
+| C19 | In closed mode, step rewards are 0 and info omits diagnostics | `tests/test_judge_contract.py::JudgeContractTest::test_c19_closed_rewards_are_zero` |
+| C20 | No truth, provenance, seed, or grader answers leaked across policy channels | `tests/test_judge_contract.py::JudgeContractTest::test_c20_no_closed_data_in_any_policy_channel` |
+| B3-01 | One correct finding yields TP=1, FP=0, FN=0, F1=1, and reward 0.98 | `tests/test_judge_reward.py::Block3::test_b3_01_one_correct_finding` |
+| B3-02 | Empty findings on single issue yield TP=0, FP=0, FN=1, reward -1 | `tests/test_judge_reward.py::Block3::test_b3_02_issue_and_empty_findings` |
+| B3-03 | Empty truth with empty findings yields F1=1 and reward 0.98 | `tests/test_judge_reward.py::Block3::test_b3_03_empty_truth_empty_findings` |
+| B3-04 | Empty truth with one false finding yields FP=1, F1=0, reward -1 | `tests/test_judge_reward.py::Block3::test_b3_04_empty_truth_one_false_finding` |
+| B3-05 | Two identical correct findings yield TP=1, FP=1, F1=2/3, reward 47/150 | `tests/test_judge_reward.py::Block3::test_b3_05_two_identical_correct_findings` |
+| B3-06 | Finding with wrong issue type yields TP=0, FP=1, FN=1, reward -1 | `tests/test_judge_reward.py::Block3::test_b3_06_wrong_type` |
+| B3-07 | Finding citing unaffected existing record yields TP=0, FP=1, FN=1, reward -1 | `tests/test_judge_reward.py::Block3::test_b3_07_other_existing_unaffected_record` |
+| B3-08 | Claimed amount off by 1 at zero tolerance yields TP=0, FP=1, FN=1, reward -1 | `tests/test_judge_reward.py::Block3::test_b3_08_amount_off_by_one_at_zero_tolerance` |
+| B3-09 | Finding with wrong currency yields TP=0, FP=1, FN=1, reward -1 | `tests/test_judge_reward.py::Block3::test_b3_09_other_currency` |
+| B3-10 | Finding with incomplete evidence set yields TP=0, FP=1, FN=1, reward -1 | `tests/test_judge_reward.py::Block3::test_b3_10_only_d1` |
+| B3-11 | Finding citing unknown evidence ID yields TP=0, FP=1, FN=1, reward -1 | `tests/test_judge_reward.py::Block3::test_b3_11_unknown_evidence_instead_of_d2` |
+| B3-12 | 20 brute-force findings yield TP=1, FP=19, F1=2/21, reward -871/1050 | `tests/test_judge_reward.py::Block3::test_b3_12_five_records_times_four_types` |
+| B3-13 | Two issues with only one found yield TP=1, FN=1, F1=2/3, reward 47/150 | `tests/test_judge_reward.py::Block3::test_b3_13_two_issues_only_a_found` |
+| B3-14 | Two issues with one match plus one false finding yield F1=1/2, reward -0.02 | `tests/test_judge_reward.py::Block3::test_b3_14_two_issues_a_found_plus_false` |
+| B3-15 | Correct finding at 0 inspection steps yields maximum reward 1.0 | `tests/test_judge_reward.py::Block3::test_b3_15_zero_inspection_steps` |
+| B3-16 | Correct finding at 50 inspection steps yields reward 0.90 | `tests/test_judge_reward.py::Block3::test_b3_16_fifty_inspection_steps` |
+| B3-17 | Correct finding at 100 inspection steps yields reward 0.80 | `tests/test_judge_reward.py::Block3::test_b3_17_hundred_inspection_steps` |
+| B3-18 | Submitting 31 findings exceeds limit, triggering structural error and reward -1 | `tests/test_judge_reward.py::Block3::test_b3_18_thirty_one_findings` |
+| B3-19 | Submitting 11 distinct evidence IDs triggers structural error and reward -1 | `tests/test_judge_reward.py::Block3::test_b3_19_eleven_distinct_evidence_ids` |
+| B3-20 | Explanation with 1001 ASCII characters triggers structural error and reward -1 | `tests/test_judge_reward.py::Block3::test_b3_20_explanation_1001_ascii` |
+| M01 | affected_ids order and duplicates normalized as set to match truth | `tests/test_judge_reward.py::OpenExamples::test_m01_affected_reordered_and_repeated` |
+| M02 | Extra unaffected existing record in affected_ids yields FP=1, FN=1 | `tests/test_judge_reward.py::OpenExamples::test_m02_extra_existing_unaffected_record` |
+| M03 | Evidence reordered with extra public document still matches as TP | `tests/test_judge_reward.py::OpenExamples::test_m03_evidence_reordered_with_public_extra` |
+| M04 | Evidence containing unknown ID fails matching, yielding FP=1, FN=1 | `tests/test_judge_reward.py::OpenExamples::test_m04_evidence_with_unknown_id` |
+| M05 | 11 evidence IDs before deduplication triggers raw limit structural error, reward -1 | `tests/test_judge_reward.py::OpenExamples::test_m05_eleven_evidence_ids_before_dedupe` |
+| M06 | Currency differing by case or whitespace fails exact match, yielding FP=1, FN=1 | `tests/test_judge_reward.py::OpenExamples::test_m06_currency_case_or_whitespace` |
+| M07 | Claimed amount off by 1 at zero tolerance yields FP=1, FN=1 | `tests/test_judge_reward.py::OpenExamples::test_m07_off_by_one_at_zero_tolerance` |
+| M08 | With published tolerance 1, off by 1 is TP while 2 fails | `tests/test_judge_reward.py::OpenExamples::test_m08_published_tolerance_one` |
+| M09 | Claimed amount as string, bool, or float triggers structural error, reward -1 | `tests/test_judge_reward.py::OpenExamples::test_m09_amount_string_bool_or_float` |
+| M10 | Maximum matching assigns findings to maximize TP=2 rather than greedy first-match | `tests/test_judge_reward.py::OpenExamples::test_m10_maximum_matching_not_greedy` |
+| M11 | When findings fit both issues, deterministic tie-breaking sorts by issue code points | `tests/test_judge_reward.py::OpenExamples::test_m11_both_fit_both_tie_break` |
+| M12 | Two identical correct findings match one issue, yielding TP=1, FP=1, FN=0 | `tests/test_judge_reward.py::OpenExamples::test_m12_two_identical_correct` |
+| D01–D20 | 20 documented scenarios generate verifiable episodes with declared truth and sufficient evidence | `tests/test_judge_scenarios.py::JudgeScenariosTest::test_every_episode_verifies_and_has_the_declared_truth` |
+| P01–P20 | 20 paired episodes preserve exact replay, oracle invariance under permutation and relabelling | `tests/test_judge_paired.py::JudgePairedTest::test_pairs` |
+
+```bash
+uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired
+```
+
+```
+Ran 69 tests in 1.404s
+
+OK
+```
+
+---
+
 ## 1. Contract and Isolation (Контракт и изоляция — 25 points)
 
 > **Criterion (`night/SPEC.md` §10):** 25 × passed/20 fixed checks of reset/step, schemas, limits, termination, invalid inputs, and leak-free isolation.

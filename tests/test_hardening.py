@@ -9,7 +9,7 @@ from unittest import mock
 from auditenv.client import RemoteEnv
 from auditenv.env import AuditEnv
 from auditenv.generator import generate
-from auditenv.matcher import grade
+from auditenv.matcher import grade_episode
 from auditenv.verify import verify_episode
 
 
@@ -68,12 +68,20 @@ class HardeningTest(unittest.TestCase):
 
     def test_validator_matches_published_schema(self):
         from auditenv.schema import validate_findings
+        from tests.test_schemas import _matches, load_schemas
+        schemas = load_schemas()
         f = {"type": "fx_error", "affected_ids": ["X"], "claimed_amount_minor": 1, "currency": "USD",
              "evidence_ids": []}
-        self.assertIsNone(validate_findings({"episode_id": "e", "findings": [f]}, "e"))
-        self.assertIsNotNone(validate_findings({"episode_id": "e", "findings": [f], "extra": 1}, "e"))
-        for cur in ("ÄÖÜ", "ＵＳＤ", "usd", "US1"):
-            self.assertIsNotNone(validate_findings({"episode_id": "e", "findings": [{**f, "currency": cur}]}, "e"))
+        cases = [({"episode_id": "e", "findings": [f]}, True),
+                 ({"episode_id": "e", "findings": [f], "extra": 1}, False)]
+        # any currency string is structurally valid (it just never matches another currency); a non-string is not
+        cases += [({"episode_id": "e", "findings": [{**f, "currency": cur}]}, True)
+                  for cur in ("ÄÖÜ", "ＵＳＤ", "usd", "US1")]
+        cases += [({"episode_id": "e", "findings": [{**f, "currency": cur}]}, False) for cur in (None, 840)]
+        for sub, valid in cases:
+            with self.subTest(sub=sub):
+                self.assertEqual(validate_findings(sub, "e") is None, valid)
+                self.assertEqual(_matches(sub, schemas["findings.schema.json"], "findings.schema.json", schemas), valid)
 
     def test_server_accepts_config_episode_lists(self):
         root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -175,7 +183,7 @@ class DuplicateEvidenceTest(unittest.TestCase):
                                              "currency": iss["currency"],
                                              "evidence_ids": list(s),
                                              "explanation": "positive test"}]}
-                        res = grade(ep["truth"], sub, ep["manifest"]["episode_id"], 0)
+                        res = grade_episode(ep, sub, 0)
                         self.assertEqual(res["tp"], 1)
                         self.assertEqual(res["fp"], 0)
 
@@ -211,7 +219,7 @@ class DuplicateEvidenceTest(unittest.TestCase):
                     "explanation": "incomplete before pattern",
                 }]
             }
-            res_before = grade(ep["truth"], incomplete_sub, ep["manifest"]["episode_id"], 4)
+            res_before = grade_episode(ep, incomplete_sub, 4)
             self.assertEqual(res_before["tp"], 0, f"{difficulty} incomplete must not match")
             self.assertEqual(res_before["fp"], 1)
             self.assertEqual(res_before["fn"], 1)
@@ -219,7 +227,7 @@ class DuplicateEvidenceTest(unittest.TestCase):
             # Complete submission (augmented with original invoice's booking row)
             complete_sub = copy.deepcopy(incomplete_sub)
             complete_sub["findings"][0]["evidence_ids"].append(orig_row)
-            res_after = grade(ep["truth"], complete_sub, ep["manifest"]["episode_id"], 4)
+            res_after = grade_episode(ep, complete_sub, 4)
             self.assertEqual(res_after["tp"], 1, f"{difficulty} complete must match")
             self.assertEqual(res_after["fp"], 0)
             self.assertEqual(res_after["fn"], 0)
@@ -266,15 +274,15 @@ class DuplicateEvidenceTest(unittest.TestCase):
                               "claimed_amount_minor": iss["expected_amount_minor"], "currency": iss["currency"],
                               "evidence_ids": [doc_ids[0], doc_ids[1], row_ids[1]], "explanation": "missing orig"}]
             }
-            self.assertEqual(grade(ep["truth"], bad_sub, ep["manifest"]["episode_id"], 0)["tp"], 0)
+            self.assertEqual(grade_episode(ep, bad_sub, 0)["tp"], 0)
 
             # Test 2: missing copy row in submission
             bad_sub["findings"][0]["evidence_ids"] = [doc_ids[0], doc_ids[1], row_ids[0]]
-            self.assertEqual(grade(ep["truth"], bad_sub, ep["manifest"]["episode_id"], 0)["tp"], 0)
+            self.assertEqual(grade_episode(ep, bad_sub, 0)["tp"], 0)
 
             # Test 3: missing one doc in submission
             bad_sub["findings"][0]["evidence_ids"] = [doc_ids[0], row_ids[0], row_ids[1]]
-            self.assertEqual(grade(ep["truth"], bad_sub, ep["manifest"]["episode_id"], 0)["tp"], 0)
+            self.assertEqual(grade_episode(ep, bad_sub, 0)["tp"], 0)
 
             # Test 4: verifier rejects episode truth if missing original row
             bad_ep = copy.deepcopy(ep)
@@ -317,7 +325,7 @@ class DuplicateEvidenceTest(unittest.TestCase):
                                   "claimed_amount_minor": iss["expected_amount_minor"], "currency": iss["currency"],
                                   "evidence_ids": bad_set, "explanation": desc}]
                 }
-                res = grade(ep["truth"], sub, ep["manifest"]["episode_id"], 0)
+                res = grade_episode(ep, sub, 0)
                 self.assertEqual(res["tp"], 0, f"Matcher should reject {desc}")
                 bad_ep = copy.deepcopy(ep)
                 bad_ep["truth"]["issues"][0]["evidence_sets"] = [bad_set]

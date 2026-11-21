@@ -28,7 +28,7 @@ from contextlib import redirect_stdout
 
 from .env import AuditEnv
 from .generator import ISSUE_TYPES, generate
-from .matcher import grade
+from .matcher import grade_episode
 from .metrics import prf1
 from .run import POLICIES, load_episodes, make_policy, run_episode
 from .verify import verify_episode
@@ -233,7 +233,7 @@ def run_paired(n: int = 20, hard: bool = False) -> bool:
             untranslated = [{"type": iss["type"], "affected_ids": list(iss["affected_ids"]),
                              "claimed_amount_minor": iss["expected_amount_minor"], "currency": iss["currency"],
                              "evidence_ids": list(iss["evidence_sets"][0])} for iss in ep1["truth"]["issues"]]
-            m_untrans = grade(ep2["truth"], {"episode_id": ep2["episode_id"], "findings": untranslated}, ep2["episode_id"], 0)
+            m_untrans = grade_episode(ep2, {"episode_id": ep2["episode_id"], "findings": untranslated}, 0)
             if m_untrans["tp"] > 0:
                 failures.append((seed, "transform", f"untranslated dirty findings earned TP: {m_untrans['tp']}"))
 
@@ -241,7 +241,7 @@ def run_paired(n: int = 20, hard: bool = False) -> bool:
         moved = [{"type": i["type"], "affected_ids": [id_map.get(a, a) for a in i["affected_ids"]],
                   "claimed_amount_minor": i["expected_amount_minor"], "currency": i["currency"],
                   "evidence_ids": [id_map.get(e, e) for e in i["evidence_sets"][0]]} for i in ep1["truth"]["issues"]]
-        m = grade(ep2["truth"], {"episode_id": ep2["episode_id"], "findings": moved}, ep2["episode_id"], 0)
+        m = grade_episode(ep2, {"episode_id": ep2["episode_id"], "findings": moved}, 0)
         if m["fn"] or m["fp"]:
             failures.append((seed, "oracle", "translated answer no longer matches"))
         if rule in names:

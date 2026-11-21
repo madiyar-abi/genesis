@@ -24,7 +24,7 @@ import time
 from typing import Any, Callable
 
 from .generator import ISSUE_TYPES, generate
-from .matcher import grade, tolerance
+from .matcher import grade, public_ids, tolerance_of
 from .run import load_episodes, parse_seeds
 from .schema import MAX_EVIDENCE, MAX_EXPLANATION, MAX_FINDINGS
 
@@ -222,6 +222,7 @@ def generate_mutations_for_episode(
     base_curr = manifest["base_currency"]
     issues = truth["issues"]
     is_clean = len(issues) == 0
+    tol = tolerance_of(ep["policy"])
 
     mutations: list[MutationCandidate] = []
 
@@ -360,7 +361,6 @@ def generate_mutations_for_episode(
         # --- AMOUNT & TOLERANCE / EQUALITY FAMILY ---
         for i_idx, iss in enumerate(issues):
             exp = iss["expected_amount_minor"]
-            tol = tolerance(exp)
             # Exact equality
             exact_f = [dict(f) for f in honest_findings]
             exact_f[i_idx] = _from_issue(iss, claimed_amount_minor=exp)
@@ -396,7 +396,7 @@ def generate_mutations_for_episode(
 
             neg_f = [dict(f) for f in honest_findings]
             neg_f[i_idx] = _from_issue(iss, claimed_amount_minor=-50)
-            add_mut("amount_tolerance", f"negative_amount_iss_{i_idx}", neg_f, is_malformed=True)
+            add_mut("amount_tolerance", f"negative_amount_iss_{i_idx}", neg_f, corrupted=(i_idx,))
 
         # --- IDS FAMILY ---
         for i_idx, iss in enumerate(issues):
@@ -460,6 +460,10 @@ def generate_mutations_for_episode(
                 if not any(set(s) <= set(primary_ev[:1]) for s in ev_sets):
                     add_mut("evidence_padding", f"incomplete_evidence_iss_{i_idx}", incomp_f, corrupted=(i_idx,))
 
+            unknown_ev = [dict(f) for f in honest_findings]
+            unknown_ev[i_idx] = _from_issue(iss, evidence_ids=list(primary_ev) + ["NOT-PUBLIC-1"])
+            add_mut("evidence_padding", f"unknown_evidence_id_iss_{i_idx}", unknown_ev, corrupted=(i_idx,))
+
             empty_ev = [dict(f) for f in honest_findings]
             empty_ev[i_idx] = _from_issue(iss, evidence_ids=[])
             add_mut("evidence_padding", f"empty_evidence_iss_{i_idx}", empty_ev, corrupted=(i_idx,))
@@ -485,7 +489,7 @@ def generate_mutations_for_episode(
             for bad_ty in ("fraud", "unauthorized_draw", "tax_error"):
                 bad_ty_f = [dict(f) for f in honest_findings]
                 bad_ty_f[i_idx] = _from_issue(iss, type=bad_ty)
-                add_mut("types", f"invalid_type_{bad_ty}_iss_{i_idx}", bad_ty_f, is_malformed=True)
+                add_mut("types", f"invalid_type_{bad_ty}_iss_{i_idx}", bad_ty_f, corrupted=(i_idx,))
 
         # --- CURRENCY FAMILY ---
         for i_idx, iss in enumerate(issues):
@@ -494,9 +498,10 @@ def generate_mutations_for_episode(
                     cur_f = [dict(f) for f in honest_findings]
                     cur_f[i_idx] = _from_issue(iss, currency=cur)
                     add_mut("currency", f"wrong_currency_{cur}_iss_{i_idx}", cur_f, corrupted=(i_idx,))
-            low_cur_f = [dict(f) for f in honest_findings]
-            low_cur_f[i_idx] = _from_issue(iss, currency=iss["currency"].lower())
-            add_mut("currency", f"lowercase_currency_iss_{i_idx}", low_cur_f, is_malformed=True)
+            for name, cur in (("lowercase", iss["currency"].lower()), ("padded", iss["currency"] + " ")):
+                bad_cur_f = [dict(f) for f in honest_findings]
+                bad_cur_f[i_idx] = _from_issue(iss, currency=cur)
+                add_mut("currency", f"{name}_currency_iss_{i_idx}", bad_cur_f, corrupted=(i_idx,))
 
         # --- DUPLICATES FAMILY ---
         for i_idx in range(len(honest_findings)):
@@ -548,10 +553,19 @@ def generate_mutations_for_episode(
 
     sub_bad_f = [dict(template_f, claimed_amount_minor=True)]
     add_mut("schema_limits", "bool_amount", sub_bad_f, is_malformed=True)
+    for name, value in (("string_amount", str(template_f["claimed_amount_minor"])),
+                        ("float_amount", float(template_f["claimed_amount_minor"]))):
+        add_mut("schema_limits", name, [dict(template_f, claimed_amount_minor=value)], is_malformed=True)
+    add_mut("schema_limits", "missing_currency",
+            [{k: v for k, v in template_f.items() if k != "currency"}], is_malformed=True)
+    repeated_ev = (list(template_f["evidence_ids"][:1]) or ["E"]) * (MAX_EVIDENCE + 1)  # limit is before dedupe
+    add_mut("schema_limits", "evidence_11_with_repeats", [dict(template_f, evidence_ids=repeated_ev)],
+            is_malformed=True)
+    # structurally valid but wrong values: a false positive, not a schema error
     sub_bad_ids = [dict(template_f, affected_ids=[""])]
-    add_mut("schema_limits", "empty_string_id", sub_bad_ids, is_malformed=True)
+    add_mut("schema_limits", "empty_string_id", sub_bad_ids, corrupted=(0,))
     sub_bad_ev = [dict(template_f, evidence_ids=[""])]
-    add_mut("schema_limits", "empty_string_evidence", sub_bad_ev, is_malformed=True)
+    add_mut("schema_limits", "empty_string_evidence", sub_bad_ev, corrupted=(0,))
 
     # -------------------------------------------------------------------------
     # 4. COMBINED / DETERMINISTIC RNG PAD TO TARGET
@@ -571,7 +585,7 @@ def generate_mutations_for_episode(
         elif choice == 1:
             f_list = [dict(f) for f in honest_findings]
             target_i = rng.randint(0, len(f_list) - 1)
-            f_list[target_i]["claimed_amount_minor"] += tolerance(f_list[target_i]["claimed_amount_minor"]) + rng.randint(2, 500)
+            f_list[target_i]["claimed_amount_minor"] += tol + rng.randint(1, 500)
             add_mut("combined", f"amount_jitter_{comb_idx}", f_list, corrupted=(target_i,))
         elif choice == 2:
             f_list = [dict(f) for f in honest_findings]
@@ -607,13 +621,17 @@ def evaluate_mutation(
     seed: int,
     episode_id: str,
     config: dict[str, Any] | None = None,
+    *,
+    known_ids: set[str],
+    tolerance: int = 0,
 ) -> ViolationRecord | None:
-    """Evaluate a single mutation candidate against matcher.grade and check contract invariants."""
+    """Evaluate a single mutation candidate against matcher.grade and check contract invariants.
+    `known_ids` / `tolerance`: the episode's `matcher.public_ids` and `matcher.tolerance_of`."""
     cfg = dict(config or {})
-    honest_res = grade(truth, honest_submission, episode_id, mutation.inspection_steps)
+    honest_res = grade(truth, honest_submission, episode_id, mutation.inspection_steps, known_ids, tolerance)
     honest_reward = honest_res["reward"]
 
-    res = grade(truth, mutation.submission, episode_id, mutation.inspection_steps)
+    res = grade(truth, mutation.submission, episode_id, mutation.inspection_steps, known_ids, tolerance)
     reward = res["reward"]
     findings = mutation.submission.get("findings")
     n_findings = len(findings) if isinstance(findings, list) else 0
@@ -777,6 +795,7 @@ def run_attack_search(
                 "findings": [_from_issue(iss) for iss in truth["issues"]],
             }
 
+        known_ids, tol = public_ids(ep["tables"]), tolerance_of(ep["policy"])
         rng = random.Random(seed * 10007 + 42)
         mutations = generate_mutations_for_episode(
             ep,
@@ -799,6 +818,8 @@ def run_attack_search(
                 seed=seed,
                 episode_id=ep_id,
                 config=cfg,
+                known_ids=known_ids,
+                tolerance=tol,
             )
             if violation is not None:
                 violations.append(violation)

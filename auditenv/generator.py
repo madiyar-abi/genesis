@@ -22,6 +22,7 @@ from .money import EXPONENT, convert, iso, offset_str, parse_offset, rate_str
 GENERATOR_VERSION = "1.0.0"
 SCHEMA_VERSION = "1.0"
 ISSUE_TYPES = ("duplicate_invoice", "payment_allocation", "fx_error", "period_cutoff")
+ALLOCATIONS = ("partial", "missing")  # payment_allocation: part of the ref allocated, or nothing
 SCENARIOS = ("I1", "I2")
 MAX_ISSUES = 12
 DIFFICULTIES = ("default", "hard")
@@ -84,6 +85,11 @@ def gen_config(config: dict) -> dict:
     difficulty = config.get("difficulty", "default")
     if difficulty not in DIFFICULTIES:
         raise ValueError(f"difficulty must be one of {DIFFICULTIES}")
+    allocation = config.get("allocation")
+    if allocation is not None and allocation not in ALLOCATIONS:
+        raise ValueError(f"allocation must be one of {ALLOCATIONS} or null")
+    if not isinstance(config.get("ensure_distractors", False), bool):
+        raise ValueError("ensure_distractors must be true or false")
     gen = {
         "errors": {t: given_e.get(t, 0) for t in ISSUE_TYPES} if explicit else None,
         "interacting": {k: given_i.get(k, 0) for k in SCENARIOS} if explicit else None,
@@ -92,6 +98,10 @@ def gen_config(config: dict) -> dict:
     }
     if difficulty != "default":  # absent for default: default episodes stay byte-identical
         gen["difficulty"] = difficulty
+    if allocation is not None:  # likewise: absent unless a payment_allocation variant is requested
+        gen["allocation"] = allocation
+    if config.get("ensure_distractors"):  # likewise: absent unless requested
+        gen["ensure_distractors"] = True
     return gen
 
 
@@ -416,6 +426,8 @@ def _build_payments(st: State, distractors: bool) -> None:
             plans.append((d, cur, total + extra, [(inv, total)], ent))
             plans.append((d + timedelta(days=rng.randint(2, 10)), cur, -extra, None, ent))
     plans = [p for p in plans if st.in_period(p[0])]
+    if st.gen.get("ensure_distractors"):
+        _ensure_split_and_refund(st, plans)
     # multi-invoice payments: merge some full payments of the same entity+currency
     merged, used = [], set()
     plans.sort(key=lambda p: (p[0], p[1], p[2]))
@@ -438,6 +450,28 @@ def _build_payments(st: State, distractors: bool) -> None:
             merged.append((st.ps + timedelta(days=rng.randrange(st.ndays)), ent["currency"], amt, None, None))
     for d, cur, amt, refs, ent in merged:
         st.book_payment(st.new_payment(d, cur, amt, refs, ent))
+
+
+def _ensure_split_and_refund(st: State, plans: list) -> None:
+    """Config "ensure_distractors": at least one invoice paid in two legitimate parts and one overpayment that is
+    refunded later in the period (the jury's clean scenarios D02, D03). Turns full single payments into them."""
+    rng = st.rng
+    paid = {}
+    for p in plans:
+        for inv, _ in p[3] or ():
+            paid[inv["invoice_id"]] = paid.get(inv["invoice_id"], 0) + 1
+    full = [i for i, p in enumerate(plans) if p[3] and len(p[3]) == 1 and p[2] == p[3][0][0]["total_minor"] >= 2
+            and st.in_period(p[0] + timedelta(days=2))]
+    if not any(n >= 2 for n in paid.values()) and full:
+        d, cur, total, refs, ent = plans[i := full.pop(rng.randrange(len(full)))]
+        a = max(1, round(total * rng.uniform(0.3, 0.7)))
+        plans[i] = (d, cur, a, [(refs[0][0], a)], ent)
+        plans.append((d + timedelta(days=1), cur, total - a, [(refs[0][0], total - a)], ent))
+    if not any(p[2] < 0 for p in plans) and full:
+        d, cur, total, refs, ent = plans[i := full.pop(rng.randrange(len(full)))]
+        extra = max(1, round(total * rng.uniform(0.01, 0.05)))
+        plans[i] = (d, cur, total + extra, refs, ent)
+        plans.append((d + timedelta(days=1), cur, -extra, None, ent))
 
 
 def _build_reissues(st: State) -> None:
@@ -601,7 +635,8 @@ def policy_for(st: State) -> dict:
             "amount": "misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the "
                       "AR debit of the later-issued copy; fx_error: abs(posted - correct); period_cutoff: the AR "
                       "debit posted; payment_allocation: expected AR credit for the ref - AR credit posted",
-            "tolerance": "abs(claimed - expected) <= max(1, expected // 1000)",
+            "tolerance": "abs(claimed - expected) <= tolerance_minor; tolerance_minor is 0, so the amount must be exact",
+            "tolerance_minor": 0,
             "affected_ids": {"duplicate_invoice": "[original_invoice_id, duplicate_invoice_id]",
                              "payment_allocation": "[invoice_id, payment_id]",
                              "fx_error": "[invoice_id] or [payment_id]",

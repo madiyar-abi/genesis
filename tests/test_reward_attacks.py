@@ -22,7 +22,7 @@ from auditenv.attack import (
     run_attack_search,
 )
 from auditenv.env import AuditEnv
-from auditenv.matcher import tolerance
+from auditenv.matcher import public_ids, tolerance_of
 from auditenv.policies.oracle import Oracle
 
 TYPES = ("duplicate_invoice", "payment_allocation", "fx_error", "period_cutoff")
@@ -209,7 +209,7 @@ class TestRewardAttacks(unittest.TestCase):
 
         def all_types_wrong_amount(e, o):
             out = [from_issue(iss, type=ty, claimed_amount_minor=iss["expected_amount_minor"]
-                              + tolerance(iss["expected_amount_minor"]) + 1000)
+                              + tolerance_of(e._ep["policy"]) + 1000)
                    for iss in issues(e) for ty in TYPES]
             return out[:30]
 
@@ -377,8 +377,10 @@ class TestRewardAttacks(unittest.TestCase):
                 ("no episode_id", {"type": "submit", "findings": {"findings": good}}),
                 ("bool amount", {"type": "submit", "findings": {"episode_id": ep, "findings": [
                     dict(good[0], claimed_amount_minor=True)]}}),
-                ("negative amount", {"type": "submit", "findings": {"episode_id": ep, "findings": [
-                    dict(good[0], claimed_amount_minor=-5)]}}),
+                ("string amount", {"type": "submit", "findings": {"episode_id": ep, "findings": [
+                    dict(good[0], claimed_amount_minor=str(good[0]["claimed_amount_minor"]))]}}),
+                ("11 evidence ids with repeats", {"type": "submit", "findings": {"episode_id": ep, "findings": [
+                    dict(good[0], evidence_ids=good[0]["evidence_ids"][:1] * 11)]}}),
                 ("11 evidence ids", {"type": "submit", "findings": {"episode_id": ep, "findings": [
                     dict(good[0], evidence_ids=[r["row_id"] for r in tables(env)["ledger"][:11]])]}}),
             ]
@@ -404,6 +406,24 @@ class TestRewardAttacks(unittest.TestCase):
                     self.assertFalse(env.result["valid"])
                     self.assertFalse(info["valid"])
 
+
+    def test_wrong_values_are_accepted_false_positives(self):
+        """Jury rule 8: a structurally valid finding with a wrong type, ids, currency, amount or evidence is an FP,
+        not an invalid submission."""
+        for seed in SEEDS[:3]:
+            env0, obs0 = new_env(seed, DIRTY)
+            good = oracle_findings(env0, obs0)
+            for name, change in (("negative amount", {"claimed_amount_minor": -5}), ("unknown type", {"type": "fraud"}),
+                                 ("lowercase currency", {"currency": good[0]["currency"].lower()}),
+                                 ("empty affected", {"affected_ids": []}), ("blank evidence", {"evidence_ids": [""]})):
+                with self.subTest(seed=seed, case=name):
+                    env, obs = new_env(seed, DIRTY)
+                    obs, reward, term, _, info = env.step({"type": "submit", "findings": {
+                        "episode_id": env.episode_id, "findings": [dict(good[0], **change)] + good[1:]}})
+                    self.assertTrue(term)
+                    self.assertIsNone(obs["error"])
+                    self.assertTrue(info["valid"])
+                    self.assertEqual((info["tp"], info["fp"], info["fn"]), (len(good) - 1, 1, 1))
     # 11
     def test_timeout(self):
         for seed in SEEDS:
@@ -451,7 +471,7 @@ class TestRewardAttacks(unittest.TestCase):
                 def outside(e, o):
                     out = []
                     for iss in issues(e):
-                        exp, tol = iss["expected_amount_minor"], tolerance(iss["expected_amount_minor"])
+                        exp, tol = iss["expected_amount_minor"], tolerance_of(e._ep["policy"])
                         out.append(from_issue(iss, claimed_amount_minor=exp + tol + 1))
                         if exp - tol - 1 >= 0:
                             out.append(from_issue(iss, claimed_amount_minor=exp - tol - 1))
@@ -465,7 +485,7 @@ class TestRewardAttacks(unittest.TestCase):
                 for sign in (1, -1):
                     def edge(e, o, sign=sign):
                         return [from_issue(iss, claimed_amount_minor=iss["expected_amount_minor"]
-                                           + sign * tolerance(iss["expected_amount_minor"]))
+                                           + sign * tolerance_of(e._ep["policy"]))
                                 for iss in issues(e)]
                     r, _, info, env = play(seed, DIRTY, edge)
                     self.assertEqual((info["tp"], info["fp"]), (len(issues(env)), 0))
@@ -504,7 +524,9 @@ class TestRewardAttacks(unittest.TestCase):
 
         honest_dirty = {"episode_id": ep_id_dirty, "findings": [from_issue(i) for i in truth_dirty["issues"]]}
         for m in muts_dirty:
-            v = evaluate_mutation(m, truth_dirty, honest_dirty, False, 9014, ep_id_dirty)
+            v = evaluate_mutation(m, truth_dirty, honest_dirty, False, 9014, ep_id_dirty,
+                                  known_ids=public_ids(env_dirty._ep["tables"]),
+                                  tolerance=tolerance_of(env_dirty._ep["policy"]))
             self.assertIsNone(v, f"Violation on dirty seed: {v}")
 
         env_clean, _ = new_env(9000, CLEAN)
@@ -515,7 +537,9 @@ class TestRewardAttacks(unittest.TestCase):
 
         honest_clean = {"episode_id": ep_id_clean, "findings": []}
         for m in muts_clean:
-            v = evaluate_mutation(m, truth_clean, honest_clean, True, 9000, ep_id_clean)
+            v = evaluate_mutation(m, truth_clean, honest_clean, True, 9000, ep_id_clean,
+                                  known_ids=public_ids(env_clean._ep["tables"]),
+                                  tolerance=tolerance_of(env_clean._ep["policy"]))
             self.assertIsNone(v, f"Violation on clean seed: {v}")
 
     # 16: HANDOFF R1 Empty Seed Selection Prevention
@@ -537,7 +561,7 @@ class TestRewardAttacks(unittest.TestCase):
                 ep_id = ep["episode_id"]
                 iss = truth["issues"][0]
                 exp = iss["expected_amount_minor"]
-                tol = tolerance(exp)
+                tol = tolerance_of(ep["policy"])
                 # Over-tolerance amount falsely claimed as honest variation -> triggers honest_boundary_variation_rejected
                 bad_f = from_issue(iss, claimed_amount_minor=exp + tol + 9999)
                 return [

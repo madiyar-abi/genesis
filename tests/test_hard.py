@@ -4,7 +4,7 @@ import unittest
 
 from auditenv.env import AuditEnv
 from auditenv.generator import gen_config, generate
-from auditenv.matcher import match
+from auditenv.matcher import grade_episode, match, public_ids
 from auditenv.policies.reconcile import reconcile_findings
 from auditenv.verify import verify_episode
 
@@ -61,12 +61,15 @@ class HardModeTests(unittest.TestCase):
             for iss in ep["truth"]["issues"]:
                 a, b = (invoices[i] for i in iss["affected_ids"])
                 retyped += a["line_items"] != b["line_items"]
-            hard = match(ep["truth"]["issues"], reconcile_findings(ep["manifest"], ep["tables"], hard=True))
+            hard = match(ep["truth"]["issues"], reconcile_findings(ep["manifest"], ep["tables"], hard=True),
+                         public_ids(ep["tables"]))
             self.assertEqual(hard["f1"], 1.0, seed)
         self.assertGreater(retyped, 5)
-        plain_tp = sum(match(generate(s, HARD_DUPS)["truth"]["issues"],
-                             reconcile_findings(generate(s, HARD_DUPS)["manifest"],
-                                                generate(s, HARD_DUPS)["tables"]))["tp"] for s in range(10))
+        plain_tp = 0
+        for s in range(10):
+            ep = generate(s, HARD_DUPS)
+            plain_tp += grade_episode(ep, {"episode_id": ep["episode_id"],
+                                           "findings": reconcile_findings(ep["manifest"], ep["tables"])}, 0)["tp"]
         self.assertLess(plain_tp, 30)
 
     def test_replay_and_transform_invariance(self):

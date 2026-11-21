@@ -8,7 +8,7 @@ import unittest
 from auditenv.env import AuditEnv, TABLES, TOOLS
 from auditenv.generator import generate
 from auditenv.run import make_policy, run_episode
-from auditenv.schema import ISSUE_TYPES, MAX_AFFECTED, MAX_EVIDENCE, MAX_EXPLANATION, MAX_FINDINGS
+from auditenv.schema import ISSUE_TYPES, MAX_EVIDENCE, MAX_EXPLANATION, MAX_FINDINGS
 
 _SCHEMA_ROOT = Path(__file__).resolve().parents[1] / "schemas"
 _JSON_TYPES = {
@@ -102,10 +102,11 @@ class SchemaTests(unittest.TestCase):
         findings = self.schemas["findings.schema.json"]["properties"]["findings"]
         fields = findings["items"]["properties"]
         self.assertEqual(findings["maxItems"], MAX_FINDINGS)
-        self.assertEqual(fields["affected_ids"]["maxItems"], MAX_AFFECTED)
+        self.assertNotIn("maxItems", fields["affected_ids"])  # no affected_ids limit: a long list is just an FP
         self.assertEqual(fields["evidence_ids"]["maxItems"], MAX_EVIDENCE)
         self.assertEqual(fields["explanation"]["maxLength"], MAX_EXPLANATION)
-        self.assertEqual(tuple(fields["type"]["enum"]), ISSUE_TYPES)
+        self.assertEqual(tuple(fields["type"]["examples"]), ISSUE_TYPES)  # documented, not an enum (rule 8)
+        self.assertNotIn("enum", fields["type"])
         truth = self.schemas["truth.schema.json"]["properties"]["issues"]["items"]
         self.assertEqual(tuple(truth["properties"]["type"]["enum"]), ISSUE_TYPES)
         actions = self.schemas["action.schema.json"]["oneOf"]

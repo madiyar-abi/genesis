@@ -624,7 +624,7 @@ def verify_episode(ep: dict) -> list[str]:
     issues, post_problems = books.discrepancies()
     problems += [f"post-injection: {p}" for p in post_problems + _ledger_policy(t, accounts)]
     found = sorted(issues)
-    declared = sorted((i["type"], tuple(i["affected_ids"]), i["expected_amount_minor"])
+    declared = sorted((i["type"], tuple(sorted(i["affected_ids"])), i["expected_amount_minor"])  # a set (CONTRACT §6)
                       for i in ep["truth"]["issues"])
     if found != declared:
         problems.append(f"truth mismatch: recomputed {found} declared {declared}")

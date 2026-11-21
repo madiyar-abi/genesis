@@ -117,16 +117,20 @@ contains legitimate look-alikes:
 
 ## 6. Matcher and reward (`auditenv/matcher.py`, published)
 
-- **Validation** (`schema.py`): ≤ 30 findings, ≤ 10 evidence ids, explanation ≤ 1000 chars,
-  known type, integer non-negative amount, 3-letter upper-case currency, matching episode_id,
-  no unknown keys. Invalid → episode ends, reward −1, error in the grader log.
-- **Normalisation**: strip ids, dedupe and sort affected/evidence ids, upper-case currency.
-- **TP** iff type, canonical affected_ids, currency equal, `|claimed − expected| ≤ max(1,
-  expected // 1000)` and the evidence ids contain one complete acceptable set.
-- **One-to-one, greedy in submission order**: a finding takes the first unmatched truth issue
-  it satisfies; repeats and everything else are FP; unmatched truth is FN. Because affected ids
-  are canonical and an injector never reuses a document for the same type, a finding can satisfy
-  at most one issue, so the order only decides which of two identical findings is the duplicate.
+- **Validation** (`schema.py`), structure only: ≤ 30 findings, ≤ 10 evidence ids counted before repeats are
+  dropped, explanation ≤ 1000 code points, the five required keys with the right JSON types (amount a JSON
+  integer, not bool), matching episode_id, no unknown keys. Invalid → episode ends, reward −1, error in the
+  grader log. A wrong value of the right type (unknown type string, negative amount, `"usd"`) is a valid
+  finding that does not match.
+- **Normalisation**: none on strings — ids and currency compare exactly (case and whitespace count);
+  affected/evidence ids are sets.
+- **TP edge** iff type, canonical affected_ids, currency equal, `|claimed − expected| ≤ tolerance_minor`
+  (published in the policy, 0 in every generated episode) and the evidence ids are all public ids of the
+  episode and contain one complete acceptable set.
+- **One-to-one, maximum matching**: the matcher takes a maximum-cardinality matching of findings (repeats
+  included) to issues, so a finding that fits two issues cannot steal the only issue another finding fits.
+  Ties: issue ids sorted by code point, lexicographically smallest (issue_id, finding index) pairs. Repeats
+  and everything else are FP; unmatched truth is FN. Submission order never changes the counts.
 - `P = TP/(TP+FP)`, `R = TP/(TP+FN)` (0 on a zero denominator), `F1 = 2TP/(2TP+FP+FN)`, F1 = 1
   when truth and findings are both empty. Terminal reward
   `clip(2·F1 − 1 − 0.002·inspection_steps, −1, 1)`; steps before the submit count. Exploration
@@ -134,13 +138,14 @@ contains legitimate look-alikes:
 - `tests/test_reward_attacks.py` proves on real episodes: correct answer > silence on dirty books;
   silence > false accusations on clean books; duplicates never help; flag-everything < 0;
   0.002/step only separates equal answers; guessed ids, unsupported evidence, wrong currency,
-  out-of-tolerance amounts are FP; resubmission, malformed input and timeouts behave as specified.
+  amounts off by one minor unit are FP; resubmission, malformed input and timeouts behave as specified.
+  `tests/test_judge_reward.py` reproduces the organisers' matcher checks (Block 3 rows 1–20, M01–M12).
 
 **Sensitivity of the design choices** (`uv run python scripts/sensitivity.py`, 2 s): every baseline episode is
 played once, then re-graded offline with the real matcher and the step cost / amount tolerance overridden
 (the default re-grade reproduces every env reward exactly). Mean return:
 
-| policy · split | cost 0.001 | **0.002** | 0.005 | tol. 0 | **0.1 %** | 1 % |
+| policy · split | cost 0.001 | **0.002** | 0.005 | **τ 0** | τ 1 | τ 100 |
 |---|---|---|---|---|---|---|
 | oracle · dev | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | reconcile · dev | 0.979 | 0.957 | 0.893 | 0.957 | 0.957 | 0.957 |
@@ -153,7 +158,7 @@ played once, then re-graded offline with the real matcher and the step cost / am
 
 The ranking (oracle > reconcile(_hard) > … > random > flag_all) is identical under all five settings on both
 splits: the step cost only spreads the middle, and tolerance never changes a mean (the rule policies compute
-exact amounts; naive's false positives stay false positives at 1 %). The defaults are not tuned to a ranking.
+exact amounts; naive's false positives stay false positives at τ = 100 minor units). The defaults are not tuned to a ranking.
 
 ## 7. Verification of data and truth (`auditenv/verify.py`)
 
