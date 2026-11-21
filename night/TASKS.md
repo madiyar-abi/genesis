@@ -80,7 +80,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   `--hard` — accept: both summaries + wall times in LOG; any problem line verbatim.
 - [x] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 69000` — accept:
   summary + wall time + max steps.
-- [ ] G3 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999` — accept: last line.
+- [x] G3 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999` — accept: last line.
 
 ## gemini1b — stress solvability (evidence only, files: night/LOG.md)
 - [x] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 10000-10299` and
