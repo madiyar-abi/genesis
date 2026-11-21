@@ -25,7 +25,7 @@ Lead review findings are added as T30+ below.
 
 ## gemini2a — flakiness / determinism (evidence only, files: night/LOG.md)
 - [x] T7 (gemini2a) Run the full unit suite three times with different hash seeds and timezones: `PYTHONHASHSEED=1 TZ=UTC env -u AUDITENV_SECRET uv run python -m unittest discover -s tests -t .`, then `PYTHONHASHSEED=4242 TZ=Asia/Almaty ...`, then `PYTHONHASHSEED=random TZ=America/New_York ...` — files: night/LOG.md — accept: per run the `Ran N tests` line, `OK`/`FAILED` and wall time; any failing test name + traceback verbatim.
-- [ ] T8 (gemini2a) Run the four jury modules 5 times in a row: `env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` — files: night/LOG.md — accept: per run the `Ran N tests` line and result; any run that differs called out verbatim.
+- [x] T8 (gemini2a) Run the four jury modules 5 times in a row: `env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` — files: night/LOG.md — accept: per run the `Ran N tests` line and result; any run that differs called out verbatim.
 - [ ] T9 (gemini2a) Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice under load: start `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999` in the background first, then run the check while it runs — files: night/LOG.md — accept: both exit codes, the check's last line and its wall time; any timeout/timing-related failure (C18, clock) quoted verbatim.
 
 ## gemini2b — reward and generator evidence (evidence only, files: night/LOG.md)
