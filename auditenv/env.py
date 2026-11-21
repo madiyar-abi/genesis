@@ -6,6 +6,7 @@ import copy
 import sys
 import time
 
+from .tool_spec import TOOLS
 from . import calculator
 from .generator import generate
 from .experimental import experimental_reward
@@ -21,17 +22,7 @@ ACTION_KEYS = {  # schemas/action.schema.json: additionalProperties false
     "list_records": {"type", "table", "cursor", "limit"}, "get_record": {"type", "table", "id"},
     "get_document": {"type", "doc_id"}, "calculator": {"type", "expression"}, "submit": {"type", "findings"},
 }
-TOOLS = [
-    {"type": "list_records", "params": {"table": "ledger|invoices|payments|fx", "cursor": "null|str",
-                                        "limit": "int<=50"},
-     "returns": "{rows, next_cursor, total}; invoice rows omit line_items"},
-    {"type": "get_record", "params": {"table": "ledger|invoices|payments|fx", "id": "str"},
-     "returns": "{record}"},
-    {"type": "get_document", "params": {"doc_id": "str"}, "returns": "{kind, document}"},
-    {"type": "calculator", "params": {"expression": "str: + - * / ( ) and decimals only"},
-     "returns": "{value}"},
-    {"type": "submit", "params": {"findings": "{episode_id, findings:[...]}"}, "returns": "ends the episode"},
-]
+
 
 
 def _limits(config: dict) -> dict:
@@ -62,9 +53,12 @@ class AuditEnv:
         self.grader_log: list[dict] = []
 
     # ------------------------------------------------------------------ API
-    def reset(self, seed: int, config: dict | None = None, abandon_open: bool = False):
+    def reset(self, seed: int, config: dict | None = None, abandon_open: bool = False, *,
+              started_at: float | None = None):
         """Start an episode. A rejected seed or config raises ValueError and leaves the current episode as it was.
         `abandon_open` (server): grade the open episode as abandoned once the new one is generated."""
+        if started_at is None:
+            started_at = self._clock()
         if isinstance(seed, bool) or not isinstance(seed, int):
             raise ValueError("seed must be an int")
         if config is not None and not isinstance(config, dict):
@@ -75,20 +69,23 @@ class AuditEnv:
             raise ValueError(f"unknown config keys: {sorted(unknown)}")
         cfg = _limits(config)
         ep = generate(seed, config)
-        return self._open(ep, cfg, abandon_open)
+        return self._open(ep, cfg, abandon_open, started_at)
 
-    def reset_episode(self, episode: dict, config: dict | None = None, abandon_open: bool = False):
+    def reset_episode(self, episode: dict, config: dict | None = None, abandon_open: bool = False, *,
+                      started_at: float | None = None):
         """Start an episode that already exists, e.g. `load.load_episode(dir)` of an exported or jury-transformed
         copy: it is served as given (no generation, ids unchanged). `config` may hold only mode, max_steps and
         time_limit_s. A rejected config raises ValueError and leaves the current episode as it was."""
+        if started_at is None:
+            started_at = self._clock()
         if config is not None and not isinstance(config, dict):
             raise ValueError("config must be an object or null")
         unknown = set(config or {}) - set(DEFAULTS)
         if unknown:
             raise ValueError(f"unknown config keys for a loaded episode: {sorted(unknown)}")
-        return self._open(copy.deepcopy(episode), _limits(dict(config or {})), abandon_open)
+        return self._open(copy.deepcopy(episode), _limits(dict(config or {})), abandon_open, started_at)
 
-    def _open(self, ep: dict, cfg: dict, abandon_open: bool):
+    def _open(self, ep: dict, cfg: dict, abandon_open: bool, started_at: float):
         tolerance = tolerance_of(ep["policy"])  # a rejected policy leaves the current episode as it was
         if abandon_open:
             self.abandon()
@@ -103,7 +100,7 @@ class AuditEnv:
         self._steps = 0
         self._done = False
         self._terminated = self._truncated = False
-        self._start = self._clock()
+        self._start = started_at
         self.result = None
         obs = {"task": self._ep["task"], "manifest": copy.deepcopy(self._ep["manifest"]),
                "policy": copy.deepcopy(self._ep["policy"]), "tools": copy.deepcopy(TOOLS),

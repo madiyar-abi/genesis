@@ -61,3 +61,5 @@ FUZZ PASSED
 2026-11-20 — Public-input and export review. Checked malformed invoices and repeated headers on temporary copies. Export validates episode identities before writing, so duplicate requests and stale directories preserve the previous split. Added evidence uniqueness coverage and updated HANDOFF.md with integration steps.
 
 Invoice posting and hard-split follow-up: compared ledger instants across each posting pair and required the shipped hard index to match configs/eval_hard.json. A delayed invoice booking and its later credit note remain valid. The disk suite rejected absent, shortened and substituted hard exports. See the focused checks in HANDOFF.md.
+
+2026-11-21 — Khasuetolog. Reproduced C18 on 3180fe4 with a deterministic clock. Counted disk loading and generation from reset entry. Added a separate policy image for the C20 baseline demonstration and a CI run of the closed scenarios with that image. See the C18 and C20 follow-up in HANDOFF.md.
