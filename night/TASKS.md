@@ -1,180 +1,175 @@
-# Round 20
+# Round 21
 
-Open improvement round (freeze 2026-11-22 18:00). Rounds 1–19 hardened contract, data, reward, the jury adapter and
-docs (night/archive/, REVIEW.md). Round 19 showed that green sweeps can still miss *ordinary-use* defects (a refund
-dated before its receipt; hidden server queues keyed publicly) — so this round hunts for such defects with
-independent checkers, plus fresh evidence on unseen seeds.
+Open improvement round (freeze 2026-11-22 18:00). Rounds 18–20 each found an *ordinary-use* data defect with an
+independent checker that read only public data (refund before receipt; cash applied before the invoice was booked).
+This round continues that line with checkers no round has written yet: an independent auditor written only from the
+task text, an independent double-entry/balance re-derivation, and extreme config combinations — plus fresh evidence
+on unseen seeds.
 
 Rules for workers: run from the repo root, prefix every module with `env -u AUDITENV_SECRET uv run python -m ...`.
-`git fetch && git merge origin/night/2026-11-22-r20` before each task. Touch only your listed files plus
+`git fetch && git merge origin/night/2026-11-22-r21` before each task. Touch only your listed files plus
 night/TASKS.md (your own `[x]`) and night/LOG.md (append, `date '+%F %H:%M'` timestamp). Never edit README.md,
 HANDOFF.md, REVIEW.md, docs/, auditenv/, episodes/, trajectories/ unless your task lists them. Scratch files only
-under /tmp/r20-<your name>/. Evidence tasks: record exact command, exit code, wall time and the summary line(s);
+under /tmp/r21-<your name>/. Evidence tasks: record exact command, exit code, wall time and the summary line(s);
 quote any failure verbatim. If something fails, do NOT fix product code — log it with a reproduction; the lead fixes.
-Audit scripts go under `night/r20/` (one file per task, named in the task) and must only read the *public* episode
-files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inject.py or policies.
+Audit scripts go under `night/r21/` (one file per task, named in the task). Scripts that "read only public data" may
+import `auditenv.generator` (to generate), `auditenv.jury` (config list), `judge_adapter` and `auditenv.money`, and
+must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies/`.
 
 ## codex1 — independent defect hunts (strong)
-- [x] X1 (lead, was codex1: rate-limited until 02:41) Chronology and causality audit. Write `night/r20/chronology.py`: generate episodes in memory via
-  `auditenv.generator` (public tables only) for default, `--hard` and every D01–D20 config in `auditenv/jury.py`
-  (both difficulties), seeds 30000–30299. Check from the public tables only: every payment / credit note / refund /
-  reversal is dated on or after the document it references; a reversal follows its original posting; every
-  refund ≤ the customer's running credit in the payment currency at that time; every ledger posting timestamp is
-  within the period or is explicitly a cutoff/period error the policy text describes; an FX rate exists for every
-  (date, currency) the policy says to use. — files: night/r20/chronology.py, night/LOG.md — accept: script exits 0
-  when no violation; LOG lists counts per check × config and every violation with config, seed and record ids.
-- [x] X2 (codex1) Policy text vs data audit. Read task.txt and policy.json of 5 default + 5 hard + 10 scenario
-  episodes. For every sentence that states a rule or a fact (terms, tolerance, currency, period, which rate to use,
-  what counts as an issue), write a check in `night/r20/policy_text.py` that tests the statement against the public
-  data on seeds 31000–31199 of each config. — files: night/r20/policy_text.py, night/LOG.md — accept: LOG lists every
-  sentence checked, the check and its count; any statement the data contradicts (or that is unstated but needed to
-  find a truth issue) quoted with seed and record ids.
-- [x] X3 (lead, was codex1: rate-limited until 02:41) Jury-machine reality check of `judge_adapter.py`: (a) fresh `HOME` with no `~/.auditenv`, (b) read-only
-  `HOME`, (c) 8 processes calling `judge_adapter.generate_episode` + `reset` at the same moment on an empty key dir
-  (race on `grader.key` creation — do all 8 agree on one key, does any crash or write a partial key?), (d) `episode_dir`
-  given as a relative path, a path with spaces and non-ASCII, and a symlinked directory. Scripts in
-  `night/r20/adapter_reality.py`. — files: night/r20/adapter_reality.py, night/LOG.md — accept: each case's result in
-  LOG; any crash, disagreement or leak of a path/key into an observation quoted with a reproduction.
+- [x] X1 (codex1) Independent text-only auditor. Write `night/r21/text_auditor.py`: an audit policy implemented ONLY
+  from `public/task.txt` + `policy.json` + the public tables (do not open auditenv/policies/, inject.py, verify.py,
+  matcher.py). It derives findings for every issue type the task text defines. Run it through `judge_adapter`
+  (`generate_episode` to a temp dir, then `score_episode` on its findings) on seeds 40000–40099 × default, hard and
+  every D01–D20 config of `auditenv/jury.py` in both difficulties. — files: night/r21/text_auditor.py, night/LOG.md —
+  accept: LOG table config × difficulty → mean F1 / precision / recall; then, for every episode where F1 < 1, the
+  lead-readable classification of each missed or extra finding: (a) auditor bug, (b) the text does not state the rule
+  needed (quote the missing rule), or (c) truth label looks wrong (seed, config, record ids, why). Exit 0 always;
+  this is evidence, not a gate.
+- [x] X2 (codex1) Independent double-entry and balance re-derivation. Write `night/r21/ledger_identity.py` (public
+  data only): per journal (group rows by `timestamp` + entity for journals without ids, see CLAUDE.md gotchas) Dr =
+  Cr; per invoice the AR (1200) balance in time order never below 0 and at period end equals total − applied cash −
+  credit notes (at the documented rates); per customer the 2900 balance in time order never below 0; every 7900 row
+  equals the FX difference the policy text defines; the trial balance sums to 0. Seeds 41000–41299 × default, hard
+  and D01–D20 both difficulties. — files: night/r21/ledger_identity.py, night/LOG.md — accept: per check × config the
+  count and violations; violations in clean configs (D01–D05) quoted with seed and row ids; exit 0 iff none
+  unexplained (explained = the config injects an error type that produces it, as in night/r20/chronology.py).
+- [x] X3 (codex1) Extreme config combinations through `judge_adapter.generate_episode` + `reset` + `score_episode`
+  (oracle-from-records policy `reconcile`/`reconcile_hard` and empty findings): n_invoices 10 with 0, 1, 12, 20, 50
+  errors of one type and of mixed types; every issue type alone at its max; `interacting` only; `allocation` ×
+  `ensure_distractors` × `distractors` × `difficulty` × `transform_seed` full product; n_invoices 100 with 12 issues.
+  Write `night/r21/extreme_configs.py`. — files: night/r21/extreme_configs.py, night/LOG.md — accept: per config:
+  either a valid episode (`uv run python -m auditenv.verify` logic via `auditenv.verify` on the written dir is
+  allowed here, it is a check not a solver) whose truth count equals the requested count, or a `ValueError` with a
+  clear message; LOG lists every other exception, silent count mismatch, or step-budget overrun with a reproduction.
 
-## codex2 — docs claims and fresh-clone runs (strong)
-- [x] Y1 (codex2) Fresh-clone sweep: `git clone /Users/caliskan/Projects/genesis /tmp/r20-codex2/clone` at
-  origin/night/2026-11-22-r20, then run every shell command in fenced blocks of README.md, docs/DEMO.md and
-  docs/CONTRACT.md (skip docker, git clone of GitHub, asciinema, the organiser server and commands needing
-  `AUDITENV_SECRET` unless they say how to set it) — files: night/LOG.md — accept: LOG table: command, exit code,
-  wall time; every non-zero exit or output that differs from what the doc says it prints quoted verbatim.
-- [x] Y2 (codex2) Claims audit of README.md sections "For the jury" and "Jury adapter" and docs/CONTRACT.md: for every
-  factual claim (a number, a behaviour, an error code, a key name, a default) find the code line or run the command
-  that proves it. — files: night/LOG.md — accept: LOG lists each wrong or unprovable claim with the file:line of the
-  doc, the evidence (code file:line or command output) and the correct text; "0 wrong claims" is a valid result
-  only with the number of claims checked.
-- [x] Y3 (codex2) Same as Y2 for docs/DESIGN.md and docs/PITCH.md (numbers must come from
-  `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r20-codex2/c.json`, `auditenv.analyze`,
-  `auditenv.fuzz`). — files: night/LOG.md — accept: as Y2.
+## codex2 — jury-run realism (strong)
+- [x] Y1 (codex2) Jury copy robustness beyond the published paired transform: take 10 exported episodes (5 default,
+  5 hard; `episodes/dev`, `episodes/hard`) and write variants a jury tool could plausibly produce when it re-writes
+  files: CSV column order shuffled, CRLF line endings, UTF-8 BOM on CSV/JSON, trailing newline missing, JSON pretty-
+  printed vs compact, JSONL with keys reordered. For each variant: `judge_adapter` reset on `episode_dir` + replay of
+  the reference answer + `score_episode`. Script `night/r21/jury_copy.py`. — files: night/r21/jury_copy.py,
+  night/LOG.md — accept: table variant → accepted / rejected (error text) / score equal to the original; every
+  rejection of a semantically identical file called out (the lead decides whether to accept it).
+- [x] Y2 (codex2) Hidden-run timing on a slow machine: run the four jury modules and `auditenv.jury_run` under
+  `taskpolicy -c background` (macOS low-QoS, slower cores) and with 6 parallel copies of
+  `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard` as background load. — files:
+  night/LOG.md — accept: per run exit code + wall time + any timing-related failure quoted verbatim (60 s limit,
+  timeouts in tests).
+- [x] Y3 (codex2) README first-read review as a jury member who has 10 minutes: follow README top to bottom on a
+  fresh clone (`git clone /Users/caliskan/Projects/genesis /tmp/r21-codex2/clone`, branch origin/night/2026-11-22-r21);
+  list every place where a reader would get stuck, read a claim that is not backed by a command, or find two
+  sections saying different things. — files: night/LOG.md — accept: numbered list with README line numbers and a
+  proposed replacement text for each item; "nothing found" only with the list of sections read.
 
-## rb — adapter-level evidence (medium)
-- [x] Z1 (rb) Play every D01–D20 scenario through `judge_adapter` (closed mode, `generate_episode` with seeds
-  32000–32004 each, both difficulties) with the oracle-from-records policy `reconcile` / `reconcile_hard` and with
-  `flag_all`; write `night/r20/scenarios_adapter.py`. — files: night/r20/scenarios_adapter.py, night/LOG.md — accept:
-  table in LOG: scenario × difficulty → mean grader score of each policy; call out any scenario where reconcile
-  scores < the documented value in README or flag_all scores > 0.
-- [x] Z2 (rb) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r20-rb/j<B>.json`
-  for B in 20000, 21000, 22000, 23000 — files: night/LOG.md — accept: per run the policy table in LOG; call out any run
+## rb — independent checkers on fresh seeds (medium)
+- [x] Z1 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 42000-42299` and
+  `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 42000-42199` — files:
+  night/LOG.md — accept: exit codes, totals and "unexplained" lines verbatim, wall times.
+- [x] Z2 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py` with seeds changed
+  to 43000–43004 (read its `--help`; if it has no seed flag, copy it to `night/r21/scenarios_adapter_43000.py` and
+  change only the seed constant) — files: night/r21/scenarios_adapter_43000.py (if needed), night/LOG.md — accept:
+  scenario × difficulty table of mean scores; any reconcile score below README's documented value or flag_all > 0
+  called out.
+- [x] Z3 (rb) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r21-rb/j<B>.json`
+  for B in 24000, 25000, 26000, 27000 — files: night/LOG.md — accept: per run the policy table; call out any run
   where oracle F1 < 1, reconcile F1 < 1, or random/flag_all return > -0.5.
 
 ## gemini1a — seed sweeps (evidence only, files: night/LOG.md)
-- [x] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 10000-10999` and the same with
-  `--hard` — files: night/LOG.md — accept: both summaries + wall times in LOG; any problem line verbatim.
-- [x] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 60000` — files:
-  night/LOG.md — accept: summary + wall time + max steps in LOG.
-- [x] G3 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 2000-2999` — files: night/LOG.md —
-  accept: last line (`N/N episodes valid`) in LOG.
+- [x] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 13000-13999` and the same with
+  `--hard` — accept: both summaries + wall times in LOG; any problem line verbatim.
+- [x] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 69000` — accept:
+  summary + wall time + max steps.
+- [x] G3 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999` — accept: last line.
 
 ## gemini1b — stress solvability (evidence only, files: night/LOG.md)
-- [x] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 8000-8299` and
-  `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 8000-8299` — files:
-  night/LOG.md — accept: per command the summary line + wall time in LOG.
-- [x] G5 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 11000-11999` and the same with
-  `--hard` — files: night/LOG.md — accept: both summaries + wall times; any problem line verbatim.
-- [x] G6 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 63000` — files:
-  night/LOG.md — accept: summary + wall time + max steps in LOG.
+- [x] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 10000-10299` and
+  `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 10000-10299` —
+  accept: per command the summary line + wall time.
+- [x] G5 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 14000-14999` and the same with
+  `--hard` — accept: both summaries + wall times; any problem line verbatim.
+- [x] G6 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 72000` — accept:
+  summary + wall time + max steps.
 
-## gemini2a — determinism (evidence only, files: night/LOG.md)
-- [x] G7 (gemini2a) Full unit suite three times: `PYTHONHASHSEED=1 TZ=UTC env -u AUDITENV_SECRET uv run python -m
-  unittest discover -s tests -t .`, then `PYTHONHASHSEED=4242 TZ=Asia/Almaty ...`, then `PYTHONHASHSEED=random
-  TZ=Pacific/Kiritimati ...` — files: night/LOG.md — accept: per run `Ran N tests`, OK/FAILED, wall time; failures
-  verbatim.
-- [x] G8 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice while
-  `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard` runs in the background — files:
-  night/LOG.md — accept: both exit codes, last lines, wall times; any timing failure verbatim.
-- [x] G9 (gemini2a) `LC_ALL=C LANG=C env -u AUDITENV_SECRET uv run python -m auditenv.check` and
-  `LC_ALL=tr_TR.UTF-8 env -u AUDITENV_SECRET uv run python -m auditenv.check` — files: night/LOG.md — accept: both
-  exit codes, last lines, wall times.
+## gemini2a — chronology on new seeds (evidence only, files: night/LOG.md)
+- [x] G7 (gemini2a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 37000-37299` —
+  accept: exit code, totals line and "unexplained violations" line verbatim, wall time.
+- [x] G8 (gemini2a) Same as G7 with `--seeds 37300-37599`.
+- [x] G9 (gemini2a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 38000-38199` —
+  accept: exit code and the final "Audited ... unexpected failures" line verbatim, wall time.
 
-## gemini2b — golden and export reproducibility (evidence only, files: night/LOG.md)
+## gemini2b — reproducibility (evidence only, files: night/LOG.md)
 - [x] G10 (gemini2b) Re-export into scratch dirs and diff against the committed exports:
-  `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r20-gemini2b/dev`
-  then `diff -r episodes/dev /tmp/r20-gemini2b/dev`; same for train, train_hard and eval_hard (use the `--out` dirs
-  and the committed dir names from README) — files: night/LOG.md — accept: per split the diff exit code; any
-  differing file named.
-- [x] G11 (gemini2b) `uv run python scripts/golden.py --check` and `uv run python scripts/mutate_reward.py` — files:
-  night/LOG.md — accept: both summary lines and exit codes in LOG.
-- [x] G12 (gemini2b) `uv run python scripts/shortcut_miner.py` (see its `--help`) — files: night/LOG.md — accept:
-  printed table in LOG; any column with precision > 0.5 that is NOT listed in docs/DESIGN.md §10 called out.
+  `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r21-gemini2b/dev` then
+  `diff -r episodes/dev /tmp/r21-gemini2b/dev`; same for every split under episodes/ (config names in configs/) —
+  accept: per split the diff exit code; any differing file named.
+- [x] G11 (gemini2b) `uv run python scripts/golden.py --check` and `uv run python scripts/mutate_reward.py` —
+  accept: both summary lines and exit codes.
+- [x] G12 (gemini2b) `uv run python scripts/shortcut_miner.py --seeds 5000-5999 --report-only` and the same with
+  `--hard` — accept: printed tables; any value with precision > 0.5 that is NOT listed in docs/DESIGN.md §10 called out.
 
-## gemini3a — jury modules repeat (evidence only, files: night/LOG.md)
-- [x] G13 (gemini3a) Four jury modules 5 times in a row: `env -u AUDITENV_SECRET uv run python -m unittest
-  tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` — files:
-  night/LOG.md — accept: per run `Ran N tests` + result; any differing run verbatim.
-- [x] G14 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and
-  `uv run python scripts/sensitivity.py` — files: night/LOG.md — accept: summaries + exit codes.
-- [x] G15 (gemini3a) Red-team modules 10 times: `env -u AUDITENV_SECRET uv run python -m unittest
-  tests.test_load_redteam tests.test_server_redteam tests.test_jury_run` in a `for i in $(seq 10)` loop — files:
-  night/LOG.md — accept: per run `Ran N tests` + OK/FAILED + wall time.
+## gemini3a — repeatability (evidence only, files: night/LOG.md)
+- [x] G13 (gemini3a) Four jury modules 5 times: `env -u AUDITENV_SECRET uv run python -m unittest
+  tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` — accept: per
+  run `Ran N tests` + result.
+- [x] G14 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
+  — accept: summaries + exit codes.
+- [x] G15 (gemini3a) Full suite under `PYTHONHASHSEED=7 TZ=America/St_Johns env -u AUDITENV_SECRET uv run python -m
+  unittest discover -s tests -t .` and `PYTHONHASHSEED=99 TZ=Pacific/Chatham ...` — accept: `Ran N tests`,
+  OK/FAILED, wall time; failures verbatim.
 
-## gemini3b — verify on exports and demo (evidence only, files: night/LOG.md)
-- [x] G16 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/
-  — files: night/LOG.md — accept: per split the `N/N episodes valid` line.
-- [x] G17 (gemini3b) `uv run python -m auditenv.demo` piped with enough newlines (`yes '' | ...`), and
-  `uv run python -m auditenv.demo --help` — files: night/LOG.md — accept: exit code, the final reward/score lines
+## gemini3b — exports, demo, docs drift (evidence only, files: night/LOG.md)
+- [x] G16 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
+  accept: per split the `N/N episodes valid` line.
+- [x] G17 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, the final reward/score lines
   quoted; compare them with the numbers in docs/DEMO.md and call out any difference.
-- [x] G18 (gemini3b) `uv run python scripts/sync_docs.py --check --json /tmp/r20-gemini3b/c.json` after
-  `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r20-gemini3b/c.json` — files: night/LOG.md —
-  accept: both exit codes; any drift line verbatim.
+- [x] G18 (gemini3b) `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r21-gemini3b/c.json` then
+  `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c.json` — accept: both exit codes; drift lines
+  verbatim.
 
 ## lead
-- [x] L1 (lead) Baseline: full check on the round start; review worker findings, fix every real defect test-first,
-  re-export if the generator changes — files: as needed — accept: `env -u AUDITENV_SECRET uv run python -m auditenv.check` exit 0.
-- [x] L2 (lead) Record Round 20 findings with evidence in REVIEW.md, sync doc numbers (`scripts/sync_docs.py`),
+- [x] L0 (lead) Baseline on round start `2f7b31e`: `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0,
+  50.9 s.
+- [x] L1 (lead) Review worker findings, fix every real defect test-first, re-export if the generator changes — files:
+  as needed — accept: `env -u AUDITENV_SECRET uv run python -m auditenv.check` exit 0.
+- [x] L2 (lead) Record Round 21 findings with evidence in REVIEW.md, sync doc numbers (`scripts/sync_docs.py`),
   update HANDOFF.md — files: REVIEW.md, HANDOFF.md, README.md, docs/ — accept: sync_docs --check no drift.
-- [x] D (lead) `docs/DEMO.md` — re-verify the numbered 2–3 min recording script against the actual demo output — accept:
-  every number in it reproduced.
+- [x] D (lead) `docs/DEMO.md` — re-verify the numbered 2–3 min recording script against the actual demo output —
+  accept: every number in it reproduced.
 - [x] P (lead) `docs/PITCH.md` — re-verify slide outline facts and numbers against the current check output — accept:
   every number matches.
 
-## Top-up 1 (00:50) — same rules as above
-- [x] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 12000-12999 --hard` and
-  `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 9000-9299` — files: night/LOG.md —
-  accept: both summaries + wall times; any problem line verbatim.
-- [x] G20 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 66000` and
-  `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 9000-9299` — files:
-  night/LOG.md — accept: summaries + wall times + max steps.
-- [x] G21 (gemini2a) Resource-leak and warning run: `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning
-  -m unittest discover -s tests -t . 2>&1 | tail -40` — files: night/LOG.md — accept: `Ran N tests` + OK/FAILED; every
-  warning or error line (file:line) quoted verbatim, deduplicated with counts.
-- [x] G22 (gemini2b) Optimized-mode run (asserts stripped): `env -u AUDITENV_SECRET uv run python -O -m auditenv.check`;
-  plus `grep -n "^\s*assert " auditenv/*.py auditenv/policies/*.py judge_adapter.py` — files: night/LOG.md — accept:
-  exit code + last line of the check; the list of product-code asserts (file:line) in LOG.
-- [x] G23 (gemini3a) Order independence: run every test module alone, `for f in tests/test_*.py; do m=$(basename $f .py);
-  env -u AUDITENV_SECRET uv run python -m unittest tests.$m >/tmp/r20-gemini3a/$m.out 2>&1; echo "$m $?"; done` —
-  files: night/LOG.md — accept: number of modules, every module with a non-zero exit and its failure quoted.
-- [x] G24 (gemini3b) Regenerate the committed trajectories exactly as README says into /tmp/r20-gemini3b/ and
-  `diff` them against `trajectories/` and `trajectories.jsonl` — files: night/LOG.md — accept: the commands used, diff
-  exit codes, any differing file named.
-- [x] Z3 (rb) Semantic review of docs/CHECKS.md: for 25 rows spread over all blocks, open the cited test and state
-  whether it actually asserts what the row claims (not only that it exists) — files: night/LOG.md — accept: per row
-  "row id → test → asserts yes/no/partly + one-line reason"; every no/partly listed at the end.
-- [x] Z4 (rb) Hand-driven stdio server session as README/CONTRACT describe (`auditenv.server`): send reset, a
-  list_records, a get_record, a malformed line, submit and one step after submit; compare each response with the
-  documented example/shape — files: night/LOG.md — accept: every request/response pair quoted; any difference from
-  the docs called out with doc file:line.
-
-## Top-up 2 (01:15) — evidence on the generator fix `299c5e7` (merge origin/night/2026-11-22-r20 first!)
-- [x] G25 (gemini1a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 33000-33299` —
-  files: night/LOG.md — accept: exit code, the totals line and the "unexplained violations" line verbatim.
-- [x] G26 (gemini1b) Same as G25 with `--seeds 34000-34299` — files: night/LOG.md — accept: as G25.
-- [x] G27 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999` and the same with `--hard` —
-  files: night/LOG.md — accept: both summaries + wall times.
-- [x] G28 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 0` and
-  `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 0-1999` — files: night/LOG.md — accept: summaries.
-- [x] G29 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice and
-  `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning -m unittest discover -s tests -t .` — files:
-  night/LOG.md — accept: exit codes, last lines, wall times.
-- [x] G30 (gemini3b) Repeat G10 (export diff of dev/train/hard) and G24 (trajectory regeneration diff) on the fix —
-  files: night/LOG.md — accept: every diff exit code; any differing file named.
-
-## Top-up 3 (02:00)
-- [x] G31 (gemini1a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 35000-35599` — files:
-  night/LOG.md — accept: exit code, totals line and "unexplained violations" line verbatim.
-- [x] G32 (gemini1b) Same as G31 with `--seeds 36000-36599` — files: night/LOG.md — accept: as G31.
-- [x] G33 (gemini2a) After the lead's doc fixes land (merge first): `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r20-gemini2a/c.json`
-  then `uv run python scripts/sync_docs.py --check --json /tmp/r20-gemini2a/c.json` — files: night/LOG.md — accept: both exit codes and last lines.
+## Top-up 1 (04:30) — same rules as above
+- [x] X4 (codex1) Classify every clean-config (D01–D05, both difficulties) violation of `night/r21/ledger_identity.py`
+  on seeds 41000–41299: add a `--classify` flag that sorts each into (a) `unapplied_running` caused only by a refund
+  debited at the refund-date rate while its receipt credited 2900 at the receipt-date rate (same customer, same
+  document currency, document-currency credit never negative), (b) `ar_running`/`ar_close` off by at most the number
+  of cash applications to that invoice (per-application ROUND_HALF_UP residue), (c) other. — files:
+  night/r21/ledger_identity.py, night/LOG.md — accept: LOG counts per class × config, max |residue| for (a) in base
+  minor units and as % of the refund, and every class (c) item quoted with seed and row ids ("0 other" is the hoped
+  result, only with the totals).
+- [x] X5 (codex1) `env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor` on seeds 45000–45099 (add a
+  `--seeds` flag if missing) — files: night/r21/text_auditor.py, night/LOG.md — accept: the table + discrepancy count.
+- [x] Y4 (codex2) After the lead's README commit "README: first-read fixes (Y3)" lands (merge first; if it is not
+  there yet, do Y5 first): fresh clone at origin/night/2026-11-22-r21, run every command in the README sections the
+  commit touched — files: night/LOG.md — accept: table command → exit code → wall time; any mismatch with the text.
+- [x] Y5 (codex2) Re-run Y2's combined condition (low QoS + 6 parallel hard fuzz sweeps) on `auditenv.jury_run` only,
+  3 times, and record per policy the max wall time; then the same with `--seed-base 5000` — files: night/LOG.md —
+  accept: table run → policy → max s; note whether the 54 s outlier repeats and what part is process startup (time
+  `uv run python -c pass` under the same load).
+- [x] Z4 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` and
+  `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` — files: night/LOG.md — accept: exit codes
+  + summary lines (reproduction of codex1/codex2 results by another worker).
+- [x] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 15000-15999` and the same with
+  `--hard` — files: night/LOG.md — accept: both summaries + wall times.
+- [x] G20 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 75000` — files:
+  night/LOG.md — accept: summary + wall time + max steps.
+- [x] G21 (gemini2a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 39000-39299`
+  — files: night/LOG.md — accept: exit code, totals and "unexplained violations" lines verbatim.
+- [x] G22 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 4000-5999` — files:
+  night/LOG.md — accept: last line + wall time.
+- [x] G23 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 11000-11299`
+  and `... --hard --stress reconcile_hard --seeds 11000-11299` — files: night/LOG.md — accept: summaries + wall times.
+- [x] G24 (gemini3b) After the lead's README commit lands: `env -u AUDITENV_SECRET uv run python -m auditenv.check
+  --json /tmp/r21-gemini3b/c2.json` then `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c2.json`
+  — files: night/LOG.md — accept: both exit codes and last lines.

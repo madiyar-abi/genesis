@@ -66,6 +66,7 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 
 - The simulator covers synthetic receivables and uses fixed UTC offsets. Its benchmark measures performance on the generated cases.
 - Across 1,000 seeds per difficulty, when exactly two invoices shared a customer, currency and total, the fraction of flagged invoices affected by a duplicate was 0.996 on default and 0.356 on hard. Hard companies include legitimate lookalikes.
+- Refunds book no realised FX difference: by the published rules a full foreign refund can leave a customer's unapplied cash below zero in the base currency (up to 7.3 % of the refund), while the credit is exactly 0 in the document currency.
 - The reported baselines are scripted. A next experiment would compare a learned policy with these baselines on held-out companies under the same investigation budget.
 
 ## 10. Team

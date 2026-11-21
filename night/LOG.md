@@ -1,650 +1,2341 @@
-2026-11-22 00:21 lead — Round 20 started (open improvement round, freeze 18:00). Read NIGHT/HANDOFF/REVIEW/r19 archive. Wrote TASKS.md: independent defect hunts (codex1 chronology/policy-text/adapter reality, codex2 fresh-clone + claims audits, rb scenario adapter runs), evidence sweeps on unseen seeds for gemini workers. Baseline check running. Assumption: generator fixes stay with lead (one re-export owner) to avoid conflicting exports.
-2026-11-22 00:23 lead — D: demo --seed 2003 reproduces every DEMO.md number (326 rows, 69 invoices, 21 inspections, 0.958, 286 / 351331 minor units, 0.333, 22 actions). P: sync_docs tables match, but prose on slide 7 and DESIGN §9 was stale since 20 Nov: analyze --config configs/eval_hard.json gives reconcile 20 FP (not 22), duplicate recall 2/8 (not 3/8, six missed, not five), mean 43 actions (not 43.2). Fixed PITCH.md and DESIGN.md; sync_docs does not cover prose numbers.
-2026-11-22 00:31 gemini1a — G1: ran `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 10000-10999` (exit 0, wall time 56.1 s: default mode, seeds 10000-10999: 3000 episodes (1986 dirty, 1014 clean), 0 problems, FUZZ PASSED) and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 10000-10999 --hard` (exit 0, wall time 229.2 s: hard mode, seeds 10000-10999: 3000 episodes (1988 dirty, 1012 clean), 0 problems, FUZZ PASSED). 0 problems found across 6,000 episodes. Next: G2.
-2026-11-22 00:33 gemini1a — G2: ran `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 60000` (exit 0, wall time 129.8 s: config sweep, cases 60000-62999: 3000 random configs (1171 hard) in 129.8 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 58, FUZZ PASSED). 0 problems found across 3,000 configs; max steps 58. Next: G3.
-2026-11-22 00:34 gemini1a — G3: ran `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 2000-2999` (exit 0, wall time 34.9 s: 3000/3000 episodes valid; episodes with problems: 0). All assigned tasks (G1-G3) complete.
-2026-11-22 00:26 gemini1b — G4 complete (stress solvability on seeds 8000-8299).
-Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 8000-8299`
-Exit code: 0, wall time: 7.33 s
-Summary: `reconcile on 1200 default episodes (seeds 8000-8299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 34, truncated 0 (7.2 s)`
-Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 8000-8299`
-Exit code: 0, wall time: 20.65 s
-Summary: `reconcile_hard on 1200 hard episodes (seeds 8000-8299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (20.6 s)`
-2026-11-22 00:32 gemini1b — G5 complete (fuzz sweeps on seeds 11000-11999).
-Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 11000-11999`
-Exit code: 0, wall time: 82.12 s
-Summary:
-default mode, seeds 11000-11999: 3000 episodes (1991 dirty, 1009 clean) in 82.1 s
-  episodes with a problem (exception / verifier / oracle): 0
-  random explorer reward > 0: 222/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
-  flag-all reward < 0: 3000/3000
-FUZZ PASSED
-Problems: 0
-Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --seeds 11000-11999`
-Exit code: 0, wall time: 214.53 s
-Summary:
-hard mode, seeds 11000-11999: 3000 episodes (1987 dirty, 1013 clean) in 214.5 s
-  episodes with a problem (exception / verifier / oracle): 0
-  random explorer reward > 0: 234/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
-  flag-all reward < 0: 3000/3000
-FUZZ PASSED
-Problems: 0
-2026-11-22 00:35 gemini1b — G6 complete (config sweep, cases 63000-65999).
-Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 63000`
-Exit code: 0, wall time: 150.26 s
-Summary: `config sweep, cases 63000-65999: 3000 random configs (1170 hard) in 150.2 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 57`
-Max steps: 57
-FUZZ PASSED
-Problems: 0
-2026-11-22 00:31 gemini2a — G7: full unit suite 3 times under different PYTHONHASHSEED and TZ. Run 1 (PYTHONHASHSEED=1 TZ=UTC): Ran 561 tests, OK, wall time 55.17s. Run 2 (PYTHONHASHSEED=4242 TZ=Asia/Almaty): Ran 561 tests, OK, wall time 65.54s. Run 3 (PYTHONHASHSEED=random TZ=Pacific/Kiritimati): Ran 561 tests, OK, wall time 64.02s. 0 failures across all 3 runs.
-2026-11-22 00:35 gemini2a — G8: auditenv.check twice with auditenv.fuzz --seeds 0-999 --hard in background. Run 1: exit code 0, wall time 86.15s, last line: ALL CHECKS PASSED in 86.1 s. Run 2: exit code 0, wall time 80.31s, last line: ALL CHECKS PASSED in 80.2 s. Timing failures: none (0 timing failures). Background fuzz process was actively running throughout and terminated cleanly.
-2026-11-22 00:37 gemini2a — G9: auditenv.check under locales LC_ALL=C LANG=C and LC_ALL=tr_TR.UTF-8. Run 1 (LC_ALL=C LANG=C): exit code 0, wall time 50.78s, last line: ALL CHECKS PASSED in 50.7 s. Run 2 (LC_ALL=tr_TR.UTF-8): exit code 0, wall time 50.36s, last line: ALL CHECKS PASSED in 50.3 s. 0 failures.
-2026-11-22 00:27 gemini2b — G10: Re-exported splits to scratch dirs and diffed against committed exports. Commands and results:
-  - `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r20-gemini2b/dev` (exit 0, wall 0.078s, "Exported 10 episodes to /tmp/r20-gemini2b/dev"). `diff -r episodes/dev /tmp/r20-gemini2b/dev` exit 0 (0 differing files).
-  - `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/train.json --out /tmp/r20-gemini2b/train` (exit 0, wall 0.074s, "Exported 10 episodes to /tmp/r20-gemini2b/train"). `diff -r episodes/train /tmp/r20-gemini2b/train` exit 0 (0 differing files).
-  - `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/eval_hard.json --out /tmp/r20-gemini2b/hard` (exit 0, wall 0.253s, "Exported 20 episodes to /tmp/r20-gemini2b/hard"). `diff -r episodes/hard /tmp/r20-gemini2b/hard` exit 0 (0 differing files).
-  - `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/train_hard.json --out /tmp/r20-gemini2b/train_hard` (exit 0, wall 0.147s, "Exported 10 episodes to /tmp/r20-gemini2b/train_hard"). Committed `episodes/train_hard` does not exist (as documented in README line 195: hard train episodes are generated on demand into /tmp; `episodes/hard` holds eval_hard); verified exported directory with `env -u AUDITENV_SECRET uv run python -m auditenv.verify --dir /tmp/r20-gemini2b/train_hard` (exit 0: "10/10 episodes valid; episodes with problems: 0").
-  All committed exports match byte for byte with fresh exports.
-2026-11-22 00:31 gemini2b — G11: Checked golden hashes and ran reward mutation tests. Commands and results:
-  - `uv run python scripts/golden.py --check` (exit 0, wall 0.650s): "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json."
-  - `uv run python scripts/mutate_reward.py` (exit 0, wall 3:40.49 total / 219.12s user): "22/22 mutants killed."
-  All 80 golden hashes match; all 22 reward/matcher/schema/metrics mutants successfully killed.
-2026-11-22 00:33 gemini2b — G12: Ran `uv run python scripts/shortcut_miner.py` (seeds 0-999, configs random_mix/heavy, 2000 episodes, wall 22.4s, exit 1 due to flagged values without --report-only).
-Max precision per issue type:
+2026-11-22 03:38 lead — Round 21 started (open improvement round, freeze 18:00). Read NIGHT/HANDOFF/REVIEW/r20 archive. Baseline check at 2f7b31e: exit 0, 50.9 s. Wrote TASKS.md: codex1 independent text-only auditor / double-entry re-derivation / extreme configs; codex2 jury-copy file-format robustness, slow-machine timing, README first read; rb chronology+policy_text+adapter on new seeds; gemini sweeps on unseen seeds. Assumption: generator/product fixes stay with lead (single re-export owner).
+2026-11-22 03:43 gemini2b — G10 complete. Re-exported dev, train, and hard splits into /tmp/r21-gemini2b/ and diffed against committed episodes/:
+- dev: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r21-gemini2b/dev` (exit 0, wall time 0.119s, "Exported 10 episodes to /tmp/r21-gemini2b/dev") && `diff -r episodes/dev /tmp/r21-gemini2b/dev` (exit 0, 0 files differ).
+- train: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/train.json --out /tmp/r21-gemini2b/train` (exit 0, wall time 0.120s, "Exported 10 episodes to /tmp/r21-gemini2b/train") && `diff -r episodes/train /tmp/r21-gemini2b/train` (exit 0, 0 files differ).
+- hard: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/eval_hard.json --out /tmp/r21-gemini2b/hard` (exit 0, wall time 0.374s, "Exported 20 episodes to /tmp/r21-gemini2b/hard") && `diff -r episodes/hard /tmp/r21-gemini2b/hard` (exit 0, 0 files differ).
+All 40 exported episodes across all three splits are byte-for-byte identical to the committed exports (0 differing files). Next: G11.
+2026-11-22 03:49 rb — Z1 done. Fresh-seed reruns of the round-20 independent checkers (no product changes).
+  (1) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 42000-42299` → exit 0, wall 111 s.
+  `episodes checked: 12600 (seeds 42000-42299, 42 configs)`
+  Totals line verbatim: `totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3057, e_fx_missing=0, f_inv_booked_before_issue=2615, f_pay_posted_before_doc=0, f_ar_before_booking=21, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5042, c_tie=1`
+  `unexplained violations: 21 (0 in clean configs)` — all 21 are `f_ar_before_booking` in configs that inject period_cutoff
+  (default/default 5, hard/hard 4, D14/default 2, D14/hard 4, D15/default 2, D15/hard 4), matching the lead's round-20
+  explanation (night/archive/r20-LOG.md 02:44: remaining hits are the prior-period invoice itself). Clean D01–D05: 0.
+  Sample reproductions verbatim:
+    default/default seed=42089 f_ar_before_booking ids=['RCPT0400010', '2507-414083', 'L01292'] ar credit 2025-07-02T23:50:00+00:00 booking 2025-07-04T20:53:00+00:00
+    hard/hard seed=42045 f_ar_before_booking ids=['BNK-318927', 'INV-908173', 'R163'] ar credit 2026-10-02T13:16:00+03:00 booking 2026-10-03T21:26:00+03:00
+    D14/default seed=42037 f_ar_before_booking ids=['RCPT0739458', 'F0922045', 'GL-003378'] ar credit 2025-11-02T15:55:00+03:00 booking 2025-11-03T16:40:00+03:00
+    D15/hard seed=42228 f_ar_before_booking ids=['RCPT0737735', '2511-562760', 'R185'] ar credit 2025-11-02T19:26:00+03:00 booking 2025-11-02T21:22:00+03:00
+  Full output kept at /tmp/r21-rb/z1_chronology.out (all 21 lines listed there).
+  (2) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 42000-42199` → exit 0, wall 157 s.
+  Final line verbatim: `Audited 8400 episodes across 42 configurations; 33043340 checks, 0 unexpected failures.`
+  Next: Z2 (scenarios_adapter on seeds 43000–43004). Assumption: the 21 non-clean f_ar_before_booking hits are the known
+  period_cutoff pattern, not a new defect — flagged for lead confirmation, no product code touched.
+
+2026-11-22 03:47 codex1 — X1 text-only auditor. `env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor` → exit 0, 150.76 s, 4,200 episodes.
+
+| Config | Difficulty | Scored | Mean F1 | Mean precision | Mean recall |
+|---|---|---:|---:|---:|---:|
+| baseline | default | 100 | 1.000000 | 0.990000 | 0.990000 |
+| baseline | hard | 100 | 1.000000 | 0.980000 | 0.980000 |
+| D01 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D01 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D02 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D02 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D03 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D03 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D04 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D04 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D05 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D05 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D06 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D06 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D07 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D07 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D08 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D08 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D09 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D09 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D10 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D10 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D11 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D11 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D12 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D12 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D13 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D13 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D14 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D14 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D15 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D15 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D16 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D16 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D17 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D17 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D18 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D18 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D19 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D19 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D20 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D20 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+
+Discrepancy entries: 0
+
+Assumptions: use the public manifest for episode ID and currency exponents, compare hard-mode descriptions without case or punctuation, and use zero inspection steps because the audit reads public exports directly. Closed runs use the local default grader key. Clean episodes have F1 1 with precision and recall 0 by the grader convention. No misses or extras. `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, ALL CHECKS PASSED in 148.2 s. Next: X2.
+2026-11-22 03:50 gemini1a — G1 complete: ran fuzz sweep on seeds 13000-13999 default and hard modes. Commands: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 13000-13999` (exit 0, wall 61.2 s): default mode, seeds 13000-13999: 3000 episodes (1990 dirty, 1010 clean) in 61.2 s, episodes with a problem: 0, random explorer reward > 0: 229/3000, flag-all reward < 0: 3000/3000, FUZZ PASSED; `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 13000-13999 --hard` (exit 0, wall 400.9 s): hard mode, seeds 13000-13999: 3000 episodes (1980 dirty, 1020 clean) in 400.9 s, episodes with a problem: 0, random explorer reward > 0: 242/3000, flag-all reward < 0: 3000/3000, FUZZ PASSED. Total 6,000 episodes, 0 problems. Next: G2. Assumptions: none.
+2026-11-22 03:42 gemini1b — G4 stress solvability on seeds 10000-10299: reconcile default 1200 episodes imperfect 0, max steps 33, truncated 0 (wall time 7.7 s); reconcile_hard 1200 hard episodes imperfect 0, max steps 57, truncated 0 (wall time 21.4 s). Next: G5.
+
+2026-11-22 03:51 gemini1b — G5 fuzz sweep on seeds 14000-14999: default mode 3000 episodes (1983 dirty, 1017 clean) in 109.7 s, problems 0, random explorer reward > 0 on dirty books 0, flag-all < 0 3000/3000, FUZZ PASSED (wall time 109.8 s); hard mode 3000 episodes (1989 dirty, 1011 clean) in 423.5 s, problems 0, random explorer reward > 0 on dirty books 0, flag-all < 0 3000/3000, FUZZ PASSED (wall time 423.5 s). Next: G6.
+2026-11-22 03:42 gemini3a — G13: Four jury modules 5 times (tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired). All 5 runs passed 73/73 tests cleanly.
+  Run 1: Ran 73 tests in 2.094s, OK, exit 0, wall time 2s
+  Run 2: Ran 73 tests in 2.083s, OK, exit 0, wall time 2s
+  Run 3: Ran 73 tests in 2.225s, OK, exit 0, wall time 3s
+  Run 4: Ran 73 tests in 2.249s, OK, exit 0, wall time 2s
+  Run 5: Ran 73 tests in 2.528s, OK, exit 0, wall time 3s
+  Total: 365 tests, 0 failures. Next: G14.
+2026-11-22 03:42 gemini3a — G14: Ran attack search and sensitivity analysis. Both passed cleanly (exit 0).
+  - auditenv.attack: PASSED, 20 seeds evaluated (5 clean, 15 dirty), 11,000 mutations tested across 10 families, 0 violations detected, elapsed 0.360 s, exit 0, wall time 0s.
+  - scripts/sensitivity.py: PASSED, evaluated dev (10 episodes) and hard (20 episodes) across varied step cost (0.001, 0.002, 0.005) and amount tolerance (0, 1, 100 units). Ranking unchanged across all settings: dev (oracle > reconcile > naive_reconcile > random > flag_all), hard (oracle > reconcile_hard > reconcile > naive_reconcile > random > flag_all). Re-grade with default parameters reproduced every env reward exactly in 2.1 s, exit 0, wall time 3s. Next: G15.
+2026-11-22 03:42 gemini3b — G16 complete: verified all splits under episodes/ (dev: 10/10 valid, exit 0, 0.13s; hard: 20/20 valid, exit 0, 0.35s; train: 10/10 valid, exit 0, 0.11s). Next: G17.
+2026-11-22 03:47 gemini3a — G15: Ran full unit test suite under two hashseed/timezone settings. Both passed cleanly (0 failures).
+  - Run 1 (PYTHONHASHSEED=7 TZ=America/St_Johns): Ran 563 tests in 106.623s, OK, exit code: 0, wall time: 107s
+  - Run 2 (PYTHONHASHSEED=99 TZ=Pacific/Chatham): Ran 563 tests in 116.834s, OK, exit code: 0, wall time: 117s
+  All G13-G15 tasks for gemini3a complete.
+2026-11-22 03:42 gemini3b — G16 complete: verified all splits under episodes/ (dev: 10/10 valid, exit 0, 0.13s; hard: 20/20 valid, exit 0, 0.35s; train: 10/10 valid, exit 0, 0.11s). Next: G17.
+2026-11-22 03:51 gemini2b — G11 complete:
+- `uv run python scripts/golden.py --check` (exit 0, wall time 1.262s): "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json."
+- `uv run python scripts/mutate_reward.py` (exit 0, wall time 407.340s): "22/22 mutants killed."
+Next: G12.
+2026-11-22 03:43 codex2 — Y1: `/usr/bin/time -p env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` exited 0 (2.19 s). Cohort chosen to include clean, interacting, and other dirty cases: dev 2000/2002/2003/2004/2009, hard 9100/9105/9109/9112/9119. Public reconciler reference answers reached F1 1.000, then the same inspection and submission actions were replayed through closed reset and independently scored.
+
+| Variant | Accepted | Rejected | Scores equal |
+|---|---:|---:|---:|
+| CSV columns shuffled | 10 | 0 | 10 |
+| CRLF | 10 | 0 | 10 |
+| CSV BOM | 10 | 0 | 10 |
+| JSON BOM | 10 | 0 | 10 |
+| JSONL BOM | 10 | 0 | 10 |
+| No final newline | 10 | 0 | 10 |
+| Pretty JSON | 10 | 0 | 10 |
+| Compact JSON | 10 | 0 | 10 |
+| JSONL keys reversed | 10 | 0 | 10 |
+| Combined | 10 | 0 | 10 |
+
+Semantically equivalent rewrite discrepancies: 0. Combined uses compact JSON, all three BOMs, shuffled CSV, reversed JSONL keys, CRLF, and no final newline. Next: Y2 low-QoS and loaded timing.
+
+2026-11-22 03:42 gemini1b — G4 stress solvability on seeds 10000-10299: reconcile default 1200 episodes imperfect 0, max steps 33, truncated 0 (wall time 7.7 s); reconcile_hard 1200 hard episodes imperfect 0, max steps 57, truncated 0 (wall time 21.4 s). Next: G5.
+2026-11-22 03:42 gemini3a — G13: Four jury modules 5 times (tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired). All 5 runs passed 73/73 tests cleanly.
+  Run 1: Ran 73 tests in 2.094s, OK, exit 0, wall time 2s
+  Run 2: Ran 73 tests in 2.083s, OK, exit 0, wall time 2s
+  Run 3: Ran 73 tests in 2.225s, OK, exit 0, wall time 3s
+  Run 4: Ran 73 tests in 2.249s, OK, exit 0, wall time 2s
+  Run 5: Ran 73 tests in 2.528s, OK, exit 0, wall time 3s
+  Total: 365 tests, 0 failures. Next: G14.
+2026-11-22 03:42 gemini3b — G16 complete: verified all splits under episodes/ (dev: 10/10 valid, exit 0, 0.13s; hard: 20/20 valid, exit 0, 0.35s; train: 10/10 valid, exit 0, 0.11s). Next: G17.
+
+2026-11-22 03:51 codex2 — Y2: timed the four jury modules and closed jury runner under macOS low QoS, six parallel hard fuzz sweeps, and both conditions together.
+
+Commands below are run from the repo root and prefixed with `/usr/bin/time -p`. Measured elapsed wall time is the `real` value. Set `TMPDIR=/tmp/r21-codex2 AUDITENV_KEY_FILE=/tmp/r21-codex2/timing.key` and unset `AUDITENV_GRADER_LOG` for scratch isolation.
+
+```sh
+taskpolicy -c background env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired
+taskpolicy -c background env -u AUDITENV_SECRET uv run python -m auditenv.jury_run
+env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired
+env -u AUDITENV_SECRET uv run python -m auditenv.jury_run
+env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard
+```
+
+The two normal-priority commands were launched concurrently with six background copies of the last command. I also launched both low-QoS commands together while all six fuzz processes were active. macOS 26.6, four performance and six efficiency cores. Low QoS is the requested scheduling proxy.
+
+| Condition | Run | Exit | Wall seconds | Summary |
+|---|---|---:|---:|---|
+| Low QoS | Four jury test modules | 0 | 7.32 | Ran 73 tests in 7.096s; OK |
+| Low QoS | Jury runner | 0 | 7.32 | 20 jury scenarios D01-D20; maximum episode 0.451 s |
+| Six fuzz processes | Four jury test modules | 0 | 7.40 | Ran 73 tests in 7.154s; OK |
+| Six fuzz processes | Jury runner | 0 | 3.27 | 20 jury scenarios D01-D20; maximum episode 0.052 s |
+| Low QoS plus fuzz | Four jury test modules | 0 | 423.94 | Ran 73 tests in 370.886s; OK |
+| Low QoS plus fuzz | Jury runner | 0 | 424.04 | 20 jury scenarios D01-D20; maximum episode 54.050 s |
+
+No timing-related failure appeared. The combined run's slowest episode was random_explorer at 54.050 s (5.950 s short of the 60 s episode limit), while reconcile peaked at 3.097 s. In all three runs, reconcile and oracle had F1 1.000 and mean returns 0.959 and 1.000 respectively; random_explorer and flag_all returned -1.000.
+
+| Fuzz process | Exit | Wall seconds | Summary |
+|---|---:|---:|---|
+| 1 | 0 | 447.61 | 3000 episodes, 0 problems, FUZZ PASSED |
+| 2 | 0 | 445.33 | 3000 episodes, 0 problems, FUZZ PASSED |
+| 3 | 0 | 445.17 | 3000 episodes, 0 problems, FUZZ PASSED |
+| 4 | 0 | 444.75 | 3000 episodes, 0 problems, FUZZ PASSED |
+| 5 | 0 | 447.61 | 3000 episodes, 0 problems, FUZZ PASSED |
+| 6 | 0 | 448.35 | 3000 episodes, 0 problems, FUZZ PASSED |
+
+Next: Y3 fresh-clone README walkthrough.
+2026-11-22 03:43 gemini2b — G10 complete. Re-exported dev, train, and hard splits into /tmp/r21-gemini2b/ and diffed against committed episodes/:
+- dev: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r21-gemini2b/dev` (exit 0, wall time 0.119s, "Exported 10 episodes to /tmp/r21-gemini2b/dev") && `diff -r episodes/dev /tmp/r21-gemini2b/dev` (exit 0, 0 files differ).
+- train: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/train.json --out /tmp/r21-gemini2b/train` (exit 0, wall time 0.120s, "Exported 10 episodes to /tmp/r21-gemini2b/train") && `diff -r episodes/train /tmp/r21-gemini2b/train` (exit 0, 0 files differ).
+- hard: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/eval_hard.json --out /tmp/r21-gemini2b/hard` (exit 0, wall time 0.374s, "Exported 20 episodes to /tmp/r21-gemini2b/hard") && `diff -r episodes/hard /tmp/r21-gemini2b/hard` (exit 0, 0 files differ).
+All 40 exported episodes across all three splits are byte-for-byte identical to the committed exports (0 differing files). Next: G11.
+2026-11-22 03:42 gemini3a — G14: Ran attack search and sensitivity analysis. Both passed cleanly (exit 0).
+  - auditenv.attack: PASSED, 20 seeds evaluated (5 clean, 15 dirty), 11,000 mutations tested across 10 families, 0 violations detected, elapsed 0.360 s, exit 0, wall time 0s.
+  - scripts/sensitivity.py: PASSED, evaluated dev (10 episodes) and hard (20 episodes) across varied step cost (0.001, 0.002, 0.005) and amount tolerance (0, 1, 100 units). Ranking unchanged across all settings: dev (oracle > reconcile > naive_reconcile > random > flag_all), hard (oracle > reconcile_hard > reconcile > naive_reconcile > random > flag_all). Re-grade with default parameters reproduced every env reward exactly in 2.1 s, exit 0, wall time 3s. Next: G15.
+2026-11-22 03:42 gemini3b — G17 complete: ran `yes '' | env -u AUDITENV_SECRET uv run python -m auditenv.demo` (exit 0, wall time 0.13s). Quoted final score lines: `terminal reward 0.958 = clip(2*F1 - 1 - 0.002*21 steps)   P=1.00 R=1.00 F1=1.00`; section 4 rewards: oracle 1.000, reconcile 0.958, silence -1.000, repeated twice 0.333, clean silence 1.000, clean reconcile 0.958; section 5 closed run: `policy side: 22 steps, rewards seen = [0.0], final info = {}`, `grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0`. Compared with docs/DEMO.md: all numbers match exactly (326 ledger rows, 69 invoices, 100 budget steps; 21 inspect + 1 submit step; return 0.958; FX error 286 cents / $2.86, allocation error 351,331 cents / $3,513.31; oracle 1, repeated 0.333, silence -1; 22 actions, empty info, TP 4 FP 0 FN 0, return 0.958). Zero differences found. Next: G18.
+
+2026-11-22 03:53 codex1 — X2 independent ledger identity audit. `env -u AUDITENV_SECRET uv run python -m night.r21.ledger_identity` → exit 1 as specified when unexplained violations exist, 186.64 s, 12,600 episodes. Table cells show checks / explained violations / unexplained violations.
+
+Clean seed 41005 D01–D05/default: GL-005102 credits 83,185 GBP minor; GL-005178 debits 84,108 for a full EUR 98,314 refund at its later payment-date rate. Account 2900 ends at −923 GBP minor. Clean seed 41007 D01–D05/default: F0057818 booked at 2,042,681 EUR minor (R2494); individually rounded cash applications of 1,376,137 (R2558) and 666,545 (R2705) leave AR at −1. These exposures follow the specified date and rounding rules. Resolving either needs an accounting convention change.
+
+Assumptions: pre-period invoices carry their face amount at the invoice-date rate as opening AR; account 2900 starts at zero; at tied instants increases precede decreases. FX checks use the public document rate and remittance, with zero required when there is no difference. The audit treats negative balances as violations even when a documented rate or rounding rule explains the arithmetic, because the task only exempts a violation caused by an injected error. `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, ALL CHECKS PASSED in 148.1 s. Next: X3.
+
+| Config | Difficulty | journal | ar_running | ar_close | unapplied_running | fx | trial |
+|---|---|---:|---:|---:|---:|---:|---:|
+| baseline | default | 47,800 / 0 / 0 | 19,653 / 27 / 35 | 15,742 / 888 / 0 | 1,777 / 0 / 85 | 7,870 / 187 / 0 | 300 / 0 / 0 |
+| baseline | hard | 168,387 / 0 / 0 | 21,111 / 43 / 43 | 16,590 / 843 / 0 | 1,756 / 0 / 78 | 7,815 / 168 / 0 | 300 / 0 / 0 |
+| D01 | default | 45,672 / 0 / 0 | 19,152 / 0 / 33 | 15,463 / 0 / 0 | 1,582 / 0 / 104 | 8,029 / 0 / 0 | 300 / 0 / 0 |
+| D01 | hard | 167,997 / 0 / 0 | 21,081 / 0 / 50 | 16,515 / 0 / 0 | 1,507 / 0 / 80 | 8,041 / 0 / 0 | 300 / 0 / 0 |
+| D02 | default | 45,672 / 0 / 0 | 19,152 / 0 / 33 | 15,463 / 0 / 0 | 1,582 / 0 / 104 | 8,029 / 0 / 0 | 300 / 0 / 0 |
+| D02 | hard | 167,997 / 0 / 0 | 21,081 / 0 / 50 | 16,515 / 0 / 0 | 1,507 / 0 / 80 | 8,041 / 0 / 0 | 300 / 0 / 0 |
+| D03 | default | 45,672 / 0 / 0 | 19,152 / 0 / 33 | 15,463 / 0 / 0 | 1,582 / 0 / 104 | 8,029 / 0 / 0 | 300 / 0 / 0 |
+| D03 | hard | 167,997 / 0 / 0 | 21,081 / 0 / 50 | 16,515 / 0 / 0 | 1,507 / 0 / 80 | 8,041 / 0 / 0 | 300 / 0 / 0 |
+| D04 | default | 45,672 / 0 / 0 | 19,152 / 0 / 33 | 15,463 / 0 / 0 | 1,582 / 0 / 104 | 8,029 / 0 / 0 | 300 / 0 / 0 |
+| D04 | hard | 167,997 / 0 / 0 | 21,081 / 0 / 50 | 16,515 / 0 / 0 | 1,507 / 0 / 80 | 8,041 / 0 / 0 | 300 / 0 / 0 |
+| D05 | default | 45,672 / 0 / 0 | 19,152 / 0 / 33 | 15,463 / 0 / 0 | 1,582 / 0 / 104 | 8,029 / 0 / 0 | 300 / 0 / 0 |
+| D05 | hard | 167,997 / 0 / 0 | 21,081 / 0 / 50 | 16,515 / 0 / 0 | 1,507 / 0 / 80 | 8,041 / 0 / 0 | 300 / 0 / 0 |
+| D06 | default | 46,915 / 0 / 0 | 19,416 / 0 / 39 | 15,771 / 0 / 0 | 1,556 / 0 / 107 | 7,876 / 0 / 0 | 300 / 0 / 0 |
+| D06 | hard | 168,573 / 0 / 0 | 21,020 / 0 / 41 | 16,582 / 0 / 0 | 1,427 / 0 / 75 | 7,866 / 0 / 0 | 300 / 0 / 0 |
+| D07 | default | 46,915 / 0 / 0 | 19,416 / 0 / 39 | 15,771 / 0 / 0 | 1,556 / 0 / 107 | 7,876 / 0 / 0 | 300 / 0 / 0 |
+| D07 | hard | 168,573 / 0 / 0 | 21,020 / 0 / 41 | 16,582 / 0 / 0 | 1,427 / 0 / 75 | 7,866 / 0 / 0 | 300 / 0 / 0 |
+| D08 | default | 46,915 / 0 / 0 | 19,416 / 0 / 39 | 15,771 / 0 / 0 | 1,556 / 0 / 107 | 7,876 / 0 / 0 | 300 / 0 / 0 |
+| D08 | hard | 168,573 / 0 / 0 | 21,020 / 0 / 41 | 16,582 / 0 / 0 | 1,427 / 0 / 75 | 7,866 / 0 / 0 | 300 / 0 / 0 |
+| D09 | default | 47,618 / 0 / 0 | 19,468 / 0 / 38 | 16,003 / 300 / 0 | 1,740 / 0 / 61 | 8,029 / 119 / 0 | 300 / 0 / 0 |
+| D09 | hard | 170,112 / 0 / 0 | 20,389 / 0 / 41 | 16,194 / 300 / 0 | 1,820 / 0 / 97 | 7,892 / 132 / 0 | 300 / 0 / 0 |
+| D10 | default | 46,534 / 0 / 0 | 19,436 / 0 / 38 | 15,628 / 300 / 0 | 1,682 / 0 / 69 | 7,940 / 131 / 0 | 300 / 0 / 0 |
+| D10 | hard | 167,843 / 0 / 0 | 20,757 / 0 / 35 | 16,210 / 300 / 0 | 1,742 / 0 / 69 | 8,013 / 105 / 0 | 300 / 0 / 0 |
+| D11 | default | 46,306 / 0 / 0 | 19,370 / 0 / 46 | 15,711 / 300 / 0 | 1,806 / 0 / 88 | 8,040 / 117 / 0 | 300 / 0 / 0 |
+| D11 | hard | 169,675 / 0 / 0 | 20,889 / 0 / 29 | 16,369 / 300 / 0 | 1,735 / 0 / 74 | 7,967 / 117 / 0 | 300 / 0 / 0 |
+| D12 | default | 46,874 / 0 / 0 | 19,524 / 61 / 46 | 15,674 / 300 / 0 | 1,507 / 0 / 110 | 8,110 / 0 / 0 | 300 / 0 / 0 |
+| D12 | hard | 169,841 / 0 / 0 | 20,786 / 57 / 23 | 16,318 / 300 / 0 | 1,443 / 0 / 60 | 7,972 / 0 / 0 | 300 / 0 / 0 |
+| D13 | default | 46,874 / 0 / 0 | 19,524 / 61 / 46 | 15,674 / 300 / 0 | 1,507 / 0 / 110 | 8,110 / 0 / 0 | 300 / 0 / 0 |
+| D13 | hard | 169,841 / 0 / 0 | 20,786 / 57 / 23 | 16,318 / 300 / 0 | 1,443 / 0 / 60 | 7,972 / 0 / 0 | 300 / 0 / 0 |
+| D14 | default | 46,864 / 0 / 0 | 19,423 / 0 / 35 | 15,440 / 300 / 0 | 1,479 / 0 / 94 | 7,826 / 0 / 0 | 300 / 0 / 0 |
+| D14 | hard | 166,667 / 0 / 0 | 21,270 / 0 / 38 | 16,338 / 300 / 0 | 1,518 / 0 / 90 | 8,001 / 0 / 0 | 300 / 0 / 0 |
+| D15 | default | 46,864 / 0 / 0 | 19,423 / 0 / 35 | 15,440 / 300 / 0 | 1,479 / 0 / 94 | 7,826 / 0 / 0 | 300 / 0 / 0 |
+| D15 | hard | 166,667 / 0 / 0 | 21,270 / 0 / 38 | 16,338 / 300 / 0 | 1,518 / 0 / 90 | 8,001 / 0 / 0 | 300 / 0 / 0 |
+| D16 | default | 47,359 / 0 / 0 | 19,761 / 0 / 37 | 15,733 / 300 / 0 | 1,756 / 0 / 95 | 8,240 / 300 / 0 | 300 / 0 / 0 |
+| D16 | hard | 168,258 / 0 / 0 | 21,102 / 0 / 35 | 16,375 / 300 / 0 | 1,718 / 0 / 84 | 8,057 / 300 / 0 | 300 / 0 / 0 |
+| D17 | default | 47,359 / 0 / 0 | 19,761 / 0 / 37 | 15,733 / 300 / 0 | 1,756 / 0 / 95 | 8,240 / 300 / 0 | 300 / 0 / 0 |
+| D17 | hard | 168,258 / 0 / 0 | 21,102 / 0 / 35 | 16,375 / 300 / 0 | 1,718 / 0 / 84 | 8,057 / 300 / 0 | 300 / 0 / 0 |
+| D18 | default | 47,359 / 0 / 0 | 19,761 / 0 / 37 | 15,733 / 300 / 0 | 1,756 / 0 / 95 | 8,240 / 300 / 0 | 300 / 0 / 0 |
+| D18 | hard | 168,258 / 0 / 0 | 21,102 / 0 / 35 | 16,375 / 300 / 0 | 1,718 / 0 / 84 | 8,057 / 300 / 0 | 300 / 0 / 0 |
+| D19 | default | 46,743 / 0 / 0 | 19,634 / 0 / 38 | 15,966 / 300 / 0 | 1,457 / 0 / 96 | 7,912 / 0 / 0 | 300 / 0 / 0 |
+| D19 | hard | 165,933 / 0 / 0 | 20,628 / 0 / 30 | 16,329 / 300 / 0 | 1,468 / 0 / 77 | 7,738 / 0 / 0 | 300 / 0 / 0 |
+| D20 | default | 46,743 / 0 / 0 | 19,634 / 0 / 38 | 15,966 / 300 / 0 | 1,457 / 0 / 96 | 7,912 / 0 / 0 | 300 / 0 / 0 |
+| D20 | hard | 165,933 / 0 / 0 | 20,628 / 0 / 30 | 16,329 / 300 / 0 | 1,468 / 0 / 77 | 7,738 / 0 / 0 | 300 / 0 / 0 |
+
+Unexplained violations: 5274. Clean scenario violations: 1335.
+
+Clean scenario violations:
+- D01/default seed 41005 unapplied_running (GL-005178): observed -923, expected 0; CUST99859
+- D01/default seed 41006 unapplied_running (GL-001878): observed -500336, expected 0; E0342
+- D01/default seed 41007 ar_running (R2705): observed -1, expected 0; F0057818
+- D01/default seed 41011 unapplied_running (L00316): observed -15, expected 0; C-5874
+- D01/default seed 41012 unapplied_running (GL-005228): observed -87, expected 0; CUST57663
+- D01/default seed 41013 unapplied_running (R3768): observed -168, expected 0; E6981
+- D01/default seed 41014 unapplied_running (L03913): observed -2, expected 0; C-5080
+- D01/default seed 41019 ar_running (GL-000793): observed -1, expected 0; INV-355747
+- D01/default seed 41020 unapplied_running (L02377): observed -5, expected 0; E7129
+- D01/default seed 41021 unapplied_running (R1433): observed -214, expected 0; E1968
+- D01/default seed 41028 ar_running (L02016): observed -1, expected 0; F0606872
+- D01/default seed 41028 unapplied_running (L02007): observed -56, expected 0; C-7863
+- D01/default seed 41029 unapplied_running (R384): observed -128, expected 0; CUST43875
+- D01/default seed 41032 unapplied_running (L00595): observed -86531, expected 0; C-2404
+- D01/default seed 41034 ar_running (R229): observed -1, expected 0; 2503-857257
+- D01/default seed 41039 ar_running (R988): observed -1, expected 0; SI-2025-984723
+- D01/default seed 41043 unapplied_running (R3711): observed -667, expected 0; C-8659
+- D01/default seed 41043 unapplied_running (R3858): observed -186, expected 0; C-7120
+- D01/default seed 41044 unapplied_running (R4057): observed -32683, expected 0; E4613
+- D01/default seed 41044 unapplied_running (R4054): observed -55854, expected 0; E9712
+- D01/default seed 41045 ar_running (R4175): observed -1, expected 0; F0254951
+- D01/default seed 41058 unapplied_running (L01321): observed -12, expected 0; C-0392
+- D01/default seed 41059 unapplied_running (R2679): observed -41, expected 0; C-8026
+- D01/default seed 41061 unapplied_running (R2190): observed -661, expected 0; CUST70335
+- D01/default seed 41064 unapplied_running (R987): observed -47522, expected 0; CUST98460
+- D01/default seed 41064 unapplied_running (R1036): observed -2977, expected 0; CUST42293
+- D01/default seed 41066 unapplied_running (L04325): observed -555, expected 0; CUST55531
+- D01/default seed 41068 unapplied_running (R1521): observed -64, expected 0; CUST07021
+- D01/default seed 41071 unapplied_running (GL-000910): observed -132, expected 0; C-5747
+- D01/default seed 41074 ar_running (GL-003948): observed -1, expected 0; 2601-593279
+- D01/default seed 41080 unapplied_running (GL-004509): observed -14, expected 0; E9009
+- D01/default seed 41081 unapplied_running (R4233): observed -225, expected 0; C-7364
+- D01/default seed 41082 ar_running (GL-005049): observed -1, expected 0; F0880818
+- D01/default seed 41084 unapplied_running (GL-001329): observed -91, expected 0; CUST52532
+- D01/default seed 41084 unapplied_running (GL-001504): observed -16, expected 0; CUST14537
+- D01/default seed 41086 unapplied_running (L03721): observed -214, expected 0; C-6213
+- D01/default seed 41091 unapplied_running (R2905): observed -9, expected 0; C-1116
+- D01/default seed 41094 ar_running (R3306): observed -1, expected 0; INV-357622
+- D01/default seed 41100 ar_running (R1817): observed -1, expected 0; 2510-112034
+- D01/default seed 41102 unapplied_running (L00536): observed -2, expected 0; CUST61593
+- D01/default seed 41105 unapplied_running (GL-002236): observed -34, expected 0; CUST43566
+- D01/default seed 41105 unapplied_running (GL-002244): observed -184, expected 0; CUST81946
+- D01/default seed 41106 unapplied_running (GL-003529): observed -74, expected 0; C-0932
+- D01/default seed 41113 unapplied_running (GL-004473): observed -115, expected 0; CUST50826
+- D01/default seed 41115 unapplied_running (L04189): observed -224685, expected 0; E1486
+- D01/default seed 41115 unapplied_running (L04274): observed -37185, expected 0; E5780
+- D01/default seed 41116 unapplied_running (GL-002108): observed -73, expected 0; C-2466
+- D01/default seed 41117 unapplied_running (GL-002803): observed -1, expected 0; E1961
+- D01/default seed 41119 unapplied_running (GL-000964): observed -3, expected 0; E2473
+- D01/default seed 41124 unapplied_running (GL-002245): observed -205, expected 0; C-6104
+- D01/default seed 41125 unapplied_running (L00377): observed -1181, expected 0; CUST50140
+- D01/default seed 41127 ar_running (GL-002840): observed -1, expected 0; F0686931
+- D01/default seed 41128 unapplied_running (GL-002910): observed -97, expected 0; C-9525
+- D01/default seed 41131 unapplied_running (L04366): observed -67, expected 0; C-2139
+- D01/default seed 41131 unapplied_running (L04354): observed -353, expected 0; C-6052
+- D01/default seed 41132 unapplied_running (R644): observed -46, expected 0; C-9933
+- D01/default seed 41137 ar_running (GL-001286): observed -1, expected 0; 2501-410390
+- D01/default seed 41140 unapplied_running (L01432): observed -446, expected 0; E0345
+- D01/default seed 41141 ar_running (R3610): observed -1, expected 0; INV-054288
+- D01/default seed 41142 unapplied_running (L03781): observed -10874, expected 0; CUST89097
+- D01/default seed 41144 unapplied_running (L03241): observed -291, expected 0; E6937
+- D01/default seed 41147 unapplied_running (L03708): observed -85, expected 0; E5990
+- D01/default seed 41149 unapplied_running (R708): observed -60771, expected 0; C-9138
+- D01/default seed 41150 unapplied_running (L01764): observed -742, expected 0; C-4875
+- D01/default seed 41157 unapplied_running (L04564): observed -20455, expected 0; CUST09866
+- D01/default seed 41158 unapplied_running (GL-000362): observed -1214, expected 0; E5459
+- D01/default seed 41166 ar_running (GL-004004): observed -1, expected 0; 2506-422686
+- D01/default seed 41170 unapplied_running (L01112): observed -27, expected 0; C-4024
+- D01/default seed 41171 unapplied_running (L02781): observed -314, expected 0; C-5870
+- D01/default seed 41173 unapplied_running (GL-001084): observed -132, expected 0; C-4096
+- D01/default seed 41174 ar_running (GL-000390): observed -1, expected 0; SI-2025-590188
+- D01/default seed 41174 unapplied_running (GL-000426): observed -286, expected 0; C-4736
+- D01/default seed 41178 unapplied_running (L03744): observed -118378, expected 0; E8203
+- D01/default seed 41182 ar_running (GL-000759): observed -1, expected 0; SI-2026-721173
+- D01/default seed 41183 unapplied_running (L02610): observed -7, expected 0; CUST45617
+- D01/default seed 41190 unapplied_running (GL-003022): observed -314, expected 0; C-6621
+- D01/default seed 41192 ar_running (GL-004482): observed -1, expected 0; 2611-659303
+- D01/default seed 41193 unapplied_running (GL-002517): observed -78, expected 0; CUST47530
+- D01/default seed 41194 unapplied_running (L00725): observed -46, expected 0; E1812
+- D01/default seed 41194 unapplied_running (L00782): observed -384, expected 0; E1022
+- D01/default seed 41195 ar_running (GL-003793): observed -1, expected 0; F0615449
+- D01/default seed 41196 unapplied_running (GL-003493): observed -44, expected 0; E4315
+- D01/default seed 41197 unapplied_running (L02821): observed -3071, expected 0; CUST82232
+- D01/default seed 41198 unapplied_running (L03718): observed -47, expected 0; CUST24584
+- D01/default seed 41199 ar_running (R2679): observed -1, expected 0; F0107215
+- D01/default seed 41203 unapplied_running (GL-002257): observed -220, expected 0; CUST44083
+- D01/default seed 41205 unapplied_running (R4514): observed -12, expected 0; E5788
+- D01/default seed 41208 unapplied_running (L02934): observed -49953, expected 0; CUST80841
+- D01/default seed 41209 unapplied_running (GL-004432): observed -74, expected 0; C-3115
+- D01/default seed 41212 ar_running (L01373): observed -1, expected 0; SI-2025-273988
+- D01/default seed 41214 unapplied_running (R2379): observed -367, expected 0; E9465
+- D01/default seed 41216 unapplied_running (R5038): observed -74, expected 0; C-8256
+- D01/default seed 41220 unapplied_running (GL-002466): observed -26938, expected 0; E5508
+- D01/default seed 41222 ar_running (GL-002092): observed -1, expected 0; INV-911729
+- D01/default seed 41224 unapplied_running (L02932): observed -402, expected 0; E4306
+- D01/default seed 41225 ar_running (R4393): observed -1, expected 0; INV-763469
+- D01/default seed 41225 ar_running (R4435): observed -1, expected 0; INV-981731
+- D01/default seed 41229 unapplied_running (GL-004718): observed -115, expected 0; C-5574
+- D01/default seed 41234 unapplied_running (R2145): observed -46, expected 0; CUST28806
+- D01/default seed 41234 unapplied_running (R2201): observed -21, expected 0; CUST09400
+- D01/default seed 41236 unapplied_running (L02890): observed -55, expected 0; CUST67673
+- D01/default seed 41239 ar_running (R1295): observed -1, expected 0; 2611-562598
+- D01/default seed 41242 unapplied_running (R736): observed -119, expected 0; E9730
+- D01/default seed 41243 ar_running (GL-005203): observed -1, expected 0; F0481630
+- D01/default seed 41243 unapplied_running (GL-005212): observed -32, expected 0; CUST32225
+- D01/default seed 41244 unapplied_running (L03904): observed -24475, expected 0; CUST93203
+- D01/default seed 41244 unapplied_running (L04056): observed -49167, expected 0; CUST54052
+- D01/default seed 41244 unapplied_running (L04053): observed -42070, expected 0; CUST05049
+- D01/default seed 41245 ar_running (R2719): observed -1, expected 0; INV-988106
+- D01/default seed 41247 unapplied_running (L01470): observed -3, expected 0; CUST42949
+- D01/default seed 41248 ar_running (L00513): observed -1, expected 0; F0370420
+- D01/default seed 41248 unapplied_running (L00432): observed -552, expected 0; E8174
+- D01/default seed 41256 unapplied_running (GL-001834): observed -173, expected 0; C-4466
+- D01/default seed 41257 unapplied_running (L00782): observed -34, expected 0; E4551
+- D01/default seed 41258 ar_running (R1433): observed -1, expected 0; SI-2026-923475
+- D01/default seed 41258 unapplied_running (R1238): observed -227031, expected 0; CUST78127
+- D01/default seed 41262 ar_running (GL-001158): observed -1, expected 0; F0515687
+- D01/default seed 41263 unapplied_running (R5022): observed -91, expected 0; CUST88062
+- D01/default seed 41264 unapplied_running (R3651): observed -83, expected 0; C-1145
+- D01/default seed 41265 unapplied_running (GL-001966): observed -170, expected 0; C-5923
+- D01/default seed 41266 unapplied_running (L00492): observed -2186, expected 0; E7360
+- D01/default seed 41267 unapplied_running (L03551): observed -1362, expected 0; E8408
+- D01/default seed 41268 unapplied_running (R3548): observed -31589, expected 0; C-4687
+- D01/default seed 41270 ar_running (GL-000401): observed -1, expected 0; INV-215118
+- D01/default seed 41270 unapplied_running (GL-000443): observed -23, expected 0; CUST74275
+- D01/default seed 41277 unapplied_running (L01581): observed -40, expected 0; E3442
+- D01/default seed 41277 unapplied_running (L01680): observed -63, expected 0; E3442
+- D01/default seed 41277 unapplied_running (L01733): observed -88, expected 0; E3442
+- D01/default seed 41282 unapplied_running (GL-003747): observed -56670, expected 0; E8942
+- D01/default seed 41283 unapplied_running (L04036): observed -57, expected 0; CUST56709
+- D01/default seed 41287 unapplied_running (GL-004422): observed -33477, expected 0; C-5782
+- D01/default seed 41287 unapplied_running (GL-004529): observed -16030, expected 0; C-6240
+- D01/default seed 41289 unapplied_running (R446): observed -195, expected 0; CUST97557
+- D01/default seed 41292 ar_running (L02096): observed -1, expected 0; INV-931351
+- D01/default seed 41293 ar_running (GL-003102): observed -1, expected 0; 2503-365156
+- D01/default seed 41293 ar_running (GL-003276): observed -1, expected 0; 2503-133260
+- D01/default seed 41296 unapplied_running (L03801): observed -60, expected 0; C-9163
+- D01/hard seed 41005 ar_running (GL-005749): observed -1, expected 0; INV-064884
+- D01/hard seed 41008 unapplied_running (GL-003144): observed -51, expected 0; C-9667
+- D01/hard seed 41011 unapplied_running (R3945): observed -229, expected 0; C-9377
+- D01/hard seed 41013 ar_running (R2646): observed -1, expected 0; INV-859119
+- D01/hard seed 41013 unapplied_running (R2930): observed -28, expected 0; CUST95480
+- D01/hard seed 41015 unapplied_running (L05401): observed -98, expected 0; CUST95106
+- D01/hard seed 41017 ar_running (L03233): observed -1, expected 0; INV-758326
+- D01/hard seed 41018 unapplied_running (L03230): observed -23, expected 0; C-8778
+- D01/hard seed 41020 unapplied_running (L01033): observed -303, expected 0; C-0028
+- D01/hard seed 41020 unapplied_running (L01160): observed -5, expected 0; C-8284
+- D01/hard seed 41024 unapplied_running (R3553): observed -143101, expected 0; E1698
+- D01/hard seed 41024 unapplied_running (R3860): observed -188319, expected 0; E1698
+- D01/hard seed 41025 unapplied_running (L02152): observed -10190, expected 0; C-6454
+- D01/hard seed 41029 unapplied_running (R2704): observed -271, expected 0; CUST08113
+- D01/hard seed 41029 unapplied_running (R2832): observed -19, expected 0; CUST09291
+- D01/hard seed 41037 ar_running (L03201): observed -1, expected 0; 2611-778760
+- D01/hard seed 41037 ar_running (L03244): observed -1, expected 0; 2611-453884
+- D01/hard seed 41038 unapplied_running (GL-005437): observed -279331, expected 0; C-0425
+- D01/hard seed 41040 ar_running (R5101): observed -1, expected 0; 2609-004130
+- D01/hard seed 41045 unapplied_running (R3505): observed -103, expected 0; E2744
+- D01/hard seed 41046 unapplied_running (L01489): observed -130, expected 0; E5006
+- D01/hard seed 41049 unapplied_running (R3890): observed -315, expected 0; E7530
+- D01/hard seed 41050 unapplied_running (L02856): observed -686, expected 0; CUST88801
+- D01/hard seed 41052 ar_running (R1027): observed -1, expected 0; SI-2026-798836
+- D01/hard seed 41053 unapplied_running (R2367): observed -63, expected 0; C-4903
+- D01/hard seed 41061 unapplied_running (L02053): observed -26452, expected 0; CUST15073
+- D01/hard seed 41063 ar_running (L01469): observed -1, expected 0; 2609-768605
+- D01/hard seed 41065 ar_running (R4601): observed -1, expected 0; F0032065
+- D01/hard seed 41073 unapplied_running (GL-001842): observed -420, expected 0; C-0848
+- D01/hard seed 41078 unapplied_running (L01768): observed -170902, expected 0; E7114
+- D01/hard seed 41079 unapplied_running (L05733): observed -20, expected 0; E5939
+- D01/hard seed 41080 unapplied_running (R5253): observed -83, expected 0; C-3829
+- D01/hard seed 41088 unapplied_running (GL-001810): observed -246, expected 0; C-6699
+- D01/hard seed 41088 unapplied_running (GL-002196): observed -256, expected 0; C-6699
+- D01/hard seed 41088 unapplied_running (GL-001984): observed -1, expected 0; C-3111
+- D01/hard seed 41091 unapplied_running (GL-003949): observed -57, expected 0; E5263
+- D01/hard seed 41092 unapplied_running (L03271): observed -4, expected 0; C-1933
+- D01/hard seed 41093 unapplied_running (L02066): observed -2, expected 0; CUST65465
+- D01/hard seed 41094 unapplied_running (R5650): observed -4, expected 0; E9227
+- D01/hard seed 41096 ar_running (R648): observed -1, expected 0; SI-2026-466918
+- D01/hard seed 41097 unapplied_running (R4467): observed -10407, expected 0; CUST02501
+- D01/hard seed 41098 ar_running (L04227): observed -1, expected 0; 2612-160441
+- D01/hard seed 41098 unapplied_running (L04443): observed -23291, expected 0; C-1225
+- D01/hard seed 41099 unapplied_running (L02896): observed -26, expected 0; C-9785
+- D01/hard seed 41099 unapplied_running (L03397): observed -9, expected 0; C-3675
+- D01/hard seed 41100 ar_running (GL-005821): observed -1, expected 0; 2612-882562
+- D01/hard seed 41103 ar_running (R2401): observed -1, expected 0; F0054592
+- D01/hard seed 41106 ar_running (L03291): observed -1, expected 0; 2507-119107
+- D01/hard seed 41108 unapplied_running (GL-003547): observed -174, expected 0; C-6620
+- D01/hard seed 41112 ar_running (R4842): observed -1, expected 0; 2508-594384
+- D01/hard seed 41115 ar_running (L03813): observed -1, expected 0; 2507-425960
+- D01/hard seed 41118 ar_running (GL-004927): observed -1, expected 0; INV-114883
+- D01/hard seed 41118 unapplied_running (GL-005060): observed -34, expected 0; CUST19568
+- D01/hard seed 41123 ar_running (R4880): observed -1, expected 0; INV-019033
+- D01/hard seed 41124 unapplied_running (L00585): observed -1, expected 0; CUST35077
+- D01/hard seed 41128 ar_running (GL-001786): observed -1, expected 0; SI-2026-305268
+- D01/hard seed 41134 unapplied_running (GL-005307): observed -201, expected 0; CUST34155
+- D01/hard seed 41137 ar_running (R1542): observed -1, expected 0; F0267943
+- D01/hard seed 41142 unapplied_running (GL-002585): observed -250, expected 0; C-5710
+- D01/hard seed 41150 unapplied_running (L05035): observed -85, expected 0; CUST48458
+- D01/hard seed 41151 ar_running (L00532): observed -1, expected 0; INV-263286
+- D01/hard seed 41156 ar_running (R5500): observed -1, expected 0; 2508-592873
+- D01/hard seed 41164 ar_running (R3355): observed -1, expected 0; 2504-064452
+- D01/hard seed 41165 unapplied_running (R3538): observed -228, expected 0; CUST82075
+- D01/hard seed 41170 ar_running (R3853): observed -1, expected 0; INV-886051
+- D01/hard seed 41170 ar_running (R3783): observed -1, expected 0; INV-044439
+- D01/hard seed 41172 unapplied_running (L02902): observed -136, expected 0; E2316
+- D01/hard seed 41173 unapplied_running (L05206): observed -69, expected 0; E8466
+- D01/hard seed 41174 ar_running (R1947): observed -1, expected 0; 2501-044446
+- D01/hard seed 41174 unapplied_running (R1343): observed -104023, expected 0; C-2817
+- D01/hard seed 41175 unapplied_running (L05070): observed -213, expected 0; C-7166
+- D01/hard seed 41176 unapplied_running (GL-005340): observed -579, expected 0; E1431
+- D01/hard seed 41179 ar_running (R5285): observed -1, expected 0; 2502-263509
+- D01/hard seed 41185 ar_running (L05076): observed -1, expected 0; SI-2026-814573
+- D01/hard seed 41194 ar_running (L05631): observed -1, expected 0; INV-589999
+- D01/hard seed 41197 unapplied_running (L04940): observed -5371, expected 0; E9990
+- D01/hard seed 41199 unapplied_running (GL-000525): observed -9, expected 0; CUST88252
+- D01/hard seed 41200 unapplied_running (R3852): observed -10, expected 0; E9348
+- D01/hard seed 41200 unapplied_running (R3947): observed -54, expected 0; E3676
+- D01/hard seed 41201 unapplied_running (GL-004366): observed -14, expected 0; E0747
+- D01/hard seed 41202 unapplied_running (R731): observed -67, expected 0; E8053
+- D01/hard seed 41204 ar_running (R3490): observed -1, expected 0; INV-929188
+- D01/hard seed 41204 unapplied_running (R3004): observed -33679, expected 0; C-2446
+- D01/hard seed 41208 unapplied_running (R1128): observed -13, expected 0; C-8157
+- D01/hard seed 41208 unapplied_running (R1712): observed -7, expected 0; C-8157
+- D01/hard seed 41210 unapplied_running (R1520): observed -1, expected 0; E8676
+- D01/hard seed 41211 unapplied_running (R1389): observed -1150, expected 0; E7884
+- D01/hard seed 41212 ar_running (GL-003946): observed -1, expected 0; 2603-669849
+- D01/hard seed 41216 ar_running (R2147): observed -1, expected 0; SI-2025-019680
+- D01/hard seed 41216 ar_running (R2145): observed -1, expected 0; SI-2025-363180
+- D01/hard seed 41216 unapplied_running (R2104): observed -66, expected 0; E3666
+- D01/hard seed 41218 unapplied_running (R2840): observed -84, expected 0; C-6028
+- D01/hard seed 41224 unapplied_running (GL-001578): observed -143, expected 0; E2277
+- D01/hard seed 41232 unapplied_running (R5419): observed -198, expected 0; E5211
+- D01/hard seed 41233 unapplied_running (GL-004739): observed -82, expected 0; C-3362
+- D01/hard seed 41234 ar_running (GL-002416): observed -1, expected 0; SI-2025-000350
+- D01/hard seed 41235 unapplied_running (GL-002070): observed -17333, expected 0; CUST16801
+- D01/hard seed 41236 unapplied_running (GL-003576): observed -216, expected 0; CUST89445
+- D01/hard seed 41240 ar_running (GL-002596): observed -1, expected 0; F0438164
+- D01/hard seed 41243 unapplied_running (R2468): observed -38, expected 0; E7080
+- D01/hard seed 41244 unapplied_running (L01940): observed -194678, expected 0; E7439
+- D01/hard seed 41249 ar_running (R4435): observed -1, expected 0; SI-2026-018892
+- D01/hard seed 41249 unapplied_running (R4476): observed -16, expected 0; E0639
+- D01/hard seed 41251 ar_running (GL-004129): observed -1, expected 0; 2602-317250
+- D01/hard seed 41253 ar_running (L01044): observed -1, expected 0; 2502-305985
+- D01/hard seed 41253 ar_running (L00832): observed -1, expected 0; 2502-633501
+- D01/hard seed 41262 ar_running (GL-003336): observed -1, expected 0; INV-882581
+- D01/hard seed 41266 ar_running (GL-002148): observed -1, expected 0; F0818242
+- D01/hard seed 41266 ar_running (GL-001994): observed -1, expected 0; F0254037
+- D01/hard seed 41267 unapplied_running (GL-004356): observed -164, expected 0; E8308
+- D01/hard seed 41276 unapplied_running (GL-004211): observed -32, expected 0; CUST98146
+- D01/hard seed 41278 ar_running (GL-000895): observed -1, expected 0; SI-2025-730616
+- D01/hard seed 41279 ar_running (L01297): observed -1, expected 0; F0674420
+- D01/hard seed 41279 unapplied_running (L01357): observed -154, expected 0; C-1009
+- D01/hard seed 41282 ar_running (R4406): observed -1, expected 0; F0128741
+- D01/hard seed 41284 unapplied_running (R3587): observed -108, expected 0; C-7663
+- D01/hard seed 41286 unapplied_running (GL-002193): observed -40, expected 0; C-7586
+- D01/hard seed 41287 unapplied_running (GL-003483): observed -259, expected 0; CUST73028
+- D01/hard seed 41288 unapplied_running (L02451): observed -14938, expected 0; E7606
+- D01/hard seed 41289 unapplied_running (L03602): observed -1092, expected 0; CUST97015
+- D01/hard seed 41289 unapplied_running (L03815): observed -251, expected 0; CUST84414
+- D01/hard seed 41290 ar_running (R5259): observed -1, expected 0; F0617458
+- D01/hard seed 41291 ar_running (R5756): observed -1, expected 0; 2604-148765
+- D01/hard seed 41291 unapplied_running (R5269): observed -78791, expected 0; E8132
+- D01/hard seed 41292 ar_running (GL-005681): observed -1, expected 0; INV-315947
+- D01/hard seed 41292 unapplied_running (GL-005406): observed -13, expected 0; E5289
+- D01/hard seed 41295 ar_running (R3380): observed -1, expected 0; F0203109
+- D01/hard seed 41298 unapplied_running (R3356): observed -4, expected 0; C-7601
+- D01/hard seed 41299 ar_running (R3080): observed -1, expected 0; SI-2025-343694
+- D01/hard seed 41299 unapplied_running (R2644): observed -27, expected 0; E7083
+- D02/default seed 41005 unapplied_running (GL-005178): observed -923, expected 0; CUST99859
+- D02/default seed 41006 unapplied_running (GL-001878): observed -500336, expected 0; E0342
+- D02/default seed 41007 ar_running (R2705): observed -1, expected 0; F0057818
+- D02/default seed 41011 unapplied_running (L00316): observed -15, expected 0; C-5874
+- D02/default seed 41012 unapplied_running (GL-005228): observed -87, expected 0; CUST57663
+- D02/default seed 41013 unapplied_running (R3768): observed -168, expected 0; E6981
+- D02/default seed 41014 unapplied_running (L03913): observed -2, expected 0; C-5080
+- D02/default seed 41019 ar_running (GL-000793): observed -1, expected 0; INV-355747
+- D02/default seed 41020 unapplied_running (L02377): observed -5, expected 0; E7129
+- D02/default seed 41021 unapplied_running (R1433): observed -214, expected 0; E1968
+- D02/default seed 41028 ar_running (L02016): observed -1, expected 0; F0606872
+- D02/default seed 41028 unapplied_running (L02007): observed -56, expected 0; C-7863
+- D02/default seed 41029 unapplied_running (R384): observed -128, expected 0; CUST43875
+- D02/default seed 41032 unapplied_running (L00595): observed -86531, expected 0; C-2404
+- D02/default seed 41034 ar_running (R229): observed -1, expected 0; 2503-857257
+- D02/default seed 41039 ar_running (R988): observed -1, expected 0; SI-2025-984723
+- D02/default seed 41043 unapplied_running (R3711): observed -667, expected 0; C-8659
+- D02/default seed 41043 unapplied_running (R3858): observed -186, expected 0; C-7120
+- D02/default seed 41044 unapplied_running (R4057): observed -32683, expected 0; E4613
+- D02/default seed 41044 unapplied_running (R4054): observed -55854, expected 0; E9712
+- D02/default seed 41045 ar_running (R4175): observed -1, expected 0; F0254951
+- D02/default seed 41058 unapplied_running (L01321): observed -12, expected 0; C-0392
+- D02/default seed 41059 unapplied_running (R2679): observed -41, expected 0; C-8026
+- D02/default seed 41061 unapplied_running (R2190): observed -661, expected 0; CUST70335
+- D02/default seed 41064 unapplied_running (R987): observed -47522, expected 0; CUST98460
+- D02/default seed 41064 unapplied_running (R1036): observed -2977, expected 0; CUST42293
+- D02/default seed 41066 unapplied_running (L04325): observed -555, expected 0; CUST55531
+- D02/default seed 41068 unapplied_running (R1521): observed -64, expected 0; CUST07021
+- D02/default seed 41071 unapplied_running (GL-000910): observed -132, expected 0; C-5747
+- D02/default seed 41074 ar_running (GL-003948): observed -1, expected 0; 2601-593279
+- D02/default seed 41080 unapplied_running (GL-004509): observed -14, expected 0; E9009
+- D02/default seed 41081 unapplied_running (R4233): observed -225, expected 0; C-7364
+- D02/default seed 41082 ar_running (GL-005049): observed -1, expected 0; F0880818
+- D02/default seed 41084 unapplied_running (GL-001329): observed -91, expected 0; CUST52532
+- D02/default seed 41084 unapplied_running (GL-001504): observed -16, expected 0; CUST14537
+- D02/default seed 41086 unapplied_running (L03721): observed -214, expected 0; C-6213
+- D02/default seed 41091 unapplied_running (R2905): observed -9, expected 0; C-1116
+- D02/default seed 41094 ar_running (R3306): observed -1, expected 0; INV-357622
+- D02/default seed 41100 ar_running (R1817): observed -1, expected 0; 2510-112034
+- D02/default seed 41102 unapplied_running (L00536): observed -2, expected 0; CUST61593
+- D02/default seed 41105 unapplied_running (GL-002236): observed -34, expected 0; CUST43566
+- D02/default seed 41105 unapplied_running (GL-002244): observed -184, expected 0; CUST81946
+- D02/default seed 41106 unapplied_running (GL-003529): observed -74, expected 0; C-0932
+- D02/default seed 41113 unapplied_running (GL-004473): observed -115, expected 0; CUST50826
+- D02/default seed 41115 unapplied_running (L04189): observed -224685, expected 0; E1486
+- D02/default seed 41115 unapplied_running (L04274): observed -37185, expected 0; E5780
+- D02/default seed 41116 unapplied_running (GL-002108): observed -73, expected 0; C-2466
+- D02/default seed 41117 unapplied_running (GL-002803): observed -1, expected 0; E1961
+- D02/default seed 41119 unapplied_running (GL-000964): observed -3, expected 0; E2473
+- D02/default seed 41124 unapplied_running (GL-002245): observed -205, expected 0; C-6104
+- D02/default seed 41125 unapplied_running (L00377): observed -1181, expected 0; CUST50140
+- D02/default seed 41127 ar_running (GL-002840): observed -1, expected 0; F0686931
+- D02/default seed 41128 unapplied_running (GL-002910): observed -97, expected 0; C-9525
+- D02/default seed 41131 unapplied_running (L04366): observed -67, expected 0; C-2139
+- D02/default seed 41131 unapplied_running (L04354): observed -353, expected 0; C-6052
+- D02/default seed 41132 unapplied_running (R644): observed -46, expected 0; C-9933
+- D02/default seed 41137 ar_running (GL-001286): observed -1, expected 0; 2501-410390
+- D02/default seed 41140 unapplied_running (L01432): observed -446, expected 0; E0345
+- D02/default seed 41141 ar_running (R3610): observed -1, expected 0; INV-054288
+- D02/default seed 41142 unapplied_running (L03781): observed -10874, expected 0; CUST89097
+- D02/default seed 41144 unapplied_running (L03241): observed -291, expected 0; E6937
+- D02/default seed 41147 unapplied_running (L03708): observed -85, expected 0; E5990
+- D02/default seed 41149 unapplied_running (R708): observed -60771, expected 0; C-9138
+- D02/default seed 41150 unapplied_running (L01764): observed -742, expected 0; C-4875
+- D02/default seed 41157 unapplied_running (L04564): observed -20455, expected 0; CUST09866
+- D02/default seed 41158 unapplied_running (GL-000362): observed -1214, expected 0; E5459
+- D02/default seed 41166 ar_running (GL-004004): observed -1, expected 0; 2506-422686
+- D02/default seed 41170 unapplied_running (L01112): observed -27, expected 0; C-4024
+- D02/default seed 41171 unapplied_running (L02781): observed -314, expected 0; C-5870
+- D02/default seed 41173 unapplied_running (GL-001084): observed -132, expected 0; C-4096
+- D02/default seed 41174 ar_running (GL-000390): observed -1, expected 0; SI-2025-590188
+- D02/default seed 41174 unapplied_running (GL-000426): observed -286, expected 0; C-4736
+- D02/default seed 41178 unapplied_running (L03744): observed -118378, expected 0; E8203
+- D02/default seed 41182 ar_running (GL-000759): observed -1, expected 0; SI-2026-721173
+- D02/default seed 41183 unapplied_running (L02610): observed -7, expected 0; CUST45617
+- D02/default seed 41190 unapplied_running (GL-003022): observed -314, expected 0; C-6621
+- D02/default seed 41192 ar_running (GL-004482): observed -1, expected 0; 2611-659303
+- D02/default seed 41193 unapplied_running (GL-002517): observed -78, expected 0; CUST47530
+- D02/default seed 41194 unapplied_running (L00725): observed -46, expected 0; E1812
+- D02/default seed 41194 unapplied_running (L00782): observed -384, expected 0; E1022
+- D02/default seed 41195 ar_running (GL-003793): observed -1, expected 0; F0615449
+- D02/default seed 41196 unapplied_running (GL-003493): observed -44, expected 0; E4315
+- D02/default seed 41197 unapplied_running (L02821): observed -3071, expected 0; CUST82232
+- D02/default seed 41198 unapplied_running (L03718): observed -47, expected 0; CUST24584
+- D02/default seed 41199 ar_running (R2679): observed -1, expected 0; F0107215
+- D02/default seed 41203 unapplied_running (GL-002257): observed -220, expected 0; CUST44083
+- D02/default seed 41205 unapplied_running (R4514): observed -12, expected 0; E5788
+- D02/default seed 41208 unapplied_running (L02934): observed -49953, expected 0; CUST80841
+- D02/default seed 41209 unapplied_running (GL-004432): observed -74, expected 0; C-3115
+- D02/default seed 41212 ar_running (L01373): observed -1, expected 0; SI-2025-273988
+- D02/default seed 41214 unapplied_running (R2379): observed -367, expected 0; E9465
+- D02/default seed 41216 unapplied_running (R5038): observed -74, expected 0; C-8256
+- D02/default seed 41220 unapplied_running (GL-002466): observed -26938, expected 0; E5508
+- D02/default seed 41222 ar_running (GL-002092): observed -1, expected 0; INV-911729
+- D02/default seed 41224 unapplied_running (L02932): observed -402, expected 0; E4306
+- D02/default seed 41225 ar_running (R4393): observed -1, expected 0; INV-763469
+- D02/default seed 41225 ar_running (R4435): observed -1, expected 0; INV-981731
+- D02/default seed 41229 unapplied_running (GL-004718): observed -115, expected 0; C-5574
+- D02/default seed 41234 unapplied_running (R2145): observed -46, expected 0; CUST28806
+- D02/default seed 41234 unapplied_running (R2201): observed -21, expected 0; CUST09400
+- D02/default seed 41236 unapplied_running (L02890): observed -55, expected 0; CUST67673
+- D02/default seed 41239 ar_running (R1295): observed -1, expected 0; 2611-562598
+- D02/default seed 41242 unapplied_running (R736): observed -119, expected 0; E9730
+- D02/default seed 41243 ar_running (GL-005203): observed -1, expected 0; F0481630
+- D02/default seed 41243 unapplied_running (GL-005212): observed -32, expected 0; CUST32225
+- D02/default seed 41244 unapplied_running (L03904): observed -24475, expected 0; CUST93203
+- D02/default seed 41244 unapplied_running (L04056): observed -49167, expected 0; CUST54052
+- D02/default seed 41244 unapplied_running (L04053): observed -42070, expected 0; CUST05049
+- D02/default seed 41245 ar_running (R2719): observed -1, expected 0; INV-988106
+- D02/default seed 41247 unapplied_running (L01470): observed -3, expected 0; CUST42949
+- D02/default seed 41248 ar_running (L00513): observed -1, expected 0; F0370420
+- D02/default seed 41248 unapplied_running (L00432): observed -552, expected 0; E8174
+- D02/default seed 41256 unapplied_running (GL-001834): observed -173, expected 0; C-4466
+- D02/default seed 41257 unapplied_running (L00782): observed -34, expected 0; E4551
+- D02/default seed 41258 ar_running (R1433): observed -1, expected 0; SI-2026-923475
+- D02/default seed 41258 unapplied_running (R1238): observed -227031, expected 0; CUST78127
+- D02/default seed 41262 ar_running (GL-001158): observed -1, expected 0; F0515687
+- D02/default seed 41263 unapplied_running (R5022): observed -91, expected 0; CUST88062
+- D02/default seed 41264 unapplied_running (R3651): observed -83, expected 0; C-1145
+- D02/default seed 41265 unapplied_running (GL-001966): observed -170, expected 0; C-5923
+- D02/default seed 41266 unapplied_running (L00492): observed -2186, expected 0; E7360
+- D02/default seed 41267 unapplied_running (L03551): observed -1362, expected 0; E8408
+- D02/default seed 41268 unapplied_running (R3548): observed -31589, expected 0; C-4687
+- D02/default seed 41270 ar_running (GL-000401): observed -1, expected 0; INV-215118
+- D02/default seed 41270 unapplied_running (GL-000443): observed -23, expected 0; CUST74275
+- D02/default seed 41277 unapplied_running (L01581): observed -40, expected 0; E3442
+- D02/default seed 41277 unapplied_running (L01680): observed -63, expected 0; E3442
+- D02/default seed 41277 unapplied_running (L01733): observed -88, expected 0; E3442
+- D02/default seed 41282 unapplied_running (GL-003747): observed -56670, expected 0; E8942
+- D02/default seed 41283 unapplied_running (L04036): observed -57, expected 0; CUST56709
+- D02/default seed 41287 unapplied_running (GL-004422): observed -33477, expected 0; C-5782
+- D02/default seed 41287 unapplied_running (GL-004529): observed -16030, expected 0; C-6240
+- D02/default seed 41289 unapplied_running (R446): observed -195, expected 0; CUST97557
+- D02/default seed 41292 ar_running (L02096): observed -1, expected 0; INV-931351
+- D02/default seed 41293 ar_running (GL-003102): observed -1, expected 0; 2503-365156
+- D02/default seed 41293 ar_running (GL-003276): observed -1, expected 0; 2503-133260
+- D02/default seed 41296 unapplied_running (L03801): observed -60, expected 0; C-9163
+- D02/hard seed 41005 ar_running (GL-005749): observed -1, expected 0; INV-064884
+- D02/hard seed 41008 unapplied_running (GL-003144): observed -51, expected 0; C-9667
+- D02/hard seed 41011 unapplied_running (R3945): observed -229, expected 0; C-9377
+- D02/hard seed 41013 ar_running (R2646): observed -1, expected 0; INV-859119
+- D02/hard seed 41013 unapplied_running (R2930): observed -28, expected 0; CUST95480
+- D02/hard seed 41015 unapplied_running (L05401): observed -98, expected 0; CUST95106
+- D02/hard seed 41017 ar_running (L03233): observed -1, expected 0; INV-758326
+- D02/hard seed 41018 unapplied_running (L03230): observed -23, expected 0; C-8778
+- D02/hard seed 41020 unapplied_running (L01033): observed -303, expected 0; C-0028
+- D02/hard seed 41020 unapplied_running (L01160): observed -5, expected 0; C-8284
+- D02/hard seed 41024 unapplied_running (R3553): observed -143101, expected 0; E1698
+- D02/hard seed 41024 unapplied_running (R3860): observed -188319, expected 0; E1698
+- D02/hard seed 41025 unapplied_running (L02152): observed -10190, expected 0; C-6454
+- D02/hard seed 41029 unapplied_running (R2704): observed -271, expected 0; CUST08113
+- D02/hard seed 41029 unapplied_running (R2832): observed -19, expected 0; CUST09291
+- D02/hard seed 41037 ar_running (L03201): observed -1, expected 0; 2611-778760
+- D02/hard seed 41037 ar_running (L03244): observed -1, expected 0; 2611-453884
+- D02/hard seed 41038 unapplied_running (GL-005437): observed -279331, expected 0; C-0425
+- D02/hard seed 41040 ar_running (R5101): observed -1, expected 0; 2609-004130
+- D02/hard seed 41045 unapplied_running (R3505): observed -103, expected 0; E2744
+- D02/hard seed 41046 unapplied_running (L01489): observed -130, expected 0; E5006
+- D02/hard seed 41049 unapplied_running (R3890): observed -315, expected 0; E7530
+- D02/hard seed 41050 unapplied_running (L02856): observed -686, expected 0; CUST88801
+- D02/hard seed 41052 ar_running (R1027): observed -1, expected 0; SI-2026-798836
+- D02/hard seed 41053 unapplied_running (R2367): observed -63, expected 0; C-4903
+- D02/hard seed 41061 unapplied_running (L02053): observed -26452, expected 0; CUST15073
+- D02/hard seed 41063 ar_running (L01469): observed -1, expected 0; 2609-768605
+- D02/hard seed 41065 ar_running (R4601): observed -1, expected 0; F0032065
+- D02/hard seed 41073 unapplied_running (GL-001842): observed -420, expected 0; C-0848
+- D02/hard seed 41078 unapplied_running (L01768): observed -170902, expected 0; E7114
+- D02/hard seed 41079 unapplied_running (L05733): observed -20, expected 0; E5939
+- D02/hard seed 41080 unapplied_running (R5253): observed -83, expected 0; C-3829
+- D02/hard seed 41088 unapplied_running (GL-001810): observed -246, expected 0; C-6699
+- D02/hard seed 41088 unapplied_running (GL-002196): observed -256, expected 0; C-6699
+- D02/hard seed 41088 unapplied_running (GL-001984): observed -1, expected 0; C-3111
+- D02/hard seed 41091 unapplied_running (GL-003949): observed -57, expected 0; E5263
+- D02/hard seed 41092 unapplied_running (L03271): observed -4, expected 0; C-1933
+- D02/hard seed 41093 unapplied_running (L02066): observed -2, expected 0; CUST65465
+- D02/hard seed 41094 unapplied_running (R5650): observed -4, expected 0; E9227
+- D02/hard seed 41096 ar_running (R648): observed -1, expected 0; SI-2026-466918
+- D02/hard seed 41097 unapplied_running (R4467): observed -10407, expected 0; CUST02501
+- D02/hard seed 41098 ar_running (L04227): observed -1, expected 0; 2612-160441
+- D02/hard seed 41098 unapplied_running (L04443): observed -23291, expected 0; C-1225
+- D02/hard seed 41099 unapplied_running (L02896): observed -26, expected 0; C-9785
+- D02/hard seed 41099 unapplied_running (L03397): observed -9, expected 0; C-3675
+- D02/hard seed 41100 ar_running (GL-005821): observed -1, expected 0; 2612-882562
+- D02/hard seed 41103 ar_running (R2401): observed -1, expected 0; F0054592
+- D02/hard seed 41106 ar_running (L03291): observed -1, expected 0; 2507-119107
+- D02/hard seed 41108 unapplied_running (GL-003547): observed -174, expected 0; C-6620
+- D02/hard seed 41112 ar_running (R4842): observed -1, expected 0; 2508-594384
+- D02/hard seed 41115 ar_running (L03813): observed -1, expected 0; 2507-425960
+- D02/hard seed 41118 ar_running (GL-004927): observed -1, expected 0; INV-114883
+- D02/hard seed 41118 unapplied_running (GL-005060): observed -34, expected 0; CUST19568
+- D02/hard seed 41123 ar_running (R4880): observed -1, expected 0; INV-019033
+- D02/hard seed 41124 unapplied_running (L00585): observed -1, expected 0; CUST35077
+- D02/hard seed 41128 ar_running (GL-001786): observed -1, expected 0; SI-2026-305268
+- D02/hard seed 41134 unapplied_running (GL-005307): observed -201, expected 0; CUST34155
+- D02/hard seed 41137 ar_running (R1542): observed -1, expected 0; F0267943
+- D02/hard seed 41142 unapplied_running (GL-002585): observed -250, expected 0; C-5710
+- D02/hard seed 41150 unapplied_running (L05035): observed -85, expected 0; CUST48458
+- D02/hard seed 41151 ar_running (L00532): observed -1, expected 0; INV-263286
+- D02/hard seed 41156 ar_running (R5500): observed -1, expected 0; 2508-592873
+- D02/hard seed 41164 ar_running (R3355): observed -1, expected 0; 2504-064452
+- D02/hard seed 41165 unapplied_running (R3538): observed -228, expected 0; CUST82075
+- D02/hard seed 41170 ar_running (R3853): observed -1, expected 0; INV-886051
+- D02/hard seed 41170 ar_running (R3783): observed -1, expected 0; INV-044439
+- D02/hard seed 41172 unapplied_running (L02902): observed -136, expected 0; E2316
+- D02/hard seed 41173 unapplied_running (L05206): observed -69, expected 0; E8466
+- D02/hard seed 41174 ar_running (R1947): observed -1, expected 0; 2501-044446
+- D02/hard seed 41174 unapplied_running (R1343): observed -104023, expected 0; C-2817
+- D02/hard seed 41175 unapplied_running (L05070): observed -213, expected 0; C-7166
+- D02/hard seed 41176 unapplied_running (GL-005340): observed -579, expected 0; E1431
+- D02/hard seed 41179 ar_running (R5285): observed -1, expected 0; 2502-263509
+- D02/hard seed 41185 ar_running (L05076): observed -1, expected 0; SI-2026-814573
+- D02/hard seed 41194 ar_running (L05631): observed -1, expected 0; INV-589999
+- D02/hard seed 41197 unapplied_running (L04940): observed -5371, expected 0; E9990
+- D02/hard seed 41199 unapplied_running (GL-000525): observed -9, expected 0; CUST88252
+- D02/hard seed 41200 unapplied_running (R3852): observed -10, expected 0; E9348
+- D02/hard seed 41200 unapplied_running (R3947): observed -54, expected 0; E3676
+- D02/hard seed 41201 unapplied_running (GL-004366): observed -14, expected 0; E0747
+- D02/hard seed 41202 unapplied_running (R731): observed -67, expected 0; E8053
+- D02/hard seed 41204 ar_running (R3490): observed -1, expected 0; INV-929188
+- D02/hard seed 41204 unapplied_running (R3004): observed -33679, expected 0; C-2446
+- D02/hard seed 41208 unapplied_running (R1128): observed -13, expected 0; C-8157
+- D02/hard seed 41208 unapplied_running (R1712): observed -7, expected 0; C-8157
+- D02/hard seed 41210 unapplied_running (R1520): observed -1, expected 0; E8676
+- D02/hard seed 41211 unapplied_running (R1389): observed -1150, expected 0; E7884
+- D02/hard seed 41212 ar_running (GL-003946): observed -1, expected 0; 2603-669849
+- D02/hard seed 41216 ar_running (R2147): observed -1, expected 0; SI-2025-019680
+- D02/hard seed 41216 ar_running (R2145): observed -1, expected 0; SI-2025-363180
+- D02/hard seed 41216 unapplied_running (R2104): observed -66, expected 0; E3666
+- D02/hard seed 41218 unapplied_running (R2840): observed -84, expected 0; C-6028
+- D02/hard seed 41224 unapplied_running (GL-001578): observed -143, expected 0; E2277
+- D02/hard seed 41232 unapplied_running (R5419): observed -198, expected 0; E5211
+- D02/hard seed 41233 unapplied_running (GL-004739): observed -82, expected 0; C-3362
+- D02/hard seed 41234 ar_running (GL-002416): observed -1, expected 0; SI-2025-000350
+- D02/hard seed 41235 unapplied_running (GL-002070): observed -17333, expected 0; CUST16801
+- D02/hard seed 41236 unapplied_running (GL-003576): observed -216, expected 0; CUST89445
+- D02/hard seed 41240 ar_running (GL-002596): observed -1, expected 0; F0438164
+- D02/hard seed 41243 unapplied_running (R2468): observed -38, expected 0; E7080
+- D02/hard seed 41244 unapplied_running (L01940): observed -194678, expected 0; E7439
+- D02/hard seed 41249 ar_running (R4435): observed -1, expected 0; SI-2026-018892
+- D02/hard seed 41249 unapplied_running (R4476): observed -16, expected 0; E0639
+- D02/hard seed 41251 ar_running (GL-004129): observed -1, expected 0; 2602-317250
+- D02/hard seed 41253 ar_running (L01044): observed -1, expected 0; 2502-305985
+- D02/hard seed 41253 ar_running (L00832): observed -1, expected 0; 2502-633501
+- D02/hard seed 41262 ar_running (GL-003336): observed -1, expected 0; INV-882581
+- D02/hard seed 41266 ar_running (GL-002148): observed -1, expected 0; F0818242
+- D02/hard seed 41266 ar_running (GL-001994): observed -1, expected 0; F0254037
+- D02/hard seed 41267 unapplied_running (GL-004356): observed -164, expected 0; E8308
+- D02/hard seed 41276 unapplied_running (GL-004211): observed -32, expected 0; CUST98146
+- D02/hard seed 41278 ar_running (GL-000895): observed -1, expected 0; SI-2025-730616
+- D02/hard seed 41279 ar_running (L01297): observed -1, expected 0; F0674420
+- D02/hard seed 41279 unapplied_running (L01357): observed -154, expected 0; C-1009
+- D02/hard seed 41282 ar_running (R4406): observed -1, expected 0; F0128741
+- D02/hard seed 41284 unapplied_running (R3587): observed -108, expected 0; C-7663
+- D02/hard seed 41286 unapplied_running (GL-002193): observed -40, expected 0; C-7586
+- D02/hard seed 41287 unapplied_running (GL-003483): observed -259, expected 0; CUST73028
+- D02/hard seed 41288 unapplied_running (L02451): observed -14938, expected 0; E7606
+- D02/hard seed 41289 unapplied_running (L03602): observed -1092, expected 0; CUST97015
+- D02/hard seed 41289 unapplied_running (L03815): observed -251, expected 0; CUST84414
+- D02/hard seed 41290 ar_running (R5259): observed -1, expected 0; F0617458
+- D02/hard seed 41291 ar_running (R5756): observed -1, expected 0; 2604-148765
+- D02/hard seed 41291 unapplied_running (R5269): observed -78791, expected 0; E8132
+- D02/hard seed 41292 ar_running (GL-005681): observed -1, expected 0; INV-315947
+- D02/hard seed 41292 unapplied_running (GL-005406): observed -13, expected 0; E5289
+- D02/hard seed 41295 ar_running (R3380): observed -1, expected 0; F0203109
+- D02/hard seed 41298 unapplied_running (R3356): observed -4, expected 0; C-7601
+- D02/hard seed 41299 ar_running (R3080): observed -1, expected 0; SI-2025-343694
+- D02/hard seed 41299 unapplied_running (R2644): observed -27, expected 0; E7083
+- D03/default seed 41005 unapplied_running (GL-005178): observed -923, expected 0; CUST99859
+- D03/default seed 41006 unapplied_running (GL-001878): observed -500336, expected 0; E0342
+- D03/default seed 41007 ar_running (R2705): observed -1, expected 0; F0057818
+- D03/default seed 41011 unapplied_running (L00316): observed -15, expected 0; C-5874
+- D03/default seed 41012 unapplied_running (GL-005228): observed -87, expected 0; CUST57663
+- D03/default seed 41013 unapplied_running (R3768): observed -168, expected 0; E6981
+- D03/default seed 41014 unapplied_running (L03913): observed -2, expected 0; C-5080
+- D03/default seed 41019 ar_running (GL-000793): observed -1, expected 0; INV-355747
+- D03/default seed 41020 unapplied_running (L02377): observed -5, expected 0; E7129
+- D03/default seed 41021 unapplied_running (R1433): observed -214, expected 0; E1968
+- D03/default seed 41028 ar_running (L02016): observed -1, expected 0; F0606872
+- D03/default seed 41028 unapplied_running (L02007): observed -56, expected 0; C-7863
+- D03/default seed 41029 unapplied_running (R384): observed -128, expected 0; CUST43875
+- D03/default seed 41032 unapplied_running (L00595): observed -86531, expected 0; C-2404
+- D03/default seed 41034 ar_running (R229): observed -1, expected 0; 2503-857257
+- D03/default seed 41039 ar_running (R988): observed -1, expected 0; SI-2025-984723
+- D03/default seed 41043 unapplied_running (R3711): observed -667, expected 0; C-8659
+- D03/default seed 41043 unapplied_running (R3858): observed -186, expected 0; C-7120
+- D03/default seed 41044 unapplied_running (R4057): observed -32683, expected 0; E4613
+- D03/default seed 41044 unapplied_running (R4054): observed -55854, expected 0; E9712
+- D03/default seed 41045 ar_running (R4175): observed -1, expected 0; F0254951
+- D03/default seed 41058 unapplied_running (L01321): observed -12, expected 0; C-0392
+- D03/default seed 41059 unapplied_running (R2679): observed -41, expected 0; C-8026
+- D03/default seed 41061 unapplied_running (R2190): observed -661, expected 0; CUST70335
+- D03/default seed 41064 unapplied_running (R987): observed -47522, expected 0; CUST98460
+- D03/default seed 41064 unapplied_running (R1036): observed -2977, expected 0; CUST42293
+- D03/default seed 41066 unapplied_running (L04325): observed -555, expected 0; CUST55531
+- D03/default seed 41068 unapplied_running (R1521): observed -64, expected 0; CUST07021
+- D03/default seed 41071 unapplied_running (GL-000910): observed -132, expected 0; C-5747
+- D03/default seed 41074 ar_running (GL-003948): observed -1, expected 0; 2601-593279
+- D03/default seed 41080 unapplied_running (GL-004509): observed -14, expected 0; E9009
+- D03/default seed 41081 unapplied_running (R4233): observed -225, expected 0; C-7364
+- D03/default seed 41082 ar_running (GL-005049): observed -1, expected 0; F0880818
+- D03/default seed 41084 unapplied_running (GL-001329): observed -91, expected 0; CUST52532
+- D03/default seed 41084 unapplied_running (GL-001504): observed -16, expected 0; CUST14537
+- D03/default seed 41086 unapplied_running (L03721): observed -214, expected 0; C-6213
+- D03/default seed 41091 unapplied_running (R2905): observed -9, expected 0; C-1116
+- D03/default seed 41094 ar_running (R3306): observed -1, expected 0; INV-357622
+- D03/default seed 41100 ar_running (R1817): observed -1, expected 0; 2510-112034
+- D03/default seed 41102 unapplied_running (L00536): observed -2, expected 0; CUST61593
+- D03/default seed 41105 unapplied_running (GL-002236): observed -34, expected 0; CUST43566
+- D03/default seed 41105 unapplied_running (GL-002244): observed -184, expected 0; CUST81946
+- D03/default seed 41106 unapplied_running (GL-003529): observed -74, expected 0; C-0932
+- D03/default seed 41113 unapplied_running (GL-004473): observed -115, expected 0; CUST50826
+- D03/default seed 41115 unapplied_running (L04189): observed -224685, expected 0; E1486
+- D03/default seed 41115 unapplied_running (L04274): observed -37185, expected 0; E5780
+- D03/default seed 41116 unapplied_running (GL-002108): observed -73, expected 0; C-2466
+- D03/default seed 41117 unapplied_running (GL-002803): observed -1, expected 0; E1961
+- D03/default seed 41119 unapplied_running (GL-000964): observed -3, expected 0; E2473
+- D03/default seed 41124 unapplied_running (GL-002245): observed -205, expected 0; C-6104
+- D03/default seed 41125 unapplied_running (L00377): observed -1181, expected 0; CUST50140
+- D03/default seed 41127 ar_running (GL-002840): observed -1, expected 0; F0686931
+- D03/default seed 41128 unapplied_running (GL-002910): observed -97, expected 0; C-9525
+- D03/default seed 41131 unapplied_running (L04366): observed -67, expected 0; C-2139
+- D03/default seed 41131 unapplied_running (L04354): observed -353, expected 0; C-6052
+- D03/default seed 41132 unapplied_running (R644): observed -46, expected 0; C-9933
+- D03/default seed 41137 ar_running (GL-001286): observed -1, expected 0; 2501-410390
+- D03/default seed 41140 unapplied_running (L01432): observed -446, expected 0; E0345
+- D03/default seed 41141 ar_running (R3610): observed -1, expected 0; INV-054288
+- D03/default seed 41142 unapplied_running (L03781): observed -10874, expected 0; CUST89097
+- D03/default seed 41144 unapplied_running (L03241): observed -291, expected 0; E6937
+- D03/default seed 41147 unapplied_running (L03708): observed -85, expected 0; E5990
+- D03/default seed 41149 unapplied_running (R708): observed -60771, expected 0; C-9138
+- D03/default seed 41150 unapplied_running (L01764): observed -742, expected 0; C-4875
+- D03/default seed 41157 unapplied_running (L04564): observed -20455, expected 0; CUST09866
+- D03/default seed 41158 unapplied_running (GL-000362): observed -1214, expected 0; E5459
+- D03/default seed 41166 ar_running (GL-004004): observed -1, expected 0; 2506-422686
+- D03/default seed 41170 unapplied_running (L01112): observed -27, expected 0; C-4024
+- D03/default seed 41171 unapplied_running (L02781): observed -314, expected 0; C-5870
+- D03/default seed 41173 unapplied_running (GL-001084): observed -132, expected 0; C-4096
+- D03/default seed 41174 ar_running (GL-000390): observed -1, expected 0; SI-2025-590188
+- D03/default seed 41174 unapplied_running (GL-000426): observed -286, expected 0; C-4736
+- D03/default seed 41178 unapplied_running (L03744): observed -118378, expected 0; E8203
+- D03/default seed 41182 ar_running (GL-000759): observed -1, expected 0; SI-2026-721173
+- D03/default seed 41183 unapplied_running (L02610): observed -7, expected 0; CUST45617
+- D03/default seed 41190 unapplied_running (GL-003022): observed -314, expected 0; C-6621
+- D03/default seed 41192 ar_running (GL-004482): observed -1, expected 0; 2611-659303
+- D03/default seed 41193 unapplied_running (GL-002517): observed -78, expected 0; CUST47530
+- D03/default seed 41194 unapplied_running (L00725): observed -46, expected 0; E1812
+- D03/default seed 41194 unapplied_running (L00782): observed -384, expected 0; E1022
+- D03/default seed 41195 ar_running (GL-003793): observed -1, expected 0; F0615449
+- D03/default seed 41196 unapplied_running (GL-003493): observed -44, expected 0; E4315
+- D03/default seed 41197 unapplied_running (L02821): observed -3071, expected 0; CUST82232
+- D03/default seed 41198 unapplied_running (L03718): observed -47, expected 0; CUST24584
+- D03/default seed 41199 ar_running (R2679): observed -1, expected 0; F0107215
+- D03/default seed 41203 unapplied_running (GL-002257): observed -220, expected 0; CUST44083
+- D03/default seed 41205 unapplied_running (R4514): observed -12, expected 0; E5788
+- D03/default seed 41208 unapplied_running (L02934): observed -49953, expected 0; CUST80841
+- D03/default seed 41209 unapplied_running (GL-004432): observed -74, expected 0; C-3115
+- D03/default seed 41212 ar_running (L01373): observed -1, expected 0; SI-2025-273988
+- D03/default seed 41214 unapplied_running (R2379): observed -367, expected 0; E9465
+- D03/default seed 41216 unapplied_running (R5038): observed -74, expected 0; C-8256
+- D03/default seed 41220 unapplied_running (GL-002466): observed -26938, expected 0; E5508
+- D03/default seed 41222 ar_running (GL-002092): observed -1, expected 0; INV-911729
+- D03/default seed 41224 unapplied_running (L02932): observed -402, expected 0; E4306
+- D03/default seed 41225 ar_running (R4393): observed -1, expected 0; INV-763469
+- D03/default seed 41225 ar_running (R4435): observed -1, expected 0; INV-981731
+- D03/default seed 41229 unapplied_running (GL-004718): observed -115, expected 0; C-5574
+- D03/default seed 41234 unapplied_running (R2145): observed -46, expected 0; CUST28806
+- D03/default seed 41234 unapplied_running (R2201): observed -21, expected 0; CUST09400
+- D03/default seed 41236 unapplied_running (L02890): observed -55, expected 0; CUST67673
+- D03/default seed 41239 ar_running (R1295): observed -1, expected 0; 2611-562598
+- D03/default seed 41242 unapplied_running (R736): observed -119, expected 0; E9730
+- D03/default seed 41243 ar_running (GL-005203): observed -1, expected 0; F0481630
+- D03/default seed 41243 unapplied_running (GL-005212): observed -32, expected 0; CUST32225
+- D03/default seed 41244 unapplied_running (L03904): observed -24475, expected 0; CUST93203
+- D03/default seed 41244 unapplied_running (L04056): observed -49167, expected 0; CUST54052
+- D03/default seed 41244 unapplied_running (L04053): observed -42070, expected 0; CUST05049
+- D03/default seed 41245 ar_running (R2719): observed -1, expected 0; INV-988106
+- D03/default seed 41247 unapplied_running (L01470): observed -3, expected 0; CUST42949
+- D03/default seed 41248 ar_running (L00513): observed -1, expected 0; F0370420
+- D03/default seed 41248 unapplied_running (L00432): observed -552, expected 0; E8174
+- D03/default seed 41256 unapplied_running (GL-001834): observed -173, expected 0; C-4466
+- D03/default seed 41257 unapplied_running (L00782): observed -34, expected 0; E4551
+- D03/default seed 41258 ar_running (R1433): observed -1, expected 0; SI-2026-923475
+- D03/default seed 41258 unapplied_running (R1238): observed -227031, expected 0; CUST78127
+- D03/default seed 41262 ar_running (GL-001158): observed -1, expected 0; F0515687
+- D03/default seed 41263 unapplied_running (R5022): observed -91, expected 0; CUST88062
+- D03/default seed 41264 unapplied_running (R3651): observed -83, expected 0; C-1145
+- D03/default seed 41265 unapplied_running (GL-001966): observed -170, expected 0; C-5923
+- D03/default seed 41266 unapplied_running (L00492): observed -2186, expected 0; E7360
+- D03/default seed 41267 unapplied_running (L03551): observed -1362, expected 0; E8408
+- D03/default seed 41268 unapplied_running (R3548): observed -31589, expected 0; C-4687
+- D03/default seed 41270 ar_running (GL-000401): observed -1, expected 0; INV-215118
+- D03/default seed 41270 unapplied_running (GL-000443): observed -23, expected 0; CUST74275
+- D03/default seed 41277 unapplied_running (L01581): observed -40, expected 0; E3442
+- D03/default seed 41277 unapplied_running (L01680): observed -63, expected 0; E3442
+- D03/default seed 41277 unapplied_running (L01733): observed -88, expected 0; E3442
+- D03/default seed 41282 unapplied_running (GL-003747): observed -56670, expected 0; E8942
+- D03/default seed 41283 unapplied_running (L04036): observed -57, expected 0; CUST56709
+- D03/default seed 41287 unapplied_running (GL-004422): observed -33477, expected 0; C-5782
+- D03/default seed 41287 unapplied_running (GL-004529): observed -16030, expected 0; C-6240
+- D03/default seed 41289 unapplied_running (R446): observed -195, expected 0; CUST97557
+- D03/default seed 41292 ar_running (L02096): observed -1, expected 0; INV-931351
+- D03/default seed 41293 ar_running (GL-003102): observed -1, expected 0; 2503-365156
+- D03/default seed 41293 ar_running (GL-003276): observed -1, expected 0; 2503-133260
+- D03/default seed 41296 unapplied_running (L03801): observed -60, expected 0; C-9163
+- D03/hard seed 41005 ar_running (GL-005749): observed -1, expected 0; INV-064884
+- D03/hard seed 41008 unapplied_running (GL-003144): observed -51, expected 0; C-9667
+- D03/hard seed 41011 unapplied_running (R3945): observed -229, expected 0; C-9377
+- D03/hard seed 41013 ar_running (R2646): observed -1, expected 0; INV-859119
+- D03/hard seed 41013 unapplied_running (R2930): observed -28, expected 0; CUST95480
+- D03/hard seed 41015 unapplied_running (L05401): observed -98, expected 0; CUST95106
+- D03/hard seed 41017 ar_running (L03233): observed -1, expected 0; INV-758326
+- D03/hard seed 41018 unapplied_running (L03230): observed -23, expected 0; C-8778
+- D03/hard seed 41020 unapplied_running (L01033): observed -303, expected 0; C-0028
+- D03/hard seed 41020 unapplied_running (L01160): observed -5, expected 0; C-8284
+- D03/hard seed 41024 unapplied_running (R3553): observed -143101, expected 0; E1698
+- D03/hard seed 41024 unapplied_running (R3860): observed -188319, expected 0; E1698
+- D03/hard seed 41025 unapplied_running (L02152): observed -10190, expected 0; C-6454
+- D03/hard seed 41029 unapplied_running (R2704): observed -271, expected 0; CUST08113
+- D03/hard seed 41029 unapplied_running (R2832): observed -19, expected 0; CUST09291
+- D03/hard seed 41037 ar_running (L03201): observed -1, expected 0; 2611-778760
+- D03/hard seed 41037 ar_running (L03244): observed -1, expected 0; 2611-453884
+- D03/hard seed 41038 unapplied_running (GL-005437): observed -279331, expected 0; C-0425
+- D03/hard seed 41040 ar_running (R5101): observed -1, expected 0; 2609-004130
+- D03/hard seed 41045 unapplied_running (R3505): observed -103, expected 0; E2744
+- D03/hard seed 41046 unapplied_running (L01489): observed -130, expected 0; E5006
+- D03/hard seed 41049 unapplied_running (R3890): observed -315, expected 0; E7530
+- D03/hard seed 41050 unapplied_running (L02856): observed -686, expected 0; CUST88801
+- D03/hard seed 41052 ar_running (R1027): observed -1, expected 0; SI-2026-798836
+- D03/hard seed 41053 unapplied_running (R2367): observed -63, expected 0; C-4903
+- D03/hard seed 41061 unapplied_running (L02053): observed -26452, expected 0; CUST15073
+- D03/hard seed 41063 ar_running (L01469): observed -1, expected 0; 2609-768605
+- D03/hard seed 41065 ar_running (R4601): observed -1, expected 0; F0032065
+- D03/hard seed 41073 unapplied_running (GL-001842): observed -420, expected 0; C-0848
+- D03/hard seed 41078 unapplied_running (L01768): observed -170902, expected 0; E7114
+- D03/hard seed 41079 unapplied_running (L05733): observed -20, expected 0; E5939
+- D03/hard seed 41080 unapplied_running (R5253): observed -83, expected 0; C-3829
+- D03/hard seed 41088 unapplied_running (GL-001810): observed -246, expected 0; C-6699
+- D03/hard seed 41088 unapplied_running (GL-002196): observed -256, expected 0; C-6699
+- D03/hard seed 41088 unapplied_running (GL-001984): observed -1, expected 0; C-3111
+- D03/hard seed 41091 unapplied_running (GL-003949): observed -57, expected 0; E5263
+- D03/hard seed 41092 unapplied_running (L03271): observed -4, expected 0; C-1933
+- D03/hard seed 41093 unapplied_running (L02066): observed -2, expected 0; CUST65465
+- D03/hard seed 41094 unapplied_running (R5650): observed -4, expected 0; E9227
+- D03/hard seed 41096 ar_running (R648): observed -1, expected 0; SI-2026-466918
+- D03/hard seed 41097 unapplied_running (R4467): observed -10407, expected 0; CUST02501
+- D03/hard seed 41098 ar_running (L04227): observed -1, expected 0; 2612-160441
+- D03/hard seed 41098 unapplied_running (L04443): observed -23291, expected 0; C-1225
+- D03/hard seed 41099 unapplied_running (L02896): observed -26, expected 0; C-9785
+- D03/hard seed 41099 unapplied_running (L03397): observed -9, expected 0; C-3675
+- D03/hard seed 41100 ar_running (GL-005821): observed -1, expected 0; 2612-882562
+- D03/hard seed 41103 ar_running (R2401): observed -1, expected 0; F0054592
+- D03/hard seed 41106 ar_running (L03291): observed -1, expected 0; 2507-119107
+- D03/hard seed 41108 unapplied_running (GL-003547): observed -174, expected 0; C-6620
+- D03/hard seed 41112 ar_running (R4842): observed -1, expected 0; 2508-594384
+- D03/hard seed 41115 ar_running (L03813): observed -1, expected 0; 2507-425960
+- D03/hard seed 41118 ar_running (GL-004927): observed -1, expected 0; INV-114883
+- D03/hard seed 41118 unapplied_running (GL-005060): observed -34, expected 0; CUST19568
+- D03/hard seed 41123 ar_running (R4880): observed -1, expected 0; INV-019033
+- D03/hard seed 41124 unapplied_running (L00585): observed -1, expected 0; CUST35077
+- D03/hard seed 41128 ar_running (GL-001786): observed -1, expected 0; SI-2026-305268
+- D03/hard seed 41134 unapplied_running (GL-005307): observed -201, expected 0; CUST34155
+- D03/hard seed 41137 ar_running (R1542): observed -1, expected 0; F0267943
+- D03/hard seed 41142 unapplied_running (GL-002585): observed -250, expected 0; C-5710
+- D03/hard seed 41150 unapplied_running (L05035): observed -85, expected 0; CUST48458
+- D03/hard seed 41151 ar_running (L00532): observed -1, expected 0; INV-263286
+- D03/hard seed 41156 ar_running (R5500): observed -1, expected 0; 2508-592873
+- D03/hard seed 41164 ar_running (R3355): observed -1, expected 0; 2504-064452
+- D03/hard seed 41165 unapplied_running (R3538): observed -228, expected 0; CUST82075
+- D03/hard seed 41170 ar_running (R3853): observed -1, expected 0; INV-886051
+- D03/hard seed 41170 ar_running (R3783): observed -1, expected 0; INV-044439
+- D03/hard seed 41172 unapplied_running (L02902): observed -136, expected 0; E2316
+- D03/hard seed 41173 unapplied_running (L05206): observed -69, expected 0; E8466
+- D03/hard seed 41174 ar_running (R1947): observed -1, expected 0; 2501-044446
+- D03/hard seed 41174 unapplied_running (R1343): observed -104023, expected 0; C-2817
+- D03/hard seed 41175 unapplied_running (L05070): observed -213, expected 0; C-7166
+- D03/hard seed 41176 unapplied_running (GL-005340): observed -579, expected 0; E1431
+- D03/hard seed 41179 ar_running (R5285): observed -1, expected 0; 2502-263509
+- D03/hard seed 41185 ar_running (L05076): observed -1, expected 0; SI-2026-814573
+- D03/hard seed 41194 ar_running (L05631): observed -1, expected 0; INV-589999
+- D03/hard seed 41197 unapplied_running (L04940): observed -5371, expected 0; E9990
+- D03/hard seed 41199 unapplied_running (GL-000525): observed -9, expected 0; CUST88252
+- D03/hard seed 41200 unapplied_running (R3852): observed -10, expected 0; E9348
+- D03/hard seed 41200 unapplied_running (R3947): observed -54, expected 0; E3676
+- D03/hard seed 41201 unapplied_running (GL-004366): observed -14, expected 0; E0747
+- D03/hard seed 41202 unapplied_running (R731): observed -67, expected 0; E8053
+- D03/hard seed 41204 ar_running (R3490): observed -1, expected 0; INV-929188
+- D03/hard seed 41204 unapplied_running (R3004): observed -33679, expected 0; C-2446
+- D03/hard seed 41208 unapplied_running (R1128): observed -13, expected 0; C-8157
+- D03/hard seed 41208 unapplied_running (R1712): observed -7, expected 0; C-8157
+- D03/hard seed 41210 unapplied_running (R1520): observed -1, expected 0; E8676
+- D03/hard seed 41211 unapplied_running (R1389): observed -1150, expected 0; E7884
+- D03/hard seed 41212 ar_running (GL-003946): observed -1, expected 0; 2603-669849
+- D03/hard seed 41216 ar_running (R2147): observed -1, expected 0; SI-2025-019680
+- D03/hard seed 41216 ar_running (R2145): observed -1, expected 0; SI-2025-363180
+- D03/hard seed 41216 unapplied_running (R2104): observed -66, expected 0; E3666
+- D03/hard seed 41218 unapplied_running (R2840): observed -84, expected 0; C-6028
+- D03/hard seed 41224 unapplied_running (GL-001578): observed -143, expected 0; E2277
+- D03/hard seed 41232 unapplied_running (R5419): observed -198, expected 0; E5211
+- D03/hard seed 41233 unapplied_running (GL-004739): observed -82, expected 0; C-3362
+- D03/hard seed 41234 ar_running (GL-002416): observed -1, expected 0; SI-2025-000350
+- D03/hard seed 41235 unapplied_running (GL-002070): observed -17333, expected 0; CUST16801
+- D03/hard seed 41236 unapplied_running (GL-003576): observed -216, expected 0; CUST89445
+- D03/hard seed 41240 ar_running (GL-002596): observed -1, expected 0; F0438164
+- D03/hard seed 41243 unapplied_running (R2468): observed -38, expected 0; E7080
+- D03/hard seed 41244 unapplied_running (L01940): observed -194678, expected 0; E7439
+- D03/hard seed 41249 ar_running (R4435): observed -1, expected 0; SI-2026-018892
+- D03/hard seed 41249 unapplied_running (R4476): observed -16, expected 0; E0639
+- D03/hard seed 41251 ar_running (GL-004129): observed -1, expected 0; 2602-317250
+- D03/hard seed 41253 ar_running (L01044): observed -1, expected 0; 2502-305985
+- D03/hard seed 41253 ar_running (L00832): observed -1, expected 0; 2502-633501
+- D03/hard seed 41262 ar_running (GL-003336): observed -1, expected 0; INV-882581
+- D03/hard seed 41266 ar_running (GL-002148): observed -1, expected 0; F0818242
+- D03/hard seed 41266 ar_running (GL-001994): observed -1, expected 0; F0254037
+- D03/hard seed 41267 unapplied_running (GL-004356): observed -164, expected 0; E8308
+- D03/hard seed 41276 unapplied_running (GL-004211): observed -32, expected 0; CUST98146
+- D03/hard seed 41278 ar_running (GL-000895): observed -1, expected 0; SI-2025-730616
+- D03/hard seed 41279 ar_running (L01297): observed -1, expected 0; F0674420
+- D03/hard seed 41279 unapplied_running (L01357): observed -154, expected 0; C-1009
+- D03/hard seed 41282 ar_running (R4406): observed -1, expected 0; F0128741
+- D03/hard seed 41284 unapplied_running (R3587): observed -108, expected 0; C-7663
+- D03/hard seed 41286 unapplied_running (GL-002193): observed -40, expected 0; C-7586
+- D03/hard seed 41287 unapplied_running (GL-003483): observed -259, expected 0; CUST73028
+- D03/hard seed 41288 unapplied_running (L02451): observed -14938, expected 0; E7606
+- D03/hard seed 41289 unapplied_running (L03602): observed -1092, expected 0; CUST97015
+- D03/hard seed 41289 unapplied_running (L03815): observed -251, expected 0; CUST84414
+- D03/hard seed 41290 ar_running (R5259): observed -1, expected 0; F0617458
+- D03/hard seed 41291 ar_running (R5756): observed -1, expected 0; 2604-148765
+- D03/hard seed 41291 unapplied_running (R5269): observed -78791, expected 0; E8132
+- D03/hard seed 41292 ar_running (GL-005681): observed -1, expected 0; INV-315947
+- D03/hard seed 41292 unapplied_running (GL-005406): observed -13, expected 0; E5289
+- D03/hard seed 41295 ar_running (R3380): observed -1, expected 0; F0203109
+- D03/hard seed 41298 unapplied_running (R3356): observed -4, expected 0; C-7601
+- D03/hard seed 41299 ar_running (R3080): observed -1, expected 0; SI-2025-343694
+- D03/hard seed 41299 unapplied_running (R2644): observed -27, expected 0; E7083
+- D04/default seed 41005 unapplied_running (GL-005178): observed -923, expected 0; CUST99859
+- D04/default seed 41006 unapplied_running (GL-001878): observed -500336, expected 0; E0342
+- D04/default seed 41007 ar_running (R2705): observed -1, expected 0; F0057818
+- D04/default seed 41011 unapplied_running (L00316): observed -15, expected 0; C-5874
+- D04/default seed 41012 unapplied_running (GL-005228): observed -87, expected 0; CUST57663
+- D04/default seed 41013 unapplied_running (R3768): observed -168, expected 0; E6981
+- D04/default seed 41014 unapplied_running (L03913): observed -2, expected 0; C-5080
+- D04/default seed 41019 ar_running (GL-000793): observed -1, expected 0; INV-355747
+- D04/default seed 41020 unapplied_running (L02377): observed -5, expected 0; E7129
+- D04/default seed 41021 unapplied_running (R1433): observed -214, expected 0; E1968
+- D04/default seed 41028 ar_running (L02016): observed -1, expected 0; F0606872
+- D04/default seed 41028 unapplied_running (L02007): observed -56, expected 0; C-7863
+- D04/default seed 41029 unapplied_running (R384): observed -128, expected 0; CUST43875
+- D04/default seed 41032 unapplied_running (L00595): observed -86531, expected 0; C-2404
+- D04/default seed 41034 ar_running (R229): observed -1, expected 0; 2503-857257
+- D04/default seed 41039 ar_running (R988): observed -1, expected 0; SI-2025-984723
+- D04/default seed 41043 unapplied_running (R3711): observed -667, expected 0; C-8659
+- D04/default seed 41043 unapplied_running (R3858): observed -186, expected 0; C-7120
+- D04/default seed 41044 unapplied_running (R4057): observed -32683, expected 0; E4613
+- D04/default seed 41044 unapplied_running (R4054): observed -55854, expected 0; E9712
+- D04/default seed 41045 ar_running (R4175): observed -1, expected 0; F0254951
+- D04/default seed 41058 unapplied_running (L01321): observed -12, expected 0; C-0392
+- D04/default seed 41059 unapplied_running (R2679): observed -41, expected 0; C-8026
+- D04/default seed 41061 unapplied_running (R2190): observed -661, expected 0; CUST70335
+- D04/default seed 41064 unapplied_running (R987): observed -47522, expected 0; CUST98460
+- D04/default seed 41064 unapplied_running (R1036): observed -2977, expected 0; CUST42293
+- D04/default seed 41066 unapplied_running (L04325): observed -555, expected 0; CUST55531
+- D04/default seed 41068 unapplied_running (R1521): observed -64, expected 0; CUST07021
+- D04/default seed 41071 unapplied_running (GL-000910): observed -132, expected 0; C-5747
+- D04/default seed 41074 ar_running (GL-003948): observed -1, expected 0; 2601-593279
+- D04/default seed 41080 unapplied_running (GL-004509): observed -14, expected 0; E9009
+- D04/default seed 41081 unapplied_running (R4233): observed -225, expected 0; C-7364
+- D04/default seed 41082 ar_running (GL-005049): observed -1, expected 0; F0880818
+- D04/default seed 41084 unapplied_running (GL-001329): observed -91, expected 0; CUST52532
+- D04/default seed 41084 unapplied_running (GL-001504): observed -16, expected 0; CUST14537
+- D04/default seed 41086 unapplied_running (L03721): observed -214, expected 0; C-6213
+- D04/default seed 41091 unapplied_running (R2905): observed -9, expected 0; C-1116
+- D04/default seed 41094 ar_running (R3306): observed -1, expected 0; INV-357622
+- D04/default seed 41100 ar_running (R1817): observed -1, expected 0; 2510-112034
+- D04/default seed 41102 unapplied_running (L00536): observed -2, expected 0; CUST61593
+- D04/default seed 41105 unapplied_running (GL-002236): observed -34, expected 0; CUST43566
+- D04/default seed 41105 unapplied_running (GL-002244): observed -184, expected 0; CUST81946
+- D04/default seed 41106 unapplied_running (GL-003529): observed -74, expected 0; C-0932
+- D04/default seed 41113 unapplied_running (GL-004473): observed -115, expected 0; CUST50826
+- D04/default seed 41115 unapplied_running (L04189): observed -224685, expected 0; E1486
+- D04/default seed 41115 unapplied_running (L04274): observed -37185, expected 0; E5780
+- D04/default seed 41116 unapplied_running (GL-002108): observed -73, expected 0; C-2466
+- D04/default seed 41117 unapplied_running (GL-002803): observed -1, expected 0; E1961
+- D04/default seed 41119 unapplied_running (GL-000964): observed -3, expected 0; E2473
+- D04/default seed 41124 unapplied_running (GL-002245): observed -205, expected 0; C-6104
+- D04/default seed 41125 unapplied_running (L00377): observed -1181, expected 0; CUST50140
+- D04/default seed 41127 ar_running (GL-002840): observed -1, expected 0; F0686931
+- D04/default seed 41128 unapplied_running (GL-002910): observed -97, expected 0; C-9525
+- D04/default seed 41131 unapplied_running (L04366): observed -67, expected 0; C-2139
+- D04/default seed 41131 unapplied_running (L04354): observed -353, expected 0; C-6052
+- D04/default seed 41132 unapplied_running (R644): observed -46, expected 0; C-9933
+- D04/default seed 41137 ar_running (GL-001286): observed -1, expected 0; 2501-410390
+- D04/default seed 41140 unapplied_running (L01432): observed -446, expected 0; E0345
+- D04/default seed 41141 ar_running (R3610): observed -1, expected 0; INV-054288
+- D04/default seed 41142 unapplied_running (L03781): observed -10874, expected 0; CUST89097
+- D04/default seed 41144 unapplied_running (L03241): observed -291, expected 0; E6937
+- D04/default seed 41147 unapplied_running (L03708): observed -85, expected 0; E5990
+- D04/default seed 41149 unapplied_running (R708): observed -60771, expected 0; C-9138
+- D04/default seed 41150 unapplied_running (L01764): observed -742, expected 0; C-4875
+- D04/default seed 41157 unapplied_running (L04564): observed -20455, expected 0; CUST09866
+- D04/default seed 41158 unapplied_running (GL-000362): observed -1214, expected 0; E5459
+- D04/default seed 41166 ar_running (GL-004004): observed -1, expected 0; 2506-422686
+- D04/default seed 41170 unapplied_running (L01112): observed -27, expected 0; C-4024
+- D04/default seed 41171 unapplied_running (L02781): observed -314, expected 0; C-5870
+- D04/default seed 41173 unapplied_running (GL-001084): observed -132, expected 0; C-4096
+- D04/default seed 41174 ar_running (GL-000390): observed -1, expected 0; SI-2025-590188
+- D04/default seed 41174 unapplied_running (GL-000426): observed -286, expected 0; C-4736
+- D04/default seed 41178 unapplied_running (L03744): observed -118378, expected 0; E8203
+- D04/default seed 41182 ar_running (GL-000759): observed -1, expected 0; SI-2026-721173
+- D04/default seed 41183 unapplied_running (L02610): observed -7, expected 0; CUST45617
+- D04/default seed 41190 unapplied_running (GL-003022): observed -314, expected 0; C-6621
+- D04/default seed 41192 ar_running (GL-004482): observed -1, expected 0; 2611-659303
+- D04/default seed 41193 unapplied_running (GL-002517): observed -78, expected 0; CUST47530
+- D04/default seed 41194 unapplied_running (L00725): observed -46, expected 0; E1812
+- D04/default seed 41194 unapplied_running (L00782): observed -384, expected 0; E1022
+- D04/default seed 41195 ar_running (GL-003793): observed -1, expected 0; F0615449
+- D04/default seed 41196 unapplied_running (GL-003493): observed -44, expected 0; E4315
+- D04/default seed 41197 unapplied_running (L02821): observed -3071, expected 0; CUST82232
+- D04/default seed 41198 unapplied_running (L03718): observed -47, expected 0; CUST24584
+- D04/default seed 41199 ar_running (R2679): observed -1, expected 0; F0107215
+- D04/default seed 41203 unapplied_running (GL-002257): observed -220, expected 0; CUST44083
+- D04/default seed 41205 unapplied_running (R4514): observed -12, expected 0; E5788
+- D04/default seed 41208 unapplied_running (L02934): observed -49953, expected 0; CUST80841
+- D04/default seed 41209 unapplied_running (GL-004432): observed -74, expected 0; C-3115
+- D04/default seed 41212 ar_running (L01373): observed -1, expected 0; SI-2025-273988
+- D04/default seed 41214 unapplied_running (R2379): observed -367, expected 0; E9465
+- D04/default seed 41216 unapplied_running (R5038): observed -74, expected 0; C-8256
+- D04/default seed 41220 unapplied_running (GL-002466): observed -26938, expected 0; E5508
+- D04/default seed 41222 ar_running (GL-002092): observed -1, expected 0; INV-911729
+- D04/default seed 41224 unapplied_running (L02932): observed -402, expected 0; E4306
+- D04/default seed 41225 ar_running (R4393): observed -1, expected 0; INV-763469
+- D04/default seed 41225 ar_running (R4435): observed -1, expected 0; INV-981731
+- D04/default seed 41229 unapplied_running (GL-004718): observed -115, expected 0; C-5574
+- D04/default seed 41234 unapplied_running (R2145): observed -46, expected 0; CUST28806
+- D04/default seed 41234 unapplied_running (R2201): observed -21, expected 0; CUST09400
+- D04/default seed 41236 unapplied_running (L02890): observed -55, expected 0; CUST67673
+- D04/default seed 41239 ar_running (R1295): observed -1, expected 0; 2611-562598
+- D04/default seed 41242 unapplied_running (R736): observed -119, expected 0; E9730
+- D04/default seed 41243 ar_running (GL-005203): observed -1, expected 0; F0481630
+- D04/default seed 41243 unapplied_running (GL-005212): observed -32, expected 0; CUST32225
+- D04/default seed 41244 unapplied_running (L03904): observed -24475, expected 0; CUST93203
+- D04/default seed 41244 unapplied_running (L04056): observed -49167, expected 0; CUST54052
+- D04/default seed 41244 unapplied_running (L04053): observed -42070, expected 0; CUST05049
+- D04/default seed 41245 ar_running (R2719): observed -1, expected 0; INV-988106
+- D04/default seed 41247 unapplied_running (L01470): observed -3, expected 0; CUST42949
+- D04/default seed 41248 ar_running (L00513): observed -1, expected 0; F0370420
+- D04/default seed 41248 unapplied_running (L00432): observed -552, expected 0; E8174
+- D04/default seed 41256 unapplied_running (GL-001834): observed -173, expected 0; C-4466
+- D04/default seed 41257 unapplied_running (L00782): observed -34, expected 0; E4551
+- D04/default seed 41258 ar_running (R1433): observed -1, expected 0; SI-2026-923475
+- D04/default seed 41258 unapplied_running (R1238): observed -227031, expected 0; CUST78127
+- D04/default seed 41262 ar_running (GL-001158): observed -1, expected 0; F0515687
+- D04/default seed 41263 unapplied_running (R5022): observed -91, expected 0; CUST88062
+- D04/default seed 41264 unapplied_running (R3651): observed -83, expected 0; C-1145
+- D04/default seed 41265 unapplied_running (GL-001966): observed -170, expected 0; C-5923
+- D04/default seed 41266 unapplied_running (L00492): observed -2186, expected 0; E7360
+- D04/default seed 41267 unapplied_running (L03551): observed -1362, expected 0; E8408
+- D04/default seed 41268 unapplied_running (R3548): observed -31589, expected 0; C-4687
+- D04/default seed 41270 ar_running (GL-000401): observed -1, expected 0; INV-215118
+- D04/default seed 41270 unapplied_running (GL-000443): observed -23, expected 0; CUST74275
+- D04/default seed 41277 unapplied_running (L01581): observed -40, expected 0; E3442
+- D04/default seed 41277 unapplied_running (L01680): observed -63, expected 0; E3442
+- D04/default seed 41277 unapplied_running (L01733): observed -88, expected 0; E3442
+- D04/default seed 41282 unapplied_running (GL-003747): observed -56670, expected 0; E8942
+- D04/default seed 41283 unapplied_running (L04036): observed -57, expected 0; CUST56709
+- D04/default seed 41287 unapplied_running (GL-004422): observed -33477, expected 0; C-5782
+- D04/default seed 41287 unapplied_running (GL-004529): observed -16030, expected 0; C-6240
+- D04/default seed 41289 unapplied_running (R446): observed -195, expected 0; CUST97557
+- D04/default seed 41292 ar_running (L02096): observed -1, expected 0; INV-931351
+- D04/default seed 41293 ar_running (GL-003102): observed -1, expected 0; 2503-365156
+- D04/default seed 41293 ar_running (GL-003276): observed -1, expected 0; 2503-133260
+- D04/default seed 41296 unapplied_running (L03801): observed -60, expected 0; C-9163
+- D04/hard seed 41005 ar_running (GL-005749): observed -1, expected 0; INV-064884
+- D04/hard seed 41008 unapplied_running (GL-003144): observed -51, expected 0; C-9667
+- D04/hard seed 41011 unapplied_running (R3945): observed -229, expected 0; C-9377
+- D04/hard seed 41013 ar_running (R2646): observed -1, expected 0; INV-859119
+- D04/hard seed 41013 unapplied_running (R2930): observed -28, expected 0; CUST95480
+- D04/hard seed 41015 unapplied_running (L05401): observed -98, expected 0; CUST95106
+- D04/hard seed 41017 ar_running (L03233): observed -1, expected 0; INV-758326
+- D04/hard seed 41018 unapplied_running (L03230): observed -23, expected 0; C-8778
+- D04/hard seed 41020 unapplied_running (L01033): observed -303, expected 0; C-0028
+- D04/hard seed 41020 unapplied_running (L01160): observed -5, expected 0; C-8284
+- D04/hard seed 41024 unapplied_running (R3553): observed -143101, expected 0; E1698
+- D04/hard seed 41024 unapplied_running (R3860): observed -188319, expected 0; E1698
+- D04/hard seed 41025 unapplied_running (L02152): observed -10190, expected 0; C-6454
+- D04/hard seed 41029 unapplied_running (R2704): observed -271, expected 0; CUST08113
+- D04/hard seed 41029 unapplied_running (R2832): observed -19, expected 0; CUST09291
+- D04/hard seed 41037 ar_running (L03201): observed -1, expected 0; 2611-778760
+- D04/hard seed 41037 ar_running (L03244): observed -1, expected 0; 2611-453884
+- D04/hard seed 41038 unapplied_running (GL-005437): observed -279331, expected 0; C-0425
+- D04/hard seed 41040 ar_running (R5101): observed -1, expected 0; 2609-004130
+- D04/hard seed 41045 unapplied_running (R3505): observed -103, expected 0; E2744
+- D04/hard seed 41046 unapplied_running (L01489): observed -130, expected 0; E5006
+- D04/hard seed 41049 unapplied_running (R3890): observed -315, expected 0; E7530
+- D04/hard seed 41050 unapplied_running (L02856): observed -686, expected 0; CUST88801
+- D04/hard seed 41052 ar_running (R1027): observed -1, expected 0; SI-2026-798836
+- D04/hard seed 41053 unapplied_running (R2367): observed -63, expected 0; C-4903
+- D04/hard seed 41061 unapplied_running (L02053): observed -26452, expected 0; CUST15073
+- D04/hard seed 41063 ar_running (L01469): observed -1, expected 0; 2609-768605
+- D04/hard seed 41065 ar_running (R4601): observed -1, expected 0; F0032065
+- D04/hard seed 41073 unapplied_running (GL-001842): observed -420, expected 0; C-0848
+- D04/hard seed 41078 unapplied_running (L01768): observed -170902, expected 0; E7114
+- D04/hard seed 41079 unapplied_running (L05733): observed -20, expected 0; E5939
+- D04/hard seed 41080 unapplied_running (R5253): observed -83, expected 0; C-3829
+- D04/hard seed 41088 unapplied_running (GL-001810): observed -246, expected 0; C-6699
+- D04/hard seed 41088 unapplied_running (GL-002196): observed -256, expected 0; C-6699
+- D04/hard seed 41088 unapplied_running (GL-001984): observed -1, expected 0; C-3111
+- D04/hard seed 41091 unapplied_running (GL-003949): observed -57, expected 0; E5263
+- D04/hard seed 41092 unapplied_running (L03271): observed -4, expected 0; C-1933
+- D04/hard seed 41093 unapplied_running (L02066): observed -2, expected 0; CUST65465
+- D04/hard seed 41094 unapplied_running (R5650): observed -4, expected 0; E9227
+- D04/hard seed 41096 ar_running (R648): observed -1, expected 0; SI-2026-466918
+- D04/hard seed 41097 unapplied_running (R4467): observed -10407, expected 0; CUST02501
+- D04/hard seed 41098 ar_running (L04227): observed -1, expected 0; 2612-160441
+- D04/hard seed 41098 unapplied_running (L04443): observed -23291, expected 0; C-1225
+- D04/hard seed 41099 unapplied_running (L02896): observed -26, expected 0; C-9785
+- D04/hard seed 41099 unapplied_running (L03397): observed -9, expected 0; C-3675
+- D04/hard seed 41100 ar_running (GL-005821): observed -1, expected 0; 2612-882562
+- D04/hard seed 41103 ar_running (R2401): observed -1, expected 0; F0054592
+- D04/hard seed 41106 ar_running (L03291): observed -1, expected 0; 2507-119107
+- D04/hard seed 41108 unapplied_running (GL-003547): observed -174, expected 0; C-6620
+- D04/hard seed 41112 ar_running (R4842): observed -1, expected 0; 2508-594384
+- D04/hard seed 41115 ar_running (L03813): observed -1, expected 0; 2507-425960
+- D04/hard seed 41118 ar_running (GL-004927): observed -1, expected 0; INV-114883
+- D04/hard seed 41118 unapplied_running (GL-005060): observed -34, expected 0; CUST19568
+- D04/hard seed 41123 ar_running (R4880): observed -1, expected 0; INV-019033
+- D04/hard seed 41124 unapplied_running (L00585): observed -1, expected 0; CUST35077
+- D04/hard seed 41128 ar_running (GL-001786): observed -1, expected 0; SI-2026-305268
+- D04/hard seed 41134 unapplied_running (GL-005307): observed -201, expected 0; CUST34155
+- D04/hard seed 41137 ar_running (R1542): observed -1, expected 0; F0267943
+- D04/hard seed 41142 unapplied_running (GL-002585): observed -250, expected 0; C-5710
+- D04/hard seed 41150 unapplied_running (L05035): observed -85, expected 0; CUST48458
+- D04/hard seed 41151 ar_running (L00532): observed -1, expected 0; INV-263286
+- D04/hard seed 41156 ar_running (R5500): observed -1, expected 0; 2508-592873
+- D04/hard seed 41164 ar_running (R3355): observed -1, expected 0; 2504-064452
+- D04/hard seed 41165 unapplied_running (R3538): observed -228, expected 0; CUST82075
+- D04/hard seed 41170 ar_running (R3853): observed -1, expected 0; INV-886051
+- D04/hard seed 41170 ar_running (R3783): observed -1, expected 0; INV-044439
+- D04/hard seed 41172 unapplied_running (L02902): observed -136, expected 0; E2316
+- D04/hard seed 41173 unapplied_running (L05206): observed -69, expected 0; E8466
+- D04/hard seed 41174 ar_running (R1947): observed -1, expected 0; 2501-044446
+- D04/hard seed 41174 unapplied_running (R1343): observed -104023, expected 0; C-2817
+- D04/hard seed 41175 unapplied_running (L05070): observed -213, expected 0; C-7166
+- D04/hard seed 41176 unapplied_running (GL-005340): observed -579, expected 0; E1431
+- D04/hard seed 41179 ar_running (R5285): observed -1, expected 0; 2502-263509
+- D04/hard seed 41185 ar_running (L05076): observed -1, expected 0; SI-2026-814573
+- D04/hard seed 41194 ar_running (L05631): observed -1, expected 0; INV-589999
+- D04/hard seed 41197 unapplied_running (L04940): observed -5371, expected 0; E9990
+- D04/hard seed 41199 unapplied_running (GL-000525): observed -9, expected 0; CUST88252
+- D04/hard seed 41200 unapplied_running (R3852): observed -10, expected 0; E9348
+- D04/hard seed 41200 unapplied_running (R3947): observed -54, expected 0; E3676
+- D04/hard seed 41201 unapplied_running (GL-004366): observed -14, expected 0; E0747
+- D04/hard seed 41202 unapplied_running (R731): observed -67, expected 0; E8053
+- D04/hard seed 41204 ar_running (R3490): observed -1, expected 0; INV-929188
+- D04/hard seed 41204 unapplied_running (R3004): observed -33679, expected 0; C-2446
+- D04/hard seed 41208 unapplied_running (R1128): observed -13, expected 0; C-8157
+- D04/hard seed 41208 unapplied_running (R1712): observed -7, expected 0; C-8157
+- D04/hard seed 41210 unapplied_running (R1520): observed -1, expected 0; E8676
+- D04/hard seed 41211 unapplied_running (R1389): observed -1150, expected 0; E7884
+- D04/hard seed 41212 ar_running (GL-003946): observed -1, expected 0; 2603-669849
+- D04/hard seed 41216 ar_running (R2147): observed -1, expected 0; SI-2025-019680
+- D04/hard seed 41216 ar_running (R2145): observed -1, expected 0; SI-2025-363180
+- D04/hard seed 41216 unapplied_running (R2104): observed -66, expected 0; E3666
+- D04/hard seed 41218 unapplied_running (R2840): observed -84, expected 0; C-6028
+- D04/hard seed 41224 unapplied_running (GL-001578): observed -143, expected 0; E2277
+- D04/hard seed 41232 unapplied_running (R5419): observed -198, expected 0; E5211
+- D04/hard seed 41233 unapplied_running (GL-004739): observed -82, expected 0; C-3362
+- D04/hard seed 41234 ar_running (GL-002416): observed -1, expected 0; SI-2025-000350
+- D04/hard seed 41235 unapplied_running (GL-002070): observed -17333, expected 0; CUST16801
+- D04/hard seed 41236 unapplied_running (GL-003576): observed -216, expected 0; CUST89445
+- D04/hard seed 41240 ar_running (GL-002596): observed -1, expected 0; F0438164
+- D04/hard seed 41243 unapplied_running (R2468): observed -38, expected 0; E7080
+- D04/hard seed 41244 unapplied_running (L01940): observed -194678, expected 0; E7439
+- D04/hard seed 41249 ar_running (R4435): observed -1, expected 0; SI-2026-018892
+- D04/hard seed 41249 unapplied_running (R4476): observed -16, expected 0; E0639
+- D04/hard seed 41251 ar_running (GL-004129): observed -1, expected 0; 2602-317250
+- D04/hard seed 41253 ar_running (L01044): observed -1, expected 0; 2502-305985
+- D04/hard seed 41253 ar_running (L00832): observed -1, expected 0; 2502-633501
+- D04/hard seed 41262 ar_running (GL-003336): observed -1, expected 0; INV-882581
+- D04/hard seed 41266 ar_running (GL-002148): observed -1, expected 0; F0818242
+- D04/hard seed 41266 ar_running (GL-001994): observed -1, expected 0; F0254037
+- D04/hard seed 41267 unapplied_running (GL-004356): observed -164, expected 0; E8308
+- D04/hard seed 41276 unapplied_running (GL-004211): observed -32, expected 0; CUST98146
+- D04/hard seed 41278 ar_running (GL-000895): observed -1, expected 0; SI-2025-730616
+- D04/hard seed 41279 ar_running (L01297): observed -1, expected 0; F0674420
+- D04/hard seed 41279 unapplied_running (L01357): observed -154, expected 0; C-1009
+- D04/hard seed 41282 ar_running (R4406): observed -1, expected 0; F0128741
+- D04/hard seed 41284 unapplied_running (R3587): observed -108, expected 0; C-7663
+- D04/hard seed 41286 unapplied_running (GL-002193): observed -40, expected 0; C-7586
+- D04/hard seed 41287 unapplied_running (GL-003483): observed -259, expected 0; CUST73028
+- D04/hard seed 41288 unapplied_running (L02451): observed -14938, expected 0; E7606
+- D04/hard seed 41289 unapplied_running (L03602): observed -1092, expected 0; CUST97015
+- D04/hard seed 41289 unapplied_running (L03815): observed -251, expected 0; CUST84414
+- D04/hard seed 41290 ar_running (R5259): observed -1, expected 0; F0617458
+- D04/hard seed 41291 ar_running (R5756): observed -1, expected 0; 2604-148765
+- D04/hard seed 41291 unapplied_running (R5269): observed -78791, expected 0; E8132
+- D04/hard seed 41292 ar_running (GL-005681): observed -1, expected 0; INV-315947
+- D04/hard seed 41292 unapplied_running (GL-005406): observed -13, expected 0; E5289
+- D04/hard seed 41295 ar_running (R3380): observed -1, expected 0; F0203109
+- D04/hard seed 41298 unapplied_running (R3356): observed -4, expected 0; C-7601
+- D04/hard seed 41299 ar_running (R3080): observed -1, expected 0; SI-2025-343694
+- D04/hard seed 41299 unapplied_running (R2644): observed -27, expected 0; E7083
+- D05/default seed 41005 unapplied_running (GL-005178): observed -923, expected 0; CUST99859
+- D05/default seed 41006 unapplied_running (GL-001878): observed -500336, expected 0; E0342
+- D05/default seed 41007 ar_running (R2705): observed -1, expected 0; F0057818
+- D05/default seed 41011 unapplied_running (L00316): observed -15, expected 0; C-5874
+- D05/default seed 41012 unapplied_running (GL-005228): observed -87, expected 0; CUST57663
+- D05/default seed 41013 unapplied_running (R3768): observed -168, expected 0; E6981
+- D05/default seed 41014 unapplied_running (L03913): observed -2, expected 0; C-5080
+- D05/default seed 41019 ar_running (GL-000793): observed -1, expected 0; INV-355747
+- D05/default seed 41020 unapplied_running (L02377): observed -5, expected 0; E7129
+- D05/default seed 41021 unapplied_running (R1433): observed -214, expected 0; E1968
+- D05/default seed 41028 ar_running (L02016): observed -1, expected 0; F0606872
+- D05/default seed 41028 unapplied_running (L02007): observed -56, expected 0; C-7863
+- D05/default seed 41029 unapplied_running (R384): observed -128, expected 0; CUST43875
+- D05/default seed 41032 unapplied_running (L00595): observed -86531, expected 0; C-2404
+- D05/default seed 41034 ar_running (R229): observed -1, expected 0; 2503-857257
+- D05/default seed 41039 ar_running (R988): observed -1, expected 0; SI-2025-984723
+- D05/default seed 41043 unapplied_running (R3711): observed -667, expected 0; C-8659
+- D05/default seed 41043 unapplied_running (R3858): observed -186, expected 0; C-7120
+- D05/default seed 41044 unapplied_running (R4057): observed -32683, expected 0; E4613
+- D05/default seed 41044 unapplied_running (R4054): observed -55854, expected 0; E9712
+- D05/default seed 41045 ar_running (R4175): observed -1, expected 0; F0254951
+- D05/default seed 41058 unapplied_running (L01321): observed -12, expected 0; C-0392
+- D05/default seed 41059 unapplied_running (R2679): observed -41, expected 0; C-8026
+- D05/default seed 41061 unapplied_running (R2190): observed -661, expected 0; CUST70335
+- D05/default seed 41064 unapplied_running (R987): observed -47522, expected 0; CUST98460
+- D05/default seed 41064 unapplied_running (R1036): observed -2977, expected 0; CUST42293
+- D05/default seed 41066 unapplied_running (L04325): observed -555, expected 0; CUST55531
+- D05/default seed 41068 unapplied_running (R1521): observed -64, expected 0; CUST07021
+- D05/default seed 41071 unapplied_running (GL-000910): observed -132, expected 0; C-5747
+- D05/default seed 41074 ar_running (GL-003948): observed -1, expected 0; 2601-593279
+- D05/default seed 41080 unapplied_running (GL-004509): observed -14, expected 0; E9009
+- D05/default seed 41081 unapplied_running (R4233): observed -225, expected 0; C-7364
+- D05/default seed 41082 ar_running (GL-005049): observed -1, expected 0; F0880818
+- D05/default seed 41084 unapplied_running (GL-001329): observed -91, expected 0; CUST52532
+- D05/default seed 41084 unapplied_running (GL-001504): observed -16, expected 0; CUST14537
+- D05/default seed 41086 unapplied_running (L03721): observed -214, expected 0; C-6213
+- D05/default seed 41091 unapplied_running (R2905): observed -9, expected 0; C-1116
+- D05/default seed 41094 ar_running (R3306): observed -1, expected 0; INV-357622
+- D05/default seed 41100 ar_running (R1817): observed -1, expected 0; 2510-112034
+- D05/default seed 41102 unapplied_running (L00536): observed -2, expected 0; CUST61593
+- D05/default seed 41105 unapplied_running (GL-002236): observed -34, expected 0; CUST43566
+- D05/default seed 41105 unapplied_running (GL-002244): observed -184, expected 0; CUST81946
+- D05/default seed 41106 unapplied_running (GL-003529): observed -74, expected 0; C-0932
+- D05/default seed 41113 unapplied_running (GL-004473): observed -115, expected 0; CUST50826
+- D05/default seed 41115 unapplied_running (L04189): observed -224685, expected 0; E1486
+- D05/default seed 41115 unapplied_running (L04274): observed -37185, expected 0; E5780
+- D05/default seed 41116 unapplied_running (GL-002108): observed -73, expected 0; C-2466
+- D05/default seed 41117 unapplied_running (GL-002803): observed -1, expected 0; E1961
+- D05/default seed 41119 unapplied_running (GL-000964): observed -3, expected 0; E2473
+- D05/default seed 41124 unapplied_running (GL-002245): observed -205, expected 0; C-6104
+- D05/default seed 41125 unapplied_running (L00377): observed -1181, expected 0; CUST50140
+- D05/default seed 41127 ar_running (GL-002840): observed -1, expected 0; F0686931
+- D05/default seed 41128 unapplied_running (GL-002910): observed -97, expected 0; C-9525
+- D05/default seed 41131 unapplied_running (L04366): observed -67, expected 0; C-2139
+- D05/default seed 41131 unapplied_running (L04354): observed -353, expected 0; C-6052
+- D05/default seed 41132 unapplied_running (R644): observed -46, expected 0; C-9933
+- D05/default seed 41137 ar_running (GL-001286): observed -1, expected 0; 2501-410390
+- D05/default seed 41140 unapplied_running (L01432): observed -446, expected 0; E0345
+- D05/default seed 41141 ar_running (R3610): observed -1, expected 0; INV-054288
+- D05/default seed 41142 unapplied_running (L03781): observed -10874, expected 0; CUST89097
+- D05/default seed 41144 unapplied_running (L03241): observed -291, expected 0; E6937
+- D05/default seed 41147 unapplied_running (L03708): observed -85, expected 0; E5990
+- D05/default seed 41149 unapplied_running (R708): observed -60771, expected 0; C-9138
+- D05/default seed 41150 unapplied_running (L01764): observed -742, expected 0; C-4875
+- D05/default seed 41157 unapplied_running (L04564): observed -20455, expected 0; CUST09866
+- D05/default seed 41158 unapplied_running (GL-000362): observed -1214, expected 0; E5459
+- D05/default seed 41166 ar_running (GL-004004): observed -1, expected 0; 2506-422686
+- D05/default seed 41170 unapplied_running (L01112): observed -27, expected 0; C-4024
+- D05/default seed 41171 unapplied_running (L02781): observed -314, expected 0; C-5870
+- D05/default seed 41173 unapplied_running (GL-001084): observed -132, expected 0; C-4096
+- D05/default seed 41174 ar_running (GL-000390): observed -1, expected 0; SI-2025-590188
+- D05/default seed 41174 unapplied_running (GL-000426): observed -286, expected 0; C-4736
+- D05/default seed 41178 unapplied_running (L03744): observed -118378, expected 0; E8203
+- D05/default seed 41182 ar_running (GL-000759): observed -1, expected 0; SI-2026-721173
+- D05/default seed 41183 unapplied_running (L02610): observed -7, expected 0; CUST45617
+- D05/default seed 41190 unapplied_running (GL-003022): observed -314, expected 0; C-6621
+- D05/default seed 41192 ar_running (GL-004482): observed -1, expected 0; 2611-659303
+- D05/default seed 41193 unapplied_running (GL-002517): observed -78, expected 0; CUST47530
+- D05/default seed 41194 unapplied_running (L00725): observed -46, expected 0; E1812
+- D05/default seed 41194 unapplied_running (L00782): observed -384, expected 0; E1022
+- D05/default seed 41195 ar_running (GL-003793): observed -1, expected 0; F0615449
+- D05/default seed 41196 unapplied_running (GL-003493): observed -44, expected 0; E4315
+- D05/default seed 41197 unapplied_running (L02821): observed -3071, expected 0; CUST82232
+- D05/default seed 41198 unapplied_running (L03718): observed -47, expected 0; CUST24584
+- D05/default seed 41199 ar_running (R2679): observed -1, expected 0; F0107215
+- D05/default seed 41203 unapplied_running (GL-002257): observed -220, expected 0; CUST44083
+- D05/default seed 41205 unapplied_running (R4514): observed -12, expected 0; E5788
+- D05/default seed 41208 unapplied_running (L02934): observed -49953, expected 0; CUST80841
+- D05/default seed 41209 unapplied_running (GL-004432): observed -74, expected 0; C-3115
+- D05/default seed 41212 ar_running (L01373): observed -1, expected 0; SI-2025-273988
+- D05/default seed 41214 unapplied_running (R2379): observed -367, expected 0; E9465
+- D05/default seed 41216 unapplied_running (R5038): observed -74, expected 0; C-8256
+- D05/default seed 41220 unapplied_running (GL-002466): observed -26938, expected 0; E5508
+- D05/default seed 41222 ar_running (GL-002092): observed -1, expected 0; INV-911729
+- D05/default seed 41224 unapplied_running (L02932): observed -402, expected 0; E4306
+- D05/default seed 41225 ar_running (R4393): observed -1, expected 0; INV-763469
+- D05/default seed 41225 ar_running (R4435): observed -1, expected 0; INV-981731
+- D05/default seed 41229 unapplied_running (GL-004718): observed -115, expected 0; C-5574
+- D05/default seed 41234 unapplied_running (R2145): observed -46, expected 0; CUST28806
+- D05/default seed 41234 unapplied_running (R2201): observed -21, expected 0; CUST09400
+- D05/default seed 41236 unapplied_running (L02890): observed -55, expected 0; CUST67673
+- D05/default seed 41239 ar_running (R1295): observed -1, expected 0; 2611-562598
+- D05/default seed 41242 unapplied_running (R736): observed -119, expected 0; E9730
+- D05/default seed 41243 ar_running (GL-005203): observed -1, expected 0; F0481630
+- D05/default seed 41243 unapplied_running (GL-005212): observed -32, expected 0; CUST32225
+- D05/default seed 41244 unapplied_running (L03904): observed -24475, expected 0; CUST93203
+- D05/default seed 41244 unapplied_running (L04056): observed -49167, expected 0; CUST54052
+- D05/default seed 41244 unapplied_running (L04053): observed -42070, expected 0; CUST05049
+- D05/default seed 41245 ar_running (R2719): observed -1, expected 0; INV-988106
+- D05/default seed 41247 unapplied_running (L01470): observed -3, expected 0; CUST42949
+- D05/default seed 41248 ar_running (L00513): observed -1, expected 0; F0370420
+- D05/default seed 41248 unapplied_running (L00432): observed -552, expected 0; E8174
+- D05/default seed 41256 unapplied_running (GL-001834): observed -173, expected 0; C-4466
+- D05/default seed 41257 unapplied_running (L00782): observed -34, expected 0; E4551
+- D05/default seed 41258 ar_running (R1433): observed -1, expected 0; SI-2026-923475
+- D05/default seed 41258 unapplied_running (R1238): observed -227031, expected 0; CUST78127
+- D05/default seed 41262 ar_running (GL-001158): observed -1, expected 0; F0515687
+- D05/default seed 41263 unapplied_running (R5022): observed -91, expected 0; CUST88062
+- D05/default seed 41264 unapplied_running (R3651): observed -83, expected 0; C-1145
+- D05/default seed 41265 unapplied_running (GL-001966): observed -170, expected 0; C-5923
+- D05/default seed 41266 unapplied_running (L00492): observed -2186, expected 0; E7360
+- D05/default seed 41267 unapplied_running (L03551): observed -1362, expected 0; E8408
+- D05/default seed 41268 unapplied_running (R3548): observed -31589, expected 0; C-4687
+- D05/default seed 41270 ar_running (GL-000401): observed -1, expected 0; INV-215118
+- D05/default seed 41270 unapplied_running (GL-000443): observed -23, expected 0; CUST74275
+- D05/default seed 41277 unapplied_running (L01581): observed -40, expected 0; E3442
+- D05/default seed 41277 unapplied_running (L01680): observed -63, expected 0; E3442
+- D05/default seed 41277 unapplied_running (L01733): observed -88, expected 0; E3442
+- D05/default seed 41282 unapplied_running (GL-003747): observed -56670, expected 0; E8942
+- D05/default seed 41283 unapplied_running (L04036): observed -57, expected 0; CUST56709
+- D05/default seed 41287 unapplied_running (GL-004422): observed -33477, expected 0; C-5782
+- D05/default seed 41287 unapplied_running (GL-004529): observed -16030, expected 0; C-6240
+- D05/default seed 41289 unapplied_running (R446): observed -195, expected 0; CUST97557
+- D05/default seed 41292 ar_running (L02096): observed -1, expected 0; INV-931351
+- D05/default seed 41293 ar_running (GL-003102): observed -1, expected 0; 2503-365156
+- D05/default seed 41293 ar_running (GL-003276): observed -1, expected 0; 2503-133260
+- D05/default seed 41296 unapplied_running (L03801): observed -60, expected 0; C-9163
+- D05/hard seed 41005 ar_running (GL-005749): observed -1, expected 0; INV-064884
+- D05/hard seed 41008 unapplied_running (GL-003144): observed -51, expected 0; C-9667
+- D05/hard seed 41011 unapplied_running (R3945): observed -229, expected 0; C-9377
+- D05/hard seed 41013 ar_running (R2646): observed -1, expected 0; INV-859119
+- D05/hard seed 41013 unapplied_running (R2930): observed -28, expected 0; CUST95480
+- D05/hard seed 41015 unapplied_running (L05401): observed -98, expected 0; CUST95106
+- D05/hard seed 41017 ar_running (L03233): observed -1, expected 0; INV-758326
+- D05/hard seed 41018 unapplied_running (L03230): observed -23, expected 0; C-8778
+- D05/hard seed 41020 unapplied_running (L01033): observed -303, expected 0; C-0028
+- D05/hard seed 41020 unapplied_running (L01160): observed -5, expected 0; C-8284
+- D05/hard seed 41024 unapplied_running (R3553): observed -143101, expected 0; E1698
+- D05/hard seed 41024 unapplied_running (R3860): observed -188319, expected 0; E1698
+- D05/hard seed 41025 unapplied_running (L02152): observed -10190, expected 0; C-6454
+- D05/hard seed 41029 unapplied_running (R2704): observed -271, expected 0; CUST08113
+- D05/hard seed 41029 unapplied_running (R2832): observed -19, expected 0; CUST09291
+- D05/hard seed 41037 ar_running (L03201): observed -1, expected 0; 2611-778760
+- D05/hard seed 41037 ar_running (L03244): observed -1, expected 0; 2611-453884
+- D05/hard seed 41038 unapplied_running (GL-005437): observed -279331, expected 0; C-0425
+- D05/hard seed 41040 ar_running (R5101): observed -1, expected 0; 2609-004130
+- D05/hard seed 41045 unapplied_running (R3505): observed -103, expected 0; E2744
+- D05/hard seed 41046 unapplied_running (L01489): observed -130, expected 0; E5006
+- D05/hard seed 41049 unapplied_running (R3890): observed -315, expected 0; E7530
+- D05/hard seed 41050 unapplied_running (L02856): observed -686, expected 0; CUST88801
+- D05/hard seed 41052 ar_running (R1027): observed -1, expected 0; SI-2026-798836
+- D05/hard seed 41053 unapplied_running (R2367): observed -63, expected 0; C-4903
+- D05/hard seed 41061 unapplied_running (L02053): observed -26452, expected 0; CUST15073
+- D05/hard seed 41063 ar_running (L01469): observed -1, expected 0; 2609-768605
+- D05/hard seed 41065 ar_running (R4601): observed -1, expected 0; F0032065
+- D05/hard seed 41073 unapplied_running (GL-001842): observed -420, expected 0; C-0848
+- D05/hard seed 41078 unapplied_running (L01768): observed -170902, expected 0; E7114
+- D05/hard seed 41079 unapplied_running (L05733): observed -20, expected 0; E5939
+- D05/hard seed 41080 unapplied_running (R5253): observed -83, expected 0; C-3829
+- D05/hard seed 41088 unapplied_running (GL-001810): observed -246, expected 0; C-6699
+- D05/hard seed 41088 unapplied_running (GL-002196): observed -256, expected 0; C-6699
+- D05/hard seed 41088 unapplied_running (GL-001984): observed -1, expected 0; C-3111
+- D05/hard seed 41091 unapplied_running (GL-003949): observed -57, expected 0; E5263
+- D05/hard seed 41092 unapplied_running (L03271): observed -4, expected 0; C-1933
+- D05/hard seed 41093 unapplied_running (L02066): observed -2, expected 0; CUST65465
+- D05/hard seed 41094 unapplied_running (R5650): observed -4, expected 0; E9227
+- D05/hard seed 41096 ar_running (R648): observed -1, expected 0; SI-2026-466918
+- D05/hard seed 41097 unapplied_running (R4467): observed -10407, expected 0; CUST02501
+- D05/hard seed 41098 ar_running (L04227): observed -1, expected 0; 2612-160441
+- D05/hard seed 41098 unapplied_running (L04443): observed -23291, expected 0; C-1225
+- D05/hard seed 41099 unapplied_running (L02896): observed -26, expected 0; C-9785
+- D05/hard seed 41099 unapplied_running (L03397): observed -9, expected 0; C-3675
+- D05/hard seed 41100 ar_running (GL-005821): observed -1, expected 0; 2612-882562
+- D05/hard seed 41103 ar_running (R2401): observed -1, expected 0; F0054592
+- D05/hard seed 41106 ar_running (L03291): observed -1, expected 0; 2507-119107
+- D05/hard seed 41108 unapplied_running (GL-003547): observed -174, expected 0; C-6620
+- D05/hard seed 41112 ar_running (R4842): observed -1, expected 0; 2508-594384
+- D05/hard seed 41115 ar_running (L03813): observed -1, expected 0; 2507-425960
+- D05/hard seed 41118 ar_running (GL-004927): observed -1, expected 0; INV-114883
+- D05/hard seed 41118 unapplied_running (GL-005060): observed -34, expected 0; CUST19568
+- D05/hard seed 41123 ar_running (R4880): observed -1, expected 0; INV-019033
+- D05/hard seed 41124 unapplied_running (L00585): observed -1, expected 0; CUST35077
+- D05/hard seed 41128 ar_running (GL-001786): observed -1, expected 0; SI-2026-305268
+- D05/hard seed 41134 unapplied_running (GL-005307): observed -201, expected 0; CUST34155
+- D05/hard seed 41137 ar_running (R1542): observed -1, expected 0; F0267943
+- D05/hard seed 41142 unapplied_running (GL-002585): observed -250, expected 0; C-5710
+- D05/hard seed 41150 unapplied_running (L05035): observed -85, expected 0; CUST48458
+- D05/hard seed 41151 ar_running (L00532): observed -1, expected 0; INV-263286
+- D05/hard seed 41156 ar_running (R5500): observed -1, expected 0; 2508-592873
+- D05/hard seed 41164 ar_running (R3355): observed -1, expected 0; 2504-064452
+- D05/hard seed 41165 unapplied_running (R3538): observed -228, expected 0; CUST82075
+- D05/hard seed 41170 ar_running (R3853): observed -1, expected 0; INV-886051
+- D05/hard seed 41170 ar_running (R3783): observed -1, expected 0; INV-044439
+- D05/hard seed 41172 unapplied_running (L02902): observed -136, expected 0; E2316
+- D05/hard seed 41173 unapplied_running (L05206): observed -69, expected 0; E8466
+- D05/hard seed 41174 ar_running (R1947): observed -1, expected 0; 2501-044446
+- D05/hard seed 41174 unapplied_running (R1343): observed -104023, expected 0; C-2817
+- D05/hard seed 41175 unapplied_running (L05070): observed -213, expected 0; C-7166
+- D05/hard seed 41176 unapplied_running (GL-005340): observed -579, expected 0; E1431
+- D05/hard seed 41179 ar_running (R5285): observed -1, expected 0; 2502-263509
+- D05/hard seed 41185 ar_running (L05076): observed -1, expected 0; SI-2026-814573
+- D05/hard seed 41194 ar_running (L05631): observed -1, expected 0; INV-589999
+- D05/hard seed 41197 unapplied_running (L04940): observed -5371, expected 0; E9990
+- D05/hard seed 41199 unapplied_running (GL-000525): observed -9, expected 0; CUST88252
+- D05/hard seed 41200 unapplied_running (R3852): observed -10, expected 0; E9348
+- D05/hard seed 41200 unapplied_running (R3947): observed -54, expected 0; E3676
+- D05/hard seed 41201 unapplied_running (GL-004366): observed -14, expected 0; E0747
+- D05/hard seed 41202 unapplied_running (R731): observed -67, expected 0; E8053
+- D05/hard seed 41204 ar_running (R3490): observed -1, expected 0; INV-929188
+- D05/hard seed 41204 unapplied_running (R3004): observed -33679, expected 0; C-2446
+- D05/hard seed 41208 unapplied_running (R1128): observed -13, expected 0; C-8157
+- D05/hard seed 41208 unapplied_running (R1712): observed -7, expected 0; C-8157
+- D05/hard seed 41210 unapplied_running (R1520): observed -1, expected 0; E8676
+- D05/hard seed 41211 unapplied_running (R1389): observed -1150, expected 0; E7884
+- D05/hard seed 41212 ar_running (GL-003946): observed -1, expected 0; 2603-669849
+- D05/hard seed 41216 ar_running (R2147): observed -1, expected 0; SI-2025-019680
+- D05/hard seed 41216 ar_running (R2145): observed -1, expected 0; SI-2025-363180
+- D05/hard seed 41216 unapplied_running (R2104): observed -66, expected 0; E3666
+- D05/hard seed 41218 unapplied_running (R2840): observed -84, expected 0; C-6028
+- D05/hard seed 41224 unapplied_running (GL-001578): observed -143, expected 0; E2277
+- D05/hard seed 41232 unapplied_running (R5419): observed -198, expected 0; E5211
+- D05/hard seed 41233 unapplied_running (GL-004739): observed -82, expected 0; C-3362
+- D05/hard seed 41234 ar_running (GL-002416): observed -1, expected 0; SI-2025-000350
+- D05/hard seed 41235 unapplied_running (GL-002070): observed -17333, expected 0; CUST16801
+- D05/hard seed 41236 unapplied_running (GL-003576): observed -216, expected 0; CUST89445
+- D05/hard seed 41240 ar_running (GL-002596): observed -1, expected 0; F0438164
+- D05/hard seed 41243 unapplied_running (R2468): observed -38, expected 0; E7080
+- D05/hard seed 41244 unapplied_running (L01940): observed -194678, expected 0; E7439
+- D05/hard seed 41249 ar_running (R4435): observed -1, expected 0; SI-2026-018892
+- D05/hard seed 41249 unapplied_running (R4476): observed -16, expected 0; E0639
+- D05/hard seed 41251 ar_running (GL-004129): observed -1, expected 0; 2602-317250
+- D05/hard seed 41253 ar_running (L01044): observed -1, expected 0; 2502-305985
+- D05/hard seed 41253 ar_running (L00832): observed -1, expected 0; 2502-633501
+- D05/hard seed 41262 ar_running (GL-003336): observed -1, expected 0; INV-882581
+- D05/hard seed 41266 ar_running (GL-002148): observed -1, expected 0; F0818242
+- D05/hard seed 41266 ar_running (GL-001994): observed -1, expected 0; F0254037
+- D05/hard seed 41267 unapplied_running (GL-004356): observed -164, expected 0; E8308
+- D05/hard seed 41276 unapplied_running (GL-004211): observed -32, expected 0; CUST98146
+- D05/hard seed 41278 ar_running (GL-000895): observed -1, expected 0; SI-2025-730616
+- D05/hard seed 41279 ar_running (L01297): observed -1, expected 0; F0674420
+- D05/hard seed 41279 unapplied_running (L01357): observed -154, expected 0; C-1009
+- D05/hard seed 41282 ar_running (R4406): observed -1, expected 0; F0128741
+- D05/hard seed 41284 unapplied_running (R3587): observed -108, expected 0; C-7663
+- D05/hard seed 41286 unapplied_running (GL-002193): observed -40, expected 0; C-7586
+- D05/hard seed 41287 unapplied_running (GL-003483): observed -259, expected 0; CUST73028
+- D05/hard seed 41288 unapplied_running (L02451): observed -14938, expected 0; E7606
+- D05/hard seed 41289 unapplied_running (L03602): observed -1092, expected 0; CUST97015
+- D05/hard seed 41289 unapplied_running (L03815): observed -251, expected 0; CUST84414
+- D05/hard seed 41290 ar_running (R5259): observed -1, expected 0; F0617458
+- D05/hard seed 41291 ar_running (R5756): observed -1, expected 0; 2604-148765
+- D05/hard seed 41291 unapplied_running (R5269): observed -78791, expected 0; E8132
+- D05/hard seed 41292 ar_running (GL-005681): observed -1, expected 0; INV-315947
+- D05/hard seed 41292 unapplied_running (GL-005406): observed -13, expected 0; E5289
+- D05/hard seed 41295 ar_running (R3380): observed -1, expected 0; F0203109
+- D05/hard seed 41298 unapplied_running (R3356): observed -4, expected 0; C-7601
+- D05/hard seed 41299 ar_running (R3080): observed -1, expected 0; SI-2025-343694
+- D05/hard seed 41299 unapplied_running (R2644): observed -27, expected 0; E7083
+
+First unexplained violation of each check outside clean scenarios:
+- baseline/default seed 41005 ar_running (L02591): observed -1, expected 0; 2610-365414
+- baseline/default seed 41012 unapplied_running (L01019): observed -73138, expected 0; CUST92808
+- baseline/hard seed 41003 unapplied_running (R1333): observed -94142, expected 0; C-9211
+- baseline/hard seed 41012 ar_running (L04872): observed -1, expected 0; F0023605
+- D06/default seed 41001 ar_running (R2582): observed -1, expected 0; F0305356
+- D06/default seed 41001 unapplied_running (R2778): observed -103426, expected 0; C-5947
+- D06/hard seed 41003 unapplied_running (L05977): observed -21074, expected 0; CUST06473
+- D06/hard seed 41045 ar_running (GL-005132): observed -1, expected 0; SI-2026-846198
+- D07/default seed 41001 ar_running (R2582): observed -1, expected 0; F0305356
+- D07/default seed 41001 unapplied_running (R2778): observed -103426, expected 0; C-5947
+- D07/hard seed 41003 unapplied_running (L05977): observed -21074, expected 0; CUST06473
+- D07/hard seed 41045 ar_running (GL-005132): observed -1, expected 0; SI-2026-846198
+- D08/default seed 41001 ar_running (R2582): observed -1, expected 0; F0305356
+- D08/default seed 41001 unapplied_running (R2778): observed -103426, expected 0; C-5947
+- D08/hard seed 41003 unapplied_running (L05977): observed -21074, expected 0; CUST06473
+- D08/hard seed 41045 ar_running (GL-005132): observed -1, expected 0; SI-2026-846198
+- D09/default seed 41010 ar_running (GL-004502): observed -1, expected 0; INV-463338
+- D09/default seed 41010 unapplied_running (GL-004469): observed -862, expected 0; C-1748
+- D09/hard seed 41000 unapplied_running (L04377): observed -7, expected 0; CUST00285
+- D09/hard seed 41005 ar_running (L05113): observed -1, expected 0; SI-2026-837760
+- D10/default seed 41000 unapplied_running (L04767): observed -2, expected 0; E3927
+- D10/default seed 41023 ar_running (R748): observed -1, expected 0; INV-743893
+- D10/hard seed 41001 unapplied_running (R766): observed -54, expected 0; E7663
+- D10/hard seed 41004 ar_running (GL-002153): observed -1, expected 0; 2611-127037
+- D11/default seed 41000 ar_running (L01797): observed -1, expected 0; 2609-934689
+- D11/default seed 41002 unapplied_running (GL-000951): observed -139083, expected 0; CUST19275
+- D11/hard seed 41000 unapplied_running (L05309): observed -124, expected 0; CUST69014
+- D11/hard seed 41005 ar_running (R3913): observed -1, expected 0; 2507-597948
+- D12/default seed 41000 unapplied_running (R2538): observed -142, expected 0; CUST35030
+- D12/default seed 41005 ar_running (R768): observed -1, expected 0; SI-2025-376606
+- D12/hard seed 41000 unapplied_running (GL-000987): observed -35, expected 0; E7690
+- D12/hard seed 41034 ar_running (GL-002580): observed -1, expected 0; SI-2026-071363
+- D13/default seed 41000 unapplied_running (R2538): observed -142, expected 0; CUST35030
+- D13/default seed 41005 ar_running (R768): observed -1, expected 0; SI-2025-376606
+- D13/hard seed 41000 unapplied_running (GL-000987): observed -35, expected 0; E7690
+- D13/hard seed 41034 ar_running (GL-002580): observed -1, expected 0; SI-2026-071363
+- D14/default seed 41001 unapplied_running (GL-003565): observed -328, expected 0; C-7484
+- D14/default seed 41020 ar_running (GL-003239): observed -1, expected 0; F0121313
+- D14/hard seed 41000 unapplied_running (L04702): observed -4, expected 0; E6613
+- D14/hard seed 41002 ar_running (R2696): observed -1, expected 0; INV-526580
+- D15/default seed 41001 unapplied_running (GL-003565): observed -328, expected 0; C-7484
+- D15/default seed 41020 ar_running (GL-003239): observed -1, expected 0; F0121313
+- D15/hard seed 41000 unapplied_running (L04702): observed -4, expected 0; E6613
+- D15/hard seed 41002 ar_running (R2696): observed -1, expected 0; INV-526580
+- D16/default seed 41001 unapplied_running (GL-003068): observed -5493, expected 0; C-9026
+- D16/default seed 41002 ar_running (R3716): observed -1, expected 0; INV-447954
+- D16/hard seed 41001 ar_running (L03959): observed -1, expected 0; F0896281
+- D16/hard seed 41022 unapplied_running (GL-004514): observed -39, expected 0; CUST71742
+- D17/default seed 41001 unapplied_running (GL-003068): observed -5493, expected 0; C-9026
+- D17/default seed 41002 ar_running (R3716): observed -1, expected 0; INV-447954
+- D17/hard seed 41001 ar_running (L03959): observed -1, expected 0; F0896281
+- D17/hard seed 41022 unapplied_running (GL-004514): observed -39, expected 0; CUST71742
+- D18/default seed 41001 unapplied_running (GL-003068): observed -5493, expected 0; C-9026
+- D18/default seed 41002 ar_running (R3716): observed -1, expected 0; INV-447954
+- D18/hard seed 41001 ar_running (L03959): observed -1, expected 0; F0896281
+- D18/hard seed 41022 unapplied_running (GL-004514): observed -39, expected 0; CUST71742
+- D19/default seed 41001 unapplied_running (GL-000925): observed -23, expected 0; E3462
+- D19/default seed 41012 ar_running (L02181): observed -1, expected 0; 2602-726143
+- D19/hard seed 41000 unapplied_running (R3497): observed -355, expected 0; CUST75627
+- D19/hard seed 41020 ar_running (GL-002714): observed -1, expected 0; SI-2025-056047
+- D20/default seed 41001 unapplied_running (GL-000925): observed -23, expected 0; E3462
+- D20/default seed 41012 ar_running (L02181): observed -1, expected 0; 2602-726143
+- D20/hard seed 41000 unapplied_running (R3497): observed -355, expected 0; CUST75627
+- D20/hard seed 41020 ar_running (GL-002714): observed -1, expected 0; SI-2025-056047
+
+2026-11-22 03:55 codex1 — X3 extreme configurations. `env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` → exit 0, 19.223 s.
+
+Assumptions: three fresh seeds 44000–44002, mixed counts distributed as evenly as possible across the four issue types, two findings per interacting scenario, documented maximum 12 for every type, and permutation seed 37 versus null. The factorial uses one allocation error so all three allocation settings are exercised. All 300 accepted episodes verified and returned exactly the requested count. All 72 rejected configurations reported `ValueError: at most 12 issues per episode`. No silent count mismatch, unexpected exception, or action-budget overrun. Max 72 actions. Both reconciliation and empty submissions were replayed in closed mode and scored independently. Per-config results follow.
+
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 18 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 18 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 18 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 18 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 18 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 17 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 25 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 28 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 47 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 23 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 24 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 43 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 43 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 43 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 43 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 43 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 35 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 61 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 48 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 41 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 54 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 63 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 48 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 17 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 17 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 17 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 17 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 35 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 35 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 19 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 19 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 19 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 19 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 19 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 24 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 27 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 24 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 23 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 40 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 40 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 40 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 40 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 40 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 36 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 68 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 36 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 41 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 72 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 33 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 33 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 23 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 23 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 23 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 23 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 23 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 26 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 28 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 49 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 27 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 26 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 41 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 41 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 41 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 41 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 41 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 58 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 41 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 50 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 36 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 41 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 47 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 69 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 48 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 51 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 35 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 35 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 36 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 36 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 15 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 15 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+
+Outcomes: {'valid': 300, 'rejected': 72, 'failure': 0}. Total: 372.
+
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, 71.45 s wall time, ALL CHECKS PASSED in 71.4 s
+2026-11-22 03:55 codex2 — Y3: README first-read review at 7444579. `git clone /Users/caliskan/Projects/genesis /tmp/r21-codex2/clone` and `git -C /tmp/r21-codex2/clone checkout --detach origin/night/2026-11-22-r21` both exited 0 (2.0 s together).
+
+Read README.md lines 1–466 top to bottom: introduction, Quick start, Container, Isolated baseline run, For the jury, Errors, Reward, Results, What the check does, Using the environment and all subsections, Other commands, Repository layout, Honest limitations, License, and Contributing. Assumption for the ten-minute review: prioritize the jury's runnable route and validate maintenance examples selectively. Docker was absent locally, so those commands were checked against Dockerfile and CI. The clone used local repository access as assigned.
+
+From the fresh clone, `/usr/bin/time -p env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r21-codex2/readme/auditenv-metrics.json` exited 0 in 92.72 s: `[PASS] unit tests — 563 tests, 0 failures, 0 errors` and `ALL CHECKS PASSED in 92.5 s`. The four jury modules exited 0 in 4.53 s (73 tests, OK), `uv run python -m auditenv.jury_run` exited 0 in 2.99 s (20 scenarios; reconcile F1 1.000), and `uv run python -m auditenv.demo` exited 0 in 0.21 s (closed reward 0.958, four TPs). All three Python examples, both trial policy commands, the hard-train export, the 674-line trajectory regeneration and byte comparison, the out-of-process smoke, generated and disk verifiers, doc sync, analysis, golden hashes, chart, and Make preview passed. Outputs generated during the review went to worker scratch or the scratch clone.
+
+1. **Lines 12 and 29–46, offline prerequisites.** A reader can see “Без сети” before learning that cloning, first-time Python installation and an uncached Docker build may need a network. The pinned image is a build input, and `--network none` applies to the run. Proposed text: “Once this checkout and Python 3.11 are available, the check runs without network access or third-party Python dependencies. A first `uv` run may download Python. The Docker build may pull its pinned base image; the built image runs the check offline with `--network none`.”
+2. **Lines 59–72, jury path placement.** The first two optional Docker flows precede the jury entry point, while a Docker-free full run took 92.72 s and the standalone demo 0.21 s. Proposed lead sentence in Quick start: “For the shortest review, run `uv run python -m auditenv.demo`, then the full check below. To connect the official harness, start at [For the jury](#for-the-jury). Docker is optional.”
+3. **Lines 30, 113–124 and 378–403, public reproducibility.** The check strips `AUDITENV_SECRET` only for its unit test gate, and a previously exported key changes other runs and generated files. Proposed text: “For the published metrics and byte-identical public exports, start these commands with `AUDITENV_SECRET` unset (for example, `env -u AUDITENV_SECRET uv run python -m auditenv.check`). Set a custom key only in the grader process.”
+4. **Lines 81, 147–150 and 332–333, policy process and adapter location.** These read as though all four baselines run through worker processes. `auditenv.jury_run.play` runs the oracle in the grader, and `JuryPolicy` is defined in `auditenv.policy_worker`. Proposed text: “The jury runner exercises four baselines. It launches random explorer, reconcile and flag-all as separate policy processes using `auditenv.policy_worker.JuryPolicy`; the oracle runs in the grader.”
+5. **Lines 108–111, 173 and 272, reward visibility.** The early reward summary describes the grading rule before distinguishing the closed return. Proposed text: “The grader uses this score on the terminal step. Train mode returns the terminal score; closed mode returns 0.0 to the policy on every step and keeps the actual score in the grader log.”
+6. **Lines 124 and 127–150, which command backs the sweep.** “Seed sweep over 3 000 episodes” appears before the full-check gates, whose data verifier covers 200 episodes and is a different workload. Proposed text: “Separate from the full check, `uv run python -m auditenv.fuzz --seeds 0-999` checked 3,000 companies with zero problems. See DESIGN §9.”
+7. **Lines 173–177 and 307–321, config discovery.** The first list of keys leaves out the two jury options used later. Proposed text after `difficulty`: “`allocation` (`partial`, `missing` or null) selects the allocation-injection variant. `ensure_distractors` (bool) adds split payments and refunded overpayments when suitable receipts exist. See CONTRACT §4 for defaults.”
+8. **Lines 197–205 and 397–399, copy-paste side effects.** The first regeneration command writes the tracked root trajectory and the later three export commands replace committed split directories. For a read-only comparison, the fresh clone reproduced all 674 trajectory lines byte for byte in scratch. Proposed text: “To verify without changing the checkout, regenerate the trajectory to a temporary path and compare it with `cmp trajectories.jsonl <temporary path>`. The export commands below replace the specified split directories; use temporary output paths for a reproduction check.”
+9. **Lines 272–274, reset and step tuple shapes.** The first observation is listed in the `step` row. Proposed replacement: “`reset` returns `(first_observation, info)`, where `first_observation` has `task`, `manifest`, `policy` and `remaining_steps`. `step` returns `(observation, reward, terminated, truncated, info)`; the step observation has `result`, `error` and `remaining_steps`.”
+10. **Lines 93 and 299, cutoff amount.** Line 299 says “AR debit posted out of period”, whereas the posted debit is in the current period and the invoice issue date is outside it. Proposed table cell: “AR debit posted inside the audited period for an invoice issued outside it.”
+11. **Line 311, clean scenario denominators and evidence.** Reading the last `199/200` as applying to both difficulties is easy. A public-record D01 probe on each difficulty at seeds 0–199 reproduced 200/200 split, refund, equal-total and unidentified-receipt cases in each difficulty, and foreign documents in 199/200 default and 200/200 hard. The Block 2 unit suite checks the scenario properties on seeds 900–903. Proposed text: “D01–D05 share these settings. Reproduce the clean scenario assertions with `uv run python -m unittest tests.test_judge_scenarios.JudgeScenariosTest.test_clean_scenarios_hold_the_legitimate_lookalikes`. In a separate public sweep on seeds 0–199, foreign-currency documents appeared in 199/200 default and 200/200 hard companies.”
+12. **Lines 346–347, timing claim.** The fresh-clone run alongside the full check reported reconcile at max 0.051 s, and the combined-load Y2 run observed a maximum of 54.050 s. The fixed “under 0.05 s” is workload-dependent. Proposed text: “The jury runner prints mean and maximum wall time per policy, including process startup. The official check requires all episodes in this replay to finish within the 60-second limit.”
+13. **Lines 355–365, closed server quick start.** With `GRADER_KEY` absent, the exact assignment in line 357 aborts in Bash with `/bin/bash: GRADER_KEY: Set GRADER_KEY in the organiser shell` before the new default-key server can run. Proposed first command: `uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl`. Follow it with: “The server creates or uses the grader-only key file by default. For a custom key, set `AUDITENV_SECRET` in the organiser's environment. To reproduce a deliberately public queue, unset `AUDITENV_SECRET` and add `--public`.”
+14. **Lines 390–391 and 405, chart input dependency.** The chart command looks self-contained and reads whatever is at `/tmp/auditenv-metrics.json`. It succeeded here with an older file already present (00:08 local); on a machine without the earlier command's output the input is missing. Proposed text: “After the `auditenv.check --json` command above, pass its output explicitly: `uv run python scripts/chart.py --json /tmp/auditenv-metrics.json`.”
+2026-11-22 03:53 gemini1a — G2 complete: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 69000` (exit 0, wall time 177.8 s / 2:57.86): config sweep, cases 69000-71999: 3000 random configs (1254 hard) in 177.8 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56; FUZZ PASSED. Max steps: 56. Next: G3. Assumptions: none.
+
+2026-11-22 03:54 gemini1a — G3 complete: `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999` (exit 0, wall time 29.9 s): 3000/3000 episodes valid; episodes with problems: 0. All assigned tasks (G1, G2, G3) complete. Next: check for any new tasks or idle. Assumptions: none.
+2026-11-22 03:54 gemini1b — G6 config sweep on cases 72000-74999: 3000 random configs (1155 hard) in 148.9 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 57; FUZZ PASSED (wall time 148.9 s). Tasks G4, G5, G6 all complete.
+2026-11-22 03:46 gemini2a — G7: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 37000-37299` exited 0 (wall time 199s, 12,600 episodes checked across 42 configs).
+  totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3044, e_fx_missing=0, f_inv_booked_before_issue=2553, f_pay_posted_before_doc=0, f_ar_before_booking=25, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5023, c_tie=3
+  unexplained violations: 25 (0 in clean configs)
+  Next: G8.
+2026-11-22 03:51 gemini2a — G8: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 37300-37599` exited 0 (wall time 233s, 12,600 episodes checked across 42 configs).
+  totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3100, e_fx_missing=0, f_inv_booked_before_issue=2625, f_pay_posted_before_doc=0, f_ar_before_booking=16, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5069, c_tie=0
+  unexplained violations: 16 (0 in clean configs)
+  Next: G9.
+2026-11-22 03:53 gemini2a — G9: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 38000-38199` exited 0 (wall time 99s).
+  Audited 8400 episodes across 42 configurations; 33113438 checks, 0 unexpected failures.
+  All gemini2a tasks (G7, G8, G9) complete.
+2026-11-22 03:55 gemini2b — G12 complete: ran `scripts/shortcut_miner.py --seeds 5000-5999 --report-only` (default, 32.7s, exit 0) and with `--hard` (42.1s, exit 0).
+Default mode: 16 flagged values (precision > 0.5):
+## Max precision per issue type (default)
 | type | affected max P | evidence max P | flagged (aff/ev) |
 |---|---|---|---|
-| duplicate_invoice | 0.996 | 0.996 | 2/2 |
-| payment_allocation | 0.964 | 0.964 | 8/1 |
-| fx_error | 0.704 | 0.308 | 3/0 |
-| period_cutoff | 0.452 | 0.452 | 0/0 |
+| duplicate_invoice | 0.997 | 0.997 | 2/2 |
+| payment_allocation | 0.981 | 0.981 | 8/1 |
+| fx_error | 0.714 | 0.320 | 3/0 |
+| period_cutoff | 0.460 | 0.460 | 0/0 |
+All 16 flagged values are consistent with docs/DESIGN.md §10 (e.g., duplicate count=2 at 0.997, 2900 amount_count>=4 at 0.981, 2900 end-0 at 0.804, 7900 end-0 at 0.577, fx_error end-0 at 0.714).
 
-Total flagged values: 16 (precision > 0.5):
-- affected duplicate_invoice (2): `invoices same_entity_currency_total_count == 2` (P=0.996), `invoices total_count_in_table == 2` (P=0.972).
-- affected payment_allocation (8): `ledger amount_count_in_table@acct2900 == 4+` (P=0.964), `ledger day_rel_period@acct2900 == end-0` (P=0.789), `ledger amount_digits@acct2900 == 9` (P=0.750), `ledger position_decile@acct2900 == 9` (P=0.671), `ledger amount_count_in_table@acct2900 == 1` (P=0.622), `ledger day_rel_period@acct7900 == end-0` (P=0.568), `ledger amount_digits@acct2900 == 6` (P=0.566), `ledger payment_journal_size@acct2900 == 4+` (P=0.557).
-- affected fx_error (3): `ledger day_rel_period@acct2900 == end-0` (P=0.704), `ledger position_decile@acct2900 == 9` (P=0.549), `ledger day_rel_period@acct7900 == end-0` (P=0.548).
-- evidence duplicate_invoice (2): `invoices same_entity_currency_total_count == 2` (P=0.996), `invoices total_count_in_table == 2` (P=0.972).
-- evidence payment_allocation (1): `ledger amount_count_in_table@acct2900 == 4+` (P=0.964).
-
-Comparison with `docs/DESIGN.md` §10: Exactly 16 flagged values in default mode, precisely matching the 16 flagged values documented in DESIGN §10 (duplicate definitions at P=0.996, last-day 2900/7900 fx_error cues at P=0.70, 2900 payment_allocation hints at P=0.75-0.78 and repeated amount at P=0.964). 0 unlisted columns/features with precision > 0.5.
-
-2026-11-22 00:26 gemini3a — G13: Ran four jury modules 5 times in a row (`env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired`). All 5 runs passed: Run 1 (Ran 73 tests in 2.208s, OK, exit 0, wall 2.30s), Run 2 (Ran 73 tests in 2.279s, OK, exit 0, wall 2.34s), Run 3 (Ran 73 tests in 2.273s, OK, exit 0, wall 2.34s), Run 4 (Ran 73 tests in 2.258s, OK, exit 0, wall 2.32s), Run 5 (Ran 73 tests in 2.359s, OK, exit 0, wall 2.42s). Zero differing runs or failures. Next: G14.
-2026-11-22 00:27 gemini3a — G14: Ran `env -u AUDITENV_SECRET uv run python -m auditenv.attack` (exit 0, wall 0.45s; 20 seeds evaluated, 11,000 mutations tested, 0 violations detected: PASSED) and `uv run python scripts/sensitivity.py` (exit 0, wall 2.35s; dev 10 episodes and hard 20 episodes evaluated across step cost and amount tolerance; rankings invariant: oracle > reconcile > naive_reconcile > random > flag_all on dev; oracle > reconcile_hard > reconcile > naive_reconcile > random > flag_all on hard; re-grade reproduced every env reward exactly). Next: G15.
-2026-11-22 00:28 gemini3a — G15: Ran red-team modules 10 times (`env -u AUDITENV_SECRET uv run python -m unittest tests.test_load_redteam tests.test_server_redteam tests.test_jury_run`). All 10 runs passed: Run 1 (Ran 18 tests in 5.195s, OK, exit 0, wall 5.29s), Run 2 (Ran 18 tests in 5.254s, OK, exit 0, wall 5.33s), Run 3 (Ran 18 tests in 5.259s, OK, exit 0, wall 5.33s), Run 4 (Ran 18 tests in 5.309s, OK, exit 0, wall 5.39s), Run 5 (Ran 18 tests in 5.295s, OK, exit 0, wall 5.37s), Run 6 (Ran 18 tests in 5.453s, OK, exit 0, wall 5.54s), Run 7 (Ran 18 tests in 5.355s, OK, exit 0, wall 5.43s), Run 8 (Ran 18 tests in 5.377s, OK, exit 0, wall 5.46s), Run 9 (Ran 18 tests in 5.392s, OK, exit 0, wall 5.47s), Run 10 (Ran 18 tests in 5.111s, OK, exit 0, wall 5.19s). Zero failures. All gemini3a tasks complete.
-2026-11-22 00:26 gemini3b — G16: verified all directories under episodes/. dev: 10/10 episodes valid; episodes with problems: 0. hard: 20/20 episodes valid; episodes with problems: 0. train: 10/10 episodes valid; episodes with problems: 0. Exit code 0.
-2026-11-22 00:27 gemini3b — G17: demo --help exit 0. yes '' | env -u AUDITENV_SECRET uv run python -m auditenv.demo exit 0. Quoted final lines: "terminal reward 0.958 = clip(2*F1 - 1 - 0.002*21 steps)   P=1.00 R=1.00 F1=1.00", "policy side: 22 steps, rewards seen = [0.0], final info = {}", "grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0". Comparison with docs/DEMO.md: all numbers (326 ledger rows, 69 invoices, 100 budget, 21 inspection steps, 22 actions, reward 0.958, 286 / 351331 minor units, repeated oracle 0.333, clean silence 1.000) match docs/DEMO.md exactly with zero differences.
-2026-11-22 00:28 gemini3b — G18: auditenv.check --json /tmp/r20-gemini3b/c.json exit 0 (ALL CHECKS PASSED in 81.7 s). sync_docs.py --check --json /tmp/r20-gemini3b/c.json exit 0 ("All documentation tables match measured data."). Zero drift.
-2026-11-22 00:30 rb — Z1 done: night/r20/scenarios_adapter.py plays all D01–D20 through judge_adapter, closed mode
-  (generate_episode with the default grader key, AUDITENV_SECRET unset), seeds 32000–32004, default + hard, policies
-  reconcile / reconcile_hard and flag_all driven via JuryPolicy (jury-shaped observations only; scores read from the
-  grader-side env.grader_log; the script never opens truth/provenance). Command:
-  `env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py` → exit 0, wall 7.0 s, 400 runs
-  (20 scenarios × 2 difficulties × 5 seeds × 2 policies), all submissions valid, every closed step reward 0.0
-  (asserted), max episode time 0.024 s of the 60 s limit. Mean grader return per scenario (min F1 over the 5 seeds):
-| scenario | default reconcile return (min F1) | default flag_all return | hard reconcile_hard return (min F1) | hard flag_all return |
-|---|---|---|---|---|
-| D01 | 0.960 (1.000) | -1.000 | 0.915 (1.000) | -1.000 |
-| D02 | 0.960 (1.000) | -1.000 | 0.915 (1.000) | -1.000 |
-| D03 | 0.960 (1.000) | -1.000 | 0.915 (1.000) | -1.000 |
-| D04 | 0.960 (1.000) | -1.000 | 0.915 (1.000) | -1.000 |
-| D05 | 0.960 (1.000) | -1.000 | 0.915 (1.000) | -1.000 |
-| D06 | 0.956 (1.000) | -1.000 | 0.914 (1.000) | -1.000 |
-| D07 | 0.956 (1.000) | -1.000 | 0.914 (1.000) | -1.000 |
-| D08 | 0.956 (1.000) | -1.000 | 0.914 (1.000) | -1.000 |
-| D09 | 0.961 (1.000) | -1.000 | 0.916 (1.000) | -1.000 |
-| D10 | 0.959 (1.000) | -1.000 | 0.914 (1.000) | -1.000 |
-| D11 | 0.961 (1.000) | -1.000 | 0.920 (1.000) | -1.000 |
-| D12 | 0.960 (1.000) | -1.000 | 0.920 (1.000) | -1.000 |
-| D13 | 0.960 (1.000) | -1.000 | 0.920 (1.000) | -1.000 |
-| D14 | 0.962 (1.000) | -1.000 | 0.918 (1.000) | -1.000 |
-| D15 | 0.962 (1.000) | -1.000 | 0.918 (1.000) | -1.000 |
-| D16 | 0.963 (1.000) | -1.000 | 0.922 (1.000) | -1.000 |
-| D17 | 0.963 (1.000) | -1.000 | 0.922 (1.000) | -1.000 |
-| D18 | 0.963 (1.000) | -1.000 | 0.922 (1.000) | -1.000 |
-| D19 | 0.960 (1.000) | -1.000 | 0.915 (1.000) | -1.000 |
-| D20 | 0.960 (1.000) | -1.000 | 0.915 (1.000) | -1.000 |
-  Flags: 0 — reconcile/reconcile_hard F1 = 1.000 on every scenario × difficulty × seed; flag_all return −1.000
-  everywhere (never > 0). Notes (return below the README jury_run mean 0.959, F1 still 1.000 — not defects):
-  D06–D08 default reconcile 0.956 (22.8 mean steps vs the 21.4-scenario average; README's 0.959 is a 20-scenario
-  mean on seeds 3001–3020, per-scenario return varies with the 0.002/step inspection cost); all 20 hard scenarios
-  reconcile_hard 0.914–0.922 (41–44 mean steps: hard books need ~2× the inspections; README's table is default
-  difficulty, no hard jury_run mean is documented). Assumptions: policies run in-process behind JuryPolicy instead
-  of policy_worker subprocesses because reconcile_hard is not in policy_worker.POLICIES and product code is
-  off-limits for workers — isolation is equivalent (the policy object receives only reset/step observations);
-  "documented value in README" taken as the jury_run table (reconcile return 0.959 / F1 1.000, flag_all −1.000).
-  Full per-seed results: /tmp/r20-rb/z1.json, full output /tmp/r20-rb/z1.out. Next: Z2.
-2026-11-22 00:31 rb — Z2 done: `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B>
-  --json /tmp/r20-rb/j<B>.json` for B = 20000, 21000, 22000, 23000. All four exit 0; wall times (time -p real):
-  2.75 s, 2.87 s, 2.74 s, 2.83 s. Policy tables (P/R/F1 micro, mean return, mean steps, max steps, mean/max s):
-  B=20000 (seeds 20001–20020): random_explorer 0.000/0.000/0.000 −1.000 33.0/33 0.040/0.045;
-    reconcile 1.000/1.000/1.000 0.960 20.8/24 0.041/0.048; flag_all 0.000/0.000/0.000 −1.000 3.5/4 0.036/0.040;
-    oracle 1.000/1.000/1.000 1.000 1.0/1 0.006/0.008.
-  B=21000 (seeds 21001–21020): random_explorer 0.000/0.000/0.000 −0.903 33.0/33 0.041/0.049;
-    reconcile 1.000/1.000/1.000 0.960 21.1/23 0.044/0.052; flag_all 0.000/0.000/0.000 −1.000 3.6/4 0.037/0.043;
-    oracle 1.000/1.000/1.000 1.000 1.0/1 0.006/0.008.
-  B=22000 (seeds 22001–22020): random_explorer 0.000/0.000/0.000 −1.000 33.0/33 0.039/0.043;
-    reconcile 1.000/1.000/1.000 0.960 21.0/24 0.040/0.045; flag_all 0.000/0.000/0.000 −1.000 3.6/4 0.036/0.041;
-    oracle 1.000/1.000/1.000 1.000 1.0/1 0.006/0.008.
-  B=23000 (seeds 23001–23020): random_explorer 0.000/0.000/0.000 −0.903 33.0/33 0.042/0.049;
-    reconcile 1.000/1.000/1.000 0.960 20.9/25 0.042/0.055; flag_all 0.000/0.000/0.000 −1.000 3.6/4 0.037/0.040;
-    oracle 1.000/1.000/1.000 1.000 1.0/1 0.006/0.008.
-  Flags: 0 — oracle F1 = 1.000 and reconcile F1 = 1.000 in all four runs (tp/fp/fn 20/0/0 each); no run's
-  random/flag_all mean return > −0.5 (worst −0.903). Note (explained, not a defect): random_explorer's mean
-  −0.9032 at B=21000 and B=23000 = 19×(−1) + one clean scenario where it submitted empty findings, the correct
-  answer on clean books (F1 1.0, reward 0.936 = 1 − 0.002×32 inspections). Reproduced with a scratch replay
-  (/tmp/r20-rb/z2_random_check.py, public generator as jury_run uses): B=21000 → D01 seed 21001, B=23000 → D04
-  seed 23004, both 0/0/0, reward 0.9360. Micro F1 stays 0.000 because a clean episode contributes no tp/fp/fn.
-  JSON tables: /tmp/r20-rb/j{20000,21000,22000,23000}.json; raw outputs j<B>.out. Both rb tasks (Z1, Z2) done.
-2026-11-22 00:48 lead — Merged gemini1a/1b/2a/2b/3a/3b and rb: all evidence green (fuzz 6k+6k+3k+3k episodes, verify 3000/3000, stress 0 imperfect max 58 steps, suite 561 OK under 3 hashseeds/TZs and 2 locales, exports byte-identical, golden 80/80, mutants 22/22, miner 16 flagged = DESIGN §10, jury modules 5x, red-team 10x, D01-D20 through adapter F1 1.000 on 400 runs, jury_run 4 seed bases). No defect. Topped up queues (G19-G24, Z3-Z4). codex1 rate-limited until 02:41, codex2 until 01:04: X1 retagged lead (subagent).
-2026-11-22 00:49 gemini2a — G21: Resource-leak and warning run (python -X dev -W error::ResourceWarning -m unittest discover -s tests -t .). Ran 561 tests in 49.960s, OK, wall time 50.07s. ResourceWarnings: 0. Total warning/error lines: 0 (no warnings or errors found).
-2026-11-22 00:52 lead — X3 (subagent): night/r20/adapter_reality.py, 20/20 checks pass twice: fresh HOME (key 0600, same episode_id across processes), read-only/missing HOME (per-process fallback, cross-process scoring still agrees), 8-process race x 20 rounds (one key, no partial file), relative/space/non-ASCII/NFD/symlink/trailing-slash episode_dir, leak scan of every observation (no key, path, seed or truth field), two JudgeEnv interleaved. No defect. Noted: with unwritable HOME closed episodes are not reproducible across processes (documented in README); stderr warning names the key path (grader-side only, documented).
-2026-11-22 01:02 lead — X1 (subagent): night/r20/chronology.py, an independent public-data checker (12,600 episodes: seeds 30000-30299 x default/hard/D01-D20 both difficulties). Found a real defect: a 30 % in-period posting lag (generator.py) let a receipt credit AR for an invoice up to 3 days before the invoice was booked (575 rows in 520 of 3,000 clean episodes; repro D01 default seed 30010 RCPT0548981 vs 2608-742998). Fix: _post_before_payment moves such an invoice's two rows to its issue instant in place (no new random draws, so 65/80 golden hashes and the demo are unchanged). Regression test_cash_is_applied_after_the_invoice_is_posted failed in 29 subtests before, passes after. After fix: checker exit 0, the remaining 32 hits are the injected prior-period period_cutoff invoice itself (explained). Re-exported dev/train/hard, regenerated 7 trajectory files + trajectories.jsonl + golden. check 562 tests all gates 54.2 s; sync_docs no drift; fuzz 0-999 and 0-199 --hard pass; attack 0/11000; verify 600/600 and splits 10/10/20. Assumption: dropping the lag (post at issue) is the least invasive fix, preferred over moving payments (which reshuffled the RNG stream and changed the demo company).
-
-2026-11-22 01:15 codex2 — Y1 fresh-clone sweep at 299c5e7 (Python 3.11.14).
-Cloned with `git clone /Users/caliskan/Projects/genesis /tmp/r20-codex2/clone` and checked out the fetched round tip by SHA. Commands ran at the clone root with `AUDITENV_SECRET` unset. Scratch output paths were moved under `/tmp/r20-codex2`; demo stdin received blank lines. CONTRACT has no shell fences. Shell control-flow blocks are timed as a unit. Full output is in `/tmp/r20-codex2/command-*.txt`.
-
-| Source | Command | Exit | Wall s | Output |
-|---|---|---:|---:|---|
-| README.md:29 | `git clone https://github.com/madiyar-abi/genesis.git && cd genesis` | skipped | — | Task exclusion |
-| README.md:30 | `uv run python -m auditenv.check` | 0 | 53.321 | ALL CHECKS PASSED in 53.2 s |
-| README.md:40 | `docker build -t auditenv .` | skipped | — | Task exclusion |
-| README.md:41 | `docker run --rm --network none auditenv` | skipped | — | Task exclusion |
-| README.md:53 | `docker build --target policy -t genesis-policy .` | skipped | — | Task exclusion |
-| README.md:54 | `uv run python -m auditenv.jury_run --policy-image genesis-policy` | skipped | — | Task exclusion |
-| README.md:184 | `uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/r20-codex2/dev_reconcile.jsonl` | 0 | 0.113 |  |
-| README.md:185 | `uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval` | 0 | 0.079 |  |
-| README.md:200 | `uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out trajectories.jsonl` | 0 | 0.250 |  |
-| README.md:210 | `for p in random naive_reconcile reconcile; do uv run python -m auditenv.run --policy $p --config configs/train.json --out trajectories/train_$p.jsonl; done` | 0 | 0.269 |  |
-| README.md:213 | `for p in random naive_reconcile reconcile reconcile_hard; do uv run python -m auditenv.run --policy $p --config configs/train_hard.json --out trajectories/train_hard_$p.jsonl; done` | 0 | 0.763 |  |
-| README.md:334 | `uv run python -m auditenv.jury_run` | 0 | 1.614 |  |
-| README.md:355 | `AUDITENV_SECRET="${GRADER_KEY:?Set GRADER_KEY in the organiser shell}" uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl` | skipped | — | Task exclusion |
-| README.md:371 | `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` | 0 | 0.078 | [PASS] out-of-process eval run — policy saw no reward/truth; 2 results in the grader log |
-| README.md:379 | `uv run python -m unittest discover -s tests -t .` | 0 | 51.975 | Ran 562 tests in 51.852s |
-| README.md:380 | `uv run python -m unittest tests.test_env` | 0 | 0.234 | Ran 33 tests in 0.178s |
-| README.md:381 | `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` | 0 | 0.104 | [PASS] out-of-process eval run — policy saw no reward/truth; 2 results in the grader log |
-| README.md:382 | `uv run python -m auditenv.verify --seeds 0-199` | 0 | 5.485 | 600/600 episodes valid; episodes with problems: 0 |
-| README.md:383 | `uv run python -m auditenv.verify --dir episodes/train` | 0 | 0.140 | 10/10 episodes valid; episodes with problems: 0 |
-| README.md:384 | `uv run python -m auditenv.verify --dir episodes/dev` | 0 | 0.135 | 10/10 episodes valid; episodes with problems: 0 |
-| README.md:385 | `uv run python -m auditenv.verify --dir episodes/hard` | 0 | 0.427 | 20/20 episodes valid; episodes with problems: 0 |
-| README.md:386 | `uv run python -m auditenv.attack` | 0 | 0.500 | Total mutations tested: 11000; Total violations detected: 0 |
-| README.md:387 | `uv run python -m tests.test_fuzz` | 0 | 1.172 | Python 3.11.14, 20319 episode actions, 20524 total step calls in 1.119 s |
-| README.md:388 | `uv run python -m auditenv.check --json /tmp/r20-codex2/auditenv-metrics.json` | 0 | 76.342 | ALL CHECKS PASSED in 76.3 s |
-| README.md:389 | `uv run python scripts/sync_docs.py --check --json /tmp/r20-codex2/auditenv-metrics.json` | 0 | 0.047 | All documentation tables match measured data. |
-| README.md:390 | `uv run python -m auditenv.fuzz --seeds 0-999` | 0 | 86.569 | FUZZ PASSED |
-| README.md:391 | `uv run python -m auditenv.fuzz --configs 3000` | 0 | 93.398 | config sweep, cases 0-2999: 3000 random configs (1186 hard) in 93.4 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56 |
-| README.md:392 | `uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299` | 0 | 7.237 | reconcile on 1200 default episodes (seeds 0-299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (7.2 s) |
-| README.md:393 | `uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json` | 0 | 0.088 |  |
-| README.md:394 | `uv run python -m auditenv.demo` | 0 | 0.104 | grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0 |
-| README.md:395 | `uv run python -m auditenv.export --config configs/dev.json --out episodes/dev` | 0 | 0.081 | Exported 10 episodes to episodes/dev |
-| README.md:396 | `uv run python -m auditenv.export --config configs/train.json --out episodes/train` | 0 | 0.080 | Exported 10 episodes to episodes/train |
-| README.md:397 | `uv run python -m auditenv.export --config configs/eval_hard.json --out episodes/hard` | 0 | 0.257 | Exported 20 episodes to episodes/hard |
-| README.md:398 | `uv run python scripts/mutate_reward.py` | 0 | 139.540 | 22/22 mutants killed. |
-| README.md:399 | `uv run python scripts/sensitivity.py` | 0 | 1.860 |  |
-| README.md:400 | `uv run python scripts/shortcut_miner.py --report-only` | 0 | 15.958 |  |
-| README.md:401 | `uv run python scripts/golden.py --check` | 0 | 0.469 | All 80 golden hashes match /private/tmp/r20-codex2/clone/tests/golden_hashes.json. |
-| README.md:402 | `uv run python scripts/bench.py` | 0 | 9.684 |  |
-| README.md:403 | `uv run python scripts/chart.py` | 0 | 0.041 | wrote /private/tmp/r20-codex2/clone/docs/baselines.svg |
-| README.md:404 | `make check` | 0 | 52.696 | ALL CHECKS PASSED in 52.6 s |
-| README.md:405 | `make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart` | 0 | 0.008 |  |
-| docs/DEMO.md:9 | `env -u AUDITENV_SECRET uv run python -m auditenv.demo --seed 2003 --pause` | 0 | 0.103 | grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0 |
-
-Output comparisons:
-- README.md:123 reports hard reconcile F1 0.752. The check printed `[PASS] hard: default rules no longer suffice — reconcile F1 0.755`.
-- README.md:340 reports 21.4 mean reconcile actions for the jury cohort. The replay printed:
-  ```text
-  reconcile         1.000  1.000  1.000    0.959    21.3    26    0.024   0.026
-  ```
-- Chart from the scratch metrics: `env -u AUDITENV_SECRET uv run python scripts/chart.py --json /tmp/r20-codex2/auditenv-metrics.json --out /tmp/r20-codex2/baselines.svg`, exit 0, 0.047 s, `wrote /tmp/r20-codex2/baselines.svg`. `cmp docs/baselines.svg /tmp/r20-codex2/baselines.svg` exited 1 and printed `docs/baselines.svg /tmp/r20-codex2/baselines.svg differ: char 3401, line 35`. Bar titles changed from `reconcile, dev: 0.957` to `reconcile, dev: 0.956`, `reconcile, hard: 0.288` to `reconcile, hard: 0.293`, `naive_reconcile, dev: −0.506` to `naive_reconcile, dev: −0.480`, and `naive_reconcile, hard: −0.711` to `naive_reconcile, hard: −0.704`. The chart command's implicit metrics path requires the README's original JSON path or an explicit `--json` when relocated.
-- All 36 eligible entries exited 0, including both trajectory loops (seven invocations). The clone's episode and trajectory paths match HEAD after replay. The six exclusions were the GitHub clone, Docker build/run, the Docker-dependent jury run, and the organiser server. The bare chart command found an existing shared default-path metrics file, so the isolated chart comparison above used this sweep's own JSON.
-- The demo reproduced 326 ledger rows, 69 invoices, 100 steps, payment PAY-136430, 286 and 351331 USD minor units, four matches in 22 actions with 21 inspections, return 0.958, oracle 1.000, repeats 0.333, silence −1.000 on dirty books and 1.000 on clean books. Hard F1 0.755 rounds to the script's approximate 0.75.
-2026-11-22 01:09 gemini1a — G19: ran `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 12000-12999 --hard` (exit 0, wall time 217.1 s: hard mode, seeds 12000-12999: 3000 episodes (1994 dirty, 1006 clean), 0 problems, FUZZ PASSED) and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 9000-9299` (exit 0, wall time 9.1 s: reconcile on 1200 default episodes (seeds 9000-9299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 32, truncated 0). 0 problems found across 4,200 episodes. All assigned tasks complete.
-2026-11-22 01:09 gemini1b — G20 complete (config sweep 66000-68999 and hard stress reconcile_hard 9000-9299).
-Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 66000`
-Exit code: 0, wall time: 138.77 s
-Summary: `config sweep, cases 66000-68999: 3000 random configs (1229 hard) in 138.7 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 58`
-Max steps: 58
-FUZZ PASSED
-Problems: 0
-Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 9000-9299`
-Exit code: 0, wall time: 31.35 s
-Summary: `reconcile_hard on 1200 hard episodes (seeds 9000-9299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 57, truncated 0 (31.3 s)`
-Max steps: 57
-Problems: 0
-2026-11-22 01:05 gemini2b — G22: Ran optimized-mode check and audited product code for assertions. Commands and results:
-  - `env -u AUDITENV_SECRET uv run python -O -m auditenv.check`: exit 0, wall 53.591s (50.69s user, 2.18s system). Last line: "ALL CHECKS PASSED in 53.4 s" (562 unit tests, 200/200 verifier, all baselines/gates passed).
-  - `grep -n "^\s*assert " auditenv/*.py auditenv/policies/*.py judge_adapter.py`: exit 1 (0 matches). Product code contains 0 assertions (proper exception handling throughout; python -O removes nothing required for validation).
-2026-11-22 01:01 gemini3a — G23: Ran every test module alone (`env -u AUDITENV_SECRET uv run python -m unittest tests.$m >/tmp/r20-gemini3a/$m.out 2>&1`). Checked 71 test modules. All 71 modules exited with code 0 (0 non-zero exits, 0 failures, total wall time 46.63s). Outputs saved to /tmp/r20-gemini3a/*.out.
-2026-11-22 01:00 gemini3b — G24: regenerated committed trajectories into /tmp/r20-gemini3b/. Commands:
-  env -u AUDITENV_SECRET uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out /tmp/r20-gemini3b/trajectories.jsonl
-  for p in random naive_reconcile reconcile; do env -u AUDITENV_SECRET uv run python -m auditenv.run --policy $p --config configs/train.json --out /tmp/r20-gemini3b/trajectories/train_$p.jsonl; done
-  for p in random naive_reconcile reconcile reconcile_hard; do env -u AUDITENV_SECRET uv run python -m auditenv.run --policy $p --config configs/train_hard.json --out /tmp/r20-gemini3b/trajectories/train_hard_$p.jsonl; done
-Diffs:
-  diff -u trajectories.jsonl /tmp/r20-gemini3b/trajectories.jsonl -> exit 0 (identical)
-  diff -ru trajectories /tmp/r20-gemini3b/trajectories -> exit 0 (all 7 files identical)
-Differing files: none.
-2026-11-22 01:14 lead — Merged top-up 1 (G19-G24): all green (hard fuzz 3000, stress 0 imperfect max 57/32 steps, config sweep 3000 max 58, -X dev 0 ResourceWarnings, -O check passes and 0 product asserts, 71 modules pass alone, trajectories byte-identical). Queued G25-G30 to re-test the generator fix.
-
-2026-11-22 01:16 codex2 — Y2 jury README and contract claims audit (round tip 4b96d2f).
-
-Evidence by claim group:
-
-| Documentation | Evidence checked |
-|---|---|
-| README.md:61–72,239–265 (key source, public/closed generation, location, protocol, example) | Dockerfile:10–14; judge_adapter.py:37–56,72–121,125–143; auditenv/grader_key.py:15–59; auditenv/generator.py:60–64,108–113,123–139; tests/test_judge_contract.py:362–389; tests/test_readme_snippets.py:42–92 |
-| README.md:74–84 (submission materials and sizes) | LICENSE:1; pyproject.toml and uv.lock; Dockerfile:1,10–14; configs/{train,dev,train_hard,eval_hard}.json; Y1 verify and byte-replay evidence, including 674 trajectory lines; auditenv/jury_run.py:28,36–63 and auditenv/policy_worker.py:10–42 |
-| README.md:268–288 (call and observation shapes, flags, limits, errors, allowed tools, no grading feedback in closed mode) | judge_adapter.py:72–143; auditenv/env.py:17–38,89–110,123–168,187–238; auditenv/load.py:106–163; tests/test_judge_contract.py:80–359; tests/test_error_codes_doc.py:128–151 |
-| README.md:290–328 (labels, amounts, matching and published scenarios, export, provenance, paired rules and minimal grading fixture) | auditenv/inject.py:61–272; auditenv/matcher.py:20–46,68–123; auditenv/jury.py:5–20; auditenv/generator.py:577–638,665–680; auditenv/verify.py:464–478; auditenv/load.py:117–139; auditenv/transform.py:25–66; tests/test_judge_scenarios.py:67–127; tests/test_judge_paired.py |
-| README.md:330–349 (jury replay, metrics and test mapping) | auditenv/jury_run.py:36–63,66–118; auditenv/check.py:51–64,301–326; Y1 replay and four jury test modules |
-| CONTRACT.md:3–62 (runtime, units, exponents, rates, manifest, IDs, journal and payment rules, dates, reversals) | pyproject.toml; auditenv/money.py:8–23,47–50; auditenv/generator.py:49–55,237–329,508–538,577–625,642–663; auditenv/verify.py:101–124 |
-| CONTRACT.md:64–91 (truth shape, four kinds, amounts, evidence, duplicate equivalence and I1/I2) | auditenv/generator.py:597–603; auditenv/inject.py:61–272; auditenv/verify.py evidence checks; schemas/truth.schema.json; tests/test_judge_scenarios.py |
-| CONTRACT.md:93–142 (native API, configuration, reset side effects, keys, result shapes, error and terminal behavior) | auditenv/env.py:17–38,56–110,123–168,187–238; auditenv/generator.py:67–105,540–569,705–719; auditenv/server.py:168–184,201–225; judge_adapter.py:37–41,84–91 |
-| CONTRACT.md:144–189 (findings structure, grading math, policy/runner API) | auditenv/schema.py; auditenv/matcher.py:20–47,68–149; auditenv/metrics.py:4–17; auditenv/run.py:28–52; tests/test_judge_reward.py and tests/test_reward_attacks.py |
-
-The four jury modules plus tests.test_readme_snippets, tests.test_error_codes_doc and tests.test_calculator ran with `env -u AUDITENV_SECRET AUDITENV_KEY_FILE=/tmp/r20-codex2/grader.key uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired tests.test_readme_snippets tests.test_error_codes_doc tests.test_calculator`, exit 0. Output:
-```text
-Ran 85 tests in 2.032s
-
-OK
-```
-
-Discrepancies and proposed wording:
-
-| Doc line | Evidence | Correct text |
-|---|---|---|
-| README.md:248–251 | judge_adapter.py:90 calls `grader_key(warn=False)` on generated closed resets; auditenv/grader_key.py:32–35 gates both stderr messages on that flag. The mode is applied at file creation (line 43); existing permissions are untouched on read (55–59). | “When generating an export, the adapter may report the key path or fallback on grader stderr. Closed reset itself is quiet. On first creation, the key file has mode 0600.” |
-| README.md:253 | Open reset passes `key=None` at judge_adapter.py:90–91; auditenv/generator.py:60–64,128–129 then uses the environment variable if present. | “Open mode uses the public generator when `AUDITENV_SECRET` is unset. The committed splits are public.” |
-| README.md:271 | judge_adapter.py:85–88 filters a loaded episode's team config to the two limit keys, silently ignoring other keys. auditenv/load.py:149–163 checks structure, payment remittance invoice targets and balance. Full semantic journal checks are verifier-specific. | “Only `max_steps` and `time_limit_s` apply to a loaded episode. The loader validates structure, payment remittance invoice targets and journal balance.” |
-| README.md:273 | judge_adapter.py:86–94 and auditenv/env.py:106–109 permit a lower initial budget. | “Reset returns `{task, manifest, policy, remaining_steps}`, with 100 remaining by default. Step returns `{result, error, remaining_steps}`.” |
-| README.md:282 | auditenv/env.py:143–152 and judge_adapter.py:103–105,120–121. Closed submit reports accepted without validation feedback. An invalid train submit has null result and error `invalid_findings`. A timed-out action is truncated before submit handling. | “A processed submission ends the episode. Closed mode returns accepted with no correctness signal. Train mode can report `invalid_findings`.” |
-| README.md:286–288 | auditenv/env.py:126–135,159–168 checks elapsed time when a step arrives, using the configured limits, and returns an `episode_over` response with the final flags and remaining budget. | “At the action limit (default 100), or on the next step once elapsed time exceeds the time limit (default 60 s from reset), the episode truncates with empty findings if a submission has not been processed.” |
-| README.md:309 | Public-record probe on D01, which shares the D01–D05 config, seeds 0–199: default 199/200 and hard 200/200 have foreign-currency documents. Split refs, refunds, equal totals, unidentified receipts and ledger records on both boundary dates are 200/200 in each. | “Foreign-currency documents appeared in 199/200 default and 200/200 hard episodes.” |
-| README.md:319 and CONTRACT.md:106–107 | `env -u AUDITENV_SECRET PYTHONPATH=. uv run python /tmp/r20-codex2/y2_public.py`, exit 0. With seed 25, `{n_invoices: 10, distractors: false, ensure_distractors: true, errors: {}}` prints `minimal ensure_distractors 25 refund: False split: True`. auditenv/generator.py:486–505 requires eligible full payments. | “`ensure_distractors` adds a split or refund when missing and suitable full payments are available. For D01–D05, the published configuration produced both on all 200 seeds per difficulty tested.” |
-| README.md:326 | auditenv/matcher.py:20–28,39–46 also recognize invoice and payment IDs as public for validation, although generated evidence sets use doc, row and FX IDs. auditenv/transform.py:35–57 preserves FX IDs and emits distinct replacements. | “Generated evidence sets refer to row IDs, document IDs and FX IDs. Match validation accepts other known public IDs as extras. Keep row, document and FX evidence IDs distinct in a paired copy.” |
-| README.md:327–328 | judge_adapter.py:85–88,130 both call auditenv/load.py:117–139, so the minimal fixture works for scoring and closed reset. The loader also accepts a missing truth issue scenario for grading. | “The shared loader accepts minimal jury fixtures without task or provenance files, explicit FX IDs or truth issue scenario labels. A missing task file yields an empty task string. The strict export verifier still requires complete exports.” |
-| README.md:330–331,340 | auditenv/jury_run.py:36–43,78–86 keeps oracle in the grader while starting the three public policies as separate processes. Y1 printed `reconcile         1.000  1.000  1.000    0.959    21.3    26    0.024   0.026`. | “The three public policies run in separate processes over the jury protocol. The oracle runs grader-side.” Reconcile mean actions: 21.3. |
-| CONTRACT.md:7 | Current night/TASKS.md is a round work queue assigning touched files. Many modules listed in the contract have no corresponding task in this round. | “Use the current `night/TASKS.md` for night task ownership.” |
-| CONTRACT.md:38–40 | auditenv/verify.py:101–123 checks the sum against `max(payment.amount_minor, 0)`, so the documented inequality fails with a refund and zero refs. auditenv/generator.py:443–449 emits negative unreferenced payments. | “Positive remittance allocations sum to no more than the receipt amount. Refunds have negative payment amounts and no invoice refs.” |
-| CONTRACT.md:51–55 | auditenv/generator.py:294–311 books a negative refund through signed cash and unapplied-cash postings. The current contract lists positive receipt directions only. | “For a refund, debit 2900 and credit 1000 at the payment-date rate.” |
-| CONTRACT.md:113–117 | auditenv/grader_key.py:23–36 falls back to a process key when the key file cannot be used. auditenv/server.py:208–225 uses this helper by default for hidden queues. | “With no explicit secret, closed adapter generation and private queues use a random grader key file, with a per-process fallback if the file is unusable.” |
-| CONTRACT.md:138–142,156 | auditenv/env.py:143–164 suppresses invalid-findings feedback and actual reward in eval. Run_server logging is optional on the filesystem, with in-memory grading at auditenv/env.py:171–184 and file append at auditenv/server.py:101–107. | “Invalid submissions terminate and are graded −1. Eval returns public reward 0.0 and keeps the grading result and error grader-side. With `--grader-log`, the server appends those results to the requested file.” |
-2026-11-22 01:15 lead — L1 done. REVIEW.md Round 20, HANDOFF header, DESIGN posting-lag row updated. L2 waits for codex X2/Y1-Y3.
-2026-11-22 01:32 gemini1a — G25: ran `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 33000-33299` (wall time 86.2 s, exit code 0).
-  Totals line: `totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3064, e_fx_missing=0, f_inv_booked_before_issue=2595, f_pay_posted_before_doc=0, f_ar_before_booking=26, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5057, c_tie=0`
-  Unexplained violations line: `unexplained violations: 26 (0 in clean configs)`
-  Logged for lead review: 26 instances of `f_ar_before_booking` (0 in clean configs, found in default/default (5), hard/hard (1), D14/default (6), D14/hard (4), D15/default (6), D15/hard (4)). Sample reproductions:
-    default/default seed=33060 ids=['BNK-916419', 'INV-802246', 'GL-003665'] ar credit 2026-07-03T17:45:00+00:00 booking 2026-07-04T20:25:00+00:00
-    hard/hard seed=33263 ids=['BNK-734657', '2609-638480', 'R469'] ar credit 2026-09-01T12:20:00+01:00 booking 2026-09-02T17:58:00+01:00
-    D14/default seed=33011 ids=['RCPT0856798', 'F0453837', 'GL-003501'] ar credit 2026-05-04T14:57:00-05:00 booking 2026-05-04T19:37:00-05:00
-2026-11-22 01:31 gemini1b — G26 complete (chronology and causality check on seeds 34000-34299).
-Command: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 34000-34299`
-Exit code: 0, wall time: 81.31 s
-Totals line:
-totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3078, e_fx_missing=0, f_inv_booked_before_issue=2589, f_pay_posted_before_doc=0, f_ar_before_booking=13, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5036, c_tie=0
-Unexplained violations line:
-unexplained violations: 13 (0 in clean configs)
-2026-11-22 01:35 gemini2a — G27: fuzz sweeps (default and hard, seeds 0-999) on generator fix 299c5e7. Default mode: exit 0, wall time 59.14s; summary: default mode, seeds 0-999: 3000 episodes (1987 dirty, 1013 clean) in 59.1 s; episodes with a problem (exception / verifier / oracle): 0; random explorer reward > 0: 246/3000 (0 on dirty books); flag-all reward < 0: 3000/3000; FUZZ PASSED. Hard mode: exit 0, wall time 146.82s; summary: hard mode, seeds 0-999: 3000 episodes (1991 dirty, 1009 clean) in 146.8 s; episodes with a problem (exception / verifier / oracle): 0; random explorer reward > 0: 268/3000 (0 on dirty books); flag-all reward < 0: 3000/3000; FUZZ PASSED. Total: 6000 episodes, 0 problems.
-2026-11-22 01:28 gemini2b — G28: Ran config sweep and seed verification on generator fix 299c5e7. Commands and results:
-  - `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 0`: exit 0, wall 1:28.40 (88.4 s). Summary: "config sweep, cases 0-2999: 3000 random configs (1186 hard) in 88.4 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56" / "FUZZ PASSED".
-  - `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 0-1999`: exit 0, wall 38.463s. Summary: "6000/6000 episodes valid; episodes with problems: 0".
-  0 problems across 3,000 random configs and 6,000 generated episodes on seeds 0-1999.
-2026-11-22 01:25 gemini3a — G29: Ran `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice and `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning -m unittest discover -s tests -t .`:
-  - `auditenv.check` Run 1: exit 0, wall 51.27s, last line: "ALL CHECKS PASSED in 51.2 s"
-  - `auditenv.check` Run 2: exit 0, wall 51.32s, last line: "ALL CHECKS PASSED in 51.2 s"
-  - `python -X dev -W error::ResourceWarning -m unittest discover -s tests -t .`: exit 0, wall 50.67s, last line: "OK" (Ran 562 tests in 50.666s, zero ResourceWarnings or errors).
-2026-11-22 01:21 gemini3b — G30: repeated G10 (export diff of dev/train/hard) and G24 (trajectory regeneration diff) on generator fix 299c5e7.
-  Export diffs:
-  - episodes/dev vs /tmp/r20-gemini3b/dev: diff exit code 0 (identical)
-  - episodes/train vs /tmp/r20-gemini3b/train: diff exit code 0 (identical)
-  - episodes/hard vs /tmp/r20-gemini3b/hard: diff exit code 0 (identical)
-  Trajectory diffs:
-  - trajectories.jsonl vs /tmp/r20-gemini3b/trajectories.jsonl: diff exit code 0 (identical)
-  - trajectories/ vs /tmp/r20-gemini3b/trajectories/: diff exit code 0 (all 7 files identical)
-  Differing files: none.
-
-2026-11-22 01:22 codex2 — Y3 DESIGN and PITCH claims audit (round tip deb34dd).
-
-Measurement runs (each used prefix `env -u AUDITENV_SECRET AUDITENV_KEY_FILE=/tmp/r20-codex2/grader.key uv run python` except the supplemental runs explicitly shown below):
-
-| Command suffix | Exit | Wall s | Summary |
-|---|---:|---:|---|
-| `-m auditenv.check --json /tmp/r20-codex2/c.json` | 0 | 102.74 | `[PASS] unit tests — 562 tests, 0 failures, 0 errors`; `ALL CHECKS PASSED in 102.6 s` |
-| `-m auditenv.analyze --policy naive_reconcile --config configs/dev.json` | 0 | 0.172 | 22 TP, 102 FP, 8 FN; F1 0.286; allocation recall 2/8 |
-| `-m auditenv.analyze --policy reconcile --config configs/dev.json` | 0 | 0.192 | 30 TP, 0 FP/FN, F1 1.000 |
-| `-m auditenv.analyze --policy reconcile --config configs/eval_hard.json` | 0 | 0.635 | 40 TP, 20 FP, 6 FN; F1 0.755; six missed duplicates, 43 actions mean |
-| `-m auditenv.fuzz --seeds 0-199 --hard` | 0 | 57.273 | 600 episodes, 399 dirty/201 clean, 0 problems, random positive only on 47 clean, flag-all negative 600/600 |
-| `-m auditenv.fuzz --stress reconcile_hard --seeds 0-299 --hard` | 0 | 36.403 | 1,200 episodes, imperfect 0, max steps 57, truncated 0 |
-| `scripts/shortcut_miner.py --report-only --hard` | 0 | 94.800 | `Flagged values: 11`; customer/currency/total duplicate cue 4,878/13,690 |
-| `-m auditenv.fuzz --configs 4000 --start 0` | 0 | 254.14 | 1,600 hard, 0 problems, max 56 |
-| `-m auditenv.fuzz --configs 4000 --start 4000` | 0 | 253.32 | 1,625 hard, 0 problems, max 55 |
-| `-m auditenv.fuzz --configs 4000 --start 8000` | 0 | 255.36 | 1,601 hard, 0 problems, max 56 |
-| `-m auditenv.fuzz --configs 4000 --start 12000` | 0 | 255.83 | 1,609 hard, 0 problems, max 58 |
-| `-m auditenv.fuzz --configs 4000 --start 16000` | 0 | 255.04 | 1,602 hard, 0 problems, max 59 |
-
-The config sweep is deterministic by case number (auditenv/fuzz.py:82–108,117–142), so the five nonoverlapping shards replay exactly cases 0–19,999 of the documented command. All printed `FUZZ PASSED`. Combined 20,000 episodes, 8,037 hard, no problems, at most 59 actions. PITCH.md:62 reproduced. Full outputs are in `/tmp/r20-codex2/y3-*.out`.
-
-Supplemental evidence:
-- `env -u AUDITENV_SECRET uv run python scripts/sync_docs.py --check --json /tmp/r20-codex2/c.json`, exit 0, 0.051 s, `All documentation tables match measured data.` Includes the rounded DESIGN/PITCH deterministic tables. DESIGN dev times are host snapshots.
-- Y1 default stress reproduced 1,200 episodes, 0 imperfect, max 33 and 0 truncations. For the four rows at DESIGN.md:323–326, ran `env -u AUDITENV_SECRET uv run python -m auditenv.run --policy POLICY --config /tmp/r20-codex2/DIFFICULTY-CASE.json` with 300 seeds per row and the matching configuration from auditenv.fuzz.STRESS. Recomputed median/nearest-rank p95/max from the printed action column. Results 22/26/28, 29/31/33, 44/50/53, 50/56/57 respectively.
-- `env -u AUDITENV_SECRET PYTHONPATH=. uv run python /tmp/r20-codex2/y3_public.py` read public tables and checked current dev worked examples and counts. Used the Y1 dev reconcile trajectory for the replacement findings. For the naive FP breakdown, subtracted per-type TP counts from the terminal submitted types in `env -u AUDITENV_SECRET uv run python -m auditenv.run --policy naive_reconcile --config configs/dev.json --out /tmp/r20-codex2/naive.jsonl`. Both commands exited 0.
-
-Source and measurement coverage:
-
-| Documentation | Evidence checked |
-|---|---|
-| DESIGN.md:8–53 (design decisions, generator lifecycle, keys, units, size, time and postings) | auditenv/generator.py:49–55,60–113,123–155,176–206,237–329,346–418,540–569,577–639,705–719; auditenv/money.py:8–23,26–50; auditenv/env.py:17–38,106–109; auditenv/grader_key.py:15–59; Dockerfile:1–14 |
-| DESIGN.md:55–106 (four issue families, interactions, worked examples and distractors) | auditenv/inject.py:45–272; auditenv/generator.py:346–418,424–538; current configurations and public records for seeds 2002, 2003 and 2005; Y1 dev trajectory and Y3 checked dev analysis |
-| DESIGN.md:108–166 (API, isolation, matcher, reward, sensitivity) | auditenv/env.py:89–110,123–168,187–238; auditenv/server.py:92–128,168–195; auditenv/calculator.py; auditenv/schema.py; auditenv/matcher.py:26–46,68–149; auditenv/metrics.py:4–17; tests/test_reward_attacks.py and tests/test_judge_reward.py; Y1 sensitivity output |
-| DESIGN.md:168–221 (verifier, evidence, repairs, replay and paired data) | auditenv/verify.py:101–124,170–214,343–428,464–478,663–707; schemas/manifest.schema.json; auditenv/transform.py:25–66; auditenv/check.py:165–259; night/archive/r1-LOG.md:50,229 and repository test coverage |
-| DESIGN.md:223–345 (results, counts, analysis, measured sizing, budget, timing and edge cases) | Fresh check and analyze output below; Y1 sweep, stress, benchmark, golden and action test; hard sweep and stress; configs/dev.json and configs/eval_hard.json; scripts/bench.py:43–69,104–136; auditenv/experimental.py:8–48; .github/workflows/check.yml:41–63; listed test cases |
-| DESIGN.md:347–398 (limitations and historical evidence) | Current shortcut miner output and public-data probe; auditenv/generator.py:402–505,508–538; auditenv/inject.py:45–75,233–272; auditenv/verify.py:29–54,92–124; auditenv/policies/reconcile.py:83–103; auditenv/metrics.py:14–17; REVIEW.md:315–320,393–400 and night/archive/r8-LOG.md:9 |
-| PITCH.md:3–39 (purpose, demo, architecture, API, grader and reward) | Y1 demo output and grader replay; auditenv/generator.py:642–719; auditenv/inject.py:61–272; auditenv/env.py:17–38,89–110,123–168,187–238; auditenv/verify.py:663–707; auditenv/matcher.py:26–46,68–149; auditenv/metrics.py:4–17 |
-| PITCH.md:41–74 (metrics, cohort structure, reproducibility, sweep, miner, training scope and team) | Fresh check JSON, hard analysis and fuzz below; tests/test_load.py and tests/test_trajectory_files.py; auditenv/check.py:165–259,301–326; Y1 chart regeneration and 22/22 mutations; current miner; no shipped model weights; SPEC.md:193–207 for deliverables |
-
-Current discrepancies and suggested text:
-
-| Doc line | Evidence | Correct text |
-|---|---|---|
-| DESIGN.md:14–18,116–121,241 | The native interface and stdio policy protocol expose only public observations. The default external worker uses the repo root and same account (auditenv/jury_run.py:43–50). Isolation flags apply only with the policy Docker image (44–46; Dockerfile:3–8). The smoke gate checks a two-episode public cohort for reward and particular grading markers (auditenv/check.py:262–283). Current `reconcile_hard` F1 is 1.000. | “The policy interface exposes public records. For untrusted processes use the isolated policy container. The two-episode out-of-process smoke test passed. Hard mode challenges the default rules, and a hard-aware rule script solves the benchmark.” |
-| DESIGN.md:16 | Y1 tested 11,000 reward mutations on 20 seeds, with zero violations. auditenv/matcher.py:39–46,125–136 compares supplied fields, independent of intent, with the explanation excluded. A finite search cannot establish the unconditional claim that reward cannot be gamed. | “The matcher checks fields and evidence and disregards explanation text. The tested mutations did not beat the honest answer.” |
-| DESIGN.md:34–39,217–218; PITCH.md:12 | auditenv/generator.py:108–113,123–129,705–719 includes the key and supports a transform. The same key/config/actions replay deterministically if the wall clock does not truncate. Public probes found default seed 27 with 434 ledger rows. The 230–420/900–1,400 ledger padding targets are in auditenv/generator.py:540–559, while strict bounds 200–2,000 rows and 20–200 documents are at auditenv/verify.py:427. | “With the same key, seed, version and config, including any transform seed, the episode is reproducible. Action replay is subject to the wall-clock limit. Default history is padded toward 230–420 ledger rows before injection. Strict exports allow 200–2,000 ledger rows and 20–200 documents.” |
-| DESIGN.md:61,65–67,75–77 | auditenv/inject.py:45–53 uses local/UTC dates or offsets +1,+2,+3,+5,+7,−1,−2,−3,−5. I1 at 246–251 picks the first candidate with a ≥10-minor-unit difference, including the bank date when it qualifies, otherwise +1,+2,+3,−1, with +1 fallback. I1/I2 deliberately share a document between two issues (233–272). | “Single FX errors try the document’s local/UTC dates and selected nearby dates. I1 prioritizes the bank date if it qualifies, then tries +1, +2, +3 and −1. Interacting scenarios intentionally affect the same document twice.” |
-| DESIGN.md:84–85,89 | At dev seed 2003, ep_14eca11ac929, public generation under configs/dev.json produced none of the claimed R1344/R1350/R1509/R1520 ledger IDs. The old PAY-874814 now remits USD 501.45 for INV-587848. The Y1 reconcile replay matched all four current findings. | “Duplicate INV-441644 and INV-588950 are both GBP 6,787.00 for CUST52061, identical lines, both issued Sept 26, with AR rows R4132/R4153; later AR debit 831,638 USD minor. PAY-779598 remits USD 8,371.00 for INV-336399 and row R4163 credits only unapplied cash; allocation shortfall 837,100 USD minor. I2 INV-959754 (GBP 8,974.00) issued Oct 1, booked Sept 30 in R4224 for 1,110,820 USD minor. Its issue-date rate 1.24037 yields 1,113,108, so FX error is 2,288 USD minor.” Seeds 2002 and 2005 examples still matched. |
-| DESIGN.md:93–106 | auditenv/generator.py:361–378,424–481 uses random and conditional creation for several distractors. On seeds 0–199 in unforced default, 192/200 episodes had any split and 155/200 had any refund; hard 191/200 and 159/200. `errors: {}` plus nonzero `interacting` still injects issues (generator.py:93–96,561–569). | “Zero error and interaction counts specify clean books. With distractors enabled the generator can add these legitimate patterns; the available patterns vary by company.” |
-| DESIGN.md:113–116,337–339 | auditenv/env.py:126–135,143–168 uses configured limits. It checks elapsed time on receipt of a step, before treating that action as a submit. Invalid `submit` returns details only in train mode (146–152). | “At the configured action limit or the next action after the deadline, the episode truncates with empty findings unless a submission was processed. Defaults are 100 actions and 60 s. The grader records −1 for invalid submissions; train also returns it publicly.” |
-| DESIGN.md:145 | auditenv/metrics.py:14–17 subtracts 0.002 per inspection even when base F1 differs; DESIGN.md:387–389 gives the resulting counterexample. | “Step cost breaks equal-F1 ties and can reverse the ordering for small differences in F1.” |
-| DESIGN.md:155–162 | Y1 `uv run python scripts/sensitivity.py` exited 0 in 1.860 s. Both rankings stay unchanged, but five rows have drift. | “At costs 0.001/0.002/0.005, then tolerances 0/1/100: dev reconcile 0.978/0.956/0.891 and 0.956/0.956/0.956; dev naive −0.467/−0.480/−0.519 and −0.480/−0.480/−0.480; hard reconcile_hard 0.958/0.916/0.790 and 0.916/0.916/0.916; hard reconcile 0.329/0.293/0.186 and 0.293/0.293/0.293; hard naive −0.683/−0.704/−0.765 and −0.704/−0.704/−0.704.” |
-| DESIGN.md:220 | The paired gate checks original findings for zero TP on transformed dirty episodes. With zero truth issues, empty findings still score F1=1 (auditenv/check.py:230–249; auditenv/metrics.py:6–11). | “Translated oracle answers retain their grade; on dirty paired episodes the old unmodified answer earns zero TP.” |
-| DESIGN.md:247–252 | Y1 default sweep printed `default mode, seeds 0-999: 3000 episodes (1987 dirty, 1013 clean) in 86.5 s` and `random explorer reward > 0: 246/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)`. The dirty oracle threshold enforced by the sweep is >0.9 (auditenv/fuzz.py:45–52); the summary does not assert exact 1.0 on each dirty episode. Hard positive count remains 47. | “1,987 dirty and 1,013 clean, 246 positive random returns, all clean. The seed sweep requires oracle score >0.9 on dirty episodes and 1.0 on clean episodes.” |
-| DESIGN.md:258,261–265 | `auditenv.analyze --policy naive_reconcile --config configs/dev.json` printed `payment_allocation | 2 | 6 | 0.25` and `Total | 102`. Subtracting its per-type TP from counts of submitted types in the public dev trajectory gives 27 allocation, 30 duplicate, 27 FX and 18 cutoff FPs, with 22 on clean companies. | “Naive allocation recall 2/8, 102 total FPs, 27 allocation FPs.” |
-| DESIGN.md:308–317 | Timing is tied to the Round 11 benchmark in night/archive/r11-LOG.md:39. Y1 benchmark on this revision measured 0.251/0.905 s for default/hard generation, 1.972 s for verifier, 2.65–5.94/6.95–12.60 ms for dev/hard single episodes. | “Historical Round 11 timing snapshot” if retaining the old table, or use the current host values with the same workload labels. |
-| DESIGN.md:352–355 | auditenv/server.py:208–225 calls the same private-key helper for `--episodes` unless `--public` is selected. auditenv/grader_key.py:23–36 handles a missing env var and file fallback. A shared key can reproduce a company on another machine. | “Hidden server queues and the jury adapter use `AUDITENV_SECRET` or a persistent grader key by default, with process fallback if needed. Reproduction requires the same key. `--public` opts the server queue into public generation.” |
-| DESIGN.md:357–375; PITCH.md:68 | Miner default 16 and hard 11 flagged values. Current duplicate feature is 4,918/4,936 (0.996) default and 4,878/13,690 (0.356) hard. Current hard retyped-token peak 44/96 (0.458); old 0.449/0.467 are historical. Default 2900 repeat amount 214/222 (0.964); 2900 period-end allocation cue 0.789. Other scoped historical rates at REVIEW.md:315–320 were retained as historical evidence rather than measured by this miner command. | “The invoice customer/currency/total heuristic has precision 0.996 default and 0.356 hard on the current run. The actual rule also checks line items. The default 2900 repeated-amount cue was 214 of 222, and the default 2900 period-end allocation cue was 0.789.” Qualify historical measurements by revision and configuration. |
-| DESIGN.md:379–382 | Public refs and totals on seeds 0–199 yielded 4,688 default and 4,697 hard settled invoices, zero over-settlements. Code checks per-payment refs at auditenv/verify.py:101–124. The historical extra-future-payment example does not establish an unlimited generator guarantee. | “The verifier checks remittance amounts per payment. In the current 400-episode public sample, 0 of 9,385 settled invoices were over-settled.” |
-| DESIGN.md:390–397 | Fresh check: default reconcile F1 1.000, hard 0.755, hard-aware 1.000. The Round 18 evidence applies to that sample (night/archive/r18-LOG.md:82; REVIEW.md:393–400), not all inputs or agents. The stated 44 groups require both difficulties for all 20 jury configs plus four non-jury groups; ‘default, hard, heavy’ alone names only three. | “The default rules score F1 0.755 on the hard split. The hard-aware policy scores 1.000. Learnability was not measured. In Round 18 an independent checker without a three-day restriction reproduced results on the documented sample.” Enumerate all four non-jury settings if retaining the 44,000 breakdown. |
-| PITCH.md:24 | On 200 explicitly clean default episodes the public probe found a split on 186 and a refund on 148, with checkable generators at auditenv/generator.py:424–481. | “Clean books can include split payments, refunds and recurring charges.” |
-| PITCH.md:43 | The deterministic table matches fresh check JSON, but the referenced docs/baselines.svg still shows older means. Y1 chart comparisons named four drifted labels. | “Use the chart regenerated from this revision’s check JSON.” |
-2026-11-22 01:47 lead — Merged G25-G30 and codex2 Y1-Y3. Fix re-tests green (chronology 600 more seeds 0 unexplained in clean configs; fuzz 0-999 both difficulties; config sweep 3000; verify 0-1999 6000/6000; check x2; exports and trajectories byte-identical). codex2 found docs/baselines.svg stale (pre-r18 returns) — regenerated; sync_docs now renders the chart and reports drift (test_stale_chart_is_drift). Y1: 36/36 eligible README commands exit 0. Y2/Y3 doc discrepancies (stale numbers in prose, seed-2003 worked example ids, sensitivity rows, refund remittance/posting in CONTRACT, ensure_distractors wording, key defaults) delegated to a lead subagent that re-verifies each before editing.
-2026-11-22 01:56 gemini1a — G31: ran `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 35000-35599` (wall time 167.0 s, exit code 0).
-  Totals line: `totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=6178, e_fx_missing=0, f_inv_booked_before_issue=5271, f_pay_posted_before_doc=0, f_ar_before_booking=34, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=10141, c_tie=0`
-  Unexplained violations line: `unexplained violations: 34 (0 in clean configs)`
-  Logged for lead review: 34 instances of `f_ar_before_booking` (0 in clean configs, found in default/default (8), hard/hard (6), D14/default (5), D14/hard (5), D15/default (5), D15/hard (5)). Sample reproductions:
-    default/default seed=35012 ids=['PAY-609369', 'SI-2026-820954', 'GL-001535'] ar credit 2026-11-03T21:12:00+05:30 booking 2026-11-04T12:49:00+05:30
-    hard/hard seed=35325 ids=['RCPT0071974', 'F0102081', 'R4524'] ar credit 2026-02-02T18:50:00+01:00 booking 2026-02-04T17:51:00+01:00
-    D14/default seed=35043 ids=['RCPT0721714', 'INV-456057', 'R4120'] ar credit 2025-10-04T09:07:00+09:00 booking 2025-10-04T21:38:00+09:00
-2026-11-22 01:55 gemini1b — G32 complete (chronology check on seeds 36000-36599).
-Command: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 36000-36599`
-Exit code: 0, wall time: 171.19 s
-Totals line:
-totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=6132, e_fx_missing=0, f_inv_booked_before_issue=5177, f_pay_posted_before_doc=0, f_ar_before_booking=46, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=10061, c_tie=3
-Unexplained violations line:
-unexplained violations: 46 (0 in clean configs)
-2026-11-22 01:54 lead — Applied codex2 Y2/Y3 doc corrections (subagent re-verified each; skipped rewording-only items and the CONTRACT:7 TASKS remark). check 563 tests pass, sync_docs no drift, doc tests 19 OK. Commit c8b8d70.
-2026-11-22 01:57 gemini2a — G33: Post-doc-fixes check and sync_docs validation. auditenv.check --json /tmp/r20-gemini2a/c.json: exit code 0, wall time 51.51s, last line: ALL CHECKS PASSED in 51.4 s. scripts/sync_docs.py --check --json /tmp/r20-gemini2a/c.json: exit code 0, wall time 0.04s, last line: All documentation tables match measured data.
-2026-11-22 02:03 rb — Z3 semantic review of docs/CHECKS.md: 25 rows spread over all six blocks (jury definitions C/B3/M/P, blocks 1–5). Opened every cited test and checked what it actually asserts, not just that it exists. Evidence run: `env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_paired tests.test_env tests.test_jury tests.test_fuzz tests.test_server tests.test_verify tests.test_hardening tests.test_mutate_reward tests.test_golden tests.test_hashseed tests.test_readme_snippets tests.test_trajectory_files` → Ran 174 tests, OK, 11.1 s, exit 0; `... tests.test_reward_attacks` → Ran 18 tests, OK, 2.8 s, exit 0.
-Per row (row → test → verdict + reason):
-| Row | Cited test (opened) | Asserts? | Reason |
+Hard mode: 13 flagged values (precision > 0.5):
+## Max precision per issue type (hard)
+| type | affected max P | evidence max P | flagged (aff/ev) |
 |---|---|---|---|
-| C05/C06 | test_judge_contract.py:114 test_c05_c06_pages_cover_the_table_and_repeat | yes | asserts seen row_ids == full ledger order (no gaps/repeats, ≥101 rows) and two replays of cursor[1] give identical results |
-| C10 | test_judge_contract.py:148 test_c10_calculator_refuses_code | yes | 3 code/file-access expressions each give bounded calc_error; asserts no "root:" in the response |
-| C16 | test_judge_contract.py:199 test_c16_submit_as_action_100 | yes | 99 non-truncating steps then submit → (terminated, truncated, accepted)=(True,False,True), inspection_steps=99, tp=1 |
-| C18 | test_judge_contract.py:221 test_c18_time_limit_truncates_with_empty_findings | yes | injected clock jumps to 60.5 s → truncated with time_limit error, grader log end=time_limit tp=0 (empty answer graded) |
-| C20 | test_judge_contract.py:266 test_c20_no_closed_data_in_any_policy_channel | yes | walks all 4 tables, 10 docs, error paths and submit on both fixtures; asserts FORBIDDEN_KEYS absent, tmp path absent, every truth issue_id absent |
-| B3-12 | test_judge_reward.py:95 test_b3_12_five_records_times_four_types | yes | 20 brute-force findings; assertScore exact TP=1 FP=19 F1=2/21 reward=Fraction(-871,1050) |
-| M10 | test_judge_reward.py:168 test_m10_maximum_matching_not_greedy | yes | asserts TP=2 (greedy gives 1) and the exact assignment {finding0→B, finding1→A} |
-| P01–P20 | test_judge_paired.py:116 test_pairs | yes | per pair: copy re-verifies, replay byte-identical, oracle back-maps to original answer, metrics equal at 0/6/37 steps, broken evidence gives fn=1 on both sides |
-| 1 Reset/step lifecycle | test_env.py:56 test_reset_observation_and_info (+ :107 isolates) | yes | exact obs key set, steps_remaining=100, info episode_id matches, exactly the 5 tool types; calculator leaves 99 |
-| 1 Bounded errors | test_jury.py:62 test_invalid_action_name (+ invalid_table, test_env bad_limit/bad_cursor) | yes | assertBoundedError checks code, message ≤200 chars, step consumed, reward 0, no termination |
-| 1 Action fuzz ≥20,000 | test_fuzz.py:125 test_seeded_actions_preserve_step_contract | yes | 205 episodes × 100 steps; asserts ≥20,000 actions, schema match == is_valid for every action, obs schema + json.dumps(allow_nan=False), bounded error codes |
-| 1 Step limit 100/101 | test_jury.py:119 test_step_101_and_actions_after_truncated | yes | truncated only at k=100 with reward -1; step 101 (calc and submit) → episode_over, step stays 100 |
-| 1 Out-of-process isolation | test_server.py:60 eval_mode_hides_reward (+ :130 oversized, :175 subprocess utf8) | yes | every remote reward 0.0 and info {}, no truth/provenance/seed keys, 2 grader-log records with reward+f1; 10 MB line → "request too large", bad UTF-8 → error, server keeps serving, exit 0 |
-| 2 Double-entry balance | test_jury.py:285 test_balanced_before_and_after_errors | yes | per journal debit==credit on reverted AND injected tables; pre-injection discrepancies == [] |
-| 2 Truth re-derivation | test_verify.py:11 test_generated_episodes_verify (+ :52 truth currency) | yes | 60 seeds × 4 configs verify_episode == []; tampered truth currency detected. (The row's 600/600 figure comes from the cited verify CLI, not this test's 240 episodes — command column is correct) |
-| 2 Evidence sufficiency | test_jury.py:295 every_evidence_id_reachable + test_hardening.py:105/:150 | yes | every evidence id reachable via get_document/get_record; duplicate test asserts 4 evidence sets, each independently grades TP=1 FP=0; partial-allocation test asserts the posted AR credit is required |
-| 2 Accounting edge cases | test_jury.py:345/:350/:357 EdgeCaseDataTests | yes | asserts hits exist (JPY, refunds, splits, unidentified, multi-payment, midnight crossing) and each hit has empty truth and 0 discrepancies; JPY exponent 0 |
-| 3 Duplicate claims | test_jury.py:224 test_duplicate_finding_is_one_tp_and_one_fp | yes | tp==len(correct), fp==1, reward strictly lower than without the duplicate |
-| 3 Clean silence max 1.0 | test_jury.py:229 + test_reward_attacks.py:131 | yes | jury test asserts F1=1.0 reward=0.98 at 10 steps; attacks test asserts reward exactly 1.0 at 0 steps and fabricated accusations fp≥6 — together they cover the row's claim |
-| 3 Mutation testing 22/22 | test_mutate_reward.py:9 test_patterns_match_exactly_once | partly | the test only asserts each of the 22 mutation patterns occurs exactly once in current source (definitions not stale); it does NOT run the mutants. The kill count is enforced by the cited command scripts/mutate_reward.py:92 `return int(killed != len(MUTANTS))` — row is honest because the command column carries the claim, but the test alone doesn't assert "22/22 killed" |
-| 3 Attack search 11,000 | test_reward_attacks.py:495 test_handoff_r1_automatic_attack_search | yes | asserts passed, ≥10,000 mutations, 0 violations, 20 seeds (≥4 clean, ≥10 dirty), all 10 MUTATION_FAMILIES non-empty; exact 11,000 is the measured run output |
-| 4 Golden hashes 80 | test_golden.py:21 test_generator_golden_hashes | yes | asserts count==80 (20 seeds × 4 configs) and mismatches==[] against committed tests/golden_hashes.json |
-| 4 Hash-seed independence | test_hashseed.py:35 test_hashseed_independence | yes | 3 subprocesses (PYTHONHASHSEED 0/1/4242) each print 7 sha256 digests; asserts the whole line identical → all 7 equal |
-| 5 README snippets "3 of 3" | test_readme_snippets.py:42 test_readme_python_snippets | partly | executes every extracted ```python snippet (currently 3) and checks the reward range only for the snippet under heading "Using the environment"; asserts len ≥ 2, not exactly 3, and "the first" is by heading, not position. Claim is true today (3 blocks in README) but the count is measured, not asserted |
-| 5 Trajectory logs | test_trajectory_files.py:26/:47/:108 + CaseTrajectoriesTest:132/:153 | yes | exact 7 keys, trajectory schema, 10 episodes/file, consecutive steps, zero intermediate reward, terminal last step, no truth markers; full action replay compares every obs/reward/flag; all 7 files + trajectories.jsonl regenerate byte-for-byte; case file = concatenation of the two named parts, 20 episodes, 10 hard |
-Summary: 23 yes, 2 partly, 0 no. The two "partly" rows (Reward mutation testing; README run steps) are still backed by their cited commands — the gap is only that the cited unit test asserts less than the row's measured-result text. No row cites a missing or misnamed test. Assumption: "25 rows spread over all blocks" satisfied with 8 jury-definition rows + 5/4/4/2/2 rows from blocks 1–5.
-## Z4 (rb) — hand-driven `auditenv.server` stdio session — 2026-11-22 02:19
+| duplicate_invoice | 0.404 | 0.404 | 0/0 |
+| payment_allocation | 1.000 | 0.840 | 9/2 |
+| fx_error | 0.668 | 0.303 | 2/0 |
+| period_cutoff | 0.454 | 0.454 | 0/0 |
+Values with precision > 0.5 called out:
+- `ledger | amount_digits@acct2900 | 10`: precision 1.000 (support 32, pos 32) for affected and 0.812 (support 32, pos 26) for evidence. This discrete 10-digit bucket (amounts >= $10,000,000 minor units) has support 32 on seeds 5000-5999, which exceeds the miner support threshold (>= 30). docs/DESIGN.md §10 noted "11 in hard mode" on seeds 0-999 (where this 10-digit bucket fell below 30 support) and noted "a large 2900 amount at payment_allocation (0.75-0.77)".
+All other 11 values match the documented hard-mode cues in DESIGN §10 (2900 amount_count>=4 at 0.840, 2900 end-0 at 0.765, 2900 9-digits at 0.730, 2900 6-digits at 0.562, fx_error 2900 end-0 at 0.668, fx_error 7900 end-0 at 0.551).
+All tasks for gemini2b in Round 21 finished.
+2026-11-22 03:46 gemini3b — G18 complete: ran `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r21-gemini3b/c.json` (exit 0, ALL CHECKS PASSED in 137.7 s; 563 unit tests, 200/200 verifier, 20/20 paired, 50/50 hard verifier, 20/20 hard paired) then `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c.json` (exit 0, verbatim output: "All documentation tables match measured data.", zero drift). All gemini3b tasks (G16, G17, G18) completed.
+2026-11-22 03:53 rb — Z2 done. scenarios_adapter has no seed flag (argparse absent; --help is ignored and it runs), so per task
+  copied night/r20/scenarios_adapter.py → night/r21/scenarios_adapter_43000.py. Edits beyond the seed constant
+  (assumptions, minimal): SEEDS range(32000,32005)→range(43000,43005); SCRATCH /tmp/r20-rb→/tmp/r21-rb (round rule:
+  scratch only under /tmp/r21-rb/); the printed header's seed-range label 32000-32004→43000-43004 so the evidence
+  is not mislabeled. No other logic changed (diff is 3 lines).
+  Command: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r21/scenarios_adapter_43000.py` → exit 0, wall 12 s.
+  Header: `Z1: 20 scenarios x 2 difficulties x 5 seeds (43000-43004) x 2 policies = 400 closed runs through judge_adapter, 12.2 s total`
+  FLAGS (0): none — every reconcile/reconcile_hard episode F1 = 1.000, every flag_all return = -1.000, no invalid
+  submissions, no episode ≥ 60 s (max 0.040 s). Table (reconcile = reconcile on default / reconcile_hard on hard;
+  steps = max adapter steps of reconcile; full 80-row output at /tmp/r21-rb/z2_scenarios.out, JSON /tmp/r21-rb/z1.json):
+  | scenario | difficulty | reconcile mean return | mean F1 | min F1 | flag_all mean return | max steps |
+  |---|---|---|---|---|---|---|
+  | D01 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D01 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D02 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D02 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D03 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D03 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D04 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D04 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D05 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D05 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D06 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D06 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D07 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D07 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D08 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D08 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D09 | default | 0.962 | 1.000 | 1.000 | -1.000 | 22 |
+  | D09 | hard | 0.915 | 1.000 | 1.000 | -1.000 | 46 |
+  | D10 | default | 0.960 | 1.000 | 1.000 | -1.000 | 22 |
+  | D10 | hard | 0.922 | 1.000 | 1.000 | -1.000 | 44 |
+  | D11 | default | 0.963 | 1.000 | 1.000 | -1.000 | 23 |
+  | D11 | hard | 0.912 | 1.000 | 1.000 | -1.000 | 48 |
+  | D12 | default | 0.962 | 1.000 | 1.000 | -1.000 | 22 |
+  | D12 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 45 |
+  | D13 | default | 0.962 | 1.000 | 1.000 | -1.000 | 22 |
+  | D13 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 45 |
+  | D14 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D14 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 44 |
+  | D15 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D15 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 44 |
+  | D16 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D16 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D17 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D17 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D18 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D18 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D19 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D19 | hard | 0.921 | 1.000 | 1.000 | -1.000 | 45 |
+  | D20 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D20 | hard | 0.921 | 1.000 | 1.000 | -1.000 | 45 |
+  Called out per accept: no reconcile F1 < 1 and no flag_all > 0. NOTES (22): all hard reconcile_hard per-scenario
+  mean returns 0.912–0.922 and D19/D20 default 0.959 are below the README jury_run mean 0.959 — expected: README's
+  number is a 20-scenario default-difficulty mean on seeds 3001-3020; hard uses ~2x inspection steps at 0.002/step.
+  Same pattern as round 20 (archive r20-LOG Z1); not a defect. Next: Z3 (jury_run on seed bases 24000-27000).
+2026-11-22 03:55 rb — Z3 done. `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r21-rb/j<B>.json`
+  for B in 24000, 25000, 26000, 27000: all exit 0; wall 3 s, 2 s, 2 s, 3 s. Policy tables verbatim:
+  --- B=24000 (seeds 24001-24020) ---
+  20 jury scenarios D01-D20 (seeds 24001-24020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.032   0.033
+  reconcile         1.000  1.000  1.000    0.961    20.4    23    0.033   0.035
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.029   0.031
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  --- B=25000 (seeds 25001-25020) ---
+  20 jury scenarios D01-D20 (seeds 25001-25020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.038   0.045
+  reconcile         1.000  1.000  1.000    0.960    21.1    23    0.033   0.038
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.030   0.031
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  --- B=26000 (seeds 26001-26020) ---
+  20 jury scenarios D01-D20 (seeds 26001-26020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.033   0.034
+  reconcile         1.000  1.000  1.000    0.961    20.7    24    0.034   0.037
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.030   0.031
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  --- B=27000 (seeds 27001-27020) ---
+  20 jury scenarios D01-D20 (seeds 27001-27020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.033   0.036
+  reconcile         1.000  1.000  1.000    0.960    21.1    25    0.034   0.036
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.030   0.034
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  Accept check: oracle F1 = 1.000 and reconcile F1 = 1.000 in all four runs; random_explorer returns -1.000/-1.000/
+  -0.903/-0.903 and flag_all -1.000 everywhere — none > -0.5, nothing to call out. Note: random_explorer -0.903 on
+  B=26000/27000 comes from fewer false positives (fp=38 vs flag_all's 600 across 20 episodes), so the FP penalty is
+  smaller; P/R/F1 still 0.000. Not a defect. JSON at /tmp/r21-rb/j{24000,25000,26000,27000}.json.
+  All rb tasks (Z1, Z2, Z3) done and pushed; no unchecked (rb) tasks remain — going IDLE.
+2026-11-22 04:06 lead — Merged all worker branches (G1–G18, X1–X3, Y1–Y3, Z1–Z3 done). X1 text-only auditor F1 1.000 on 4,200 episodes, 0 disagreements. X3: 300 extreme configs valid with exact counts, >12 issues rejected with ValueError. X2: 1,335 clean-config violations; lead inspected the largest (D01 seed 41006, E0342, −500,336 KZT minor): a full refund debited to 2900 at the refund-date rate after the receipt credited it at the receipt-date rate. This follows the documented CONTRACT rule (refund Dr 2900 / Cr 1000 at payment-date rate); the document-currency credit is exactly 0 (chronology c_neg_credit = 0). Decision: no posting-rule change 13 h before freeze (would change policy text, every export and golden hashes); measure (X4) and document as a limitation in DESIGN §10 / README. Y3: README fixes by lead next (incl. real defect #13: closed-server command aborts in bash when GRADER_KEY is unset). Top-up 1 queued.
+2026-11-22 04:09 rb — Z4 reproduction of codex1 X3 and codex2 Y1 on this worktree (merged origin/night/2026-11-22-r21 at 91f6573).
+  Command 1: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` → exit 0, wall 10 s.
+  Summary verbatim: `Outcomes: {'valid': 300, 'rejected': 72, 'failure': 0}. Total: 372.`
+  All 300 valid configs show `reconcile F1=1.0`; empty findings F1=1.0 only on the 0-issue configs, 0.0 otherwise.
+  All 72 rejections are exactly `ValueError: at most 12 issues per episode` (counts 20/50 per type, interacting I1/I2=7
+  which expands to 14 findings, etc.). Max actions 72 (≤100 budget). No silent count mismatch, no other exception, no
+  budget overrun — identical to codex1's 03:55 X3 entry (theirs 19.2 s, mine 10 s; machine load differs).
+  Command 2: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` → exit 0, wall 2 s.
+  Reference seeds identical to Y1: dev [2000, 2002, 2003, 2004, 2009], hard [9100, 9105, 9109, 9112, 9119].
+  Table verbatim: all 10 variants (CSV columns shuffled, CRLF, CSV BOM, JSON BOM, JSONL BOM, No final newline,
+  Pretty JSON, Compact JSON, JSONL keys reversed, Combined) → Accepted 10 / Rejected 0 / Scores equal 10.
+  Final line verbatim: `Semantically equivalent rewrite discrepancies: 0` — matches codex2's 03:43 Y1 entry exactly.
+  Assumption: ran both scripts with defaults (no flags), as the task text specifies; full stdout kept at
+  /tmp/r21-rb/z4_extreme.out and /tmp/r21-rb/z4_jury_copy.out. Nothing to call out. No unchecked (rb) tasks remain — IDLE.
+2026-11-22 04:08 lead — README: first-read fixes (Y3 items 1–4, 6, 7, 9, 10, 12–14). #13 was a real defect: the closed-server command `AUDITENV_SECRET="${GRADER_KEY:?...}"` aborted in bash without GRADER_KEY although the server keys hidden episodes by default since round 19; now the plain command (verified: starts, warns about the key file, exit 0). Skipped #5 (mode key text already says eval hides the reward), #8 (export commands are labelled as re-export after a generator change), #11 (the README 199/200 sentence is per difficulty in its own table). check exit 0 50.7 s; sync_docs no drift.
+2026-11-22 04:08 lead — Correction to the previous entry: Y3 #11 was valid (README D01–D05 row gave 199/200 without saying it is the default count); now '199/200 default and 200/200 hard' per codex2's probe.
 
-The six requests the task names (reset, list_records, get_record, a malformed line, submit, one step after
-submit) plus `close`, piped to the server's stdin. Public mode: `AUDITENV_SECRET` unset (public key → a
-deterministic episode), eval, seed 2001, `errors.fx_error=1`, `interacting.I1=I2=0`. Two runs of the same input
-gave byte-identical stdout (`cmp` exit 0), so every id below is reproducible; the `get_record` id and the
-`episode_id` in the submit are the ones the server itself returned in a reset+list probe with the same seed
-(`ep_3cf976410457`, first ledger row `GL-000321`).
+2026-11-22 04:28 codex1 — X4 clean balance classification. `env -u AUDITENV_SECRET uv run python -m night.r21.ledger_identity --classify` → exit 0, 30.771 s.
 
-```bash
-env -u AUDITENV_SECRET uv run python -m auditenv.server \
-  < /tmp/r20-rb/z4b/session.in > /tmp/r20-rb/z4b/session3.out 2> /tmp/r20-rb/z4b/session2.err
+| Config | Difficulty | FX refund (a) | AR rounding (b) | Other (c) | Max (a) base minor | Max (a) % |
+|---|---|---:|---:|---:|---:|---:|
+| D01 | default | 104 | 33 | 0 | 500336 | 1.860974% |
+| D01 | hard | 80 | 50 | 0 | 279331 | 7.345768% |
+| D02 | default | 104 | 33 | 0 | 500336 | 1.860974% |
+| D02 | hard | 80 | 50 | 0 | 279331 | 7.345768% |
+| D03 | default | 104 | 33 | 0 | 500336 | 1.860974% |
+| D03 | hard | 80 | 50 | 0 | 279331 | 7.345768% |
+| D04 | default | 104 | 33 | 0 | 500336 | 1.860974% |
+| D04 | hard | 80 | 50 | 0 | 279331 | 7.345768% |
+| D05 | default | 104 | 33 | 0 | 500336 | 1.860974% |
+| D05 | hard | 80 | 50 | 0 | 279331 | 7.345768% |
+
+Classified 1335 clean violations: (a) 920, (b) 415, (c) 0.
+
+Assumptions: the percentage denominator is the absolute base-minor debit for the latest refund as of the observed row. The classifier requires every 2900 posting through that row to match its own payment-date conversion and every document-currency running balance to remain nonnegative. AR rounding requires the amount to match the difference between separately rounded applications and a single conversion of their sum. D01–D05 share the same clean config, so the aggregate includes repeats across scenarios.
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, ALL CHECKS PASSED in 93.8 s
+2026-11-22 04:33 codex2 — Y4: verified the Y3 README fixes in a fresh clone at 544bd15, containing 55d4c34.
+
+The table uses README line numbers at that revision. Duplicate instructions use the same result (jury runner at 79 and 346, jury tests at 75 and 359, demo at 41 and 91). The Python rows pipe the corresponding fenced examples into Python. Public commands ran with AUDITENV_SECRET unset, input/output paths normally under /tmp redirected to /tmp/r21-codex2/y4, and a one-seed clean hidden.json plus reset/close input for the server. Several independent commands ran concurrently; wall times describe this shared-load run.
+
+| README line | Command | Exit | Wall seconds |
+|---|---|---:|---:|
+| checkout | `git checkout --detach 544bd15f8a788dc41e88eba3b772484983160588` | 0 | 0.07 |
+| clone | `git clone https://github.com/madiyar-abi/genesis.git && cd genesis` | 0 | 4.55 |
+| tracked | `git diff --exit-code` | 0 | 0.11 |
+| 30 | `uv run python -m auditenv.check` | 0 | 94.64 |
+| 35 | `python3.11 -m auditenv.check` | 0 | 94.72 |
+| 41 | `uv run python -m auditenv.demo` | 0 | 0.20 |
+| 47 | `docker build -t auditenv .` | 127 | 0.00 |
+| 48 | `docker run --rm --network none auditenv` | 127 | 0.01 |
+| 53 | `docker run --rm --network none auditenv python -m unittest discover -s tests -t .` | 127 | 0.00 |
+| 75 | `uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` | 0 | 3.83 |
+| 77 | `docker run --rm --network none auditenv python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` | 127 | 0.00 |
+| 79 | `uv run python -m auditenv.jury_run` | 0 | 2.69 |
+| 162 | `uv run python -` | 0 | 0.06 |
+| 194 | `uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/r21-codex2/y4/dev_reconcile.jsonl` | 0 | 0.17 |
+| 195 | `uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval` | 0 | 0.13 |
+| 207 | `uv run python -m auditenv.export --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard` | 0 | 0.26 |
+| 210 | `uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out /tmp/r21-codex2/y4/trajectories.jsonl` | 0 | 0.48 |
+| 210-cmp | `cmp trajectories.jsonl /tmp/r21-codex2/y4/trajectories.jsonl` | 0 | 0.01 |
+| 221-naive_reconcile | `uv run python -m auditenv.run --policy naive_reconcile --config configs/train.json --out /tmp/r21-codex2/y4/train_naive_reconcile.jsonl` | 0 | 0.16 |
+| 221-random | `uv run python -m auditenv.run --policy random --config configs/train.json --out /tmp/r21-codex2/y4/train_random.jsonl` | 0 | 0.14 |
+| 221-reconcile | `uv run python -m auditenv.run --policy reconcile --config configs/train.json --out /tmp/r21-codex2/y4/train_reconcile.jsonl` | 0 | 0.16 |
+| 224-naive_reconcile | `uv run python -m auditenv.run --policy naive_reconcile --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_naive_reconcile.jsonl` | 0 | 0.36 |
+| 224-random | `uv run python -m auditenv.run --policy random --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_random.jsonl` | 0 | 0.25 |
+| 224-reconcile | `uv run python -m auditenv.run --policy reconcile --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_reconcile.jsonl` | 0 | 0.37 |
+| 224-reconcile_hard | `uv run python -m auditenv.run --policy reconcile_hard --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_reconcile_hard.jsonl` | 0 | 0.37 |
+| 233 | `uv run python -` | 0 | 0.05 |
+| 267 | `uv run python -` | 0 | 0.08 |
+| 367 | `uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl` | 0 | 0.07 |
+| 383 | `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` | 0 | 0.14 |
+| 391 | `uv run python -m unittest discover -s tests -t .` | 0 | 78.27 |
+| 392 | `uv run python -m unittest tests.test_env` | 0 | 0.30 |
+| 393 | `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` | 0 | 0.12 |
+| 394 | `uv run python -m auditenv.verify --seeds 0-199` | 0 | 7.50 |
+| 395 | `uv run python -m auditenv.verify --dir episodes/train` | 0 | 0.17 |
+| 396 | `uv run python -m auditenv.verify --dir episodes/dev` | 0 | 0.17 |
+| 397 | `uv run python -m auditenv.verify --dir episodes/hard` | 0 | 0.55 |
+| 398 | `uv run python -m auditenv.attack` | 0 | 0.68 |
+| 399 | `uv run python -m tests.test_fuzz` | 0 | 1.57 |
+| 400 | `uv run python -m auditenv.check --json /tmp/r21-codex2/y4/metrics.json` | 0 | 93.29 |
+| 401 | `uv run python scripts/sync_docs.py --check --json /tmp/r21-codex2/y4/metrics.json` | 0 | 0.04 |
+| 402 | `uv run python -m auditenv.fuzz --seeds 0-999` | 0 | 90.66 |
+| 403 | `uv run python -m auditenv.fuzz --configs 3000` | 0 | 130.93 |
+| 404 | `uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299` | 0 | 12.45 |
+| 405 | `uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json` | 0 | 0.15 |
+| 406 | `uv run python -m auditenv.demo` | 0 | 0.17 |
+| 407 | `uv run python -m auditenv.export --config configs/dev.json --out episodes/dev` | 0 | 0.09 |
+| 408 | `uv run python -m auditenv.export --config configs/train.json --out episodes/train` | 0 | 0.09 |
+| 409 | `uv run python -m auditenv.export --config configs/eval_hard.json --out episodes/hard` | 0 | 0.29 |
+| 410 | `uv run python scripts/mutate_reward.py` | 0 | 141.70 |
+| 411 | `uv run python scripts/sensitivity.py` | 0 | 3.18 |
+| 412 | `uv run python scripts/shortcut_miner.py --report-only` | 0 | 28.81 |
+| 413 | `uv run python scripts/golden.py --check` | 0 | 0.79 |
+| 414 | `uv run python scripts/bench.py` | 0 | 16.63 |
+| 415 | `uv run python scripts/chart.py --json /tmp/r21-codex2/y4/metrics.json` | 0 | 0.04 |
+| 416 | `make check` | 0 | 76.64 |
+| 417 | `make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart` | 0 | 0.01 |
+| 420 | `uv run python -m auditenv.analyze --config configs/dev.json --seeds 2003` | 0 | 0.06 |
+
+The four Docker attempts each reported `bash: docker: command not found` (exit 127). Native quick start passed all 563 tests and gates, with wall times of 94.64 s via uv and 94.72 s via installed Python; the README's “about a minute” was optimistic under concurrent load. Demo took 0.20 s and scored 0.958. The jury replay matched the documented scores and its maximum was 0.049 s. The README example printed `100 99 50 0.0`, then TP 0, FN 1 and return −1. The keyless server used the scratch grader key file and wrote one closed result. Both fuzz commands passed with zero problems, all eight regenerated trajectory files matched by cmp, the explicit chart input and docs sync passed, and the re-exports and chart left tracked files byte-identical. The line-398 mutation count, line-410 22/22 caught and line-413 80/80 golden hashes matched the notes.
+2026-11-22 04:31 gemini1a — G19 complete: ran fuzz sweep on seeds 15000-15999 default and hard modes. Commands: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 15000-15999` (exit 0, wall 79.6 s): default mode, seeds 15000-15999: 3000 episodes (1988 dirty, 1012 clean) in 79.6 s, episodes with a problem: 0, random explorer reward > 0: 263/3000, flag-all reward < 0: 3000/3000, FUZZ PASSED; `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 15000-15999 --hard` (exit 0, wall 217.8 s): hard mode, seeds 15000-15999: 3000 episodes (1980 dirty, 1020 clean) in 217.8 s, episodes with a problem: 0, random explorer reward > 0: 268/3000, flag-all reward < 0: 3000/3000, FUZZ PASSED. Total 6,000 episodes, 0 problems. Next: check for any new tasks or idle. Assumptions: none.
+2026-11-22 04:26 gemini2a — G21: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 39000-39299` exited 0 (12,600 episodes checked across 42 configs).
+  totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3081, e_fx_missing=0, f_inv_booked_before_issue=2600, f_pay_posted_before_doc=0, f_ar_before_booking=21, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5037, c_tie=0
+  unexplained violations: 21 (0 in clean configs)
+2026-11-22 04:27 gemini2b — G22 complete: `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 4000-5999` (exit 0, wall time 70.583s). Last line: "6000/6000 episodes valid; episodes with problems: 0". No unchecked tasks remain for gemini2b.
+2026-11-22 04:19 gemini3a — G23 complete: stress fuzzing on seeds 11000-11299.
+  - default (reconcile): 1200 episodes (seeds 11000-11299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (7.3 s), exit code 0, wall time 8s.
+  - hard (reconcile_hard): 1200 hard episodes (seeds 11000-11299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (18.6 s), exit code 0, wall time 18s.
+2026-11-22 04:18 gemini3b — G24 complete: ran `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r21-gemini3b/c2.json` (exit 0, last line: "ALL CHECKS PASSED in 51.9 s"; 563 unit tests, 200/200 verifier, 20/20 paired, 50/50 hard verifier, 20/20 hard paired) then `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c2.json` (exit 0, last line: "All documentation tables match measured data."). Both exit codes 0; zero doc drift. All gemini3b tasks complete.
+
+2026-11-22 04:30 codex1 — X5 fresh text-only audit. `env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds 45000-45099` → exit 0, 81.30 s, 4,200 episodes. Same local default grader key and zero inspection steps as X1.
+
+| Config | Difficulty | Scored | Mean F1 | Mean precision | Mean recall |
+|---|---|---:|---:|---:|---:|
+| baseline | default | 100 | 1.000000 | 0.990000 | 0.990000 |
+| baseline | hard | 100 | 1.000000 | 0.990000 | 0.990000 |
+| D01 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D01 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D02 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D02 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D03 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D03 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D04 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D04 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D05 | default | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D05 | hard | 100 | 1.000000 | 0.000000 | 0.000000 |
+| D06 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D06 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D07 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D07 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D08 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D08 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D09 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D09 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D10 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D10 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D11 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D11 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D12 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D12 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D13 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D13 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D14 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D14 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D15 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D15 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D16 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D16 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D17 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D17 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D18 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D18 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D19 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D19 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D20 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
+| D20 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+
+Discrepancy entries: 0
+2026-11-22 04:38 codex2 — Y5: repeated the combined-load jury runner at two seed bases.
+
+Ran six serial timing trials at worker HEAD 19fbfc9 while the same six parallel hard fuzz sweeps were active (no concurrent jury unit-test run, per Y5). Environment: macOS 26.6; scratch TMPDIR and AUDITENV_KEY_FILE; AUDITENV_GRADER_LOG unset.
+
+```sh
+env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard  # six concurrent processes
+taskpolicy -c background env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <3000-or-5000> --json /tmp/r21-codex2/y5/<seed>-<run>.json
+/usr/bin/time -p taskpolicy -c background env -u AUDITENV_SECRET uv run python -c pass
 ```
 
-Exit code **0** · wall time **0.035 s** (`date +%s.%N` around the process) · stderr **0 bytes** ·
-**6 response lines for 7 request lines**: `close` returns nothing.
+| Seed base | Trial | Exit | Runner wall s | random_explorer max s | reconcile max s | flag_all max s | oracle max s |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 3000 | 1 | 0 | 5.824 | 0.100 | 0.161 | 0.161 | 0.008 |
+| 3000 | 2 | 0 | 5.387 | 0.156 | 0.107 | 0.096 | 0.008 |
+| 3000 | 3 | 0 | 5.593 | 0.154 | 0.105 | 0.146 | 0.008 |
+| 5000 | 1 | 0 | 5.609 | 0.162 | 0.099 | 0.152 | 0.008 |
+| 5000 | 2 | 0 | 5.209 | 0.099 | 0.165 | 0.152 | 0.008 |
+| 5000 | 3 | 0 | 5.360 | 0.158 | 0.093 | 0.153 | 0.008 |
 
-### Request/response pairs, verbatim
+All trials replayed 20 scenarios without reported timing failures; reconcile and oracle reached F1 1.000, random_explorer and flag_all returned −1.000. The Y2 random_explorer outlier (54.050 s) did not recur. The overall maximum was reconcile at 0.165 s (seed base 5000, trial 2), and random_explorer peaked at 0.162 s.
 
-**1. `reset`** — first observation + reset info
+The six startup probes used the same load and QoS, after the runner trials and while all six sweeps were still active. Exit codes were all 0; wall seconds were 0.04, 0.03, 0.03, 0.03, 0.03, 0.03. This benchmarks uv plus Python startup under load. Jury policy workers launch Python directly and also import modules and move messages, so the probe cannot separate startup from execution in the 54.050 s episode or establish its cause. Y2 also ran the four jury unittest modules alongside the loaded runner.
 
-request:
-```json
-{"cmd": "reset", "seed": 2001, "config": {"mode": "eval", "errors": {"fx_error": 1}, "interacting": {"I1": 0, "I2": 0}}}
-```
-response:
-```json
-{"observation": {"task": "You are auditing one company for one reporting period. Find misstatements in the ledger caused by: duplicate_invoice (the same invoice entered twice: same entity, currency and identical line items), payment_allocation (a payment's remittance says it pays an invoice but the ledger credits less to that invoice's receivable), fx_error (a foreign-currency amount converted with a rate of the wrong date), period_cutoff (an invoice issued outside the period booked in this period). The books may be clean. Split payments, partial payments, refunds, unidentified receipts and recurring equal amounts can be legitimate. Use the tools to read records (max 50 rows per page) and submit findings once; every action costs a step (max 100 including submit).", "manifest": {"schema_version": "1.0", "generator_version": "1.0.0", "episode_id": "ep_3cf976410457", "base_currency": "KZT", "period_start": "2026-05-01", "period_end": "2026-05-31", "timezone": "+05:30", "counts": {"ledger": 240, "invoices": 37, "payments": 18, "fx": 318, "documents": 55}, "rounding": "ROUND_HALF_UP", "amount_exponents": {"EUR": 2, "JPY": 0, "KZT": 2, "USD": 2}}, "policy": {"base_currency": "KZT", "timezone": "+05:30", "period": {"start": "2026-05-01", "end": "2026-05-31", "rule": "a record belongs to the period iff its timestamp converted to the company timezone has a date in [start, end] (inclusive)"}, "fx": {"rate_date": "transaction date in the company timezone (invoice: issued_at; payment: timestamp)", "direction": "rate = units of target_currency per 1 unit of source_currency (major units)", "conversion": "base_minor = round_half_up(amount_minor / 10^exp_src * rate * 10^exp_base)"}, "rounding": "ROUND_HALF_UP to integer minor units", "ledger": {"currency": "every ledger row is in base_currency", "accounts": {"1000": "Cash", "1200": "Accounts receivable", "2900": "Unapplied cash", "4000": "Revenue", "6100": "Rent", "6200": "Payroll", "6300": "Software", "6400": "Bank fees", "7900": "FX gain/loss"}, "invoice": "Dr 1200 / Cr 4000 at the invoice issue-date rate, only for invoices issued in the period", "payment": "Dr 1000 at the payment-date rate; Cr 1200 per invoice_ref at that invoice's issue-date rate; remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; difference to 7900; negative amount = refund (Dr 2900 / Cr 1000)", "expense": "Dr 6xxx / Cr 1000"}, "findings": {"amount": "misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the AR debit of the later-issued copy; fx_error: abs(posted - correct); period_cutoff: the AR debit posted; payment_allocation: expected AR credit for the ref - AR credit posted", "tolerance": "abs(claimed - expected) <= tolerance_minor; tolerance_minor is 0, so the amount must be exact", "tolerance_minor": 0, "affected_ids": {"duplicate_invoice": "[original_invoice_id, duplicate_invoice_id]", "payment_allocation": "[invoice_id, payment_id]", "fx_error": "[invoice_id] or [payment_id]", "period_cutoff": "[invoice_id]"}, "evidence": "doc_id / row_id / fx_id values; must include at least one full acceptable evidence set: duplicate_invoice: both invoice docs + one AR (or revenue) row of each invoice, the original and the later copy; payment_allocation: payment doc + invoice doc + the AR credit row of that invoice in the payment (or, if nothing was allocated to it, the 2900 row) + the invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row + the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row"}}, "tools": [{"type": "list_records", "params": {"table": "ledger|invoices|payments|fx", "cursor": "null|str", "limit": "int<=50"}, "returns": "{rows, next_cursor, total}; invoice rows omit line_items"}, {"type": "get_record", "params": {"table": "ledger|invoices|payments|fx", "id": "str"}, "returns": "{record}"}, {"type": "get_document", "params": {"doc_id": "str"}, "returns": "{kind, document}"}, {"type": "calculator", "params": {"expression": "str: + - * / ( ) and decimals only"}, "returns": "{value}"}, {"type": "submit", "params": {"findings": "{episode_id, findings:[...]}"}, "returns": "ends the episode"}], "steps_remaining": 100}, "info": {"episode_id": "ep_3cf976410457", "mode": "eval", "max_steps": 100}}
-```
-
-**2. `list_records`** — `limit: 3` honoured, stable cursor
-
-request:
-```json
-{"cmd": "step", "action": {"type": "list_records", "table": "ledger", "cursor": null, "limit": 3}}
-```
-response:
-```json
-{"observation": {"step": 1, "steps_remaining": 99, "result": {"rows": [{"row_id": "GL-000321", "timestamp": "2026-05-01T08:51:00+05:30", "account": "4000", "debit_minor": 0, "credit_minor": 63879463, "currency": "KZT", "entity_id": "E2159", "invoice_id": "F0173607", "payment_id": null}, {"row_id": "GL-000322", "timestamp": "2026-05-01T08:51:00+05:30", "account": "1200", "debit_minor": 63879463, "credit_minor": 0, "currency": "KZT", "entity_id": "E2159", "invoice_id": "F0173607", "payment_id": null}, {"row_id": "GL-000323", "timestamp": "2026-05-01T10:59:00+05:30", "account": "1000", "debit_minor": 0, "credit_minor": 2818744, "currency": "KZT", "entity_id": null, "invoice_id": null, "payment_id": null}], "next_cursor": "ledger:3", "total": 240}, "error": null}, "reward": 0.0, "terminated": false, "truncated": false, "info": {}}
-```
-
-**3. `get_record`** — record for the id just listed
-
-request:
-```json
-{"cmd": "step", "action": {"type": "get_record", "table": "ledger", "id": "GL-000321"}}
-```
-response:
-```json
-{"observation": {"step": 2, "steps_remaining": 98, "result": {"record": {"row_id": "GL-000321", "timestamp": "2026-05-01T08:51:00+05:30", "account": "4000", "debit_minor": 0, "credit_minor": 63879463, "currency": "KZT", "entity_id": "E2159", "invoice_id": "F0173607", "payment_id": null}}, "error": null}, "reward": 0.0, "terminated": false, "truncated": false, "info": {}}
-```
-
-**4. `malformed line`** — line 4 is `{"cmd": "step", "action": {"type": "list_records", "table": "ledger"` — no closing braces
-
-request:
-```json
-{"cmd": "step", "action": {"type": "list_records", "table": "ledger"}
-```
-response:
-```json
-{"error": "invalid json"}
-```
-
-**5. `submit`** — empty findings (eval) — terminates
-
-request:
-```json
-{"cmd": "step", "action": {"type": "submit", "findings": {"episode_id": "ep_3cf976410457", "findings": []}}}
-```
-response:
-```json
-{"observation": {"step": 3, "steps_remaining": 97, "result": {"submitted": true}, "error": null}, "reward": 0.0, "terminated": true, "truncated": false, "info": {}}
-```
-
-**6. `step after submit`** — `calculator` after the terminal submit
-
-request:
-```json
-{"cmd": "step", "action": {"type": "calculator", "expression": "1+1"}}
-```
-response:
-```json
-{"observation": {"step": 3, "steps_remaining": 97, "result": null, "error": {"code": "episode_over", "message": "episode has ended; call reset()"}}, "reward": 0.0, "terminated": true, "truncated": false, "info": {}}
-```
-
-**7. `close`** — no response line (see the doc note below)
-
-request:
-```json
-{"cmd": "close"}
-```
-
-### Comparison with the docs
-
-Machine-checked shape assertions (all pass): the reset response's top level is exactly
-`{observation, info}`, its observation exactly `{task, manifest, policy, tools, steps_remaining}`, its info
-exactly `{episode_id, mode, max_steps}`; every step response is exactly
-`{observation, reward, terminated, truncated, info}`, every step observation exactly
-`{step, steps_remaining, result, error}`; all rewards `0.0`, every step `info` `{}` (eval mode),
-`truncated` false throughout.
-
-| pair | documented shape | verdict |
-|---|---|---|
-| 1 reset | `docs/CONTRACT.md:122-123` — first observation `{task, manifest, policy, tools, steps_remaining}`, reset `info` = `{episode_id, mode, max_steps}` | matches, key for key |
-| 1 reset | `auditenv/server.py:15` — reset response is `{"observation", "info"}` (no reward/terminated/truncated) | matches |
-| 2 list_records | `docs/CONTRACT.md:130` — → `{rows, next_cursor, total}`, max 50 rows, cursor `table:offset` | matches: 3 rows for `limit: 3`, `next_cursor` `"ledger:3"`, `total` 240 = `manifest.counts.ledger` |
-| 3 get_record | `docs/CONTRACT.md:132` — → `{record}` | matches: `{"record": {row_id, timestamp, account, debit_minor, credit_minor, currency, entity_id, invoice_id, payment_id}}` |
-| 4 malformed line | `auditenv/server.py:16,163` — `{"error": "..."}`, here `{"error": "invalid json"}` | matches, and it costs **no** step (the submit that follows is step 3, not 4), so the counter still follows `docs/CONTRACT.md:126` |
-| 5 submit | `docs/CONTRACT.md:135` (→ terminates), `:142` (in eval the policy sees `{"submitted": true}`), `:144-145` (reward 0.0, result only to the grader log) | matches: `result {"submitted": true}`, `terminated: true`, `reward 0.0`, `info {}` |
-| 6 step after submit | `docs/CONTRACT.md:143` — every later action returns `episode_over` without consuming a step, counter and outcome preserved | matches: `{"code": "episode_over", "message": "episode has ended; call reset()"}`, step 3, 97 steps left, `terminated` still true |
-| 7 close | `auditenv/server.py:12-16` — `close` is a request; the response list has only reset/step/error shapes | matches: no response line, process exits 0 |
-
-No behavioural difference from the docs. Two documentation gaps found (this task's file list is `night/LOG.md`
-only, so recorded here instead of fixed):
-
-- `README.md:367` lists `{"cmd": "close"}` among the JSON-line commands but never says it produces no response;
-  a client that reads one line after `close` waits forever. Only `auditenv/server.py:15-16`, whose response list
-  omits `close`, implies it.
-- Framing-level errors are undocumented outside the module: `{"error": "invalid json"}` and its siblings
-  (`"request too large"`, `"invalid utf-8"`, `"invalid input type"`, `"request must be a JSON object"`,
-  `"unknown cmd"` — `auditenv/server.py:138-166,193`) appear nowhere in `docs/CONTRACT.md` (its error section,
-  `:137-142`, lists action error codes only) or in README; `docs/CONTRACT.md:112` covers only a rejected
-  seed/config. A client in another language needs the framing errors spelled out — suggested for a `(lead)` doc pass.
-
-Assumption: public mode is the right setting for this evidence task — without `--episodes` there is no hidden
-queue, the run is reproducible, and the closed (`--episodes`) path is already covered by `tests/test_server.py`
-and by the round-19 closed-mode evidence. Assumption: `close` was added as a seventh request so the session ends
-explicitly; EOF ends it the same way (exit 0, 0 bytes on stderr).
-2026-11-22 02:44 lead — Merged G31-G33, Z3, Z4. Chronology on 1,200 more seeds: 0 unexplained in clean configs (the remaining f_ar_before_booking hits are all in configs that inject period_cutoff: the prior-period invoice itself). Z3: 23/25 CHECKS rows fully asserted by the cited test, 2 partly (mutation kill count and README snippet count are enforced by the cited command, not the unit test) — no fix needed. Z4: server session matches CONTRACT key for key; documented the two gaps rb found (close has no response line; framing error strings) in CONTRACT §4 and README.
-
-2026-11-22 02:46 codex1 — X2 complete: public policy text audit.
-
-Command: `env -u AUDITENV_SECRET uv run python -m night.r20.policy_text`. Exit 0, wall time 56.36 s.
-
-Inputs and scope: 5 default and 5 hard discovery seeds (31000–31004), and 10 scenario discovery episodes (D02, D04, …, D20 at default seed 31000). The sweep covers D01–D20 in both difficulties, plus unconfigured default and hard, on seeds 31000–31199 inclusive. Identical jury settings are counted under each published scenario. The script reads in-memory equivalents of the public files including the manifest. It derives candidates and evidence independently, using the scenario's configured issue counts as controls. It does not compare candidates or evidence to generated truth.
-
-How the quoted clauses map to the counted checks and observations below:
-
-- Task introduction and policy currency/timezone/period fields → `company_period` compares policy to manifest, `period_rule` classifies each posting in the company timezone against inclusive bounds, `invoice_required` and `payment_period` check document membership against posting presence.
-- Task duplicate, allocation, FX and cutoff definitions → `issue_types` and `scenario_findings`; duplicate candidates group booked invoices by entity, currency and item multiset and exclude fully reversed invoices. `later_copy` checks issue-order, `ar_credit` checks a remittance's per-invoice allocation, `wrong_date_explains` checks that an alternate published date can produce each incorrect invoice AR debit or payment cash posting, and a posting for an out-of-period issue date gives a cutoff candidate. The per-type observations count candidates and `clean_episodes` counts episodes with none.
-- Task legitimate split/partial payments, refunds, unidentified receipts and recurring amounts → observations for multiple remittances per invoice, remittances below invoice face value, signed refunds, receipts with no remittance and same-entity/currency equal totals; clean scenario counts check these patterns add no false findings. The public payment document has no entity field, so receipts without remittance are counted rather than assumed to be unidentified.
-- Task hard-mode sentence and `ledger.credit_note` → `hard_ledger_larger` compares each paired seed/config, `hard_text` checks which policies publish the extra rule, `credit_note` and `reissue` check for full same-invoice reversal and a later separately booked equivalent invoice, and the retyped observations count unequal literal item lists that match after ignoring order, case and punctuation.
-- `fx.direction`, `fx.rate_date`, `fx.conversion`, `rounding` → `rate_direction`, `rate_date`, `rounding`, `conversion`, `wrong_date_explains`, `ar_credit` and `unapplied_payment_date`. The script independently scales public source and base exponents and uses Decimal half-up rounding at local issue/payment dates.
-- `ledger.accounts`, `ledger.currency`, `ledger.expense`, `ledger.invoice`, `ledger.payment` → `account_legend`, `accounts`, `ledger_base_currency`, `minor_units`, `expense`, `invoice_shape`, `invoice_balance`, `payment_shape`, `payment_balance`, `refs`, `ref_currency`, `ar_credit`, `unapplied_payment_date`, `refund`. The 7900 balance line is checked by restricting journal accounts and reconciling the signed total to zero.
-- `findings.amount`, `findings.affected_ids`, `findings.evidence` → candidate tuples in the four per-type evidence checks, with the stated invoice/payment IDs, later AR debit, local-rate valuation gap, posted out-of-period invoice debit or per-ref AR credit shortfall. The checker constructs one public evidence alternative for each candidate and tests distinct IDs and positive integer base-minor amounts. It does not establish grader acceptance of each generated evidence alternative.
-- `findings.tolerance` and the task's page cap, final submit and action cost/cap are interface rules. The public policy tolerance is checked on every episode. Separate command `env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward` exited 0 in 0.22 s, `Ran 63 tests in 0.158s`, `OK`. Relevant tests include C05/C06, C14, C15, C16 and reward B3-08/M07. There is no payment-term rule in the sampled task or policy text.
-
-Wording gap observed in expected allocation findings: policy says “remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate” without saying whether the remainder follows remittances or amounts actually credited. D10/hard seed 31000, PAY-655914 (DOC0140581), invoice F0954418 (DOC0438583), provides a base-GBP example. Cash debit 678900 (GL-001546) equals the two refs (130400 + 548500), leaving no remainder as instructed on the remittance. AR credits are 45454 (GL-001547) and 548500 (GL-001549); GL-001548 credits 84946 to 2900, exactly the shortfall. This is the expected allocation finding rather than an extra issue. The distinction matters when interpreting 2900 entries. The text could state explicitly that diverted amounts can appear on 2900 in misallocated journals and that the per-invoice remittance and AR posting establish the finding.
-
-Hard-mode normalization example: D06/hard seed 31003, earlier F0482348 (DOC0454912, AR R871) and later F0451339 (DOC0090426, AR R1058). “DATA MIGRATION - PO/2246” and “data migration - po/2246” match after the stated case relaxation, regardless of line order. The checker used the same lowercase ASCII alphanumeric description key in all hard-mode comparisons. No additional normalization rule was needed to recover the scenario counts on this sample.
-
-Also opened the public task.txt/policy.json pairs for the first five sorted dev export IDs, first five sorted hard export IDs, and the ten generated scenario samples above (public text files materialized under scratch). All 20 pairs read successfully.
-
-Exact sweep output:
-
-```text
-Read task and policy from 20 discovery samples.
-CLAIM You are auditing one company for one reporting period. Find misstatements in the ledger caused by: duplicate_invoice (the same invoice entered twice: same entity, currency and identical line items), payment_allocation (a payment's remittance says it pays an invoice but the ledger credits less to that invoice's receivable), fx_error (a foreign-currency amount converted with a rate of the wrong date), period_cutoff (an invoice issued outside the period booked in this period). The books may be clean. Split payments, partial payments, refunds, unidentified receipts and recurring equal amounts can be legitimate. Use the tools to read records (max 50 rows per page) and submit findings once; every action costs a step (max 100 including submit).
-CLAIM You are auditing one company for one reporting period. Find misstatements in the ledger caused by: duplicate_invoice (the same invoice entered twice: same entity, currency and identical line items), payment_allocation (a payment's remittance says it pays an invoice but the ledger credits less to that invoice's receivable), fx_error (a foreign-currency amount converted with a rate of the wrong date), period_cutoff (an invoice issued outside the period booked in this period). The books may be clean. Split payments, partial payments, refunds, unidentified receipts and recurring equal amounts can be legitimate. Use the tools to read records (max 50 rows per page) and submit findings once; every action costs a step (max 100 including submit). Hard mode: the ledger is larger; line items keyed in by hand (some invoices, re-issues and duplicate copies) may be re-typed (other order, case and punctuation of the descriptions) with the same products, quantities and prices; an invoice cancelled by a full credit note and re-issued with the same line items is legitimate.
-CLAIM findings.affected_ids.duplicate_invoice: [original_invoice_id, duplicate_invoice_id]
-CLAIM findings.affected_ids.fx_error: [invoice_id] or [payment_id]
-CLAIM findings.affected_ids.payment_allocation: [invoice_id, payment_id]
-CLAIM findings.affected_ids.period_cutoff: [invoice_id]
-CLAIM findings.amount: misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the AR debit of the later-issued copy; fx_error: abs(posted - correct); period_cutoff: the AR debit posted; payment_allocation: expected AR credit for the ref - AR credit posted
-CLAIM findings.evidence: doc_id / row_id / fx_id values; must include at least one full acceptable evidence set: duplicate_invoice: both invoice docs + one AR (or revenue) row of each invoice, the original and the later copy; payment_allocation: payment doc + invoice doc + the AR credit row of that invoice in the payment (or, if nothing was allocated to it, the 2900 row) + the invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row + the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row
-CLAIM findings.tolerance: abs(claimed - expected) <= tolerance_minor; tolerance_minor is 0, so the amount must be exact
-CLAIM findings.tolerance_minor: 0
-CLAIM fx.conversion: base_minor = round_half_up(amount_minor / 10^exp_src * rate * 10^exp_base)
-CLAIM fx.direction: rate = units of target_currency per 1 unit of source_currency (major units)
-CLAIM fx.rate_date: transaction date in the company timezone (invoice: issued_at; payment: timestamp)
-CLAIM ledger.accounts.1000: Cash
-CLAIM ledger.accounts.1200: Accounts receivable
-CLAIM ledger.accounts.2900: Unapplied cash
-CLAIM ledger.accounts.4000: Revenue
-CLAIM ledger.accounts.6100: Rent
-CLAIM ledger.accounts.6200: Payroll
-CLAIM ledger.accounts.6300: Software
-CLAIM ledger.accounts.6400: Bank fees
-CLAIM ledger.accounts.7900: FX gain/loss
-CLAIM ledger.credit_note: a cancelled invoice is reversed in full: Dr 4000 / Cr 1200 with the same invoice_id and no payment_id; a re-issued replacement is booked as a new invoice
-CLAIM ledger.currency: every ledger row is in base_currency
-CLAIM ledger.expense: Dr 6xxx / Cr 1000
-CLAIM ledger.invoice: Dr 1200 / Cr 4000 at the invoice issue-date rate, only for invoices issued in the period
-CLAIM ledger.payment: Dr 1000 at the payment-date rate; Cr 1200 per invoice_ref at that invoice's issue-date rate; remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; difference to 7900; negative amount = refund (Dr 2900 / Cr 1000)
-CLAIM period.rule: a record belongs to the period iff its timestamp converted to the company timezone has a date in [start, end] (inclusive)
-CLAIM rounding: ROUND_HALF_UP to integer minor units
-CHECK account_legend: 8400
-CHECK accounts: 6220986
-CHECK ar_credit: 217152
-CHECK company_period: 8400
-CHECK conversion: 557606
-CHECK credit_note: 10494
-CHECK evidence_duplicate_invoice: 1502
-CHECK evidence_fx_error: 3366
-CHECK evidence_payment_allocation: 2856
-CHECK evidence_period_cutoff: 2049
-CHECK expense: 2455961
-CHECK hard_ledger_larger: 4200
-CHECK hard_text: 8400
-CHECK invoice_balance: 335490
-CHECK invoice_required: 111697
-CHECK invoice_shape: 447187
-CHECK issue_types: 8400
-CHECK later_copy: 1502
-CHECK ledger_base_currency: 6220986
-CHECK minor_units: 6220986
-CHECK payment_balance: 222116
-CHECK payment_period: 222116
-CHECK payment_shape: 222116
-CHECK period_rule: 6220986
-CHECK positive_base_minor: 9773
-CHECK rate_date: 400268
-CHECK rate_direction: 2200561
-CHECK ref_currency: 217152
-CHECK refs: 222116
-CHECK refund: 12897
-CHECK reissue: 10494
-CHECK rounding: 8400
-CHECK scenario_findings: 32000
-CHECK tolerance: 8400
-CHECK unapplied_payment_date: 219260
-CHECK wrong_date_explains: 3366
-OBSERVED allocation_remainder_departures: 2856
-OBSERVED clean_episodes: 2011
-OBSERVED duplicate_invoice: 1502
-OBSERVED fx_balance_adjustments: 79041
-OBSERVED fx_error: 3366
-OBSERVED partial_remittances: 84791
-OBSERVED payment_allocation: 2856
-OBSERVED period_cutoff: 2049
-OBSERVED receipts_without_remittance: 12741
-OBSERVED recurring_equal_amounts: 18943
-OBSERVED refunds: 12897
-OBSERVED retyped_duplicates: 347
-OBSERVED retyped_reissues: 5238
-OBSERVED split_payments: 24733
-Audited 8400 episodes across 42 configurations; 33079641 checks, 0 unexpected failures.
-```
-2026-11-22 03:28 lead — X2 merged (33,079,641 checks on 8,400 episodes, 0 unexpected; allocation remainder wording left as is: it describes correct postings and the error is defined as the departure). L2: REVIEW Round 20 complete, HANDOFF header updated. Final: check 563 tests all gates 50.7 s, sync_docs no drift, golden 80/80. SPEC acceptance unchanged by this round (no contract/reward change; generator change verified by check, fuzz, verify, attack). All tasks [x]; creating night/DONE.
+The original six load processes covered every trial and probe, and each finished with exit 0, 3,000 hard episodes, zero problems and `FUZZ PASSED`. Wall seconds by process number: 275.414, 275.828, 275.201, 276.866, 275.619, 276.443.
+2026-11-22 04:28 gemini1b — G20 config sweep on cases 75000-77999: 3000 random configs (1217 hard) in 138.2 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56; FUZZ PASSED (wall time 138.2 s). Task G20 complete.2026-11-22 04:49 lead — Merged X4/X5/Y4/Y5/G19–G24/Z4. X4: 1,335 clean violations = 920 refund-FX (a) + 415 AR rounding (b), 0 other; max (a) 500,336 base minor (1.9 %) default, 7.3 % hard. X5: text auditor F1 1.000 on 4,200 more episodes (seeds 45000–45099). Y4: every README command touched by the Y3 commit exit 0 on a fresh clone except the four Docker commands (docker not installed, exit 127); full check 94.6 s under concurrent load → README says 'about a minute on an idle machine'. Y5: the 54 s outlier did not recur (max 0.165 s in 6 loaded trials). Documented the refund FX / rounding artefacts in DESIGN §10, README limitations and PITCH slide 9; REVIEW Round 21 and HANDOFF header written. D: demo seed 2003 reproduces every DEMO.md number (lead 03:40, gemini3b G17). P: sync_docs no drift; no product change this round, so prose numbers verified in round 20 stand. check exit 0 50.7 s. All tasks [x]; creating night/DONE.

@@ -378,6 +378,16 @@ to explore.
   paid one. A lookalike pair whose earlier invoice is already paid is a duplicate with precision 0.995 (recall
   432/830, 1 000 hard seeds; Round 17 probe) without reading the ledger; the credit-note rows in the ledger separate all pairs.
 - Expense journals carry no ids (the schema has no journal id); checks group them by timestamp.
+- No realised FX on refunds or rounding plug on receivables. Every posting follows the published per-document rule
+  (CONTRACT §2: a refund is `Dr 2900 / Cr 1000` at the refund-date rate; each cash application is converted and
+  rounded on its own at the invoice-date rate), so a full foreign-currency refund can leave a customer's 2900
+  balance in base currency below zero, and two or more applications can leave an invoice's 1200 balance a few minor
+  units off. In the document currency the customer's credit returns exactly to 0 (`night/r20/chronology.py`). An
+  independent balance re-derivation (`night/r21/ledger_identity.py --classify`, clean D01–D05 config, seeds
+  41000–41299) counts 104 such refund rows (largest 500 336 base minor units, 1.9 % of the refund) and 33 rounding
+  rows in default mode, 80 (largest 7.3 % of the refund) and 50 in hard mode, and nothing else. No issue type or
+  truth record depends on these balances; booking the difference to 7900 would change the posting rule, the policy
+  text and every exported episode, so it is reported here instead.
 - A wrong conversion is always the published rate of another date (the document's local or UTC date, nearby days,
   the bank's date); a rate value that appears on no date, or a wrong currency pair, is not modelled.
 - The verifier does not bound the total settled on one invoice across payments: an extra future payment of 5×
