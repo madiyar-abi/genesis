@@ -188,3 +188,12 @@ unexplained violations: 13 (0 in clean configs)
   - `auditenv.check` Run 1: exit 0, wall 51.27s, last line: "ALL CHECKS PASSED in 51.2 s"
   - `auditenv.check` Run 2: exit 0, wall 51.32s, last line: "ALL CHECKS PASSED in 51.2 s"
   - `python -X dev -W error::ResourceWarning -m unittest discover -s tests -t .`: exit 0, wall 50.67s, last line: "OK" (Ran 562 tests in 50.666s, zero ResourceWarnings or errors).
+2026-11-22 01:21 gemini3b — G30: repeated G10 (export diff of dev/train/hard) and G24 (trajectory regeneration diff) on generator fix 299c5e7.
+  Export diffs:
+  - episodes/dev vs /tmp/r20-gemini3b/dev: diff exit code 0 (identical)
+  - episodes/train vs /tmp/r20-gemini3b/train: diff exit code 0 (identical)
+  - episodes/hard vs /tmp/r20-gemini3b/hard: diff exit code 0 (identical)
+  Trajectory diffs:
+  - trajectories.jsonl vs /tmp/r20-gemini3b/trajectories.jsonl: diff exit code 0 (identical)
+  - trajectories/ vs /tmp/r20-gemini3b/trajectories/: diff exit code 0 (all 7 files identical)
+  Differing files: none.
