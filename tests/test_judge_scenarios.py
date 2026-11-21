@@ -7,6 +7,7 @@ import os
 import shutil
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 
 import judge_adapter as ja
 from auditenv import jury
@@ -34,6 +35,16 @@ def allocated(ep, issue) -> int:
     inv = next(i for i in issue["affected_ids"] if i != pay)
     return sum(r["credit_minor"] - r["debit_minor"] for r in ep["tables"]["ledger"]
                if r["payment_id"] == pay and r["account"] == "1200" and r["invoice_id"] == inv)
+
+
+def straddles_period_edge(ep) -> bool:
+    """D05: some record's own-offset date and company-timezone date fall on opposite sides of the period edge."""
+    m = ep["manifest"]
+    sign, (hh, mm) = (1 if m["timezone"][0] == "+" else -1), m["timezone"][1:].split(":")
+    company = timezone(sign * timedelta(hours=int(hh), minutes=int(mm)))
+    inside = lambda d: m["period_start"] <= d.isoformat() <= m["period_end"]
+    stamps = [r["issued_at"] for r in ep["tables"]["invoices"]] + [r["timestamp"] for r in ep["tables"]["payments"]]
+    return any(inside(t.date()) != inside(t.astimezone(company).date()) for t in map(datetime.fromisoformat, stamps))
 
 
 class JudgeScenariosTest(unittest.TestCase):
@@ -83,6 +94,9 @@ class JudgeScenariosTest(unittest.TestCase):
                     totals = [(i["currency"], i["total_minor"]) for i in t["invoices"]]
                     self.assertLess(len(set(totals)), len(totals))  # D04: equal amounts that are not duplicates
                     self.assertTrue(any(p["invoice_refs"] is None for p in t["payments"]))
+                    base = self.episodes[f"D{n:02d}", seed]["manifest"]["base_currency"]
+                    self.assertTrue(any(r["currency"] != base for r in t["invoices"] + t["payments"]))  # D05
+                    self.assertTrue(straddles_period_edge(self.episodes[f"D{n:02d}", seed]))  # D05: period edge
 
     def test_interacting_scenarios_vary_their_parameters(self):
         for names in (("D16", "D17", "D18"), ("D19", "D20")):
