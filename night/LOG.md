@@ -721,3 +721,37 @@ Verification:
 - Messages do not leak any filesystem paths or '/' characters (`path-free: yes`).
 - An active episode retains state and `env.step({"name": "calculator", "args": {"expression": "1"}})` executes successfully and consumes 1 step following each rejected reset.
 Next: T59.
+2026-11-21 22:40 gemini3b — T60: Fresh clone of the current tip in path with spaces ('/tmp/r18 gemini3b clone2').
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.check`
+  Exit code: 0
+  Wall time: 49.09 s
+  Last line: 'ALL CHECKS PASSED in 49.0 s' (539 unit tests pass, all gates pass)
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.demo`
+  Exit code: 0
+  Wall time: 0.14 s
+  Last line: 'Done. Full check: uv run python -m auditenv.check'
+- Command: `uv run --no-project --python 3.13 python -m auditenv.check`
+  Exit code: 0
+  Wall time: 49.77 s
+  Last line: 'ALL CHECKS PASSED in 49.6 s' (539 unit tests pass on Python 3.13)
+Removed clone2 worktree. Next: T61.
+
+2026-11-21 22:44 gemini3b — T61: Verified golden hashes, reward mutations, and shortcut miner on seeds 1000-1499.
+- Command: `env -u AUDITENV_SECRET uv run python scripts/golden.py --check`
+  Exit code: 0
+  Last line: `All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini3b/tests/golden_hashes.json.`
+- Command: `env -u AUDITENV_SECRET uv run python scripts/mutate_reward.py`
+  Exit code: 0
+  Last line: `22/22 mutants killed.`
+- Command: `env -u AUDITENV_SECRET uv run python scripts/shortcut_miner.py --report-only --seeds 1000-1499`
+  Exit code: 0 (14.3 s)
+  Summary:
+  # Shortcut miner: default mode, 500 seeds x random_mix/heavy = 1000 episodes (14.3 s)
+  Records: ledger 336122, invoices 54245, payments 26662. Support >= 30. Flag: precision > 0.5.
+  ## Max precision per issue type
+  | type | affected max P | evidence max P | flagged (aff/ev) |
+  | duplicate_invoice | 0.997 | 0.997 | 2/2 |
+  | payment_allocation | 0.932 | 0.932 | 9/1 |
+  | fx_error | 0.701 | 0.311 | 3/0 |
+  | period_cutoff | 0.470 | 0.470 | 0/0 |
+Next: none queued for gemini3b.
