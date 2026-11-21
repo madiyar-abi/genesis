@@ -293,7 +293,7 @@ Reproduced on origin/main b799231 before each fix; every regression failed first
   up to the whole short reference; it now requires exactly the unallocated part of the reference at the
   payment-date rate.
 - Verifier, hard mode. A full credit note on an invoice with no replacement wrote off revenue and verified with
-  unchanged truth. A cancelled invoice now needs a replacement with the same entity, currency and line items.
+  unchanged truth. A cancelled invoice now needs its own replacement with the same entity, currency and line items, booked in the period after the credit note (an unbooked copy dated outside the period no longer counts).
 - Verifier, public records. `amount_minor` 783500.75 on a payment and its ref, and payment timestamps without an
   offset (read in the host time zone), verified. Payment and ref amounts must be integers and every ledger,
   payment and invoice timestamp needs an offset.
@@ -306,3 +306,35 @@ Reproduced on origin/main b799231 before each fix; every regression failed first
 - Server, missing grader key. `auditenv.server --episodes` without `AUDITENV_SECRET` served silently and a
   policy recovered seed 734211 from `episode_id` in 3.8 s. The server now warns on stderr; `--public` marks the
   deliberately public smoke run and demo (`tests/test_server_secret.py`).
+- Verifier and server, reporting. A naive invoice or payment timestamp, or a string amount, made `verify_episode`
+  raise `TypeError` instead of naming the problem; it now returns the structure problem. A missing, malformed or
+  mistyped hidden list ended the server in a traceback; it now exits 2 with one line.
+- Measured, not fixed (generator change; listed in DESIGN §10): one page of `payments` flags the I1 payment with
+  precision 0.68 and recall 1.0; in hard mode a lookalike pair whose earlier invoice is paid is a duplicate with
+  precision 0.995.
+
+## Audit defects from PR #39 and their review (21 November)
+
+Reproduced on `main` at `f270e4d` with `night/archive/audit-f270e4d.py`; every regression below failed on the
+code before its fix (checked by running the new tests on the previous commit) and passes after it.
+
+- Export. A failed `export_split` (13 FX issues on seed 3) wrote seeds 1–2 next to the old `index.json`, so a
+  valid split failed `verify --dir`. Episodes are now generated in memory, written to a working directory and
+  swapped in by renames that are undone on failure; non-episode files stay (`tests/test_export.py`). The review
+  of that change found that a working directory beside the split needed a writable parent (main did not) and
+  failed with `EXDEV` on a mounted destination (reproduced on a disk image); it now lives inside an existing
+  destination, and an interrupted rollback names where the previous files are.
+- Verifier, unused FX rate. `not-a-rate` on an unused rate verified. Every published rate must be a plain
+  ASCII decimal above 0 and below 10^9: the review found that `1.2_9169`, ` 1.29169`, `129169e-5`, `+1.29169`
+  and full-width digits passed on used and unused rates, and `1e30` on a used rate crashed the conversion.
+- Verifier, out-of-period payment. An unbooked future payment skipped every reference check, so an unknown
+  invoice and refs above the amount verified. `Books.ref_problems` now checks every payment document
+  (`tests/test_payment_refs.py`); booking, cash, AR and 2900 checks stay in-period.
+- Verifier, manifest. Without `schema_version` the episode verified. The manifest is now checked against
+  `schemas/manifest.schema.json`; the review found that extra fields (a `seed` field would leak the grader's
+  seed), float or extra counts, bad dates, time zones and currency codes passed or crashed `Books`.
+  `generator_version`, listed in CONTRACT §2, is now required by the schema too.
+- Verifier, diagnostics. `not-a-date` in a ledger timestamp raised `ValueError`; it is reported with the row
+  id (fixed in `3a2f013`, regression in `tests/test_verify_records.py`). A ref without a string `invoice_id`
+  raised `KeyError` and blank `row_id` / payment `doc_id` values verified; both are now reported.
+- Measured, not fixed: the total settled on one invoice across payments is not bounded (DESIGN §10).

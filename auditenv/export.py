@@ -25,7 +25,9 @@ import argparse
 import csv
 import json
 import os
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 from .generator import FX_FIELDS, LEDGER_FIELDS, episode_id_for, generate
@@ -87,24 +89,71 @@ def export_split(config_path: str, out_dir: str) -> list[dict]:
         if name in expected:
             raise ValueError(f"duplicate episode {name} for seed {seed}")
         expected.add(name)
-    dest = Path(out_dir)
+    dest = Path(out_dir).resolve()
     if dest.exists():
         stale = sorted(p.name for p in dest.iterdir() if (p / "public").is_dir() and p.name not in expected)
         if stale:
             raise ValueError(f"destination contains episodes outside the requested split: {', '.join(stale)}")
-    os.makedirs(out_dir, exist_ok=True)
-    index: list[dict] = []
+    # generate everything first: a generation error must not touch the destination
+    generated = [(seed, cfg, generate(seed, cfg)) for seed, cfg in episodes]
+    index = [{"config": cfg, "episode_id": ep["episode_id"], "seed": seed} for seed, cfg, ep in generated]
 
-    for seed, cfg in episodes:
-        ep = generate(seed, cfg)
-        ep_id = ep["episode_id"]
-        ep_dir = os.path.join(out_dir, ep_id)
-        export_episode(ep, ep_dir)
-        index.append({"config": cfg, "episode_id": ep_id, "seed": seed})
-
-    index_path = os.path.join(out_dir, "index.json")
-    _write_json(index_path, index)
+    # write into a working directory on dest's filesystem, so publishing is renames only. An existing dest holds
+    # it itself: dest must be writable anyway, its parent need not be, and dest may be a mount point. It has no
+    # public/, so neither the stale check nor `verify --dir` takes it for an episode, and _swap_entries moves only
+    # the names written into it.
+    if dest.exists():
+        work = Path(tempfile.mkdtemp(prefix=f".{dest.name}.export-", dir=dest))
+    else:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        work = Path(tempfile.mkdtemp(prefix=f".{dest.name}.export-", dir=dest.parent))
+    old = work / "old"
+    try:
+        new = work / "new"
+        for _, _, ep in generated:
+            export_episode(ep, os.path.join(new, ep["episode_id"]))
+        _write_json(os.path.join(new, "index.json"), index)
+        if dest.exists():
+            _swap_entries(dest, new, old)
+        else:
+            os.replace(new, dest)
+    except BaseException as exc:
+        if not (old.is_dir() and any(old.iterdir())):
+            shutil.rmtree(work, ignore_errors=True)
+            raise
+        # the rollback failed or was interrupted (exc; the export failure is its context): keep the previous files
+        # and say where they are
+        causes = [str(e) or type(e).__name__ for e in (exc.__context__, exc) if e is not None]
+        message = f"export to {dest} failed and was not undone ({'; then '.join(causes)}); " \
+                  f"the previous files are in {old}"
+        if isinstance(exc, Exception):
+            raise OSError(message) from exc
+        print(message, file=sys.stderr)  # e.g. a second Ctrl-C: keep the interrupt, but name the path
+        raise
+    shutil.rmtree(work, ignore_errors=True)
     return index
+
+
+def _swap_entries(dest: Path, new: Path, old: Path) -> None:
+    """Replace dest's export entries (episode dirs, index.json last) with those in `new`; other files stay put.
+    Old entries go to `old` first. On failure every rename is undone in reverse, so dest is as before."""
+    names = sorted(p.name for p in new.iterdir() if p.name != "index.json") + ["index.json"]
+    old.mkdir()
+    done: list[tuple[Path, Path]] = []
+    try:
+        for name in names:
+            if os.path.lexists(dest / name):
+                os.replace(dest / name, old / name)
+                done.append((dest / name, old / name))
+        for name in names:
+            os.replace(new / name, dest / name)
+            done.append((new / name, dest / name))
+    except BaseException:
+        # any failure or interrupt from here on leaves files in `old`; export_split then keeps it and names it
+        for src, dst in reversed(done):
+            os.replace(dst, src)
+        old.rmdir()  # empty again; rmdir cannot remove anything that was restored too late
+        raise
 
 
 def main(argv: list[str] | None = None) -> int:

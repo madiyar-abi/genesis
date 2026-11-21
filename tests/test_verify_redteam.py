@@ -45,8 +45,8 @@ class RedTeamTest(unittest.TestCase):
         with self.subTest("missing JPY"):
             self.assertTrue(_has(verify_episode(ep), "amount exponents"))
         exponents["JPY"] = False
-        with self.subTest("JSON boolean instead of integer"):
-            self.assertTrue(_has(verify_episode(ep), "amount exponents"))
+        with self.subTest("JSON boolean instead of integer"):  # caught by manifest.schema.json first
+            self.assertTrue(_has(verify_episode(ep), "manifest.amount_exponents.JPY: expected integer"))
 
     def _base_single_ref_payment(self):
         for p in self.t["payments"]:
@@ -180,12 +180,14 @@ class RedTeamTest(unittest.TestCase):
                        lambda ep: ep["policy"]["period"].update(start="2000-01-01"),
                        lambda ep: ep["policy"].update(base_currency="XYZ"),
                        lambda ep: ep["policy"]["ledger"]["accounts"].update({"6900": "Other"}),
-                       lambda ep: ep["manifest"]["amount_exponents"].update({self.base: 3}),
-                       lambda ep: ep["manifest"].update(rounding="ROUND_HALF_EVEN")):
+                       lambda ep: ep["manifest"]["amount_exponents"].update({self.base: 3})):
             ep = copy.deepcopy(self.ep)
             change(ep)
             problems = verify_episode(ep)
             self.assertTrue(_has(problems, "contradict"), problems)
+        ep = copy.deepcopy(self.ep)
+        ep["manifest"].update(rounding="ROUND_HALF_EVEN")  # the schema pins the contract's rounding
+        self.assertTrue(_has(verify_episode(ep), "manifest.rounding: must be 'ROUND_HALF_UP'"))
 
 
 if __name__ == "__main__":

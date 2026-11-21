@@ -4,7 +4,46 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Integration snapshot (20 November 2026).** Round 17 is on main at `b799231`. The following audit fixes were reviewed against that revision.
+**Current state (21 November 2026).** Branch `feature/audit-defects-r19` (PR into `main`, needs a teammate's
+review and merge) closes the five audit defects from [PR #39](https://github.com/madiyar-abi/genesis/pull/39),
+which it contains, and the findings of an adversarial review of those fixes. Engineering is done: what is left
+before the deadline (22 November, 22:00 Astana) is the human submission checklist under "Deadline & submission".
+
+## Five audit defects from PR #39 — fixed (21 November)
+
+Baseline `main` at `f270e4d`. Each regression failed on the code before its fix and passes after it; details
+and reproductions are in `REVIEW.md` → "Audit defects from PR #39 and their review".
+
+| Priority | Defect | Fix | Regression tests |
+|---|---|---|---|
+| High | A failed `export_split` left new episodes next to the old `index.json`, so a valid split failed `verify --dir` | `auditenv/export.py`: generate every episode first, write into a working directory on the destination's filesystem, swap in by renames, undo on failure | `tests/test_export.py` |
+| Medium | An unused FX rate `not-a-rate` verified | every published rate must be a plain decimal, 0 < rate < 10^9 (`_structure`) | `tests/test_verify_records.py` |
+| Medium | An out-of-period payment skipped every reference check | `Books.ref_problems` checks every payment document | `tests/test_payment_refs.py` |
+| Medium | A manifest without `schema_version` verified | the manifest is checked against `schemas/manifest.schema.json` (now also requires `generator_version`, as CONTRACT §2 lists it) | `tests/test_verify_records.py` |
+| Low | `not-a-date` in a ledger timestamp raised `ValueError` | already fixed in `3a2f013`; regression added | `tests/test_verify_records.py` |
+
+The review of these fixes (a second, read-only pass) also found and the branch fixes: extra or wrong-typed
+manifest fields (a `seed` field would leak the grader's seed), rate spellings such as `1.2_9169` or `1e30`,
+a ref without a string `invoice_id` (`KeyError`), blank `row_id` / payment `doc_id`, and an export regression
+(a read-only parent and a mounted destination, `EXDEV`). Measured and left as documented limitations
+(DESIGN §10): the total settled on one invoice across payments is not bounded (0 of 9,386 settled invoices
+over-settled on seeds 0–199), and the free-text rules in `policy.json` / `task.txt` are checked only where the
+books depend on them.
+
+Verified on the branch head, Python 3.11:
+
+| Command | Result |
+|---|---|
+| `env -u AUDITENV_SECRET uv run python -m auditenv.check` | 437 tests, all gates pass, 42.8 s |
+| `uv run python scripts/sync_docs.py --check --json <check json>` | no drift |
+| `uv run python -m auditenv.verify --seeds 0-199` and `--dir episodes/{train,dev,hard}` | 600/600, 10/10, 10/10, 20/20 |
+| `auditenv.fuzz --seeds 0-999` / `--seeds 0-199 --hard` | 3,000 and 600 episodes, 0 problems |
+| `auditenv.attack` | 11,000 mutations on 20 seeds, 0 violations |
+| `scripts/golden.py --check` | 80/80 hashes match (generator output unchanged) |
+| `night/archive/audit-f270e4d.py` | control 0; the four malformed episodes 1; the split after a failed export 0 |
+| every README command on a fresh clone (at `0b7989c`, before the review fixes) | 33 of 34 run exit 0; `python3.11 -m auditenv.check` exits 127 only where `python3.11` is not on `PATH` (passes with uv's 3.11 on `PATH`); Docker, `git clone` and the organiser server were not run |
+
+## Integrated work
 
 | Branch or PR | What it covers |
 |---|---|
@@ -12,7 +51,7 @@
 | [PR #36](https://github.com/madiyar-abi/genesis/pull/36) | Check both timestamps of invoice postings and reversals. Require the configured 20 public hard episodes and verify the hard export in CI. |
 | [PR #37](https://github.com/madiyar-abi/genesis/pull/37) | Reject ambiguous CSV headers and malformed invoice fields. Detect duplicate episode IDs and leftover episode directories before export writes. Check uniqueness of evidence IDs in schema tests. |
 
-PR #37 contains #35, #36 and [#38](https://github.com/madiyar-abi/genesis/pull/38). The merged verifier checks both invoice/truth structure and accounting semantics. For release, review #37 against main and check its GitHub Actions run. After integrating #38, Python 3.11.18 passed 410 tests and the seed sweep completed 3,000 episodes with zero problems. Local checks verified 600/600 generated episodes, matched all 80 golden hashes, and found zero violations across 11,000 reward mutations on 20 seeds. To reproduce:
+PR #37 contains #35, #36 and [#38](https://github.com/madiyar-abi/genesis/pull/38). The merged verifier checks both invoice/truth structure and accounting semantics. After integrating #38, Python 3.11.18 passed 410 tests and the seed sweep completed 3,000 episodes with zero problems. Local checks verified 600/600 generated episodes, matched all 80 golden hashes, and found zero violations across 11,000 reward mutations on 20 seeds. To reproduce:
 
 ```sh
 env -u AUDITENV_SECRET uv run python -m unittest tests.test_export tests.test_verify_dir tests.test_schemas tests.test_posting_period tests.test_load
@@ -23,7 +62,7 @@ uv run python -m auditenv.verify --seeds 0-199
 for split in train dev hard; do uv run python -m auditenv.verify --dir "episodes/$split" || exit 1; done
 ```
 
-The next participant should review PR #37, confirm Python and Docker CI, and merge after team approval. E3 pins the multi-platform Python image by digest. E4 includes the [terminal recording](docs/demo.cast) with verified public demo output. The submission owner still has the narrated video, deck, access checks and submission listed below. No model training was started.
+E3 pins the multi-platform Python image by digest. E4 includes the [terminal recording](docs/demo.cast) with verified public demo output. The submission owner still has the narrated video, deck, access checks and submission listed below. No model training was started.
 
 ## Export verifier follow-up
 

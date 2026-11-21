@@ -176,7 +176,11 @@ def main(argv=None) -> int:
         print("auditenv.server: warning: AUDITENV_SECRET is not set, so these episodes are public: a policy can "
               "recover each seed from episode_id and regenerate the truth. Set it in the grader process "
               "(README, closed run) or pass --public for a deliberately public list.", file=sys.stderr, flush=True)
-    episodes = load_episodes(args.episodes) if args.episodes else None
+    try:
+        episodes = load_episodes(args.episodes) if args.episodes else None
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        print(f"auditenv.server: cannot read the hidden episode list: {e}", file=sys.stderr, flush=True)
+        return 2
     for i, (seed, config) in enumerate(episodes or (), start=1):  # fail fast: a typo must not surface at close
         try:
             AuditEnv().reset(seed, {**config, "mode": config.get("mode", "eval")})

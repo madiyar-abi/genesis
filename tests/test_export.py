@@ -1,16 +1,19 @@
 """Tests for episode export and configuration splits (T16)."""
 
+from contextlib import redirect_stderr, redirect_stdout
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
-from auditenv.export import export_split, main
+from auditenv.export import export_episode, export_split, main
 from auditenv.generator import FX_FIELDS, LEDGER_FIELDS, generate
 from auditenv.run import load_episodes
-from auditenv.verify import verify_episode
+from auditenv.verify import main as verify_main, verify_episode
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -64,6 +67,150 @@ class TestExport(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, reason):
                         export_split(spec, out)
                     self.assertEqual(_dir_tree_hashes(out), original)
+
+    def test_failed_export_leaves_destination_untouched(self):
+        """A generation error, a write error or a failed swap leaves every path and byte as before (audit f270e4d)."""
+        real_export, real_replace = export_episode, os.replace
+
+        def failing_write():
+            calls = [0]
+
+            def write(ep, ep_dir):
+                calls[0] += 1
+                real_export(ep, ep_dir)
+                if calls[0] == 2:
+                    raise OSError("disk full")
+            return mock.patch("auditenv.export.export_episode", side_effect=write)
+
+        def failing_swap(n):  # 6 renames here: old episode 1 and index out, episodes 1-3 and the index in
+            calls = [0]
+
+            def replace(src, dst):
+                calls[0] += 1
+                if calls[0] == n:
+                    raise OSError("rename failed")
+                return real_replace(src, dst)
+            return mock.patch("auditenv.export.os.replace", side_effect=replace)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            spec, out = Path(tmp) / "config.json", Path(tmp) / "out"
+            spec.write_text(json.dumps({"seeds": [1]}))
+            export_split(spec, out)
+            (out / "notes.txt").write_text("not an episode\n")  # foreign files must survive too
+            original = _dir_tree_hashes(out)
+            spec.write_text(json.dumps({"episodes": [{"seed": 1}, {"seed": 2},
+                                                     {"seed": 3, "config": {"errors": {"fx_error": 13}}}]}))
+            with self.assertRaisesRegex(ValueError, "at most 12 issues"):
+                export_split(spec, out)
+            self.assertEqual(_dir_tree_hashes(out), original)
+            spec.write_text(json.dumps({"seeds": [1, 2, 3]}))
+            for name, failure in (("write", failing_write()), ("first swap", failing_swap(1)),
+                                  ("middle swap", failing_swap(3)), ("last swap", failing_swap(6))):
+                with self.subTest(failure=name):
+                    with failure, self.assertRaises(OSError):
+                        export_split(spec, out)
+                    self.assertEqual(_dir_tree_hashes(out), original)
+                    self.assertEqual(sorted(os.listdir(tmp)), ["config.json", "out"], "temporary directory left")
+                    self.assertEqual(sorted(os.listdir(out)), sorted({Path(p).parts[0] for p in original}),
+                                     "working directory left in the destination")
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(verify_main(["--dir", str(out)]), 0)
+
+            # a valid retry publishes the new split and keeps the foreign file
+            index = export_split(spec, out)
+            self.assertEqual([e["seed"] for e in index], [1, 2, 3])
+            self.assertEqual((out / "notes.txt").read_text(), "not an episode\n")
+            self.assertEqual(sorted(os.listdir(tmp)), ["config.json", "out"])
+            self.assertEqual(sorted(os.listdir(out)), sorted([e["episode_id"] for e in index] + ["index.json",
+                                                                                                  "notes.txt"]))
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(verify_main(["--dir", str(out)]), 0)
+            fresh = Path(tmp) / "fresh"
+            export_split(spec, fresh)
+            retried = _dir_tree_hashes(out)
+            del retried["notes.txt"]
+            self.assertEqual(retried, _dir_tree_hashes(fresh))
+
+    def test_failed_export_to_new_destination_creates_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            spec, out = Path(tmp) / "config.json", Path(tmp) / "new" / "split"
+            spec.write_text(json.dumps({"episodes": [{"seed": 1}, {"seed": 3, "config": {"errors": {"fx_error": 13}}}]}))
+            with self.assertRaisesRegex(ValueError, "at most 12 issues"):
+                export_split(spec, out)
+            self.assertEqual(os.listdir(tmp), ["config.json"])
+            spec.write_text(json.dumps({"seeds": [1]}))
+            with mock.patch("auditenv.export.export_episode", side_effect=OSError("disk full")), \
+                    self.assertRaises(OSError):
+                export_split(spec, out)
+            self.assertFalse(out.exists())
+            self.assertEqual(os.listdir(out.parent), [], "temporary directory left")
+            export_split(spec, out)
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(verify_main(["--dir", str(out)]), 0)
+
+    @unittest.skipIf(hasattr(os, "geteuid") and os.geteuid() == 0, "root ignores directory permissions")
+    def test_export_into_writable_destination_under_read_only_parent(self):
+        """An existing, writable destination needs no write access to its parent (review r19, regression vs main)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            spec, parent = Path(tmp) / "config.json", Path(tmp) / "ro"
+            out = parent / "dev"
+            out.mkdir(parents=True)
+            parent.chmod(0o555)
+            try:
+                for seeds in ([1], [1, 2]):  # into the empty destination, then over the split it now holds
+                    with self.subTest(seeds=seeds):
+                        spec.write_text(json.dumps({"seeds": seeds}))
+                        index = export_split(spec, out)
+                        self.assertEqual(sorted(os.listdir(out)),
+                                         sorted([e["episode_id"] for e in index] + ["index.json"]))
+                self.assertEqual(os.listdir(parent), ["dev"])
+            finally:
+                parent.chmod(0o755)
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(verify_main(["--dir", str(out)]), 0)
+
+    def test_unfinished_rollback_names_the_previous_files(self):
+        """A second interrupt or failure during rollback keeps the previous files in the working directory inside
+        dest and names that path; the kept directory is never taken for an episode or published (review r19)."""
+        real_replace = os.replace
+        for second in (KeyboardInterrupt(), OSError("undo failed")):
+            with self.subTest(second=type(second).__name__), tempfile.TemporaryDirectory() as tmp:
+                spec, out = Path(tmp) / "config.json", Path(tmp) / "out"
+                spec.write_text(json.dumps({"seeds": [1]}))
+                export_split(spec, out)
+                original = _dir_tree_hashes(out)
+                spec.write_text(json.dumps({"seeds": [1, 2]}))
+                calls = [0]
+
+                def replace(src, dst):  # 1-2 move the old episode and index out, 3 is interrupted, 4 is the 1st undo
+                    calls[0] += 1
+                    if calls[0] == 3:
+                        raise KeyboardInterrupt
+                    if calls[0] == 4:
+                        raise second
+                    return real_replace(src, dst)
+
+                stderr = io.StringIO()
+                with mock.patch("auditenv.export.os.replace", side_effect=replace), redirect_stderr(stderr), \
+                        self.assertRaises(type(second)) as ctx:
+                    export_split(spec, out)
+                kept = [p for p in out.iterdir() if p.name.startswith(".")]
+                self.assertEqual(len(kept), 1, f"expected one working directory in {out}: {os.listdir(out)}")
+                old = kept[0].resolve() / "old"  # export names resolved paths (/var -> /private/var on macOS)
+                self.assertIn(f"the previous files are in {old}", stderr.getvalue() + str(ctx.exception))
+                self.assertEqual(_dir_tree_hashes(old), original)
+
+                # restore by hand as the message says; the kept directory stays and must not count as an episode
+                for name in os.listdir(old):
+                    real_replace(old / name, out / name)
+                with redirect_stdout(io.StringIO()):
+                    self.assertEqual(verify_main(["--dir", str(out)]), 0)
+                index = export_split(spec, out)
+                self.assertEqual([e["seed"] for e in index], [1, 2])
+                self.assertEqual(sorted(os.listdir(out)),
+                                 sorted([e["episode_id"] for e in index] + ["index.json", kept[0].name]))
+                with redirect_stdout(io.StringIO()):
+                    self.assertEqual(verify_main(["--dir", str(out)]), 0)
 
     def test_all_episodes_pass_verifier(self):
         """Every episode across train, dev, eval_example, and eval_hard passes the independent verifier."""

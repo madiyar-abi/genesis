@@ -42,7 +42,7 @@ class ManifestCountsTest(unittest.TestCase):
         tampered = copy.deepcopy(ep)
         del tampered["manifest"]["counts"]["documents"]
         problems = _structure(tampered)
-        self.assertIn("manifest count mismatch for documents", problems)
+        self.assertIn("manifest.counts.documents: required", problems)  # manifest.schema.json requires it
 
 
 if __name__ == "__main__":

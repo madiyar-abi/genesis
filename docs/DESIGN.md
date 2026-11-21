@@ -158,17 +158,21 @@ exact amounts; naive's false positives stay false positives at 1 %). The default
 ## 7. Verification of data and truth (`auditenv/verify.py`)
 
 Independent of the generator, from the public tables and closed files only:
-1. structure — unique ids, manifest counts, base-currency one-sided integer ledger rows, integer payment and
-   ref amounts, timestamps with a UTC offset, size limits; the policy agrees with the manifest and with the
-   contract's chart of accounts, exponents and rounding;
+1. structure — the manifest matches `schemas/manifest.schema.json` (required fields, types, patterns, dates, no
+   extra fields), unique non-blank ids, manifest counts, base-currency one-sided integer ledger rows, integer
+   payment and ref amounts with string invoice ids, timestamps with a UTC offset, every published FX rate (used
+   or not) a plain positive decimal below 10^9, size limits; the policy agrees with the manifest and with the
+   contract's chart of accounts, exponents and rounding. Remittance references are checked on every payment
+   document, whatever its period: known, same-currency, not cancelled invoices issued before the payment,
+   positive, unique and within the payment amount;
 2. **before the errors** — revert the provenance changes; every journal balances and the books
    have zero discrepancies (each in-period invoice booked once at the right rate, every payment
    cash/AR/2900 line exact, no duplicates, nothing out of period). In both books every account is
    allowed for its journal type (invoice 1200/4000, payment 1000/1200/2900/7900, expense Dr 6xxx /
    Cr 1000), entities match the invoices, payment rows carry the payment's instant, no invoice is
-   booked before its issue, and invoice refs are positive, unique, same-currency and issued before
-   the payment. Credit notes are accepted only where the hard-mode policy publishes the rule, and each
-   cancelled invoice needs a replacement with the same entity, currency and line items;
+   booked before its issue. Credit notes are accepted only where the hard-mode policy publishes the rule, and
+   each cancelled invoice needs its own replacement with the same entity, currency and line items, issued at
+   or after the credit note and booked in the period;
 3. **after the errors** — journals still balance and the discrepancies recomputed from the records
    are exactly the truth (type, ids, amount): nothing undeclared, nothing unsupported. A wrong booked
    amount counts as an `fx_error` only if it is foreign and some published rate of the pair produces it;
@@ -348,8 +352,18 @@ to explore.
 - Cutoff of a next-period invoice is booked *before* its issue instant; a policy can learn that
   direction-of-lag cue, but it is exactly the audit rule (document date outside the period).
 - The I1 payment is always on the last evening of the period (by the definition of the scenario);
-  "last-evening payment" alone has precision 0.35.
+  "last-evening payment" alone has precision 0.35. Narrowed to a foreign payment on the last company day after
+  18:00 with one invoice ref equal to its amount, one page of `payments` flags it with precision 0.68 (random mix,
+  1 000 seeds, default and hard) and recall 1.0. It names the payment, not the two amounts, which still need the
+  reconciliation; changing it would change the default episodes, so it stays and is reported here.
+- Hard mode re-issues (credit note + new invoice) are drawn only from unpaid invoices, while duplicates may copy a
+  paid one. A lookalike pair whose earlier invoice is already paid is a duplicate with precision 0.995 (recall
+  432/830, 1 000 hard seeds) without reading the ledger; the credit-note rows in the ledger separate all pairs.
 - Expense journals carry no ids (the schema has no journal id); checks group them by timestamp.
+- The verifier does not bound the total settled on one invoice across payments: an extra future payment of 5×
+  an invoice's total verifies (the generator never over-settles: 0 of 9 386 settled invoices on seeds 0–199,
+  default and hard). The free-text rules in `policy.json` and `task.txt` are checked only where the books depend
+  on them (base currency, timezone, period, chart of accounts, credit-note rule, non-blank task).
 - Default duplicates are exact copies; hard mode re-types the text, but changed amounts or quantities
   (a "near-duplicate" that is really a different sale) are not modelled.
 - The 60 s wall-clock limit can make a replay truncate under load. The scripted baselines completed

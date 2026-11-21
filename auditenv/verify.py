@@ -62,7 +62,8 @@ class Books:
             return {credit} if 0 <= credit < ref else set()
         rate = Decimal(self.fx[(self.cdate(ts).isoformat(), cur, self.base)])
         per_unit = rate.scaleb(EXPONENT[self.base] - EXPONENT[cur])  # base minor units per document minor unit
-        guess, width = int(Decimal(credit) / per_unit), int(1 / per_unit) + 3
+        guess = int(Decimal(credit) / per_unit)
+        width = min(int(1 / per_unit) + 3, 1000)  # a rate this small is no real currency pair; bound the search
         return {a for a in range(max(0, guess - width), min(ref, guess + width + 1))
                 if self.conv(a, cur, ts) == credit}
 
@@ -74,6 +75,31 @@ class Books:
                if (src, tgt) == (cur, self.base)):
             return "that no published rate produces"
         return None
+
+    def ref_problems(self, pid: str, pay: dict) -> list[str]:
+        """Remittance consistency of one payment document, whatever its posting period. The generator never pays
+        an invoice before its issue or one it later cancels (checked on all payments), so both hold outside the
+        period too. Needs self.voided (set by discrepancies)."""
+        problems = []
+        refs = pay["invoice_refs"] or []
+        if sum(r["amount_minor"] for r in refs) > max(pay["amount_minor"], 0):
+            problems.append(f"payment {pid}: refs exceed amount")
+        if len({r["invoice_id"] for r in refs}) != len(refs):
+            problems.append(f"payment {pid} references an invoice twice")
+        if any(r["amount_minor"] <= 0 for r in refs):
+            problems.append(f"payment {pid}: non-positive invoice ref")
+        for ref in refs:
+            inv = self.invoices.get(ref["invoice_id"])
+            if inv is None:
+                problems.append(f"payment {pid} references unknown invoice {ref['invoice_id']}")
+                continue
+            if datetime_key(inv["issued_at"]) > datetime_key(pay["timestamp"]):
+                problems.append(f"payment {pid} settles invoice {inv['invoice_id']} issued after the payment")
+            if inv["invoice_id"] in self.voided:
+                problems.append(f"payment {pid} settles a cancelled invoice {inv['invoice_id']}")
+            if inv["currency"] != pay["currency"]:
+                problems.append(f"payment {pid} settles an other-currency invoice {inv['invoice_id']}")
+        return problems
 
     def journals(self) -> dict[str, list[dict]]:
         groups = defaultdict(list)
@@ -97,7 +123,7 @@ class Books:
             if sum(r["debit_minor"] for r in rows) != sum(r["credit_minor"] for r in rows):
                 problems.append(f"unbalanced journal {jid}")
         # invoices: booking, period, FX
-        booked, self.voided = {}, set()
+        booked, self.voided = {}, {}  # voided: cancelled invoice -> instant of its credit note
         for jid, rows in js.items():
             if jid.startswith("inv:"):
                 ar = [r for r in rows if r["account"] == "1200"]
@@ -112,7 +138,7 @@ class Books:
                             or datetime_key(reversal[0]["timestamp"]) < datetime_key(ar_dr[0]["timestamp"]):
                         problems.append(f"malformed credit note in {jid}")
                         continue
-                    self.voided.add(jid[4:])
+                    self.voided[jid[4:]] = datetime_key(reversal[0]["timestamp"])
                     ar = ar_dr
                     rev = [r for r in rev if r["credit_minor"]]
                 if len(ar) != 1 or len(rev) != 1 or not ar[0]["debit_minor"] \
@@ -147,14 +173,24 @@ class Books:
                 problems.append(f"invoice {iid} total != line items")
             if self.in_period(inv["issued_at"]) and iid not in booked:
                 problems.append(f"in-period invoice {iid} not booked")
-        # hard mode: a cancelled invoice is re-issued as a new invoice with identical line items
-        for iid in self.voided:
+        # hard mode: a cancelled invoice is re-issued as a new invoice with identical line items, booked in the
+        # period after the credit note; each replacement serves one cancelled invoice (CONTRACT §2)
+        used = set()
+        for iid, cancelled_at in sorted(self.voided.items(), key=lambda kv: kv[1]):
             inv = self.invoices.get(iid)
-            key = inv and (inv["entity_id"], inv["currency"], line_key(inv["line_items"]))
-            if inv and not any(o["invoice_id"] != iid and o["invoice_id"] not in self.voided
-                               and (o["entity_id"], o["currency"], line_key(o["line_items"])) == key
-                               for o in self.invoices.values()):
-                problems.append(f"credit-noted invoice {iid} has no replacement invoice with the same line items")
+            if inv is None:
+                continue
+            key = (inv["entity_id"], inv["currency"], line_key(inv["line_items"]))
+            new = next((o for o in sorted(self.invoices.values(), key=lambda o: datetime_key(o["issued_at"]))
+                        if o["invoice_id"] != iid and o["invoice_id"] not in self.voided and o["invoice_id"] in booked
+                        and o["invoice_id"] not in used and self.in_period(o["issued_at"])
+                        and datetime_key(o["issued_at"]) >= cancelled_at
+                        and (o["entity_id"], o["currency"], line_key(o["line_items"])) == key), None)
+            if new is None:
+                problems.append(f"credit-noted invoice {iid} has no replacement invoice with the same line items, "
+                                f"issued at or after the credit note and booked in the period")
+            else:
+                used.add(new["invoice_id"])
         # duplicates: same entity, currency, same line items (re-typed text allowed) -> later copy;
         # an invoice cancelled by a full credit note is not a duplicate of its replacement
         seen = defaultdict(list)
@@ -173,6 +209,7 @@ class Books:
                 issues.append(("duplicate_invoice", ids, ar["debit_minor"] if ar else 0))
         # payments: cash FX, allocations, unapplied remainder
         for pid, pay in self.payments.items():
+            problems += self.ref_problems(pid, pay)
             rows = js.get("pay:" + pid)
             if not self.in_period(pay["timestamp"]):
                 if rows:
@@ -197,24 +234,13 @@ class Books:
                 else:
                     issues.append(("fx_error", (pid,), abs(posted - correct)))
             refs = pay["invoice_refs"] or []
-            if sum(r["amount_minor"] for r in refs) > max(pay["amount_minor"], 0):
-                problems.append(f"payment {pid}: refs exceed amount")
-            if len({r["invoice_id"] for r in refs}) != len(refs):
-                problems.append(f"payment {pid} references an invoice twice")
-            if any(r["amount_minor"] <= 0 for r in refs):
-                problems.append(f"payment {pid}: non-positive invoice ref")
             if pay["currency"] == self.base and any(r["account"] == "7900" for r in rows):
                 problems.append(f"payment {pid}: FX gain/loss on a base-currency payment")
             extras = {0}  # what the allocation shortfalls may add to 2900 (each moved part at the payment-date rate)
             for ref in refs:
                 inv = self.invoices.get(ref["invoice_id"])
-                if inv is None:
-                    problems.append(f"payment {pid} references unknown invoice")
+                if inv is None:  # reported by ref_problems
                     continue
-                if datetime_key(inv["issued_at"]) > datetime_key(pay["timestamp"]):
-                    problems.append(f"payment {pid} settles invoice {inv['invoice_id']} issued after the payment")
-                if inv["invoice_id"] in self.voided or inv["currency"] != pay["currency"]:
-                    problems.append(f"payment {pid} settles a cancelled or other-currency invoice {inv['invoice_id']}")
                 expected = self.conv(ref["amount_minor"], pay["currency"], inv["issued_at"])
                 credit = sum(r["credit_minor"] - r["debit_minor"] for r in rows
                              if r["account"] == "1200" and r["invoice_id"] == inv["invoice_id"])
@@ -252,7 +278,13 @@ def datetime_key(ts: str):
     return parse_ts(ts)
 
 
+RATE = re.compile(r"[0-9]+(\.[0-9]+)?")  # plain ASCII decimal, as the generator writes it (no sign, exponent, _)
+
+
 def _structure(ep: dict) -> list[str]:
+    error = _schema_error(ep.get("manifest"), _schema("manifest.schema.json"), "manifest")
+    if error:
+        return [error]  # the checks below index the manifest's fields
     problems = []
     if not isinstance(ep.get("task"), str) or not ep["task"].strip():
         problems.append("public task text must contain instructions")
@@ -266,6 +298,8 @@ def _structure(ep: dict) -> list[str]:
     ids = [r["row_id"] for r in t["ledger"]] + [d["doc_id"] for d in t["invoices"] + t["payments"]]
     if len(ids) != len(set(ids)):
         problems.append("duplicate row_id/doc_id")
+    if not all(isinstance(i, str) and i.strip() for i in ids):
+        problems.append("row_id/doc_id must be a non-empty string")
     for key, rows in (("invoice_id", t["invoices"]), ("payment_id", t["payments"]), ("fx_id", t["fx"])):
         if len({r[key] for r in rows}) != len(rows):
             problems.append(f"duplicate {key}")
@@ -277,6 +311,11 @@ def _structure(ep: dict) -> list[str]:
         rate_keys.add(key)
         if rate["fx_id"] != ":".join(key):
             problems.append(f"fx_id differs from date and currency pair: {rate['fx_id']}")
+        # every published rate, used or not: a reader must be able to convert with any of them; above 10^9 is no
+        # real currency pair and would exceed the conversion's decimal precision
+        value = rate.get("rate")
+        if not isinstance(value, str) or not RATE.fullmatch(value) or not 0 < Decimal(value) < 10 ** 9:
+            problems.append(f"fx rate {rate['fx_id']}: rate must be a positive decimal below 10^9")
     pol = ep["policy"]
     if (pol["base_currency"], pol["timezone"], pol["period"]["start"], pol["period"]["end"]) != \
             (m["base_currency"], m["timezone"], m["period_start"], m["period_end"]):
@@ -308,6 +347,8 @@ def _structure(ep: dict) -> list[str]:
                 not isinstance(refs, list)
                 or any(not isinstance(r, dict) or type(r.get("amount_minor")) is not int for r in refs))):
             problems.append(f"payment {p.get('payment_id')}: amount_minor must be an integer")
+        elif refs and any(not isinstance(r.get("invoice_id"), str) for r in refs):
+            problems.append(f"payment {p.get('payment_id')}: invoice_refs invoice_id must be a string")
     stamps = [(f"ledger row {r['row_id']}", r["timestamp"]) for r in t["ledger"]]
     stamps += [(f"payment {p['payment_id']}", p["timestamp"]) for p in t["payments"]]
     stamps += [(f"invoice {i['invoice_id']}", i[k]) for i in t["invoices"] for k in ("issued_at", "due_at")]
@@ -474,42 +515,56 @@ def _invoice_error(invoice: dict) -> str | None:
     return None
 
 
-@lru_cache(maxsize=1)
-def _truth_schema():
-    path = Path(__file__).resolve().parents[1] / "schemas/truth.schema.json"
+@lru_cache(maxsize=None)
+def _schema(name: str) -> dict:
+    path = Path(__file__).resolve().parents[1] / "schemas" / name
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _truth_error(value, schema, path="truth"):
-    """Check the keywords used in truth.schema.json, reporting the first invalid field."""
+def _schema_error(value, schema, path):
+    """Check the keywords used in truth.schema.json and manifest.schema.json, reporting the first invalid field.
+    An object field not in `properties` must match `additionalProperties`; without it, it is unexpected."""
     kind = schema.get("type")
     types = {"object": dict, "array": list, "string": str, "integer": int}
     if kind and type(value) is not types[kind]:
         return f"{path}: expected {kind}"
+    if "const" in schema and (type(value) is not type(schema["const"]) or value != schema["const"]):
+        return f"{path}: must be {schema['const']!r}"
     if "enum" in schema and value not in schema["enum"]:
         return f"{path}: invalid choice"
     if kind == "object":
-        fields = schema["properties"]
-        for name in schema["required"]:
+        for name in schema.get("required", ()):
             if name not in value:
                 return f"{path}.{name}: required"
         for name, item in value.items():
-            if name not in fields:
+            if "propertyNames" in schema:
+                error = _schema_error(name, schema["propertyNames"], f"{path} key {name!r}")
+                if error:
+                    return error
+            sub = schema.get("properties", {}).get(name, schema.get("additionalProperties", False))
+            if sub is False:
                 return f"{path}.{name}: unexpected field"
-            error = _truth_error(item, fields[name], f"{path}.{name}")
+            error = _schema_error(item, sub, f"{path}.{name}") if isinstance(sub, dict) else None
             if error:
                 return error
     if kind == "array":
         if len(value) < schema.get("minItems", 0):
             return f"{path}: empty list"
         for index, item in enumerate(value):
-            error = _truth_error(item, schema["items"], f"{path}[{index}]")
+            error = _schema_error(item, schema["items"], f"{path}[{index}]")
             if error:
                 return error
         if schema.get("uniqueItems") and len(set(value)) != len(value):
             return f"{path}: duplicate ID"
     if "pattern" in schema and not re.search(schema["pattern"], value):
         return f"{path}: invalid string"
+    if schema.get("format") == "date":
+        try:  # fromisoformat alone also takes the basic form 20250301
+            valid = re.fullmatch(r"\d{4}-\d{2}-\d{2}", value) and date.fromisoformat(value)
+        except ValueError:
+            valid = False
+        if not valid:
+            return f"{path}: invalid date"
     if "minimum" in schema and value < schema["minimum"]:
         return f"{path}: below minimum"
     return None
@@ -545,10 +600,15 @@ def verify_episode(ep: dict) -> list[str]:
         error = _invoice_error(invoice)
         if error:
             return [error]
-    error = _truth_error(ep.get("truth"), _truth_schema())
+    error = _schema_error(ep.get("truth"), _schema("truth.schema.json"), "truth")
     if error:
         return [error]
     problems = _structure(ep)
+    # the bookkeeping checks below assume a valid manifest, int amounts, string refs, offset-aware timestamps
+    # and convertible rates
+    if any(p.startswith(("manifest.", "manifest:", "manifest key")) or "must be an integer" in p
+           or "timestamp must be" in p or "fx rate " in p or "invoice_id must be" in p for p in problems):
+        return problems
     m, t = ep["manifest"], ep["tables"]
     if ep["truth"].get("episode_id") != m["episode_id"]:
         problems.append("truth episode_id differs from manifest")
