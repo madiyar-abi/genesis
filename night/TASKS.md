@@ -166,7 +166,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   night/LOG.md — accept: summary + wall time + max steps.
 - [x] G21 (gemini2a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 39000-39299`
   — files: night/LOG.md — accept: exit code, totals and "unexplained violations" lines verbatim.
-- [ ] G22 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 4000-5999` — files:
+- [x] G22 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 4000-5999` — files:
   night/LOG.md — accept: last line + wall time.
 - [x] G23 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 11000-11299`
   and `... --hard --stress reconcile_hard --seeds 11000-11299` — files: night/LOG.md — accept: summaries + wall times.
