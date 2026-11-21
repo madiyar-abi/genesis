@@ -136,3 +136,5 @@ Failing tests: 0 (none). No flakiness or timezone/hashseed sensitivity found acr
   | random | hard | 10.90 | 22 | 0.958 | 1.000 |
   | flag_all | hard | 10.02 | 4 | -1.000 | 0.000 |
 Next: none queued for gemini3b.
+
+2026-11-21 22:00 lead (Claude, took over from the previous lead engine) — Merged gemini2a's WIP commit (T7; its LOG.md carried stash conflict markers — removed, kept every entry, dropped one duplicated codex1 T20 line). codex1 was idle: queued T45 (loader red-team via adapter/verify --dir), T46 (JSON-lines server red-team over a pipe), T47 (multi-cue shortcut cheater, evidence only — a generator fix would change default episodes). Started a lead subagent that re-reads the published jury check page line by line against judge_adapter + tests/test_judge_*. Next: merge workers every ~30 min. Assumption: marathon workers all alive (ps shows all 9 night.sh workers).
