@@ -902,3 +902,33 @@ user 51.64
 sys 0.16
 ```
 `env -u AUDITENV_SECRET uv run python -m auditenv.check` exit 0 (ALL CHECKS PASSED in 56.6 s); `scripts/golden.py --check` 80/80 and `auditenv.verify --seeds 0-199` 600/600. Next: T24.
+
+2026-11-21 23:18 codex1 — T24. `env -u AUDITENV_SECRET PYTHONPATH=. uv run python -u /tmp/r18-codex1/t24.py` exited 0. Exported seeds 0–29 in each difficulty and drove the public `verify --dir` entry point after one file mutation at a time. It rejected 4,173/4,173 invalid mutations, with zero accepted before or after and no production changes. The FX mutations selected used rate cells whose last-digit change altered at least one rounded public conversion; for controls, changing an unused published rate does not contradict the books. All 60 unmodified exports and 60 unused-rate controls were accepted. The allocations were moved between distinct existing invoices of the same currency and entity, by editing a remittance reference or the receivables row in isolation.
+
+```text
+default affected_ids_swapped: checked=276, accepted=0
+default amount_off_by_one: checked=268, accepted=0
+default issue_type_relabelled: checked=402, accepted=0
+default last_fx_decimal_changed: checked=90, accepted=0
+default ledger_account_changed: checked=60, accepted=0
+default one_evidence_id_dropped: checked=922, accepted=0
+default original_control: checked=30, accepted=30
+default payment_ar_moved: checked=60, accepted=0
+default payment_reference_moved: checked=60, accepted=0
+default unused_fx_decimal_control: checked=30, accepted=30
+hard affected_ids_swapped: checked=265, accepted=0
+hard amount_off_by_one: checked=256, accepted=0
+hard issue_type_relabelled: checked=384, accepted=0
+hard last_fx_decimal_changed: checked=90, accepted=0
+hard ledger_account_changed: checked=60, accepted=0
+hard one_evidence_id_dropped: checked=860, accepted=0
+hard original_control: checked=30, accepted=30
+hard payment_ar_moved: checked=60, accepted=0
+hard payment_reference_moved: checked=60, accepted=0
+hard unused_fx_decimal_control: checked=30, accepted=30
+Total unexpected outcomes: 0
+real 45.59
+user 43.53
+sys 1.47
+```
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0 (ALL CHECKS PASSED in 55.0 s).
