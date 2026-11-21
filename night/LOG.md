@@ -652,3 +652,18 @@ Next: T53 (stress reconcile and reconcile_hard on seeds 7000-7299).
   Summary: reconcile_hard on 1200 hard episodes (seeds 7000-7299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 56, truncated 0 (32.2 s)
 Result: 0 imperfect, 0 truncated across 2,400 episodes. Max steps: 35 (default), 56 (hard).
 All assigned gemini1b tasks (T4, T5, T6, T40, T41, T42, T52, T53) complete.
+2026-11-21 22:45 gemini2a — T54: ran `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice under background load from `auditenv.fuzz --seeds 0-999 --hard`.
+- Background load: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard` (PID 16491, active throughout both check runs).
+- Check Run 1: exit code 0, wall time 73.00 s (check reported 72.9 s), last line: `ALL CHECKS PASSED in 72.9 s`
+- Check Run 2: exit code 0, wall time 84.05 s (check reported 83.9 s), last line: `ALL CHECKS PASSED in 83.9 s`
+- Timing failures: 0 (C18, clock, subprocess timeouts all passed cleanly on both runs).
+Next: T55.
+
+2026-11-21 22:50 gemini2a — T55: full unit test suite ran three times with different hash seeds and timezones on the current tip. All 3 runs passed with 0 failures:
+- Run 1: `PYTHONHASHSEED=1 TZ=UTC env -u AUDITENV_SECRET uv run python -m unittest discover -s tests -t .` -> exit 0, wall time 39.35 s (unittest 39.250s), `Ran 539 tests in 39.250s`, `OK`.
+- Run 2: `PYTHONHASHSEED=4242 TZ=Asia/Almaty env -u AUDITENV_SECRET uv run python -m unittest discover -s tests -t .` -> exit 0, wall time 40.89 s (unittest 40.801s), `Ran 539 tests in 40.801s`, `OK`.
+- Run 3: `PYTHONHASHSEED=random TZ=America/New_York env -u AUDITENV_SECRET uv run python -m unittest discover -s tests -t .` -> exit 0, wall time 42.78 s (unittest 42.685s), `Ran 539 tests in 42.685s`, `OK`.
+Failing tests: 0 (none). 539 tests passed cleanly across all three runs with zero flakiness or timezone/hashseed sensitivity.
+All assigned gemini2a tasks (T7, T8, T9, T54, T55) complete.
+
+
