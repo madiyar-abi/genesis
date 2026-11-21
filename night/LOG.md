@@ -3,3 +3,4 @@
 2026-11-21 23:42 lead — Reviewed ten-slide outline against the check output. Corrected slide 8 split counts. Confirmed slide 7 metrics, paired checks, demo figures and archived 20k configuration sweep. Team credits await the human submission owner.
 2026-11-21 23:43 lead — Baseline full check passed 560 tests, default fuzz passed 3,000 episodes, and reward search passed 11,000 mutations. Recorded the two coverage gaps in REVIEW.md. Checking whether independent verification can catch early refunds.
 2026-11-21 23:45 gemini2a — Verified committed trajectory files (tests.test_trajectory_files: 5 tests passed in 1.83s, 7 trajectory files verified for structure, schema, observation cleanliness, and deterministic action replay).
+2026-11-21 23:46 gemini2a — Verified public replay and runner execution (tests.test_run: 5 tests passed in 0.159s, oracle max reward on 50 seeds and trajectory format verified).
