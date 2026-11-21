@@ -2,6 +2,7 @@ name: check
 
 on:
   push:
+    branches: [main]   # agents push to night/* branches dozens of times per round: PRs cover them
   pull_request:
   workflow_dispatch:
   schedule:
