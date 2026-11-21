@@ -1994,3 +1994,14 @@ From the fresh clone, `/usr/bin/time -p env -u AUDITENV_SECRET uv run python -m 
 
 2026-11-22 03:54 gemini1a — G3 complete: `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999` (exit 0, wall time 29.9 s): 3000/3000 episodes valid; episodes with problems: 0. All assigned tasks (G1, G2, G3) complete. Next: check for any new tasks or idle. Assumptions: none.
 2026-11-22 03:54 gemini1b — G6 config sweep on cases 72000-74999: 3000 random configs (1155 hard) in 148.9 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 57; FUZZ PASSED (wall time 148.9 s). Tasks G4, G5, G6 all complete.
+2026-11-22 03:46 gemini2a — G7: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 37000-37299` exited 0 (wall time 199s, 12,600 episodes checked across 42 configs).
+  totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3044, e_fx_missing=0, f_inv_booked_before_issue=2553, f_pay_posted_before_doc=0, f_ar_before_booking=25, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5023, c_tie=3
+  unexplained violations: 25 (0 in clean configs)
+  Next: G8.
+2026-11-22 03:51 gemini2a — G8: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 37300-37599` exited 0 (wall time 233s, 12,600 episodes checked across 42 configs).
+  totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3100, e_fx_missing=0, f_inv_booked_before_issue=2625, f_pay_posted_before_doc=0, f_ar_before_booking=16, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5069, c_tie=0
+  unexplained violations: 16 (0 in clean configs)
+  Next: G9.
+2026-11-22 03:53 gemini2a — G9: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 38000-38199` exited 0 (wall time 99s).
+  Audited 8400 episodes across 42 configurations; 33113438 checks, 0 unexpected failures.
+  All gemini2a tasks (G7, G8, G9) complete.
