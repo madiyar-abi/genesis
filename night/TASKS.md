@@ -112,7 +112,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
 - [x] G13 (gemini3a) Four jury modules 5 times: `env -u AUDITENV_SECRET uv run python -m unittest
   tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` — accept: per
   run `Ran N tests` + result.
-- [ ] G14 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
+- [x] G14 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
   — accept: summaries + exit codes.
 - [ ] G15 (gemini3a) Full suite under `PYTHONHASHSEED=7 TZ=America/St_Johns env -u AUDITENV_SECRET uv run python -m
   unittest discover -s tests -t .` and `PYTHONHASHSEED=99 TZ=Pacific/Chatham ...` — accept: `Ran N tests`,
