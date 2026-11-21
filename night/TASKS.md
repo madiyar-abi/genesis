@@ -71,7 +71,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   change only the seed constant) — files: night/r21/scenarios_adapter_43000.py (if needed), night/LOG.md — accept:
   scenario × difficulty table of mean scores; any reconcile score below README's documented value or flag_all > 0
   called out.
-- [ ] Z3 (rb) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r21-rb/j<B>.json`
+- [x] Z3 (rb) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r21-rb/j<B>.json`
   for B in 24000, 25000, 26000, 27000 — files: night/LOG.md — accept: per run the policy table; call out any run
   where oracle F1 < 1, reconcile F1 < 1, or random/flag_all return > -0.5.
 

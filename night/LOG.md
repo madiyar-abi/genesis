@@ -107,3 +107,38 @@ All 40 exported episodes across all three splits are byte-for-byte identical to 
   mean returns 0.912–0.922 and D19/D20 default 0.959 are below the README jury_run mean 0.959 — expected: README's
   number is a 20-scenario default-difficulty mean on seeds 3001-3020; hard uses ~2x inspection steps at 0.002/step.
   Same pattern as round 20 (archive r20-LOG Z1); not a defect. Next: Z3 (jury_run on seed bases 24000-27000).
+2026-11-22 03:55 rb — Z3 done. `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r21-rb/j<B>.json`
+  for B in 24000, 25000, 26000, 27000: all exit 0; wall 3 s, 2 s, 2 s, 3 s. Policy tables verbatim:
+  --- B=24000 (seeds 24001-24020) ---
+  20 jury scenarios D01-D20 (seeds 24001-24020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.032   0.033
+  reconcile         1.000  1.000  1.000    0.961    20.4    23    0.033   0.035
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.029   0.031
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  --- B=25000 (seeds 25001-25020) ---
+  20 jury scenarios D01-D20 (seeds 25001-25020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.038   0.045
+  reconcile         1.000  1.000  1.000    0.960    21.1    23    0.033   0.038
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.030   0.031
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  --- B=26000 (seeds 26001-26020) ---
+  20 jury scenarios D01-D20 (seeds 26001-26020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.033   0.034
+  reconcile         1.000  1.000  1.000    0.961    20.7    24    0.034   0.037
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.030   0.031
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  --- B=27000 (seeds 27001-27020) ---
+  20 jury scenarios D01-D20 (seeds 27001-27020) through judge_adapter, closed mode, policies in their own process (oracle grader-side)
+  policy                P      R     F1   return   steps   max   time s   max s
+  random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.033   0.036
+  reconcile         1.000  1.000  1.000    0.960    21.1    25    0.034   0.036
+  flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.030   0.034
+  oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.006
+  Accept check: oracle F1 = 1.000 and reconcile F1 = 1.000 in all four runs; random_explorer returns -1.000/-1.000/
+  -0.903/-0.903 and flag_all -1.000 everywhere — none > -0.5, nothing to call out. Note: random_explorer -0.903 on
+  B=26000/27000 comes from fewer false positives (fp=38 vs flag_all's 600 across 20 episodes), so the FP penalty is
+  smaller; P/R/F1 still 0.000. Not a defect. JSON at /tmp/r21-rb/j{24000,25000,26000,27000}.json.
+  All rb tasks (Z1, Z2, Z3) done and pushed; no unchecked (rb) tasks remain — going IDLE.
