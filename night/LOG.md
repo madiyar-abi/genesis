@@ -2155,8 +2155,26 @@ All tasks for gemini2b in Round 21 finished.
   smaller; P/R/F1 still 0.000. Not a defect. JSON at /tmp/r21-rb/j{24000,25000,26000,27000}.json.
   All rb tasks (Z1, Z2, Z3) done and pushed; no unchecked (rb) tasks remain — going IDLE.
 2026-11-22 04:06 lead — Merged all worker branches (G1–G18, X1–X3, Y1–Y3, Z1–Z3 done). X1 text-only auditor F1 1.000 on 4,200 episodes, 0 disagreements. X3: 300 extreme configs valid with exact counts, >12 issues rejected with ValueError. X2: 1,335 clean-config violations; lead inspected the largest (D01 seed 41006, E0342, −500,336 KZT minor): a full refund debited to 2900 at the refund-date rate after the receipt credited it at the receipt-date rate. This follows the documented CONTRACT rule (refund Dr 2900 / Cr 1000 at payment-date rate); the document-currency credit is exactly 0 (chronology c_neg_credit = 0). Decision: no posting-rule change 13 h before freeze (would change policy text, every export and golden hashes); measure (X4) and document as a limitation in DESIGN §10 / README. Y3: README fixes by lead next (incl. real defect #13: closed-server command aborts in bash when GRADER_KEY is unset). Top-up 1 queued.
+2026-11-22 04:09 rb — Z4 reproduction of codex1 X3 and codex2 Y1 on this worktree (merged origin/night/2026-11-22-r21 at 91f6573).
+  Command 1: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` → exit 0, wall 10 s.
+  Summary verbatim: `Outcomes: {'valid': 300, 'rejected': 72, 'failure': 0}. Total: 372.`
+  All 300 valid configs show `reconcile F1=1.0`; empty findings F1=1.0 only on the 0-issue configs, 0.0 otherwise.
+  All 72 rejections are exactly `ValueError: at most 12 issues per episode` (counts 20/50 per type, interacting I1/I2=7
+  which expands to 14 findings, etc.). Max actions 72 (≤100 budget). No silent count mismatch, no other exception, no
+  budget overrun — identical to codex1's 03:55 X3 entry (theirs 19.2 s, mine 10 s; machine load differs).
+  Command 2: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` → exit 0, wall 2 s.
+  Reference seeds identical to Y1: dev [2000, 2002, 2003, 2004, 2009], hard [9100, 9105, 9109, 9112, 9119].
+  Table verbatim: all 10 variants (CSV columns shuffled, CRLF, CSV BOM, JSON BOM, JSONL BOM, No final newline,
+  Pretty JSON, Compact JSON, JSONL keys reversed, Combined) → Accepted 10 / Rejected 0 / Scores equal 10.
+  Final line verbatim: `Semantically equivalent rewrite discrepancies: 0` — matches codex2's 03:43 Y1 entry exactly.
+  Assumption: ran both scripts with defaults (no flags), as the task text specifies; full stdout kept at
+  /tmp/r21-rb/z4_extreme.out and /tmp/r21-rb/z4_jury_copy.out. Nothing to call out. No unchecked (rb) tasks remain — IDLE.
 2026-11-22 04:08 lead — README: first-read fixes (Y3 items 1–4, 6, 7, 9, 10, 12–14). #13 was a real defect: the closed-server command `AUDITENV_SECRET="${GRADER_KEY:?...}"` aborted in bash without GRADER_KEY although the server keys hidden episodes by default since round 19; now the plain command (verified: starts, warns about the key file, exit 0). Skipped #5 (mode key text already says eval hides the reward), #8 (export commands are labelled as re-export after a generator change), #11 (the README 199/200 sentence is per difficulty in its own table). check exit 0 50.7 s; sync_docs no drift.
 2026-11-22 04:08 lead — Correction to the previous entry: Y3 #11 was valid (README D01–D05 row gave 199/200 without saying it is the default count); now '199/200 default and 200/200 hard' per codex2's probe.
 2026-11-22 04:26 gemini2a — G21: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 39000-39299` exited 0 (12,600 episodes checked across 42 configs).
   totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3081, e_fx_missing=0, f_inv_booked_before_issue=2600, f_pay_posted_before_doc=0, f_ar_before_booking=21, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5037, c_tie=0
   unexplained violations: 21 (0 in clean configs)
+2026-11-22 04:19 gemini3a — G23 complete: stress fuzzing on seeds 11000-11299.
+  - default (reconcile): 1200 episodes (seeds 11000-11299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (7.3 s), exit code 0, wall time 8s.
+  - hard (reconcile_hard): 1200 hard episodes (seeds 11000-11299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (18.6 s), exit code 0, wall time 18s.
+2026-11-22 04:18 gemini3b — G24 complete: ran `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r21-gemini3b/c2.json` (exit 0, last line: "ALL CHECKS PASSED in 51.9 s"; 563 unit tests, 200/200 verifier, 20/20 paired, 50/50 hard verifier, 20/20 hard paired) then `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c2.json` (exit 0, last line: "All documentation tables match measured data."). Both exit codes 0; zero doc drift. All gemini3b tasks complete.
