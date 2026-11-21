@@ -81,8 +81,11 @@ def load_episode(path: str) -> dict:
     pub_dir = os.path.join(path, "public")
     grd_dir = os.path.join(path, "grader")
 
-    with open(os.path.join(pub_dir, "task.txt"), encoding="utf-8", newline="") as fh:
-        task = fh.read()
+    task_path = os.path.join(pub_dir, "task.txt")
+    task = ""  # a hand-built grading fixture may omit it; verify reports a blank task
+    if os.path.exists(task_path):
+        with open(task_path, encoding="utf-8", newline="") as fh:
+            task = fh.read()
     manifest = _read_json(os.path.join(pub_dir, "manifest.json"))
     policy = _read_json(os.path.join(pub_dir, "policy.json"))
 
@@ -96,15 +99,17 @@ def load_episode(path: str) -> dict:
     invoices = _read_jsonl(os.path.join(pub_dir, "invoices.jsonl"))
     payments = _read_jsonl(os.path.join(pub_dir, "payments.jsonl"))
 
-    fx = _read_csv(
-        os.path.join(pub_dir, "fx.csv"),
-        FX_FIELDS,
-        set(),  # no int fields in fx
-        set(),  # no nullable fields in fx
-    )
+    fx_path = os.path.join(pub_dir, "fx.csv")
+    with open(fx_path, encoding="utf-8", newline="") as fh:
+        has_id = "fx_id" in next(csv.reader(fh), [])
+    fx = _read_csv(fx_path, FX_FIELDS if has_id else tuple(f for f in FX_FIELDS if f != "fx_id"),
+                   set(), set())  # no int or nullable fields in fx
+    for r in fx:  # the case's fx.csv has no fx_id column: the id is its key date:source:target (CONTRACT §2)
+        r.setdefault("fx_id", f"{r['date']}:{r['source_currency']}:{r['target_currency']}")
 
     truth = _read_json(os.path.join(grd_dir, "truth.json"))
-    provenance = _read_json(os.path.join(grd_dir, "provenance.json"))
+    prov_path = os.path.join(grd_dir, "provenance.json")
+    provenance = _read_json(prov_path) if os.path.exists(prov_path) else {"injections": []}  # optional for grading
 
     tables = {
         "ledger": ledger,

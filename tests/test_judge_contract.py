@@ -314,6 +314,37 @@ class JudgeContractTest(unittest.TestCase):
                 self.assertEqual({k: score({**f, **changed})[k] for k in ("tp", "fp", "fn")},
                                  {"tp": 0, "fp": 1, "fn": 1})
 
+    def test_minimal_fixture_without_task_provenance_or_fx_id(self):
+        """A grading fixture built from the definitions' file list only: no task.txt, no provenance.json, and the
+        case's fx.csv columns (date, source_currency, target_currency, rate)."""
+        fixture = os.path.join(self.tmp, "minimal")
+        shutil.copytree(self.e_dir, fixture)
+        os.remove(os.path.join(fixture, "public", "task.txt"))
+        os.remove(os.path.join(fixture, "grader", "provenance.json"))
+        fx_path = os.path.join(fixture, "public", "fx.csv")
+        with open(fx_path, encoding="utf-8", newline="") as fh:
+            lines = fh.read().splitlines()
+        with open(fx_path, "w", encoding="utf-8", newline="") as fh:
+            fh.write("\n".join(line.split(",", 1)[1] for line in lines) + "\n")
+        result = ja.score_episode(fixture, oracle_findings(self.e), 10)
+        self.assertEqual((result["tp"], result["fp"], result["fn"]), (1, 0, 0))
+        self.assertEqual(load_episode(fixture)["tables"]["fx"], self.e["tables"]["fx"])
+
+    def test_generate_warns_without_the_secret(self):
+        import contextlib
+        import io
+        from unittest import mock
+        ja._WARNED = False
+        err = io.StringIO()
+        with mock.patch.dict(os.environ, {"AUDITENV_SECRET": ""}), contextlib.redirect_stderr(err):
+            ja.generate_episode(3, {}, os.path.join(self.tmp, "warn"))
+        self.assertIn("AUDITENV_SECRET", err.getvalue())
+        ja._WARNED = False
+        err = io.StringIO()
+        with mock.patch.dict(os.environ, {"AUDITENV_SECRET": "k"}), contextlib.redirect_stderr(err):
+            ja.generate_episode(3, {}, os.path.join(self.tmp, "keyed"))
+        self.assertEqual(err.getvalue(), "")
+
     def test_score_episode(self):
         good = ja.score_episode(self.e_dir, oracle_findings(self.e), 10)
         self.assertEqual({k: good[k] for k in ("tp", "fp", "fn")}, {"tp": 1, "fp": 0, "fn": 0})

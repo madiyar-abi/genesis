@@ -183,6 +183,11 @@ The jury's single connection point ([check definitions](https://genesis-exe.com/
 container); it imports `auditenv` and needs nothing else. The adapter only translates names and shapes; the
 environment, matcher and reward are the ones described above.
 
+**Set `AUDITENV_SECRET` (any private string) in the jury process that calls `generate_episode`**, and never in the
+policy's process. Without it `episode_id` is keyed by a public constant, so a policy can recover the seed of a hidden
+episode by enumeration and regenerate its truth (`generate_episode` prints a warning on stderr). Loading, `reset` and
+`score_episode` read the files and need no key.
+
 ```python
 import os, tempfile
 import judge_adapter as ja
@@ -237,7 +242,7 @@ Block 2 scenarios through the generator's config (`auditenv/jury.py`; the jury c
 
 | scenarios | config |
 |---|---|
-| D01–D05 clean | `{"errors": {}, "interacting": {"I1": 0, "I2": 0}, "ensure_distractors": true}` — guarantees an invoice paid in two parts (D02) and a refunded overpayment (D03); equal invoice totals (D04), unidentified receipts, foreign currencies and records on the period's first and last day (D05) are present anyway |
+| D01–D05 clean | `{"errors": {}, "interacting": {"I1": 0, "I2": 0}, "ensure_distractors": true}` — guarantees an invoice paid in two parts (D02) and a refunded overpayment (D03); equal invoice totals (D04), unidentified receipts and records on the period's first and last day in company time (D05) are present anyway (200/200 on seeds 0–199, default and hard); foreign-currency documents in 199/200 (a company whose entities all bill in the base currency has none) |
 | D06–D08 duplicate invoice | `{"errors": {"duplicate_invoice": 1}, "interacting": {"I1": 0, "I2": 0}}` |
 | D09 missing allocation | `{"errors": {"payment_allocation": 1}, "interacting": {"I1": 0, "I2": 0}, "allocation": "missing"}` |
 | D10 partial allocation | the same with `"allocation": "partial"` |
@@ -254,7 +259,9 @@ and `changes`, each `{journal, before, after}` with the full ledger rows before 
 `inv:<invoice_id>`, `pay:<payment_id>`), so the books before the error can be rebuilt and checked independently
 (`auditenv/verify.py` does exactly that). For the paired checks rename `row_id`, `doc_id`, `invoice_id`,
 `payment_id`, `entity_id` consistently, including `invoice_refs`, truth and these journal keys; `fx_id` is the
-key `date:source:target` and stays.
+key `date:source:target` and stays. Evidence ids share one namespace (`row_id`, `doc_id`, `fx_id`), so keep the new
+`row_id` and `doc_id` values distinct from each other. For grading only, `task.txt` and `provenance.json` may be
+absent and `fx.csv` may omit the `fx_id` column (it is then derived as `date:source:target`).
 
 Run the jury's four blocks locally: `uv run python -m unittest tests.test_judge_contract tests.test_judge_reward
 tests.test_judge_scenarios tests.test_judge_paired` (C01–C20; Block 3 rows 1–20 and M01–M12; D01–D20; P01–P20).

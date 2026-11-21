@@ -209,7 +209,7 @@ class AuditEnv:
                 return {"value": calculator.evaluate(expr)}
             except calculator.CalculatorError as e:
                 raise ToolError("calc_error", str(e)[:100]) from None
-        raise ToolError("unknown_action", "unknown action type; see tools in the first observation")
+        raise ToolError("unknown_action", "unknown action; use list_records, get_record, get_document, calculator or submit")
 
     def _table(self, table):
         if not isinstance(table, str) or table not in TABLES:

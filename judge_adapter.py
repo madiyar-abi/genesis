@@ -8,22 +8,26 @@ repository root (the container's WORKDIR, /app), for example:
 print(env.reset(0, {'mode': 'closed', 'episode_dir': '/tmp/ep7'})[0]['remaining_steps'])"
 
 Grader side only (the jury process): `generate_episode`, `score_episode`, episode paths, seeds, truth and provenance.
-A policy runs in its own process and receives only what `reset` and `step` return.
+A policy runs in its own process and receives only what `reset` and `step` return. Set `AUDITENV_SECRET` in the jury
+process that generates hidden episodes: without it `episode_id` is keyed by a public constant and a policy can
+recover the seed and regenerate the truth (a warning is printed on stderr).
 """
 
 from __future__ import annotations
 
 import json
 import os
+import sys
 
 from auditenv.env import AuditEnv
 from auditenv.export import export_episode
-from auditenv.generator import generate
+from auditenv.generator import generate, secret
 from auditenv.load import load_episode
 from auditenv.matcher import grade, public_ids, tolerance_of
 
 ACTIONS = ("list_records", "get_record", "get_document", "calculator", "submit")
 LIMIT_KEYS = ("max_steps", "time_limit_s")  # the only team_config keys that apply to a loaded episode
+_WARNED = False
 GRADER_LOG: list[dict] = []  # grader-side journal of score_episode; also appended to $AUDITENV_GRADER_LOG if set
 
 
@@ -31,6 +35,12 @@ def generate_episode(seed: int, config: dict, output_dir: str) -> None:
     """Write one episode into `output_dir`: public/ (task.txt, manifest.json, ledger.csv, invoices.jsonl,
     payments.jsonl, fx.csv, policy.json) and grader/ (truth.json, provenance.json). `config` is the generator
     config of CONTRACT §4 (errors, interacting, n_invoices, distractors, difficulty, ...)."""
+    global _WARNED
+    if not secret() and not _WARNED:
+        _WARNED = True
+        print("judge_adapter: warning: AUDITENV_SECRET is not set, so generated episodes are public: a policy can "
+              "recover the seed from episode_id and regenerate the truth. Set it in the jury process that calls "
+              "generate_episode (never in the policy's process).", file=sys.stderr, flush=True)
     export_episode(generate(seed, config or None), output_dir)
 
 
