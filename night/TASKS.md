@@ -35,6 +35,6 @@ Use Python 3.11 via uv. For evidence tasks append measured counts and any mismat
 - [ ] gemini3b-4 (gemini3b) Verify truth identity and manifests — files: night/LOG.md — accept: `uv run python -m unittest tests.test_truth_identity tests.test_manifest_counts` exits zero and count recorded.
 - [ ] rb-3 (rb) Verify baseline simple behaviors — files: night/LOG.md — accept: `uv run python -m unittest tests.test_baselines_simple` exits zero and count recorded.
 - [ ] rb-4 (rb) Verify eval diagnostics and metrics — files: night/LOG.md — accept: `uv run python -m unittest tests.test_eval_diagnostics tests.test_metrics` exits zero and count recorded.
-- [ ] R (lead) Review results, closed-server documentation and SPEC acceptance — files: README.md, docs/CONTRACT.md, REVIEW.md, HANDOFF.md — accept: full check, fuzz, reward search, miner and docs sync verified.
+- [x] R (lead) Review results, closed-server documentation and SPEC acceptance — files: README.md, docs/CONTRACT.md, REVIEW.md, HANDOFF.md — accept: full check, fuzz, reward search, miner and docs sync verified.
 - [x] D (lead) Verify numbered recording script against actual demo — files: docs/DEMO.md — accept: timed demo fits 2–3 minute script.
 - [x] P (lead) Verify slide outline and numbers — files: docs/PITCH.md — accept: slide facts match current code and measured results.
