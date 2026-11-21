@@ -318,7 +318,7 @@ Block 2 scenarios through the generator's config (`auditenv/jury.py`; the jury c
 
 | scenarios | config |
 |---|---|
-| D01–D05 clean | `{"errors": {}, "interacting": {"I1": 0, "I2": 0}, "ensure_distractors": true}` — adds an invoice paid in two parts (D02) and a refunded overpayment (D03) when the company has suitable full payments (with this config both appeared on all 200 seeds 0–199, default and hard); equal invoice totals (D04), unidentified receipts and records on the period's first and last day in company time (D05) are present anyway (200/200 on seeds 0–199, default and hard); foreign-currency documents in 199/200 (a company whose entities all bill in the base currency has none) |
+| D01–D05 clean | `{"errors": {}, "interacting": {"I1": 0, "I2": 0}, "ensure_distractors": true}` — adds an invoice paid in two parts (D02) and a refunded overpayment (D03) when the company has suitable full payments (with this config both appeared on all 200 seeds 0–199, default and hard); equal invoice totals (D04), unidentified receipts and records on the period's first and last day in company time (D05) are present anyway (200/200 on seeds 0–199, default and hard); foreign-currency documents in 199/200 default and 200/200 hard companies (a company whose entities all bill in the base currency has none) |
 | D06–D08 duplicate invoice | `{"errors": {"duplicate_invoice": 1}, "interacting": {"I1": 0, "I2": 0}}` |
 | D09 missing allocation | `{"errors": {"payment_allocation": 1}, "interacting": {"I1": 0, "I2": 0}, "allocation": "missing"}` |
 | D10 partial allocation | the same with `"allocation": "partial"` |
