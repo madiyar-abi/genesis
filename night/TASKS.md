@@ -105,7 +105,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   accept: per split the diff exit code; any differing file named.
 - [x] G11 (gemini2b) `uv run python scripts/golden.py --check` and `uv run python scripts/mutate_reward.py` —
   accept: both summary lines and exit codes.
-- [ ] G12 (gemini2b) `uv run python scripts/shortcut_miner.py --seeds 5000-5999 --report-only` and the same with
+- [x] G12 (gemini2b) `uv run python scripts/shortcut_miner.py --seeds 5000-5999 --report-only` and the same with
   `--hard` — accept: printed tables; any value with precision > 0.5 that is NOT listed in docs/DESIGN.md §10 called out.
 
 ## gemini3a — repeatability (evidence only, files: night/LOG.md)

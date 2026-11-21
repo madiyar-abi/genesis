@@ -43,3 +43,26 @@ All 40 exported episodes across all three splits are byte-for-byte identical to 
   - auditenv.attack: PASSED, 20 seeds evaluated (5 clean, 15 dirty), 11,000 mutations tested across 10 families, 0 violations detected, elapsed 0.360 s, exit 0, wall time 0s.
   - scripts/sensitivity.py: PASSED, evaluated dev (10 episodes) and hard (20 episodes) across varied step cost (0.001, 0.002, 0.005) and amount tolerance (0, 1, 100 units). Ranking unchanged across all settings: dev (oracle > reconcile > naive_reconcile > random > flag_all), hard (oracle > reconcile_hard > reconcile > naive_reconcile > random > flag_all). Re-grade with default parameters reproduced every env reward exactly in 2.1 s, exit 0, wall time 3s. Next: G15.
 2026-11-22 03:42 gemini3b — G17 complete: ran `yes '' | env -u AUDITENV_SECRET uv run python -m auditenv.demo` (exit 0, wall time 0.13s). Quoted final score lines: `terminal reward 0.958 = clip(2*F1 - 1 - 0.002*21 steps)   P=1.00 R=1.00 F1=1.00`; section 4 rewards: oracle 1.000, reconcile 0.958, silence -1.000, repeated twice 0.333, clean silence 1.000, clean reconcile 0.958; section 5 closed run: `policy side: 22 steps, rewards seen = [0.0], final info = {}`, `grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0`. Compared with docs/DEMO.md: all numbers match exactly (326 ledger rows, 69 invoices, 100 budget steps; 21 inspect + 1 submit step; return 0.958; FX error 286 cents / $2.86, allocation error 351,331 cents / $3,513.31; oracle 1, repeated 0.333, silence -1; 22 actions, empty info, TP 4 FP 0 FN 0, return 0.958). Zero differences found. Next: G18.
+2026-11-22 03:55 gemini2b — G12 complete: ran `scripts/shortcut_miner.py --seeds 5000-5999 --report-only` (default, 32.7s, exit 0) and with `--hard` (42.1s, exit 0).
+Default mode: 16 flagged values (precision > 0.5):
+## Max precision per issue type (default)
+| type | affected max P | evidence max P | flagged (aff/ev) |
+|---|---|---|---|
+| duplicate_invoice | 0.997 | 0.997 | 2/2 |
+| payment_allocation | 0.981 | 0.981 | 8/1 |
+| fx_error | 0.714 | 0.320 | 3/0 |
+| period_cutoff | 0.460 | 0.460 | 0/0 |
+All 16 flagged values are consistent with docs/DESIGN.md §10 (e.g., duplicate count=2 at 0.997, 2900 amount_count>=4 at 0.981, 2900 end-0 at 0.804, 7900 end-0 at 0.577, fx_error end-0 at 0.714).
+
+Hard mode: 13 flagged values (precision > 0.5):
+## Max precision per issue type (hard)
+| type | affected max P | evidence max P | flagged (aff/ev) |
+|---|---|---|---|
+| duplicate_invoice | 0.404 | 0.404 | 0/0 |
+| payment_allocation | 1.000 | 0.840 | 9/2 |
+| fx_error | 0.668 | 0.303 | 2/0 |
+| period_cutoff | 0.454 | 0.454 | 0/0 |
+Values with precision > 0.5 called out:
+- `ledger | amount_digits@acct2900 | 10`: precision 1.000 (support 32, pos 32) for affected and 0.812 (support 32, pos 26) for evidence. This discrete 10-digit bucket (amounts >= $10,000,000 minor units) has support 32 on seeds 5000-5999, which exceeds the miner support threshold (>= 30). docs/DESIGN.md §10 noted "11 in hard mode" on seeds 0-999 (where this 10-digit bucket fell below 30 support) and noted "a large 2900 amount at payment_allocation (0.75-0.77)".
+All other 11 values match the documented hard-mode cues in DESIGN §10 (2900 amount_count>=4 at 0.840, 2900 end-0 at 0.765, 2900 9-digits at 0.730, 2900 6-digits at 0.562, fx_error 2900 end-0 at 0.668, fx_error 7900 end-0 at 0.551).
+All tasks for gemini2b in Round 21 finished.
