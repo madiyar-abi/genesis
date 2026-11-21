@@ -258,6 +258,21 @@ class JudgeContractTest(unittest.TestCase):
             for issue in ep["truth"]["issues"]:
                 self.assertNotIn(issue["issue_id"], text)
 
+    def test_rejected_episode_leaves_the_open_one(self):
+        env, _, _ = self.open(self.e_dir)
+        env.step(act("calculator", expression="1"))
+        bad = os.path.join(self.tmp, "bad-policy")
+        shutil.copytree(self.c_dir, bad)
+        with open(os.path.join(bad, "public", "policy.json"), encoding="utf-8") as fh:
+            policy = json.load(fh)
+        policy["findings"]["tolerance_minor"] = -1
+        with open(os.path.join(bad, "public", "policy.json"), "w", encoding="utf-8") as fh:
+            json.dump(policy, fh)
+        with self.assertRaises(ValueError):
+            env.reset(0, {"mode": "closed", "episode_dir": bad, "team_config": {}})
+        obs = env.step(act("get_record", table="ledger", id=self.e["tables"]["ledger"][0]["row_id"]))[0]
+        self.assertEqual((obs["remaining_steps"], obs["result"]), (98, self.e["tables"]["ledger"][0]))
+
     def test_reset_restarts_the_same_episode(self):
         env, first, _ = self.open(self.e_dir)
         env.step(act("calculator", expression="1"))

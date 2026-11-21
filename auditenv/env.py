@@ -89,6 +89,7 @@ class AuditEnv:
         return self._open(copy.deepcopy(episode), _limits(dict(config or {})), abandon_open)
 
     def _open(self, ep: dict, cfg: dict, abandon_open: bool):
+        tolerance = tolerance_of(ep["policy"])  # a rejected policy leaves the current episode as it was
         if abandon_open:
             self.abandon()
         self._ep = ep
@@ -98,7 +99,7 @@ class AuditEnv:
         self._docs = {d["doc_id"]: ("invoice", d) for d in t["invoices"]}
         self._docs.update({d["doc_id"]: ("payment", d) for d in t["payments"]})
         self._known_ids = public_ids(t)
-        self._tolerance = tolerance_of(self._ep["policy"])
+        self._tolerance = tolerance
         self._steps = 0
         self._done = False
         self._terminated = self._truncated = False

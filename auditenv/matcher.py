@@ -30,7 +30,7 @@ def public_ids(tables: dict) -> set[str]:
 
 def tolerance_of(policy: dict) -> int:
     """The published amount tolerance in minor units (policy `findings.tolerance_minor`, default 0)."""
-    tol = policy["findings"].get("tolerance_minor", 0)
+    tol = (policy.get("findings") or {}).get("tolerance_minor", 0)  # absent = exact
     if isinstance(tol, bool) or not isinstance(tol, int) or tol < 0:
         raise ValueError("policy findings.tolerance_minor must be a non-negative int")
     return tol
