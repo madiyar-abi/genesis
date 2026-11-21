@@ -172,3 +172,10 @@ Differing files: none.
     default/default seed=33060 ids=['BNK-916419', 'INV-802246', 'GL-003665'] ar credit 2026-07-03T17:45:00+00:00 booking 2026-07-04T20:25:00+00:00
     hard/hard seed=33263 ids=['BNK-734657', '2609-638480', 'R469'] ar credit 2026-09-01T12:20:00+01:00 booking 2026-09-02T17:58:00+01:00
     D14/default seed=33011 ids=['RCPT0856798', 'F0453837', 'GL-003501'] ar credit 2026-05-04T14:57:00-05:00 booking 2026-05-04T19:37:00-05:00
+2026-11-22 01:31 gemini1b — G26 complete (chronology and causality check on seeds 34000-34299).
+Command: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 34000-34299`
+Exit code: 0, wall time: 81.31 s
+Totals line:
+totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3078, e_fx_missing=0, f_inv_booked_before_issue=2589, f_pay_posted_before_doc=0, f_ar_before_booking=13, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5036, c_tie=0
+Unexplained violations line:
+unexplained violations: 13 (0 in clean configs)
