@@ -99,3 +99,36 @@ All assigned gemini3a tasks (T13, T14, T15) complete.
 Problems: 0 problems found across 6,000 episodes (default + hard).
 Next: T2 (config fuzz sweep: 3000 configs starting at 40000).
 2026-11-21 21:55 gemini3b — T17: Other Python versions (3.12, 3.13) in fresh clone. Command `env -u AUDITENV_SECRET uv run --python 3.12 python -m auditenv.check` exited 2 in 9.17s; last line: 'error: The requested interpreter resolved to Python 3.12.12, which is incompatible with the project\'s Python requirement: `==3.11.*` (from `project.requires-python`)'. Command `env -u AUDITENV_SECRET uv run --python 3.13 python -m auditenv.check` exited 2 in 0.04s; last line: 'error: The requested interpreter resolved to Python 3.13.9, which is incompatible with the project\'s Python requirement: `==3.11.*` (from `project.requires-python`)'. Verified with `--no-project` that the codebase itself is fully compatible with both: all 521 unit tests and all gates pass cleanly on Python 3.12.12 (113.3s, exit 0, 'ALL CHECKS PASSED in 113.3 s') and Python 3.13.9 (111.3s, exit 0, 'ALL CHECKS PASSED in 111.3 s'). Removed worktree. Next: T18.
+
+2026-11-21 21:59 gemini3b — T18: Verified Makefile targets.
+- `make -n fuzz stress attack miner sensitivity bench chart`: exit code 0.
+  Output:
+  uv run python -m auditenv.fuzz --seeds 0-999
+  uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299
+  uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 0-299
+  uv run python -m auditenv.attack
+  uv run python scripts/shortcut_miner.py --report-only
+  uv run python scripts/sensitivity.py
+  uv run python scripts/bench.py
+  uv run python -m auditenv.check --json /tmp/auditenv-metrics.json && uv run python scripts/chart.py
+- `env -u AUDITENV_SECRET make sensitivity`: exit code 0, wall time 2.57 s.
+  Last lines:
+  Ranking unchanged across all settings: oracle > reconcile_hard > reconcile > naive_reconcile > random > flag_all.
+  (re-grade with default parameters reproduced every env reward exactly; tolerances are fixed minor units: abs(claimed - expected) <= 0, 1 or 100; 2.5 s)
+- `env -u AUDITENV_SECRET make bench`: exit code 0, wall time 12.70 s.
+  Last lines:
+  | Policy | Split | Time (ms) | Steps | Return | F1 |
+  |---|---|---|---|---|---|
+  | oracle | dev | 4.04 | 1 | 1.000 | 1.000 |
+  | reconcile_hard | dev | 7.27 | 21 | 0.960 | 1.000 |
+  | reconcile | dev | 7.10 | 21 | 0.960 | 1.000 |
+  | naive_reconcile | dev | 7.00 | 17 | -1.000 | 0.000 |
+  | random | dev | 7.85 | 35 | 0.932 | 1.000 |
+  | flag_all | dev | 4.30 | 4 | -1.000 | 0.000 |
+  | oracle | hard | 9.57 | 1 | 1.000 | 1.000 |
+  | reconcile_hard | hard | 17.25 | 37 | 0.928 | 1.000 |
+  | reconcile | hard | 16.02 | 37 | 0.928 | 1.000 |
+  | naive_reconcile | hard | 16.42 | 29 | -1.000 | 0.000 |
+  | random | hard | 10.90 | 22 | 0.958 | 1.000 |
+  | flag_all | hard | 10.02 | 4 | -1.000 | 0.000 |
+Next: none queued for gemini3b.
