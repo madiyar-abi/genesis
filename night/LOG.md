@@ -394,3 +394,131 @@ Per row (row → test → verdict + reason):
 | 5 README snippets "3 of 3" | test_readme_snippets.py:42 test_readme_python_snippets | partly | executes every extracted ```python snippet (currently 3) and checks the reward range only for the snippet under heading "Using the environment"; asserts len ≥ 2, not exactly 3, and "the first" is by heading, not position. Claim is true today (3 blocks in README) but the count is measured, not asserted |
 | 5 Trajectory logs | test_trajectory_files.py:26/:47/:108 + CaseTrajectoriesTest:132/:153 | yes | exact 7 keys, trajectory schema, 10 episodes/file, consecutive steps, zero intermediate reward, terminal last step, no truth markers; full action replay compares every obs/reward/flag; all 7 files + trajectories.jsonl regenerate byte-for-byte; case file = concatenation of the two named parts, 20 episodes, 10 hard |
 Summary: 23 yes, 2 partly, 0 no. The two "partly" rows (Reward mutation testing; README run steps) are still backed by their cited commands — the gap is only that the cited unit test asserts less than the row's measured-result text. No row cites a missing or misnamed test. Assumption: "25 rows spread over all blocks" satisfied with 8 jury-definition rows + 5/4/4/2/2 rows from blocks 1–5.
+## Z4 (rb) — hand-driven `auditenv.server` stdio session — 2026-11-22 02:19
+
+The six requests the task names (reset, list_records, get_record, a malformed line, submit, one step after
+submit) plus `close`, piped to the server's stdin. Public mode: `AUDITENV_SECRET` unset (public key → a
+deterministic episode), eval, seed 2001, `errors.fx_error=1`, `interacting.I1=I2=0`. Two runs of the same input
+gave byte-identical stdout (`cmp` exit 0), so every id below is reproducible; the `get_record` id and the
+`episode_id` in the submit are the ones the server itself returned in a reset+list probe with the same seed
+(`ep_3cf976410457`, first ledger row `GL-000321`).
+
+```bash
+env -u AUDITENV_SECRET uv run python -m auditenv.server \
+  < /tmp/r20-rb/z4b/session.in > /tmp/r20-rb/z4b/session3.out 2> /tmp/r20-rb/z4b/session2.err
+```
+
+Exit code **0** · wall time **0.035 s** (`date +%s.%N` around the process) · stderr **0 bytes** ·
+**6 response lines for 7 request lines**: `close` returns nothing.
+
+### Request/response pairs, verbatim
+
+**1. `reset`** — first observation + reset info
+
+request:
+```json
+{"cmd": "reset", "seed": 2001, "config": {"mode": "eval", "errors": {"fx_error": 1}, "interacting": {"I1": 0, "I2": 0}}}
+```
+response:
+```json
+{"observation": {"task": "You are auditing one company for one reporting period. Find misstatements in the ledger caused by: duplicate_invoice (the same invoice entered twice: same entity, currency and identical line items), payment_allocation (a payment's remittance says it pays an invoice but the ledger credits less to that invoice's receivable), fx_error (a foreign-currency amount converted with a rate of the wrong date), period_cutoff (an invoice issued outside the period booked in this period). The books may be clean. Split payments, partial payments, refunds, unidentified receipts and recurring equal amounts can be legitimate. Use the tools to read records (max 50 rows per page) and submit findings once; every action costs a step (max 100 including submit).", "manifest": {"schema_version": "1.0", "generator_version": "1.0.0", "episode_id": "ep_3cf976410457", "base_currency": "KZT", "period_start": "2026-05-01", "period_end": "2026-05-31", "timezone": "+05:30", "counts": {"ledger": 240, "invoices": 37, "payments": 18, "fx": 318, "documents": 55}, "rounding": "ROUND_HALF_UP", "amount_exponents": {"EUR": 2, "JPY": 0, "KZT": 2, "USD": 2}}, "policy": {"base_currency": "KZT", "timezone": "+05:30", "period": {"start": "2026-05-01", "end": "2026-05-31", "rule": "a record belongs to the period iff its timestamp converted to the company timezone has a date in [start, end] (inclusive)"}, "fx": {"rate_date": "transaction date in the company timezone (invoice: issued_at; payment: timestamp)", "direction": "rate = units of target_currency per 1 unit of source_currency (major units)", "conversion": "base_minor = round_half_up(amount_minor / 10^exp_src * rate * 10^exp_base)"}, "rounding": "ROUND_HALF_UP to integer minor units", "ledger": {"currency": "every ledger row is in base_currency", "accounts": {"1000": "Cash", "1200": "Accounts receivable", "2900": "Unapplied cash", "4000": "Revenue", "6100": "Rent", "6200": "Payroll", "6300": "Software", "6400": "Bank fees", "7900": "FX gain/loss"}, "invoice": "Dr 1200 / Cr 4000 at the invoice issue-date rate, only for invoices issued in the period", "payment": "Dr 1000 at the payment-date rate; Cr 1200 per invoice_ref at that invoice's issue-date rate; remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; difference to 7900; negative amount = refund (Dr 2900 / Cr 1000)", "expense": "Dr 6xxx / Cr 1000"}, "findings": {"amount": "misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the AR debit of the later-issued copy; fx_error: abs(posted - correct); period_cutoff: the AR debit posted; payment_allocation: expected AR credit for the ref - AR credit posted", "tolerance": "abs(claimed - expected) <= tolerance_minor; tolerance_minor is 0, so the amount must be exact", "tolerance_minor": 0, "affected_ids": {"duplicate_invoice": "[original_invoice_id, duplicate_invoice_id]", "payment_allocation": "[invoice_id, payment_id]", "fx_error": "[invoice_id] or [payment_id]", "period_cutoff": "[invoice_id]"}, "evidence": "doc_id / row_id / fx_id values; must include at least one full acceptable evidence set: duplicate_invoice: both invoice docs + one AR (or revenue) row of each invoice, the original and the later copy; payment_allocation: payment doc + invoice doc + the AR credit row of that invoice in the payment (or, if nothing was allocated to it, the 2900 row) + the invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row + the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row"}}, "tools": [{"type": "list_records", "params": {"table": "ledger|invoices|payments|fx", "cursor": "null|str", "limit": "int<=50"}, "returns": "{rows, next_cursor, total}; invoice rows omit line_items"}, {"type": "get_record", "params": {"table": "ledger|invoices|payments|fx", "id": "str"}, "returns": "{record}"}, {"type": "get_document", "params": {"doc_id": "str"}, "returns": "{kind, document}"}, {"type": "calculator", "params": {"expression": "str: + - * / ( ) and decimals only"}, "returns": "{value}"}, {"type": "submit", "params": {"findings": "{episode_id, findings:[...]}"}, "returns": "ends the episode"}], "steps_remaining": 100}, "info": {"episode_id": "ep_3cf976410457", "mode": "eval", "max_steps": 100}}
+```
+
+**2. `list_records`** — `limit: 3` honoured, stable cursor
+
+request:
+```json
+{"cmd": "step", "action": {"type": "list_records", "table": "ledger", "cursor": null, "limit": 3}}
+```
+response:
+```json
+{"observation": {"step": 1, "steps_remaining": 99, "result": {"rows": [{"row_id": "GL-000321", "timestamp": "2026-05-01T08:51:00+05:30", "account": "4000", "debit_minor": 0, "credit_minor": 63879463, "currency": "KZT", "entity_id": "E2159", "invoice_id": "F0173607", "payment_id": null}, {"row_id": "GL-000322", "timestamp": "2026-05-01T08:51:00+05:30", "account": "1200", "debit_minor": 63879463, "credit_minor": 0, "currency": "KZT", "entity_id": "E2159", "invoice_id": "F0173607", "payment_id": null}, {"row_id": "GL-000323", "timestamp": "2026-05-01T10:59:00+05:30", "account": "1000", "debit_minor": 0, "credit_minor": 2818744, "currency": "KZT", "entity_id": null, "invoice_id": null, "payment_id": null}], "next_cursor": "ledger:3", "total": 240}, "error": null}, "reward": 0.0, "terminated": false, "truncated": false, "info": {}}
+```
+
+**3. `get_record`** — record for the id just listed
+
+request:
+```json
+{"cmd": "step", "action": {"type": "get_record", "table": "ledger", "id": "GL-000321"}}
+```
+response:
+```json
+{"observation": {"step": 2, "steps_remaining": 98, "result": {"record": {"row_id": "GL-000321", "timestamp": "2026-05-01T08:51:00+05:30", "account": "4000", "debit_minor": 0, "credit_minor": 63879463, "currency": "KZT", "entity_id": "E2159", "invoice_id": "F0173607", "payment_id": null}}, "error": null}, "reward": 0.0, "terminated": false, "truncated": false, "info": {}}
+```
+
+**4. `malformed line`** — line 4 is `{"cmd": "step", "action": {"type": "list_records", "table": "ledger"` — no closing braces
+
+request:
+```json
+{"cmd": "step", "action": {"type": "list_records", "table": "ledger"}
+```
+response:
+```json
+{"error": "invalid json"}
+```
+
+**5. `submit`** — empty findings (eval) — terminates
+
+request:
+```json
+{"cmd": "step", "action": {"type": "submit", "findings": {"episode_id": "ep_3cf976410457", "findings": []}}}
+```
+response:
+```json
+{"observation": {"step": 3, "steps_remaining": 97, "result": {"submitted": true}, "error": null}, "reward": 0.0, "terminated": true, "truncated": false, "info": {}}
+```
+
+**6. `step after submit`** — `calculator` after the terminal submit
+
+request:
+```json
+{"cmd": "step", "action": {"type": "calculator", "expression": "1+1"}}
+```
+response:
+```json
+{"observation": {"step": 3, "steps_remaining": 97, "result": null, "error": {"code": "episode_over", "message": "episode has ended; call reset()"}}, "reward": 0.0, "terminated": true, "truncated": false, "info": {}}
+```
+
+**7. `close`** — no response line (see the doc note below)
+
+request:
+```json
+{"cmd": "close"}
+```
+
+### Comparison with the docs
+
+Machine-checked shape assertions (all pass): the reset response's top level is exactly
+`{observation, info}`, its observation exactly `{task, manifest, policy, tools, steps_remaining}`, its info
+exactly `{episode_id, mode, max_steps}`; every step response is exactly
+`{observation, reward, terminated, truncated, info}`, every step observation exactly
+`{step, steps_remaining, result, error}`; all rewards `0.0`, every step `info` `{}` (eval mode),
+`truncated` false throughout.
+
+| pair | documented shape | verdict |
+|---|---|---|
+| 1 reset | `docs/CONTRACT.md:122-123` — first observation `{task, manifest, policy, tools, steps_remaining}`, reset `info` = `{episode_id, mode, max_steps}` | matches, key for key |
+| 1 reset | `auditenv/server.py:15` — reset response is `{"observation", "info"}` (no reward/terminated/truncated) | matches |
+| 2 list_records | `docs/CONTRACT.md:130` — → `{rows, next_cursor, total}`, max 50 rows, cursor `table:offset` | matches: 3 rows for `limit: 3`, `next_cursor` `"ledger:3"`, `total` 240 = `manifest.counts.ledger` |
+| 3 get_record | `docs/CONTRACT.md:132` — → `{record}` | matches: `{"record": {row_id, timestamp, account, debit_minor, credit_minor, currency, entity_id, invoice_id, payment_id}}` |
+| 4 malformed line | `auditenv/server.py:16,163` — `{"error": "..."}`, here `{"error": "invalid json"}` | matches, and it costs **no** step (the submit that follows is step 3, not 4), so the counter still follows `docs/CONTRACT.md:126` |
+| 5 submit | `docs/CONTRACT.md:135` (→ terminates), `:142` (in eval the policy sees `{"submitted": true}`), `:144-145` (reward 0.0, result only to the grader log) | matches: `result {"submitted": true}`, `terminated: true`, `reward 0.0`, `info {}` |
+| 6 step after submit | `docs/CONTRACT.md:143` — every later action returns `episode_over` without consuming a step, counter and outcome preserved | matches: `{"code": "episode_over", "message": "episode has ended; call reset()"}`, step 3, 97 steps left, `terminated` still true |
+| 7 close | `auditenv/server.py:12-16` — `close` is a request; the response list has only reset/step/error shapes | matches: no response line, process exits 0 |
+
+No behavioural difference from the docs. Two documentation gaps found (this task's file list is `night/LOG.md`
+only, so recorded here instead of fixed):
+
+- `README.md:367` lists `{"cmd": "close"}` among the JSON-line commands but never says it produces no response;
+  a client that reads one line after `close` waits forever. Only `auditenv/server.py:15-16`, whose response list
+  omits `close`, implies it.
+- Framing-level errors are undocumented outside the module: `{"error": "invalid json"}` and its siblings
+  (`"request too large"`, `"invalid utf-8"`, `"invalid input type"`, `"request must be a JSON object"`,
+  `"unknown cmd"` — `auditenv/server.py:138-166,193`) appear nowhere in `docs/CONTRACT.md` (its error section,
+  `:137-142`, lists action error codes only) or in README; `docs/CONTRACT.md:112` covers only a rejected
+  seed/config. A client in another language needs the framing errors spelled out — suggested for a `(lead)` doc pass.
+
+Assumption: public mode is the right setting for this evidence task — without `--episodes` there is no hidden
+queue, the run is reproducible, and the closed (`--episodes`) path is already covered by `tests/test_server.py`
+and by the round-19 closed-mode evidence. Assumption: `close` was added as a seventh request so the session ends
+explicitly; EOF ends it the same way (exit 0, 0 bytes on stderr).
