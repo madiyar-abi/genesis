@@ -115,3 +115,11 @@ Command: `env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_cont
 - Run 5: exit code 0, wall time 2.98 s -> `Ran 71 tests in 2.872s`, `OK`
 Result: 0 differing runs, 0 failures across all 5 runs (71 tests each). No flakiness detected in the jury modules. Next: T9.
 
+2026-11-21 22:17 gemini2a — T9: ran `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice under background load from `auditenv.fuzz --seeds 0-999`.
+- Background load: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999` (PID 4443, active across both check runs, finished with exit code 0 in 113.90 s; summary: 3000 episodes, 0 problems, FUZZ PASSED).
+- Check Run 1: exit code 0, wall time 58.56 s (check reported 58.5 s), last line: `ALL CHECKS PASSED in 58.5 s`
+- Check Run 2: exit code 0, wall time 53.32 s (check reported 53.2 s), last line: `ALL CHECKS PASSED in 53.2 s`
+- Failures: 0 timeout or timing-related failures (C18, clock all passed cleanly on both runs).
+All assigned gemini2a tasks (T7, T8, T9) complete.
+
+
