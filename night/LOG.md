@@ -560,3 +560,18 @@ hard reconcile submissions: P=0.780478 R=0.909893 F1=0.840232 (TP=1959 FP=551 FN
 `env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0. ALL CHECKS PASSED in 52.1 s.
 
 2026-11-21 22:31 lead — Merged gemini1a/1b/2a/2b/3a/3b (all evidence tasks done, 0 problems; miner/cheater cues match DESIGN §10) and codex1 T45–T47 (loader + server hardening, multi-cue cheater F1 0.163 default / 0.153 hard vs reconcile 1.000 / 0.840). Review of codex1: (1) its stricter loader rejected a ledger row_id equal to a doc_id; the published paired definitions rename each id space separately and expect equal strings across tables → an independent file-level jury transform failed closed reset after the merge; fixed in 0f33a0f (uniqueness per id space in loaded episodes, strict for our exports), harness 40/40 again, regression test SeparateIdSpaces. (2) T46 narrowed the server's except to ValueError/RuntimeError, so any other exception would end the server → restored a message-free catch-all ({"error": "internal error"}) with a test. (3) jury_run --policy-image without docker printed a raw traceback → clean error, exit 2 (test). Also D05 now asserted (b45cd76). check ALL PASSED, golden 80/80, verify 600/600, load 2.5 ms/episode. Queued T50–T61 (gemini, re-verify the tip) and T62–T63 (codex1: committed colliding-id paired test, loader strictness audit). Assumption: the loader's new validation is acceptable because jury fixtures come from generate_episode or transforms of our exports.
+
+2026-11-21 22:40 gemini3b — T60: Fresh clone of the current tip in path with spaces ('/tmp/r18 gemini3b clone2').
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.check`
+  Exit code: 0
+  Wall time: 49.09 s
+  Last line: 'ALL CHECKS PASSED in 49.0 s' (539 unit tests pass, all gates pass)
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.demo`
+  Exit code: 0
+  Wall time: 0.14 s
+  Last line: 'Done. Full check: uv run python -m auditenv.check'
+- Command: `uv run --no-project --python 3.13 python -m auditenv.check`
+  Exit code: 0
+  Wall time: 49.77 s
+  Last line: 'ALL CHECKS PASSED in 49.6 s' (539 unit tests pass on Python 3.13)
+Removed clone2 worktree. Next: T61.
