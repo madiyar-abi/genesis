@@ -76,6 +76,31 @@ class Books:
             return "that no published rate produces"
         return None
 
+    def ref_problems(self, pid: str, pay: dict) -> list[str]:
+        """Remittance consistency of one payment document, whatever its posting period. The generator never pays
+        an invoice before its issue or one it later cancels (checked on all payments), so both hold outside the
+        period too. Needs self.voided (set by discrepancies)."""
+        problems = []
+        refs = pay["invoice_refs"] or []
+        if sum(r["amount_minor"] for r in refs) > max(pay["amount_minor"], 0):
+            problems.append(f"payment {pid}: refs exceed amount")
+        if len({r["invoice_id"] for r in refs}) != len(refs):
+            problems.append(f"payment {pid} references an invoice twice")
+        if any(r["amount_minor"] <= 0 for r in refs):
+            problems.append(f"payment {pid}: non-positive invoice ref")
+        for ref in refs:
+            inv = self.invoices.get(ref["invoice_id"])
+            if inv is None:
+                problems.append(f"payment {pid} references unknown invoice {ref['invoice_id']}")
+                continue
+            if datetime_key(inv["issued_at"]) > datetime_key(pay["timestamp"]):
+                problems.append(f"payment {pid} settles invoice {inv['invoice_id']} issued after the payment")
+            if inv["invoice_id"] in self.voided:
+                problems.append(f"payment {pid} settles a cancelled invoice {inv['invoice_id']}")
+            if inv["currency"] != pay["currency"]:
+                problems.append(f"payment {pid} settles an other-currency invoice {inv['invoice_id']}")
+        return problems
+
     def journals(self) -> dict[str, list[dict]]:
         groups = defaultdict(list)
         for r in self.ledger:
@@ -184,6 +209,7 @@ class Books:
                 issues.append(("duplicate_invoice", ids, ar["debit_minor"] if ar else 0))
         # payments: cash FX, allocations, unapplied remainder
         for pid, pay in self.payments.items():
+            problems += self.ref_problems(pid, pay)
             rows = js.get("pay:" + pid)
             if not self.in_period(pay["timestamp"]):
                 if rows:
@@ -208,24 +234,13 @@ class Books:
                 else:
                     issues.append(("fx_error", (pid,), abs(posted - correct)))
             refs = pay["invoice_refs"] or []
-            if sum(r["amount_minor"] for r in refs) > max(pay["amount_minor"], 0):
-                problems.append(f"payment {pid}: refs exceed amount")
-            if len({r["invoice_id"] for r in refs}) != len(refs):
-                problems.append(f"payment {pid} references an invoice twice")
-            if any(r["amount_minor"] <= 0 for r in refs):
-                problems.append(f"payment {pid}: non-positive invoice ref")
             if pay["currency"] == self.base and any(r["account"] == "7900" for r in rows):
                 problems.append(f"payment {pid}: FX gain/loss on a base-currency payment")
             extras = {0}  # what the allocation shortfalls may add to 2900 (each moved part at the payment-date rate)
             for ref in refs:
                 inv = self.invoices.get(ref["invoice_id"])
-                if inv is None:
-                    problems.append(f"payment {pid} references unknown invoice")
+                if inv is None:  # reported by ref_problems
                     continue
-                if datetime_key(inv["issued_at"]) > datetime_key(pay["timestamp"]):
-                    problems.append(f"payment {pid} settles invoice {inv['invoice_id']} issued after the payment")
-                if inv["invoice_id"] in self.voided or inv["currency"] != pay["currency"]:
-                    problems.append(f"payment {pid} settles a cancelled or other-currency invoice {inv['invoice_id']}")
                 expected = self.conv(ref["amount_minor"], pay["currency"], inv["issued_at"])
                 credit = sum(r["credit_minor"] - r["debit_minor"] for r in rows
                              if r["account"] == "1200" and r["invoice_id"] == inv["invoice_id"])
