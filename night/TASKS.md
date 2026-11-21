@@ -16,7 +16,7 @@ Lead review findings are added as T30+ below.
 - [ ] T3 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 1000-1999` — files: night/LOG.md — accept: last line (`N/N episodes valid`) in LOG.
 
 ## gemini1b — stress solvability (evidence only, files: night/LOG.md)
-- [ ] T4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 5000-5299` and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 5000-5299` — files: night/LOG.md — accept: per command the summary line (imperfect / max steps / truncated) + wall time in LOG.
+- [x] T4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 5000-5299` and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 5000-5299` — files: night/LOG.md — accept: per command the summary line (imperfect / max steps / truncated) + wall time in LOG.
 - [ ] T5 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 7000 --json /tmp/r18-gemini1b/j7000.json`, then the same with `--seed-base 8000` and `--seed-base 9000` (mkdir the dir first) — files: night/LOG.md — accept: per run the printed per-policy table (P, R, F1, return, steps) copied into LOG; any policy whose F1 differs between runs by more than 0.2 called out.
 - [ ] T6 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 50000` — files: night/LOG.md — accept: summary + wall time + max steps in LOG.
 
