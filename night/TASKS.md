@@ -144,7 +144,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
 - [ ] G22 (gemini2b) Optimized-mode run (asserts stripped): `env -u AUDITENV_SECRET uv run python -O -m auditenv.check`;
   plus `grep -n "^\s*assert " auditenv/*.py auditenv/policies/*.py judge_adapter.py` — files: night/LOG.md — accept:
   exit code + last line of the check; the list of product-code asserts (file:line) in LOG.
-- [ ] G23 (gemini3a) Order independence: run every test module alone, `for f in tests/test_*.py; do m=$(basename $f .py);
+- [x] G23 (gemini3a) Order independence: run every test module alone, `for f in tests/test_*.py; do m=$(basename $f .py);
   env -u AUDITENV_SECRET uv run python -m unittest tests.$m >/tmp/r20-gemini3a/$m.out 2>&1; echo "$m $?"; done` —
   files: night/LOG.md — accept: number of modules, every module with a non-zero exit and its failure quoted.
 - [ ] G24 (gemini3b) Regenerate the committed trajectories exactly as README says into /tmp/r20-gemini3b/ and
