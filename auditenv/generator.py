@@ -22,6 +22,7 @@ from .money import EXPONENT, convert, iso, offset_str, parse_offset, rate_str
 GENERATOR_VERSION = "1.0.0"
 SCHEMA_VERSION = "1.0"
 ISSUE_TYPES = ("duplicate_invoice", "payment_allocation", "fx_error", "period_cutoff")
+ALLOCATIONS = ("partial", "missing")  # payment_allocation: part of the ref allocated, or nothing
 SCENARIOS = ("I1", "I2")
 MAX_ISSUES = 12
 DIFFICULTIES = ("default", "hard")
@@ -84,6 +85,9 @@ def gen_config(config: dict) -> dict:
     difficulty = config.get("difficulty", "default")
     if difficulty not in DIFFICULTIES:
         raise ValueError(f"difficulty must be one of {DIFFICULTIES}")
+    allocation = config.get("allocation")
+    if allocation is not None and allocation not in ALLOCATIONS:
+        raise ValueError(f"allocation must be one of {ALLOCATIONS} or null")
     gen = {
         "errors": {t: given_e.get(t, 0) for t in ISSUE_TYPES} if explicit else None,
         "interacting": {k: given_i.get(k, 0) for k in SCENARIOS} if explicit else None,
@@ -92,6 +96,8 @@ def gen_config(config: dict) -> dict:
     }
     if difficulty != "default":  # absent for default: default episodes stay byte-identical
         gen["difficulty"] = difficulty
+    if allocation is not None:  # likewise: absent unless a payment_allocation variant is requested
+        gen["allocation"] = allocation
     return gen
 
 

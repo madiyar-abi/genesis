@@ -158,6 +158,8 @@ def payment_allocation(st, pay=None, partial=None, scenario="single") -> bool:
         ref = pay["invoice_refs"][0]
     if partial is None:
         partial = rng.random() < 0.6
+        if st.gen.get("allocation") is not None:  # config "allocation" picks the variant (CONTRACT §4)
+            partial = st.gen["allocation"] == "partial"
     inv = st.invoice(ref["invoice_id"])
     jid = "pay:" + pay["payment_id"]
     before = st.snapshot(jid)
