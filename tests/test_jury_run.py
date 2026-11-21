@@ -14,6 +14,8 @@ from auditenv.policies.random_explorer import RandomExplorer
 from auditenv.policies.reconcile import Reconcile
 from auditenv.run import run_episode
 
+ja._WARNED = True  # public test seeds: the grader-key warning is tested on its own
+
 
 class JuryPolicyTest(unittest.TestCase):
     def test_same_actions_and_grade_as_on_auditenv(self):

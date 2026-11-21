@@ -43,6 +43,32 @@ The container path is exercised on every push by `.github/workflows/check.yml` (
 network, plus the verifier and the seed sweep on plain Python 3.11). To run just the unit tests in the same image, use
 `docker run --rm --network none auditenv python -m unittest discover -s tests -t .`.
 
+## For the jury
+
+1. **Set `AUDITENV_SECRET`** (any private string) in the process that generates hidden episodes, never in the
+   policy's process: without it `episode_id` is keyed by a public constant and a policy can recover the seed.
+2. Connect through **`judge_adapter.py`** in the repository root (working directory `/app` in the container):
+   `generate_episode`, `make_env()` → `reset` / `step({"name", "args"})`, `score_episode` — see
+   [Jury adapter](#jury-adapter-judge_adapterpy). The `{"type": ...}` actions further down are the environment's
+   native form; the adapter translates the jury's envelope to them.
+3. Replay the four blocks of the published checks: `uv run python -m unittest tests.test_judge_contract
+   tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` (in the container:
+   `docker run --rm --network none auditenv python -m unittest tests.test_judge_contract tests.test_judge_reward
+   tests.test_judge_scenarios tests.test_judge_paired`); each check → test in [`docs/CHECKS.md`](docs/CHECKS.md).
+   The whole flow with our four baselines: `uv run python -m auditenv.jury_run`.
+
+| §09 material | where |
+|---|---|
+| source, licence, pinned dependencies | `auditenv/`, `judge_adapter.py`, `LICENSE` (MIT); stdlib only, `pyproject.toml`, `uv.lock`, base image pinned by digest |
+| README: container and one check command | this file: Quick start, Container |
+| matcher and reward, schemas, policies | `auditenv/matcher.py`, `metrics.py`, `schema.py`; `schemas/*.json`; `public/policy.json` in every episode |
+| 10 train + 10 dev episodes | `episodes/train`, `episodes/dev` (plus 20 public hard episodes in `episodes/hard`) |
+| tests | `tests/` (environment, matching, reward, verifier, jury checks) |
+| four baseline-policy adapters | `auditenv/policies/` (random explorer, reconcile, flag-all, oracle; plus naive reconcile and reconcile_hard); `auditenv.jury_run.JuryPolicy` runs them behind the jury protocol |
+| `trajectories.jsonl` | `trajectories/train_*.jsonl`, one file per policy, each line `{episode_id, step, action, observation, reward, terminated, truncated}`; no truth in observations (checked by the tests) |
+| design note | [`docs/DESIGN.md`](docs/DESIGN.md) (interfaces: [`docs/CONTRACT.md`](docs/CONTRACT.md)) |
+| demo | `uv run python -m auditenv.demo` (narrated, seed 2003 of the demo config), [`docs/demo.cast`](docs/demo.cast), script [`docs/DEMO.md`](docs/DEMO.md); the video link is in the submission document |
+
 ## Errors the agent must find
 
 | type | what happened | amount in truth (base currency, minor units) |
@@ -320,9 +346,9 @@ uv run python -m unittest discover -s tests -t .     # tests only
 uv run python -m unittest tests.test_env             # one module
 uv run python -c "from auditenv.check import run_remote; assert run_remote()"  # public 2-episode out-of-process smoke
 uv run python -m auditenv.verify --seeds 0-199       # verifier on 600 generated episodes
-uv run python -m auditenv.verify --dir episodes/train  # verifier on exported splits (40 episodes)
-uv run python -m auditenv.verify --dir episodes/dev
-uv run python -m auditenv.verify --dir episodes/hard
+uv run python -m auditenv.verify --dir episodes/train  # verifier on the exported splits: 10 train,
+uv run python -m auditenv.verify --dir episodes/dev    # 10 dev
+uv run python -m auditenv.verify --dir episodes/hard   # and 20 hard episodes
 uv run python -m auditenv.attack                     # 11,000 mutations on 20 fixed public seeds
 uv run python -m tests.test_fuzz                     # action count and runtime
 uv run python -m auditenv.check --json /tmp/auditenv-metrics.json
@@ -357,6 +383,8 @@ To compare variants of the same seed, list each configuration as a separate epis
 | `auditenv/calculator.py` | arithmetic-only calculator (AST whitelist, Decimal) |
 | `auditenv/verify.py` | independent data/truth verifier |
 | `auditenv/transform.py` | benign transformation (new ids, permuted rows) |
+| `judge_adapter.py` | the jury's connection point (generate_episode, make_env, score_episode) |
+| `auditenv/jury.py`, `jury_run.py` | configs of the jury scenarios D01–D20; their flow end to end with our baselines |
 | `auditenv/server.py`, `client.py` | out-of-process environment/grader |
 | `auditenv/policies/` | baselines: random explorer, naive reconcile, reconcile, reconcile_hard, flag-all, oracle |
 | `scripts/` | round-2 tools: mutation testing, sensitivity, shortcut miner, golden hashes, benchmark, chart, doc sync |
@@ -369,7 +397,9 @@ To compare variants of the same seed, list each configuration as a separate epis
 | `episodes/` | exported 10 train + 10 dev + 20 public hard episodes (`public/` for agents: task text, manifest, policy, four tables; `grader/` closed) |
 | `trajectories/` | training trajectories (JSONL) of reconcile, naive reconcile and random on the train split, and the same three plus reconcile_hard on the hard train split (`train_hard_*`) |
 | `tests/` | Unit tests; `tests/test_jury.py` maps the jury checklist to tests |
-| `docs/` | contract, design note, demo script, pitch outline, `CHECKS.md` (jury criteria → test → command → result); `REVIEW.md` — jury-style review log |
+| `docs/` | contract, design note, demo script, pitch outline, `CHECKS.md` (jury criteria → test → command → result) |
+| `REVIEW.md` | jury-style review log: every defect found, its reproduction and fix |
+| `HANDOFF.md`, `NIGHT.md`, `night/`, `scripts/night.sh`, `scripts/marathon.sh`, `scripts/deepseek_worker.py` | the team's development tooling (handoff notes, autonomous agent runs); not used by the check, which needs no network or paid API |
 
 ## Honest limitations
 
