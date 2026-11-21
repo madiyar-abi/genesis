@@ -29,7 +29,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   data on seeds 31000–31199 of each config. — files: night/r20/policy_text.py, night/LOG.md — accept: LOG lists every
   sentence checked, the check and its count; any statement the data contradicts (or that is unstated but needed to
   find a truth issue) quoted with seed and record ids.
-- [ ] X3 (codex1) Jury-machine reality check of `judge_adapter.py`: (a) fresh `HOME` with no `~/.auditenv`, (b) read-only
+- [ ] X3 (lead, was codex1: rate-limited until 02:41) Jury-machine reality check of `judge_adapter.py`: (a) fresh `HOME` with no `~/.auditenv`, (b) read-only
   `HOME`, (c) 8 processes calling `judge_adapter.generate_episode` + `reset` at the same moment on an empty key dir
   (race on `grader.key` creation — do all 8 agree on one key, does any crash or write a partial key?), (d) `episode_dir`
   given as a relative path, a path with spaces and non-ASCII, and a symlinked directory. Scripts in
