@@ -33,6 +33,13 @@ uv run python -m auditenv.check        # the single official check (exit code 0 
 Needs only [`uv`](https://docs.astral.sh/uv/getting-started/installation/): it fetches Python 3.11 (pinned in
 `.python-version`); there are no other dependencies. For an offline checkout with Python 3.11 already installed, run
 `python3.11 -m auditenv.check` from the repository root, or use the container below.
+The check itself needs no network; a first `uv` run may download Python 3.11 and `docker build` may pull the pinned
+base image (the built image then runs with `--network none`). For the published numbers and byte-identical public
+exports, run commands with `AUDITENV_SECRET` unset (`env -u AUDITENV_SECRET uv run python -m ...`); set a key only in
+the grader process.
+
+Shortest review: `uv run python -m auditenv.demo` (under a second), then the full check above (about a minute).
+To connect the official harness, go straight to [For the jury](#for-the-jury); Docker is optional.
 
 ### Container
 
@@ -78,7 +85,7 @@ Each non-oracle baseline runs as UID 65534 with a read-only filesystem, no netwo
 | matcher and reward, schemas, policies | `auditenv/matcher.py`, `metrics.py`, `schema.py`; `schemas/*.json`; `public/policy.json` in every episode |
 | 10 train + 10 dev episodes | `episodes/train`, `episodes/dev` (plus 20 public hard episodes in `episodes/hard`) |
 | tests | `tests/` (environment, matching, reward, verifier, jury checks) |
-| four baseline-policy adapters | `auditenv/policies/` (random explorer, reconcile, flag-all, oracle; plus naive reconcile and reconcile_hard); `auditenv.jury_run.JuryPolicy` runs them behind the jury protocol |
+| four baseline-policy adapters | `auditenv/policies/` (random explorer, reconcile, flag-all, oracle; plus naive reconcile and reconcile_hard); `auditenv.policy_worker.JuryPolicy` runs them behind the jury protocol (`auditenv.jury_run` starts random explorer, reconcile and flag-all as separate policy processes; the oracle runs in the grader) |
 | `trajectories.jsonl` | [`trajectories.jsonl`](trajectories.jsonl) in the repository root: 20 train episodes (10 default, 10 hard) played by `reconcile_hard`, 674 lines, each exactly `{episode_id, step, action, observation, reward, terminated, truncated}`; no truth in observations; the tests regenerate it byte for byte ([how](#run-a-policy-write-trajectories)); per-policy logs of the other baselines in `trajectories/` |
 | design note | [`docs/DESIGN.md`](docs/DESIGN.md) (interfaces: [`docs/CONTRACT.md`](docs/CONTRACT.md)) |
 | demo | `uv run python -m auditenv.demo` (narrated, seed 2003 of the demo config), [`docs/demo.cast`](docs/demo.cast), script [`docs/DEMO.md`](docs/DEMO.md) |
@@ -121,7 +128,7 @@ the episode with −1. Code: `auditenv/matcher.py`, `metrics.py`.
 | flag-everything | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 |
 
 Hard mode (`configs/eval_hard.json`): the same reconcile script drops to F1 0.755, oracle stays 1.0.
-Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs/DESIGN.md`](docs/DESIGN.md) §9.
+Separately from the check, `uv run python -m auditenv.fuzz --seeds 0-999` (3 000 episodes): 0 problems. Details and failure analysis: [`docs/DESIGN.md`](docs/DESIGN.md) §9.
 ## What the check does
 
 `auditenv.check` exits 0 only if every gate passes:
@@ -175,6 +182,9 @@ Config keys: `mode` (`train` returns the terminal reward, `eval` hides it), `max
 (`{"I1": n, "I2": n}`), `n_invoices` (10–100), `distractors`, `transform_seed` (benign relabel/permute),
 `difficulty` (`"default"` | `"hard"`: credit-note reissues, re-typed duplicates, a ledger padded to a target of 900–1 400 rows before injection —
 see [`docs/DESIGN.md`](docs/DESIGN.md) “Hard mode”; `configs/eval_hard.json` is a 20-episode hard split).
+Two opt-in keys used by the jury scenarios: `allocation` (`"partial"` | `"missing"` | null) picks the
+`payment_allocation` variant, and `ensure_distractors` (bool) adds a split payment and a refunded overpayment when
+suitable receipts exist (CONTRACT §4).
 
 Omit both `errors` and `interacting` for a random mix. Supplying either object sets every unspecified count to zero.
 
@@ -271,7 +281,7 @@ print(ja.score_episode(out, {"episode_id": info["episode_id"], "findings": []}, 
 | `generate_episode(seed, config, output_dir)` | our generator with the config of `docs/CONTRACT.md` §4; writes `public/` (task.txt, manifest.json, ledger.csv, invoices.jsonl, payments.jsonl, fx.csv, policy.json) and `grader/` (truth.json, provenance.json) |
 | `reset(seed, {"mode": "closed", "episode_dir": d, "team_config": {...}})` | serves the episode in `d` as it is (no generation, ids unchanged); a second reset restarts it. The files are validated first (CONTRACT shapes, balanced journals, known references; ids unique within each id space, so a copy renamed per space may reuse a string across tables); a malformed directory raises `ValueError` with a path-free message and leaves the open episode untouched. `team_config` may set `max_steps` and `time_limit_s` only. Reward to the policy is 0 on every step and `info` holds only `episode_id`, `mode`, `max_steps` (reset) or `{}` (steps) |
 | `reset(seed, {"mode": "train", "team_config": cfg})` | generates `generate(seed, cfg)`; with `episode_dir` it serves that episode. The terminal step returns the reward and `info` = `{valid, tp, fp, fn, precision, recall, f1, reward, inspection_steps}` |
-| `step({"name": ..., "args": {...}})` | first observation `{task, manifest, policy, remaining_steps}` (100 by default), then `{result, error, remaining_steps}` |
+| `step({"name": ..., "args": {...}})` | returns `(observation, reward, terminated, truncated, info)` with observation `{result, error, remaining_steps}`; `reset` returns `(first_observation, info)` with `{task, manifest, policy, remaining_steps}` (100 by default) |
 | `score_episode(d, findings, inspection_steps)` | the shared matcher and reward on `d`'s truth; an invalid structure returns `return = -1` and nulls, and the reason goes to `judge_adapter.GRADER_LOG` (and to the JSON-lines file `$AUDITENV_GRADER_LOG`, if set) |
 
 | `name` | `args` | `result` |
@@ -296,7 +306,7 @@ The four error types (`type` in truth and findings; amounts in base-currency min
 | duplicate invoice | `duplicate_invoice` | original and duplicate invoice_id | AR debit of the later copy |
 | missing or partial payment allocation | `payment_allocation` | invoice_id and payment_id | expected AR credit − credit posted |
 | wrong conversion date or rate | `fx_error` | the invoice_id or payment_id | abs(posted − correct) |
-| period error | `period_cutoff` | the invoice_id | AR debit posted out of period |
+| period error | `period_cutoff` | the invoice_id | AR debit posted inside the period for an invoice issued outside it |
 
 Matching follows the jury's exact conventions: ids, type and currency are compared as exact strings, `affected_ids`
 and `evidence_ids` as sets, an evidence id that is not a public record or document makes the finding a false
@@ -308,7 +318,7 @@ Block 2 scenarios through the generator's config (`auditenv/jury.py`; the jury c
 
 | scenarios | config |
 |---|---|
-| D01–D05 clean | `{"errors": {}, "interacting": {"I1": 0, "I2": 0}, "ensure_distractors": true}` — adds an invoice paid in two parts (D02) and a refunded overpayment (D03) when the company has suitable full payments (with this config both appeared on all 200 seeds 0–199, default and hard); equal invoice totals (D04), unidentified receipts and records on the period's first and last day in company time (D05) are present anyway (200/200 on seeds 0–199, default and hard); foreign-currency documents in 199/200 (a company whose entities all bill in the base currency has none) |
+| D01–D05 clean | `{"errors": {}, "interacting": {"I1": 0, "I2": 0}, "ensure_distractors": true}` — adds an invoice paid in two parts (D02) and a refunded overpayment (D03) when the company has suitable full payments (with this config both appeared on all 200 seeds 0–199, default and hard); equal invoice totals (D04), unidentified receipts and records on the period's first and last day in company time (D05) are present anyway (200/200 on seeds 0–199, default and hard); foreign-currency documents in 199/200 default and 200/200 hard companies (a company whose entities all bill in the base currency has none) |
 | D06–D08 duplicate invoice | `{"errors": {"duplicate_invoice": 1}, "interacting": {"I1": 0, "I2": 0}}` |
 | D09 missing allocation | `{"errors": {"payment_allocation": 1}, "interacting": {"I1": 0, "I2": 0}, "allocation": "missing"}` |
 | D10 partial allocation | the same with `"allocation": "partial"` |
@@ -343,8 +353,8 @@ uv run python -m auditenv.jury_run        # D01–D20, seeds 3001–3020
 | flag-everything | 0.000 | 0.000 | 0.000 | −1.000 | 3.6 |
 | oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 |
 
-Every episode took under 0.05 s of the 60 s limit on the development Mac (the time includes starting the
-policy's process).
+`jury_run` prints the mean and maximum wall time per policy, including starting the policy's process; on the
+development Mac every episode took under 0.06 s of the 60 s limit when the machine was otherwise idle.
 
 Run the jury's four blocks locally: `uv run python -m unittest tests.test_judge_contract tests.test_judge_reward
 tests.test_judge_scenarios tests.test_judge_paired` (C01–C20; Block 3 rows 1–20 and M01–M12; D01–D20; P01–P20).
@@ -354,7 +364,7 @@ They are part of `auditenv.check`.
 
 ```bash
 # organiser side: hidden episode list never reaches the agent
-AUDITENV_SECRET="${GRADER_KEY:?Set GRADER_KEY in the organiser shell}" uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl
+uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl   # keyed by the grader key file by default
 ```
 
 `hidden.json` uses the `configs/*.json` format (`{"episodes": [{"seed": int, "config": {...}}, ...]}`) or
@@ -402,7 +412,7 @@ uv run python scripts/sensitivity.py                 # baseline ranking under ot
 uv run python scripts/shortcut_miner.py --report-only  # single-feature data-leak search (add --hard)
 uv run python scripts/golden.py --check              # 80 golden hashes: generator drift detector
 uv run python scripts/bench.py                       # timing benchmark
-uv run python scripts/chart.py                       # docs/baselines.svg from the check --json output
+uv run python scripts/chart.py --json /tmp/auditenv-metrics.json  # docs/baselines.svg from the check --json output above
 make check                                           # run one target, or combine targets: make test verify
 make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart  # preview commands
 ```
