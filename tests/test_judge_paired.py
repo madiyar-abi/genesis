@@ -5,12 +5,14 @@ Each pair passes when (1) replaying the original gives identical transitions and
 the copy maps back to the original answer, (3) TP/FP/FN/P/R/F1/return are equal for equal inspection steps, and
 (4) a broken evidence set is not rewarded on either side."""
 
+import csv
 import json
 import os
 import random
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 
 import judge_adapter as ja
 from auditenv import jury
@@ -138,6 +140,89 @@ class JudgePairedTest(unittest.TestCase):
                     sa, sb = ja.score_episode(src, a, 6), ja.score_episode(dst, b, 6)
                     self.assertEqual(sa, sb)
                     self.assertEqual(sa["fn"], 1)
+
+
+class CollidingIdPairTest(unittest.TestCase):
+    def test_file_level_transform_with_overlapping_id_spaces(self):
+        for difficulty in ("default", "hard"):
+            for seed in range(900, 903):
+                with self.subTest(difficulty=difficulty, seed=seed), tempfile.TemporaryDirectory() as tmp:
+                    src, dst = Path(tmp) / "original", Path(tmp) / "copy"
+                    cfg = {**jury.SCENARIOS[f"D{seed - 884:02d}"], "difficulty": difficulty}
+                    ja.generate_episode(seed, cfg, src)
+                    original = oracle(load_episode(src))
+                    shutil.copytree(src, dst)
+                    mapped = self.rename_files(dst, seed, original)
+                    env = ja.make_env()
+                    first, _ = env.reset(seed, {"mode": "closed", "episode_dir": dst})
+                    self.assertEqual(first["manifest"]["episode_id"], original["episode_id"])
+                    expected = ja.score_episode(src, original, 6)
+                    self.assertGreater(expected["tp"], 0)
+                    self.assertEqual(expected["f1"], 1)
+                    self.assertEqual(ja.score_episode(dst, mapped, 6), expected)
+
+    def rename_files(self, root, seed, original):
+        public = root / "public"
+        with (public / "ledger.csv").open(encoding="utf-8", newline="") as stream:
+            reader = csv.DictReader(stream)
+            ledger = list(reader)
+            fields = reader.fieldnames
+        invoices, payments = [
+            [json.loads(line) for line in (public / name).read_text(encoding="utf-8").splitlines()]
+            for name in ("invoices.jsonl", "payments.jsonl")
+        ]
+        rows = [*ledger, *invoices, *payments]
+        maps = {
+            field: {value: f"k{n}" for n, value in enumerate(sorted({r[field] for r in rows if r.get(field)}))}
+            for field in ID_FIELDS
+        }
+        self.assertEqual(set(maps["row_id"].values()) & set(maps["doc_id"].values()),
+                         set(maps["doc_id"].values()))
+        forward = {old: new for mapping in maps.values() for old, new in mapping.items()}
+
+        def rename(value):
+            if isinstance(value, dict):
+                return {k: rename(v) for k, v in value.items()}
+            if isinstance(value, list):
+                return [rename(item) for item in value]
+            if isinstance(value, str):
+                if value[:4] in ("inv:", "pay:"):
+                    return value[:4] + forward.get(value[4:], value[4:])
+                return forward.get(value, value)
+            return value
+
+        rng = random.Random(seed)
+
+        def permute(records):
+            rng.shuffle(records)
+            return records
+
+        with (public / "ledger.csv").open("w", encoding="utf-8", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(permute([rename(row) for row in ledger]))
+        for name, records in (("invoices.jsonl", invoices), ("payments.jsonl", payments)):
+            (public / name).write_text(
+                "".join(json.dumps(row) + "\n" for row in permute([rename(r) for r in records])),
+                encoding="utf-8",
+            )
+        fx = public / "fx.csv"
+        header, *rates = fx.read_text(encoding="utf-8").splitlines()
+        fx.write_text("\n".join([header, *permute(rates)]) + "\n", encoding="utf-8")
+        for name in ("truth.json", "provenance.json"):
+            path = root / "grader" / name
+            content = rename(json.loads(path.read_text(encoding="utf-8")))
+            if name == "truth.json":
+                # The contract and matcher treat affected IDs and evidence as sets.
+                for issue in content["issues"]:
+                    issue["affected_ids"] = list(dict.fromkeys(issue["affected_ids"]))
+                    issue["evidence_sets"] = [list(dict.fromkeys(group)) for group in issue["evidence_sets"]]
+            path.write_text(json.dumps(content), encoding="utf-8")
+        answer = rename(original)
+        for finding in answer["findings"]:
+            finding["affected_ids"] = list(dict.fromkeys(finding["affected_ids"]))
+            finding["evidence_ids"] = list(dict.fromkeys(finding["evidence_ids"]))
+        return answer
 
 
 if __name__ == "__main__":
