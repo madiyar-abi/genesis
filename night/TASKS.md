@@ -63,7 +63,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   proposed replacement text for each item; "nothing found" only with the list of sections read.
 
 ## rb — independent checkers on fresh seeds (medium)
-- [ ] Z1 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 42000-42299` and
+- [x] Z1 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 42000-42299` and
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 42000-42199` — files:
   night/LOG.md — accept: exit codes, totals and "unexplained" lines verbatim, wall times.
 - [ ] Z2 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py` with seeds changed
