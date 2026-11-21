@@ -5,7 +5,7 @@ Use Python 3.11 via uv. For evidence tasks append measured counts and any mismat
 - [ ] gemini1a-1 (gemini1a) Verify public train/dev exports — files: night/LOG.md — accept: `uv run python -m auditenv.verify --dir episodes/train` exits zero and count recorded.
 - [ ] gemini1a-2 (gemini1a) Verify public train/dev exports — files: night/LOG.md — accept: `uv run python -m auditenv.verify --dir episodes/dev` exits zero and count recorded.
 - [x] gemini1b-1 (gemini1b) Verify hard exports and golden records — files: night/LOG.md — accept: `uv run python -m auditenv.verify --dir episodes/hard` exits zero and count recorded.
-- [ ] gemini1b-2 (gemini1b) Verify hard exports and golden records — files: night/LOG.md — accept: `uv run python -m unittest tests.test_golden` exits zero and count recorded.
+- [x] gemini1b-2 (gemini1b) Verify hard exports and golden records — files: night/LOG.md — accept: `uv run python -m unittest tests.test_golden` exits zero and count recorded.
 - [ ] gemini2a-1 (gemini2a) Verify trajectories and public replay — files: night/LOG.md — accept: `uv run python -m unittest tests.test_trajectory_files` exits zero and count recorded.
 - [ ] gemini2a-2 (gemini2a) Verify trajectories and public replay — files: night/LOG.md — accept: `uv run python -m unittest tests.test_run` exits zero and count recorded.
 - [ ] gemini2b-1 (gemini2b) Verify published jury maps and examples — files: night/LOG.md — accept: `uv run python -m unittest tests.test_checks_map` exits zero and count recorded.

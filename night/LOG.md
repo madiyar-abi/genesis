@@ -3,3 +3,4 @@
 2026-11-21 23:42 lead — Reviewed ten-slide outline against the check output. Corrected slide 8 split counts. Confirmed slide 7 metrics, paired checks, demo figures and archived 20k configuration sweep. Team credits await the human submission owner.
 2026-11-21 23:43 lead — Baseline full check passed 560 tests, default fuzz passed 3,000 episodes, and reward search passed 11,000 mutations. Recorded the two coverage gaps in REVIEW.md. Checking whether independent verification can catch early refunds.
 2026-11-21 23:44 gemini1b — Verified hard exports (auditenv.verify --dir episodes/hard): 20/20 episodes valid, 0 problems. Next: gemini1b-2.
+2026-11-21 23:45 gemini1b — Verified golden records (uv run python -m unittest tests.test_golden): 80/80 golden hashes match, 0 mismatches. All assigned tasks complete.
