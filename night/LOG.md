@@ -2191,6 +2191,71 @@ Classified 1335 clean violations: (a) 920, (b) 415, (c) 0.
 
 Assumptions: the percentage denominator is the absolute base-minor debit for the latest refund as of the observed row. The classifier requires every 2900 posting through that row to match its own payment-date conversion and every document-currency running balance to remain nonnegative. AR rounding requires the amount to match the difference between separately rounded applications and a single conversion of their sum. D01–D05 share the same clean config, so the aggregate includes repeats across scenarios.
 `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, ALL CHECKS PASSED in 93.8 s
+2026-11-22 04:33 codex2 — Y4: verified the Y3 README fixes in a fresh clone at 544bd15, containing 55d4c34.
+
+The table uses README line numbers at that revision. Duplicate instructions use the same result (jury runner at 79 and 346, jury tests at 75 and 359, demo at 41 and 91). The Python rows pipe the corresponding fenced examples into Python. Public commands ran with AUDITENV_SECRET unset, input/output paths normally under /tmp redirected to /tmp/r21-codex2/y4, and a one-seed clean hidden.json plus reset/close input for the server. Several independent commands ran concurrently; wall times describe this shared-load run.
+
+| README line | Command | Exit | Wall seconds |
+|---|---|---:|---:|
+| checkout | `git checkout --detach 544bd15f8a788dc41e88eba3b772484983160588` | 0 | 0.07 |
+| clone | `git clone https://github.com/madiyar-abi/genesis.git && cd genesis` | 0 | 4.55 |
+| tracked | `git diff --exit-code` | 0 | 0.11 |
+| 30 | `uv run python -m auditenv.check` | 0 | 94.64 |
+| 35 | `python3.11 -m auditenv.check` | 0 | 94.72 |
+| 41 | `uv run python -m auditenv.demo` | 0 | 0.20 |
+| 47 | `docker build -t auditenv .` | 127 | 0.00 |
+| 48 | `docker run --rm --network none auditenv` | 127 | 0.01 |
+| 53 | `docker run --rm --network none auditenv python -m unittest discover -s tests -t .` | 127 | 0.00 |
+| 75 | `uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` | 0 | 3.83 |
+| 77 | `docker run --rm --network none auditenv python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` | 127 | 0.00 |
+| 79 | `uv run python -m auditenv.jury_run` | 0 | 2.69 |
+| 162 | `uv run python -` | 0 | 0.06 |
+| 194 | `uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/r21-codex2/y4/dev_reconcile.jsonl` | 0 | 0.17 |
+| 195 | `uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval` | 0 | 0.13 |
+| 207 | `uv run python -m auditenv.export --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard` | 0 | 0.26 |
+| 210 | `uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out /tmp/r21-codex2/y4/trajectories.jsonl` | 0 | 0.48 |
+| 210-cmp | `cmp trajectories.jsonl /tmp/r21-codex2/y4/trajectories.jsonl` | 0 | 0.01 |
+| 221-naive_reconcile | `uv run python -m auditenv.run --policy naive_reconcile --config configs/train.json --out /tmp/r21-codex2/y4/train_naive_reconcile.jsonl` | 0 | 0.16 |
+| 221-random | `uv run python -m auditenv.run --policy random --config configs/train.json --out /tmp/r21-codex2/y4/train_random.jsonl` | 0 | 0.14 |
+| 221-reconcile | `uv run python -m auditenv.run --policy reconcile --config configs/train.json --out /tmp/r21-codex2/y4/train_reconcile.jsonl` | 0 | 0.16 |
+| 224-naive_reconcile | `uv run python -m auditenv.run --policy naive_reconcile --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_naive_reconcile.jsonl` | 0 | 0.36 |
+| 224-random | `uv run python -m auditenv.run --policy random --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_random.jsonl` | 0 | 0.25 |
+| 224-reconcile | `uv run python -m auditenv.run --policy reconcile --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_reconcile.jsonl` | 0 | 0.37 |
+| 224-reconcile_hard | `uv run python -m auditenv.run --policy reconcile_hard --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_reconcile_hard.jsonl` | 0 | 0.37 |
+| 233 | `uv run python -` | 0 | 0.05 |
+| 267 | `uv run python -` | 0 | 0.08 |
+| 367 | `uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl` | 0 | 0.07 |
+| 383 | `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` | 0 | 0.14 |
+| 391 | `uv run python -m unittest discover -s tests -t .` | 0 | 78.27 |
+| 392 | `uv run python -m unittest tests.test_env` | 0 | 0.30 |
+| 393 | `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` | 0 | 0.12 |
+| 394 | `uv run python -m auditenv.verify --seeds 0-199` | 0 | 7.50 |
+| 395 | `uv run python -m auditenv.verify --dir episodes/train` | 0 | 0.17 |
+| 396 | `uv run python -m auditenv.verify --dir episodes/dev` | 0 | 0.17 |
+| 397 | `uv run python -m auditenv.verify --dir episodes/hard` | 0 | 0.55 |
+| 398 | `uv run python -m auditenv.attack` | 0 | 0.68 |
+| 399 | `uv run python -m tests.test_fuzz` | 0 | 1.57 |
+| 400 | `uv run python -m auditenv.check --json /tmp/r21-codex2/y4/metrics.json` | 0 | 93.29 |
+| 401 | `uv run python scripts/sync_docs.py --check --json /tmp/r21-codex2/y4/metrics.json` | 0 | 0.04 |
+| 402 | `uv run python -m auditenv.fuzz --seeds 0-999` | 0 | 90.66 |
+| 403 | `uv run python -m auditenv.fuzz --configs 3000` | 0 | 130.93 |
+| 404 | `uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299` | 0 | 12.45 |
+| 405 | `uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json` | 0 | 0.15 |
+| 406 | `uv run python -m auditenv.demo` | 0 | 0.17 |
+| 407 | `uv run python -m auditenv.export --config configs/dev.json --out episodes/dev` | 0 | 0.09 |
+| 408 | `uv run python -m auditenv.export --config configs/train.json --out episodes/train` | 0 | 0.09 |
+| 409 | `uv run python -m auditenv.export --config configs/eval_hard.json --out episodes/hard` | 0 | 0.29 |
+| 410 | `uv run python scripts/mutate_reward.py` | 0 | 141.70 |
+| 411 | `uv run python scripts/sensitivity.py` | 0 | 3.18 |
+| 412 | `uv run python scripts/shortcut_miner.py --report-only` | 0 | 28.81 |
+| 413 | `uv run python scripts/golden.py --check` | 0 | 0.79 |
+| 414 | `uv run python scripts/bench.py` | 0 | 16.63 |
+| 415 | `uv run python scripts/chart.py --json /tmp/r21-codex2/y4/metrics.json` | 0 | 0.04 |
+| 416 | `make check` | 0 | 76.64 |
+| 417 | `make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart` | 0 | 0.01 |
+| 420 | `uv run python -m auditenv.analyze --config configs/dev.json --seeds 2003` | 0 | 0.06 |
+
+The four Docker attempts each reported `bash: docker: command not found` (exit 127). Native quick start passed all 563 tests and gates, with wall times of 94.64 s via uv and 94.72 s via installed Python; the README's “about a minute” was optimistic under concurrent load. Demo took 0.20 s and scored 0.958. The jury replay matched the documented scores and its maximum was 0.049 s. The README example printed `100 99 50 0.0`, then TP 0, FN 1 and return −1. The keyless server used the scratch grader key file and wrote one closed result. Both fuzz commands passed with zero problems, all eight regenerated trajectory files matched by cmp, the explicit chart input and docs sync passed, and the re-exports and chart left tracked files byte-identical. The line-398 mutation count, line-410 22/22 caught and line-413 80/80 golden hashes matched the notes.
 2026-11-22 04:19 gemini3a — G23 complete: stress fuzzing on seeds 11000-11299.
   - default (reconcile): 1200 episodes (seeds 11000-11299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (7.3 s), exit code 0, wall time 8s.
   - hard (reconcile_hard): 1200 hard episodes (seeds 11000-11299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (18.6 s), exit code 0, wall time 18s.
@@ -2244,3 +2309,27 @@ Assumptions: the percentage denominator is the absolute base-minor debit for the
 | D20 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
 
 Discrepancy entries: 0
+2026-11-22 04:38 codex2 — Y5: repeated the combined-load jury runner at two seed bases.
+
+Ran six serial timing trials at worker HEAD 19fbfc9 while the same six parallel hard fuzz sweeps were active (no concurrent jury unit-test run, per Y5). Environment: macOS 26.6; scratch TMPDIR and AUDITENV_KEY_FILE; AUDITENV_GRADER_LOG unset.
+
+```sh
+env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard  # six concurrent processes
+taskpolicy -c background env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <3000-or-5000> --json /tmp/r21-codex2/y5/<seed>-<run>.json
+/usr/bin/time -p taskpolicy -c background env -u AUDITENV_SECRET uv run python -c pass
+```
+
+| Seed base | Trial | Exit | Runner wall s | random_explorer max s | reconcile max s | flag_all max s | oracle max s |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 3000 | 1 | 0 | 5.824 | 0.100 | 0.161 | 0.161 | 0.008 |
+| 3000 | 2 | 0 | 5.387 | 0.156 | 0.107 | 0.096 | 0.008 |
+| 3000 | 3 | 0 | 5.593 | 0.154 | 0.105 | 0.146 | 0.008 |
+| 5000 | 1 | 0 | 5.609 | 0.162 | 0.099 | 0.152 | 0.008 |
+| 5000 | 2 | 0 | 5.209 | 0.099 | 0.165 | 0.152 | 0.008 |
+| 5000 | 3 | 0 | 5.360 | 0.158 | 0.093 | 0.153 | 0.008 |
+
+All trials replayed 20 scenarios without reported timing failures; reconcile and oracle reached F1 1.000, random_explorer and flag_all returned −1.000. The Y2 random_explorer outlier (54.050 s) did not recur. The overall maximum was reconcile at 0.165 s (seed base 5000, trial 2), and random_explorer peaked at 0.162 s.
+
+The six startup probes used the same load and QoS, after the runner trials and while all six sweeps were still active. Exit codes were all 0; wall seconds were 0.04, 0.03, 0.03, 0.03, 0.03, 0.03. This benchmarks uv plus Python startup under load. Jury policy workers launch Python directly and also import modules and move messages, so the probe cannot separate startup from execution in the 54.050 s episode or establish its cause. Y2 also ran the four jury unittest modules alongside the loaded runner.
+
+The original six load processes covered every trial and probe, and each finished with exit 0, 3,000 hard episodes, zero problems and `FUZZ PASSED`. Wall seconds by process number: 275.414, 275.828, 275.201, 276.866, 275.619, 276.443.
