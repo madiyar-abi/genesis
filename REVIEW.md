@@ -417,3 +417,9 @@ evidence tasks (night/TASKS.md, night/LOG.md).
   seeds 0–499 and scored on 5000–5499 through the adapter: F1 0.163 (default) / 0.153 (hard) vs reconcile 1.000 /
   0.840. Its strongest cues (I1 payment is the last-evening payment; cutoff bookings at the period start) are the
   ones DESIGN §10 already lists.
+- Matcher differential (lead subagent, T23): a reference grader written from the published page (before reading
+  `matcher.py`) agreed with `matcher.grade` on 60 000 random submissions from 400 episodes (default, hard, D01–D20;
+  tie-rule clones in 5 234 cases; tolerance 0/1/5; all 12 invalid classes) and with `score_episode` on 6 000 more,
+  0 disagreements; five deliberately broken reference variants were each caught (91–2 779 disagreements), so the
+  harness can see a difference. Documented choices the page leaves open: `10000.0` is not an integer amount; an
+  unknown key and a wrong `episode_id` invalidate the submission; `explanation` is optional but must be a string.

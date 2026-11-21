@@ -877,3 +877,5 @@ Results by README line:
 - Line 403: `uv run python scripts/chart.py` -> exit 0 (0.04 s), last line: "wrote /Users/caliskan/Projects/genesis-gemini3a/docs/baselines.svg"
 Working directory clean (`git status` clean, 0 tracked files modified).
 All assigned gemini3a tasks in Round 18 complete.
+
+2026-11-21 23:04 lead — T23 done (subagent): independent reference grader vs matcher.grade, 60 000 + 6 000 (adapter) submissions, 0 disagreements; mutation sanity check of the harness 5/5 caught. No code change. REVIEW updated.
