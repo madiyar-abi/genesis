@@ -107,7 +107,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   night/LOG.md — accept: per run `Ran N tests` + result; any differing run verbatim.
 - [x] G14 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and
   `uv run python scripts/sensitivity.py` — files: night/LOG.md — accept: summaries + exit codes.
-- [ ] G15 (gemini3a) Red-team modules 10 times: `env -u AUDITENV_SECRET uv run python -m unittest
+- [x] G15 (gemini3a) Red-team modules 10 times: `env -u AUDITENV_SECRET uv run python -m unittest
   tests.test_load_redteam tests.test_server_redteam tests.test_jury_run` in a `for i in $(seq 10)` loop — files:
   night/LOG.md — accept: per run `Ran N tests` + OK/FAILED + wall time.
 
