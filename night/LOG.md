@@ -1,3 +1,6 @@
 # Round 18 log
 
 2026-11-21 21:42 lead (Claude) — Round 18 started (open improvement round, freeze 2026-11-22 18:00). No TASKS.md existed, so this is the first lead of the round. Wrote night/TASKS.md: 3 tasks per worker (gemini1a–3b evidence sweeps/doc integrity on new seeds, codex1/codex2 red-team the four jury blocks with fixes, rb doc-consistency tests). Assumption: the memory note "red-team passes beat sweeps" (r16) → the strong workers get red-team tasks, the Gemini workers get evidence on new seed ranges. Next: lead review (T30) while the check runs.
+
+2026-11-21 21:49 lead — T98: fresh `auditenv.demo --seed 2003` matches every number in docs/DEMO.md (326 rows, 69 invoices, 21 inspection steps, 0.958, 0.333, 286 / 351331 minor units, 22 actions, TP 4) and the check (dev reconcile F1 1.000, hard 0.752). No edit needed.
+2026-11-21 21:49 lead — T99: `sync_docs --check` clean against a fresh `check --json`. Found one untracked stale number: `scripts/mutate_reward.py` now runs 22 mutants (22/22 killed, re-run tonight) but PITCH slide 8, CHECKS.md, README "Other commands" and HANDOFF "How to run" said 15. Fixed all four; historical round notes in HANDOFF left as they were.

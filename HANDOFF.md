@@ -568,7 +568,7 @@ uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out
 uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json
 uv run python -m auditenv.fuzz --seeds 0-999          # seed sweep (3 000 episodes, ~45 s)
 uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299
-uv run python scripts/mutate_reward.py                # 15/15 reward mutants caught
+uv run python scripts/mutate_reward.py                # 22/22 reward mutants caught
 uv run python scripts/golden.py --check               # generator drift detector (80 hashes)
 make -n fuzz stress attack miner sensitivity bench chart  # preview available targets
 ```
