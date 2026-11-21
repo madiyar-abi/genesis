@@ -314,8 +314,12 @@ def _structure(ep: dict, *, strict_export: bool = True) -> list[str]:
                 return [*problems, f"payment {field} must be a nonblank string"]
         if "invoice_refs" not in p:
             return [*problems, "payment invoice_refs field is required"]
-    ids = [r["row_id"] for r in t["ledger"]] + [d["doc_id"] for d in t["invoices"] + t["payments"]]
-    if len(ids) != len(set(ids)):
+    row_ids = [r["row_id"] for r in t["ledger"]]
+    doc_ids = [d["doc_id"] for d in t["invoices"] + t["payments"]]
+    ids = row_ids + doc_ids
+    # our exports keep row and doc ids disjoint; a jury copy renames each id space on its own (check definitions,
+    # paired block), so a loaded episode only needs each space to be unique
+    if any(len(s) != len(set(s)) for s in ((ids,) if strict_export else (row_ids, doc_ids))):
         problems.append("duplicate row_id/doc_id")
     if not all(isinstance(i, str) and i.strip() for i in ids):
         problems.append("row_id/doc_id must be a non-empty string")

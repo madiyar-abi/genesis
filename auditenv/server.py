@@ -190,6 +190,8 @@ def _serve_lines(inp, env, queue, flush_log, send_resp) -> None:
             resp = {"error": f"ValueError: {_validation_error(e)}"}
         except RuntimeError:
             resp = {"error": "RuntimeError: call reset() first"}
+        except Exception:  # bounded and message-free: never a traceback, never internals, keep serving
+            resp = {"error": "internal error"}
         send_resp(resp)
 
 

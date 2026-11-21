@@ -119,3 +119,18 @@ class ServerPipeRedTeam(unittest.TestCase):
             self.assertTrue(client.proc.stdout.closed)
         finally:
             client.close()
+
+
+class UnexpectedErrorTest(unittest.TestCase):
+    def test_an_unexpected_exception_type_is_a_bounded_error_and_serving_continues(self):
+        import io
+        from unittest import mock
+        from auditenv.env import AuditEnv
+        from auditenv.server import serve
+        out = io.StringIO()
+        with mock.patch.object(AuditEnv, "step", side_effect=KeyError("/secret/path")):
+            serve(io.StringIO(RESET.decode() + STEP.decode() + RESET.decode()), out)
+        responses = [json.loads(line) for line in out.getvalue().splitlines()]
+        self.assertEqual(len(responses), 3)
+        self.assertEqual(responses[1], {"error": "internal error"})
+        self.assertIn("observation", responses[2])

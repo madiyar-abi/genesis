@@ -165,3 +165,25 @@ class ExportLoaderRedTeam(unittest.TestCase):
                     self.check_case(filename, lambda p: p.write_text(
                         contents if contents else "\n".join([p.read_text().splitlines()[0], *p.read_text().splitlines()[:-1]]) + "\n"
                     ))
+
+
+class SeparateIdSpaces(unittest.TestCase):
+    """The jury renames each id space on its own, so "identical strings in different tables" are legal
+    (published check definitions, paired block): a ledger row_id equal to a document's doc_id still loads."""
+
+    def test_row_id_equal_to_a_doc_id_loads_in_closed_reset(self):
+        entry = next(e for e in json.loads((EXAMPLE / "index.json").read_text()) if e["seed"] == 2003)
+        with tempfile.TemporaryDirectory() as temp:
+            episode = Path(temp) / entry["episode_id"]
+            shutil.copytree(EXAMPLE / entry["episode_id"], episode)
+            truth = json.loads((episode / "grader/truth.json").read_text())
+            cited = {i for issue in truth["issues"] for s in issue["evidence_sets"] for i in s}
+            doc_id = json.loads((episode / "public/invoices.jsonl").read_text().splitlines()[0])["doc_id"]
+
+            def rename(rows):
+                col = rows[0].index("row_id")
+                next(r for r in rows[1:] if r[col] not in cited)[col] = doc_id
+
+            csv_edit(episode / "public/ledger.csv", rename)
+            observation, _ = judge_adapter.make_env().reset(0, {**RESET, "episode_dir": str(episode)})
+            self.assertEqual(observation["manifest"]["episode_id"], entry["episode_id"])
