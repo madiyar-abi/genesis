@@ -56,7 +56,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard` as background load. — files:
   night/LOG.md — accept: per run exit code + wall time + any timing-related failure quoted verbatim (60 s limit,
   timeouts in tests).
-- [ ] Y3 (codex2) README first-read review as a jury member who has 10 minutes: follow README top to bottom on a
+- [x] Y3 (codex2) README first-read review as a jury member who has 10 minutes: follow README top to bottom on a
   fresh clone (`git clone /Users/caliskan/Projects/genesis /tmp/r21-codex2/clone`, branch origin/night/2026-11-22-r21);
   list every place where a reader would get stuck, read a claim that is not backed by a command, or find two
   sections saying different things. — files: night/LOG.md — accept: numbered list with README line numbers and a
