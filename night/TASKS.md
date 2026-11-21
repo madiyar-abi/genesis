@@ -138,3 +138,38 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   accept: every number in it reproduced.
 - [ ] P (lead) `docs/PITCH.md` — re-verify slide outline facts and numbers against the current check output — accept:
   every number matches.
+
+## Top-up 1 (04:30) — same rules as above
+- [ ] X4 (codex1) Classify every clean-config (D01–D05, both difficulties) violation of `night/r21/ledger_identity.py`
+  on seeds 41000–41299: add a `--classify` flag that sorts each into (a) `unapplied_running` caused only by a refund
+  debited at the refund-date rate while its receipt credited 2900 at the receipt-date rate (same customer, same
+  document currency, document-currency credit never negative), (b) `ar_running`/`ar_close` off by at most the number
+  of cash applications to that invoice (per-application ROUND_HALF_UP residue), (c) other. — files:
+  night/r21/ledger_identity.py, night/LOG.md — accept: LOG counts per class × config, max |residue| for (a) in base
+  minor units and as % of the refund, and every class (c) item quoted with seed and row ids ("0 other" is the hoped
+  result, only with the totals).
+- [ ] X5 (codex1) `env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor` on seeds 45000–45099 (add a
+  `--seeds` flag if missing) — files: night/r21/text_auditor.py, night/LOG.md — accept: the table + discrepancy count.
+- [ ] Y4 (codex2) After the lead's README commit "README: first-read fixes (Y3)" lands (merge first; if it is not
+  there yet, do Y5 first): fresh clone at origin/night/2026-11-22-r21, run every command in the README sections the
+  commit touched — files: night/LOG.md — accept: table command → exit code → wall time; any mismatch with the text.
+- [ ] Y5 (codex2) Re-run Y2's combined condition (low QoS + 6 parallel hard fuzz sweeps) on `auditenv.jury_run` only,
+  3 times, and record per policy the max wall time; then the same with `--seed-base 5000` — files: night/LOG.md —
+  accept: table run → policy → max s; note whether the 54 s outlier repeats and what part is process startup (time
+  `uv run python -c pass` under the same load).
+- [ ] Z4 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` and
+  `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` — files: night/LOG.md — accept: exit codes
+  + summary lines (reproduction of codex1/codex2 results by another worker).
+- [ ] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 15000-15999` and the same with
+  `--hard` — files: night/LOG.md — accept: both summaries + wall times.
+- [ ] G20 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 75000` — files:
+  night/LOG.md — accept: summary + wall time + max steps.
+- [ ] G21 (gemini2a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 39000-39299`
+  — files: night/LOG.md — accept: exit code, totals and "unexplained violations" lines verbatim.
+- [ ] G22 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 4000-5999` — files:
+  night/LOG.md — accept: last line + wall time.
+- [ ] G23 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 11000-11299`
+  and `... --hard --stress reconcile_hard --seeds 11000-11299` — files: night/LOG.md — accept: summaries + wall times.
+- [ ] G24 (gemini3b) After the lead's README commit lands: `env -u AUDITENV_SECRET uv run python -m auditenv.check
+  --json /tmp/r21-gemini3b/c2.json` then `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c2.json`
+  — files: night/LOG.md — accept: both exit codes and last lines.
