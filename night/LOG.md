@@ -1540,3 +1540,384 @@ First unexplained violation of each check outside clean scenarios:
 - D20/default seed 41012 ar_running (L02181): observed -1, expected 0; 2602-726143
 - D20/hard seed 41000 unapplied_running (R3497): observed -355, expected 0; CUST75627
 - D20/hard seed 41020 ar_running (GL-002714): observed -1, expected 0; SI-2025-056047
+
+2026-11-22 03:55 codex1 — X3 extreme configurations. `env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` → exit 0, 19.223 s.
+
+Assumptions: three fresh seeds 44000–44002, mixed counts distributed as evenly as possible across the four issue types, two findings per interacting scenario, documented maximum 12 for every type, and permutation seed 37 versus null. The factorial uses one allocation error so all three allocation settings are exercised. All 300 accepted episodes verified and returned exactly the requested count. All 72 rejected configurations reported `ValueError: at most 12 issues per episode`. No silent count mismatch, unexpected exception, or action-budget overrun. Max 72 actions. Both reconciliation and empty submissions were replayed in closed mode and scored independently. Per-config results follow.
+
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 18 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 18 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 18 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 18 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 18 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 17 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 25 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 28 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 47 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 23 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 24 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 43 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 43 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 43 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 43 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 43 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 35 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 61 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 48 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 41 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 54 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 63 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 48 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 17 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 17 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 17 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 17 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 35 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 35 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44000 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 19 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 19 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 19 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 19 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 19 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 24 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 27 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 24 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 23 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 40 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 40 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 40 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 40 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 40 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 36 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 68 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 36 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 41 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 72 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 33 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 33 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 45 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44001 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 23 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 23 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 23 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 23 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 23 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 26 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 28 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 49 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 22 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 27 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "default", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 26 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 0}, "n_invoices": 10} — valid: 0 issues; 41 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 0}, "n_invoices": 10} — valid: 0 issues; 41 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 0}, "n_invoices": 10} — valid: 0 issues; 41 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 41 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 0, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 0 issues; 41 actions; reconcile F1=1.0; empty F1=1.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 1}, "n_invoices": 10} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 1}, "n_invoices": 10} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 1}, "n_invoices": 10} — valid: 1 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 1}, "n_invoices": 10} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 1, "fx_error": 0, "payment_allocation": 0, "period_cutoff": 0}, "n_invoices": 10} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 10} — valid: 12 issues; 58 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 10} — valid: 12 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 10} — valid: 12 issues; 43 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 10} — valid: 12 issues; 41 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 10} — valid: 12 issues; 50 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 20}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 5, "fx_error": 5, "payment_allocation": 5, "period_cutoff": 5}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 50}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 13, "fx_error": 12, "payment_allocation": 13, "period_cutoff": 12}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 0}, "n_invoices": 10} — valid: 2 issues; 44 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 1}, "n_invoices": 10} — valid: 2 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 1, "I2": 1}, "n_invoices": 10} — valid: 4 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 6, "I2": 0}, "n_invoices": 10} — valid: 12 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 6}, "n_invoices": 10} — valid: 12 issues; 36 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 3, "I2": 3}, "n_invoices": 10} — valid: 12 issues; 41 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 7, "I2": 0}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "interacting": {"I1": 0, "I2": 7}, "n_invoices": 10} — rejected: ValueError: at most 12 issues per episode
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 3, "fx_error": 3, "payment_allocation": 3, "period_cutoff": 3}, "n_invoices": 100} — valid: 12 issues; 47 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"duplicate_invoice": 12}, "n_invoices": 100} — valid: 12 issues; 69 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"payment_allocation": 12}, "n_invoices": 100} — valid: 12 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"fx_error": 12}, "n_invoices": 100} — valid: 12 issues; 48 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"difficulty": "hard", "errors": {"period_cutoff": 12}, "n_invoices": 100} — valid: 12 issues; 51 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 14 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 21 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 37 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 35 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 35 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": null, "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 46 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 16 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 38 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 36 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 36 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "missing", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 18 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 40 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 19 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": false, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 39 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 15 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 15 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": false, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 34 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "default", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 20 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": null} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+- seed 44002 {"allocation": "partial", "difficulty": "hard", "distractors": true, "ensure_distractors": true, "errors": {"payment_allocation": 1}, "n_invoices": 10, "transform_seed": 37} — valid: 1 issues; 42 actions; reconcile F1=1.0; empty F1=0.0
+
+Outcomes: {'valid': 300, 'rejected': 72, 'failure': 0}. Total: 372.
+
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, 71.45 s wall time, ALL CHECKS PASSED in 71.4 s

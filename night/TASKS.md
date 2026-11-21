@@ -34,7 +34,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   and D01–D20 both difficulties. — files: night/r21/ledger_identity.py, night/LOG.md — accept: per check × config the
   count and violations; violations in clean configs (D01–D05) quoted with seed and row ids; exit 0 iff none
   unexplained (explained = the config injects an error type that produces it, as in night/r20/chronology.py).
-- [ ] X3 (codex1) Extreme config combinations through `judge_adapter.generate_episode` + `reset` + `score_episode`
+- [x] X3 (codex1) Extreme config combinations through `judge_adapter.generate_episode` + `reset` + `score_episode`
   (oracle-from-records policy `reconcile`/`reconcile_hard` and empty findings): n_invoices 10 with 0, 1, 12, 20, 50
   errors of one type and of mixed types; every issue type alone at its max; `interacting` only; `allocation` ×
   `ensure_distractors` × `distractors` × `difficulty` × `transform_seed` full product; n_invoices 100 with 12 issues.
