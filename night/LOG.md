@@ -2241,3 +2241,28 @@ The four Docker attempts each reported `bash: docker: command not found` (exit 1
   - default (reconcile): 1200 episodes (seeds 11000-11299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (7.3 s), exit code 0, wall time 8s.
   - hard (reconcile_hard): 1200 hard episodes (seeds 11000-11299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (18.6 s), exit code 0, wall time 18s.
 2026-11-22 04:18 gemini3b — G24 complete: ran `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r21-gemini3b/c2.json` (exit 0, last line: "ALL CHECKS PASSED in 51.9 s"; 563 unit tests, 200/200 verifier, 20/20 paired, 50/50 hard verifier, 20/20 hard paired) then `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c2.json` (exit 0, last line: "All documentation tables match measured data."). Both exit codes 0; zero doc drift. All gemini3b tasks complete.
+
+2026-11-22 04:38 codex2 — Y5: repeated the combined-load jury runner at two seed bases.
+
+Ran six serial timing trials at worker HEAD 19fbfc9 while the same six parallel hard fuzz sweeps were active (no concurrent jury unit-test run, per Y5). Environment: macOS 26.6; scratch TMPDIR and AUDITENV_KEY_FILE; AUDITENV_GRADER_LOG unset.
+
+```sh
+env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard  # six concurrent processes
+taskpolicy -c background env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <3000-or-5000> --json /tmp/r21-codex2/y5/<seed>-<run>.json
+/usr/bin/time -p taskpolicy -c background env -u AUDITENV_SECRET uv run python -c pass
+```
+
+| Seed base | Trial | Exit | Runner wall s | random_explorer max s | reconcile max s | flag_all max s | oracle max s |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 3000 | 1 | 0 | 5.824 | 0.100 | 0.161 | 0.161 | 0.008 |
+| 3000 | 2 | 0 | 5.387 | 0.156 | 0.107 | 0.096 | 0.008 |
+| 3000 | 3 | 0 | 5.593 | 0.154 | 0.105 | 0.146 | 0.008 |
+| 5000 | 1 | 0 | 5.609 | 0.162 | 0.099 | 0.152 | 0.008 |
+| 5000 | 2 | 0 | 5.209 | 0.099 | 0.165 | 0.152 | 0.008 |
+| 5000 | 3 | 0 | 5.360 | 0.158 | 0.093 | 0.153 | 0.008 |
+
+All trials replayed 20 scenarios without reported timing failures; reconcile and oracle reached F1 1.000, random_explorer and flag_all returned −1.000. The Y2 random_explorer outlier (54.050 s) did not recur. The overall maximum was reconcile at 0.165 s (seed base 5000, trial 2), and random_explorer peaked at 0.162 s.
+
+The six startup probes used the same load and QoS, after the runner trials and while all six sweeps were still active. Exit codes were all 0; wall seconds were 0.04, 0.03, 0.03, 0.03, 0.03, 0.03. This benchmarks uv plus Python startup under load. Jury policy workers launch Python directly and also import modules and move messages, so the probe cannot separate startup from execution in the 54.050 s episode or establish its cause. Y2 also ran the four jury unittest modules alongside the loaded runner.
+
+The original six load processes covered every trial and probe, and each finished with exit 0, 3,000 hard episodes, zero problems and `FUZZ PASSED`. Wall seconds by process number: 275.414, 275.828, 275.201, 276.866, 275.619, 276.443.
