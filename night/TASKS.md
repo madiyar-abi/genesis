@@ -79,7 +79,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   night/LOG.md — accept: summary + wall time + max steps in LOG.
 
 ## gemini2a — determinism (evidence only, files: night/LOG.md)
-- [ ] G7 (gemini2a) Full unit suite three times: `PYTHONHASHSEED=1 TZ=UTC env -u AUDITENV_SECRET uv run python -m
+- [x] G7 (gemini2a) Full unit suite three times: `PYTHONHASHSEED=1 TZ=UTC env -u AUDITENV_SECRET uv run python -m
   unittest discover -s tests -t .`, then `PYTHONHASHSEED=4242 TZ=Asia/Almaty ...`, then `PYTHONHASHSEED=random
   TZ=Pacific/Kiritimati ...` — files: night/LOG.md — accept: per run `Ran N tests`, OK/FAILED, wall time; failures
   verbatim.
