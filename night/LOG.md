@@ -370,4 +370,11 @@ Current discrepancies and suggested text:
     default/default seed=35012 ids=['PAY-609369', 'SI-2026-820954', 'GL-001535'] ar credit 2026-11-03T21:12:00+05:30 booking 2026-11-04T12:49:00+05:30
     hard/hard seed=35325 ids=['RCPT0071974', 'F0102081', 'R4524'] ar credit 2026-02-02T18:50:00+01:00 booking 2026-02-04T17:51:00+01:00
     D14/default seed=35043 ids=['RCPT0721714', 'INV-456057', 'R4120'] ar credit 2025-10-04T09:07:00+09:00 booking 2025-10-04T21:38:00+09:00
+2026-11-22 01:55 gemini1b — G32 complete (chronology check on seeds 36000-36599).
+Command: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 36000-36599`
+Exit code: 0, wall time: 171.19 s
+Totals line:
+totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=6132, e_fx_missing=0, f_inv_booked_before_issue=5177, f_pay_posted_before_doc=0, f_ar_before_booking=46, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=10061, c_tie=3
+Unexplained violations line:
+unexplained violations: 46 (0 in clean configs)
 2026-11-22 01:54 lead — Applied codex2 Y2/Y3 doc corrections (subagent re-verified each; skipped rewording-only items and the CONTRACT:7 TASKS remark). check 563 tests pass, sync_docs no drift, doc tests 19 OK. Commit c8b8d70.
