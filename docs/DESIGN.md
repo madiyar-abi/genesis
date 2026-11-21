@@ -391,4 +391,8 @@ to explore.
   hard mode, and only after adding the two hard rules (`reconcile_hard`) is it perfect again. Every level
   a script can solve is still learnable for an agent that must discover the rules within 100 tool calls;
   the baselines measure how much the distractors hurt shortcuts, not agent difficulty.
+- The baseline `reconcile` pairs duplicate candidates only when they were issued within 3 days of each other, a
+  window the task text does not state (the generator issues copies 0–3 days later). It never changes a result: an
+  independent checker that applies only the written definitions, with no window, reproduced the truth exactly on
+  44 000 episodes (seeds 20000–20999 × default, hard, heavy and the 20 jury scenarios in both difficulties).
 - No model was trained; we make no claim about training improvements.

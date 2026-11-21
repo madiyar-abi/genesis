@@ -389,3 +389,10 @@ evidence tasks (night/TASKS.md, night/LOG.md).
 - Paired (codex1, T20): an independent transform (all surrogate ids renamed, dates shifted one 400-year cycle so every
   fx_id changes, four tables shuffled) on seeds 0–49 default and hard: 100/100 pairs same closed and oracle reward,
   `verify --dir` 50/50 each. No defect.
+- Data ambiguity (case §10: "contradictory or unsolvable data do not count as difficulty"): an independent checker
+  that reads only task.txt, policy.json and the public tables and applies the written definitions literally (no
+  verifier, policy or truth code) reproduced the truth exactly — type, affected ids, amount — in all 44 000 episodes
+  (seeds 20000–20999 × 44 configs: default, hard, heavy, D01–D20 in both difficulties). The 0.4 % of the default
+  duplicate cue that misses (18 of 4 920) are same-customer invoices with equal totals but different line items:
+  not duplicates under the written definition. One unstated rule found in a baseline, not in the data: `reconcile`
+  pairs duplicates only within 3 days; it never changes a result. DESIGN §10 now says so.
