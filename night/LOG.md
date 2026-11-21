@@ -597,3 +597,58 @@ Next: T51 (`env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 9000-9
   FUZZ PASSED
 Result: 0 problems found across 6,000 episodes (default + hard).
 All assigned gemini1a tasks complete.
+2026-11-21 22:43 gemini1b — T52: jury_run baseline evaluation on seed bases 15000, 16000, 17000, 18000, 19000.
+Command: `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r18-gemini1b/j<B>.json`
+- Seed base 15000 (exit 0, wall 2.47s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.036   0.040
+reconcile         1.000  1.000  1.000    0.960    20.8    24    0.036   0.039
+flag_all          0.000  0.000  0.000   -1.000     3.7     4    0.033   0.036
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+
+- Seed base 16000 (exit 0, wall 2.50s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.036   0.044
+reconcile         1.000  1.000  1.000    0.960    21.1    23    0.037   0.041
+flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.033   0.039
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+
+- Seed base 17000 (exit 0, wall 2.53s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.037   0.040
+reconcile         1.000  1.000  1.000    0.959    21.2    26    0.037   0.039
+flag_all          0.000  0.000  0.000   -1.000     3.4     4    0.034   0.041
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+
+- Seed base 18000 (exit 0, wall 2.57s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.806    33.0    33    0.037   0.041
+reconcile         1.000  1.000  1.000    0.960    21.2    24    0.037   0.043
+flag_all          0.000  0.000  0.000   -1.000     3.7     4    0.034   0.042
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+
+- Seed base 19000 (exit 0, wall 2.58s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.806    33.0    33    0.038   0.048
+reconcile         1.000  1.000  1.000    0.959    21.5    25    0.039   0.045
+flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.034   0.036
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+
+Checks:
+- Oracle F1 = 1.000 on all runs (none < 1).
+- Reconcile F1 = 1.000 on all runs (none < 1).
+- Random explorer return <= -0.806 on all runs (none > -0.5).
+- Flag_all return = -1.000 on all runs (none > -0.5).
+Next: T53 (stress reconcile and reconcile_hard on seeds 7000-7299).
+
+2026-11-21 22:45 gemini1b — T53: stress solvability on seeds 7000-7299.
+- Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 7000-7299`
+  Exit code: 0
+  Wall time: 13.57 s
+  Summary: reconcile on 1200 default episodes (seeds 7000-7299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 35, truncated 0 (13.5 s)
+- Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 7000-7299`
+  Exit code: 0
+  Wall time: 32.23 s
+  Summary: reconcile_hard on 1200 hard episodes (seeds 7000-7299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 56, truncated 0 (32.2 s)
+Result: 0 imperfect, 0 truncated across 2,400 episodes. Max steps: 35 (default), 56 (hard).
+All assigned gemini1b tasks (T4, T5, T6, T40, T41, T42, T52, T53) complete.
