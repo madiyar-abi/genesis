@@ -694,3 +694,30 @@ Next: T57 (auditenv.verify --seeds 3000-3999).
   Wall time: 22.95 s
   Summary: 3000/3000 episodes valid; episodes with problems: 0
 All assigned gemini2b tasks (T56, T57) complete.
+2026-11-21 22:52 gemini3a — T58 complete: re-ran T44 error-code script and tested closed-reset failure cases on current branch tip.
+1. Error-code table through `judge_adapter` (`JudgeEnv`):
+| Action / Input                                                              | Code               | Steps Before | Steps After  | Cost (Delta) |
+|-----------------------------------------------------------------------------|--------------------|--------------|--------------|--------------|
+| malformed envelope `{"x": 1}`                                               | unknown_action     | 100          | 99           | 1            |
+| unknown action name `{"name": "unknown", "args": {}}`                       | unknown_action     | 99           | 98           | 1            |
+| bad_params `{"name": "list_records", "args": {"table": "ledger", "limit": -1}}` | bad_params         | 98           | 97           | 1            |
+| unknown_table `{"name": "list_records", "args": {"table": "nonexistent"}}`  | unknown_table      | 97           | 96           | 1            |
+| not_found `{"name": "get_record", "args": {"table": "ledger", "id": "NONEXISTENT"}}` | not_found          | 96           | 95           | 1            |
+| not_found `{"name": "get_document", "args": {"doc_id": "NONEXISTENT"}}`     | not_found          | 95           | 94           | 1            |
+| calc_error `{"name": "calculator", "args": {"expression": "1/0"}}`          | calc_error         | 94           | 93           | 1            |
+| invalid_findings `{"name": "submit", "args": {"findings": {"episode_id": "x", "findings": "no"}}}` | invalid_findings   | 100          | 99           | 1            |
+| episode_over (action after submit)                                          | episode_over       | 99           | 99           | 0            |
+| time_limit `{"name": "calculator", "args": {"expression": "1+1"}}` (after timeout) | time_limit         | 100          | 99           | 1            |
+
+2. Closed-reset error cases (first dev episode: `ep_14eca11ac929`):
+| Case                                                  | Exception  | Message                                 | Path-free | Prev step works |
+|-------------------------------------------------------|------------|-----------------------------------------|-----------|-----------------|
+| nonexistent path `/nonexistent`                       | ValueError | manifest.json: required file is missing | yes       | True            |
+| empty directory                                       | ValueError | manifest.json: required file is missing | yes       | True            |
+| copy of ep_14eca11ac929 with public/ledger.csv deleted | ValueError | ledger.csv: required file is missing    | yes       | True            |
+
+Verification:
+- Each closed-reset error case raises `ValueError`.
+- Messages do not leak any filesystem paths or '/' characters (`path-free: yes`).
+- An active episode retains state and `env.step({"name": "calculator", "args": {"expression": "1"}})` executes successfully and consumes 1 step following each rejected reset.
+Next: T59.
