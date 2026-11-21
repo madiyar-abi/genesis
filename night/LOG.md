@@ -12,3 +12,9 @@ Command: python3 /tmp/r18-gemini3a/check_links.py (exit 0)
 - docs/PITCH.md: 0 markdown links checked, 2 repo paths checked; 0 missing
 Total: 15 markdown links, 313 repo paths checked across 6 files. 0 missing.
 Next: T14.
+
+2026-11-21 21:49 gemini3a — T14 complete: verified all CLI command lines and flags in README.md and docs/*.md.
+Command: python3 /tmp/r18-gemini3a/check_flags.py (exit 0)
+Number of command lines checked: 67 across 6 files (README.md, docs/CHECKS.md, docs/CONTRACT.md, docs/DEMO.md, docs/DESIGN.md, docs/PITCH.md).
+Result: 0 unknown flags.
+Next: T15.
