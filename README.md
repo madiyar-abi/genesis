@@ -30,7 +30,9 @@ git clone https://github.com/madiyar-abi/genesis.git && cd genesis
 uv run python -m auditenv.check        # the single official check (exit code 0 = pass)
 ```
 
-For an offline checkout with Python 3.11 already installed, run `python3.11 -m auditenv.check` from the repository root.
+Needs only [`uv`](https://docs.astral.sh/uv/getting-started/installation/): it fetches Python 3.11 (pinned in
+`.python-version`); there are no other dependencies. For an offline checkout with Python 3.11 already installed, run
+`python3.11 -m auditenv.check` from the repository root, or use the container below.
 
 ### Container
 

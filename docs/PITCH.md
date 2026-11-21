@@ -61,7 +61,7 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 - Paired checks cover 20 default and 20 hard episodes. They replay actions, compare each public record after translating its IDs, and check that the oracle earns the same reward on the shuffled records.
 - Run `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 20000` to vary company size, error mix and difficulty. Across 20,000 cases, including 8,037 hard cases, the verifier reported zero problems. The oracle and the rule policy for each difficulty reached F1 1.0 within 59 actions.
 - A separate mutation test, `uv run python scripts/mutate_reward.py`, caught 15 of 15 deliberately introduced matcher and reward changes.
-- The unit tests regenerate the 40 exported episodes and the seven training trajectory files and compare them byte for byte with the committed copies.
+- The unit tests regenerate the 40 exported episodes and the seven training trajectory files plus `trajectories.jsonl` and compare them byte for byte with the committed copies.
 
 ## 9. Limits and next experiment
 
