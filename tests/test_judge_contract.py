@@ -274,6 +274,31 @@ class JudgeContractTest(unittest.TestCase):
         self.assertEqual(reward, 1.0)
         self.assertEqual(info["tp"], 1)
 
+    def test_score_episode_on_a_hand_written_fixture(self):
+        """Block 3's fixture as the jury may build it: a copy of an exported episode whose truth.json holds only the
+        issue A (10000 KZT, evidence {D1, D2}), written by hand without our extra truth fields."""
+        fixture = os.path.join(self.tmp, "B3")
+        shutil.copytree(self.c_dir, fixture)
+        inv, docs = self.c["tables"]["invoices"][0], [d["doc_id"] for d in self.c["tables"]["invoices"][:2]]
+        issue = {"issue_id": "A", "type": "fx_error", "affected_ids": [inv["invoice_id"]],
+                 "expected_amount_minor": 10000, "currency": "KZT", "evidence_sets": [docs]}
+        with open(os.path.join(fixture, "grader", "truth.json"), "w", encoding="utf-8") as fh:
+            json.dump({"episode_id": self.c["episode_id"], "issues": [issue]}, fh)
+        f = {"type": "fx_error", "affected_ids": [inv["invoice_id"]], "claimed_amount_minor": 10000,
+             "currency": "KZT", "evidence_ids": docs, "explanation": "rate of the wrong day"}
+
+        def score(*findings, steps=10):
+            return ja.score_episode(fixture, {"episode_id": self.c["episode_id"], "findings": list(findings)}, steps)
+        self.assertEqual(score(f), {"tp": 1, "fp": 0, "fn": 0, "precision": 1.0, "recall": 1.0, "f1": 1.0,
+                                    "return": score(f)["return"]})
+        self.assertAlmostEqual(score(f)["return"], 0.98, delta=1e-9)
+        self.assertAlmostEqual(score(f, f)["return"], 47 / 150, delta=1e-9)  # row 5
+        for changed in ({"claimed_amount_minor": 10001}, {"evidence_ids": docs[:1]},
+                        {"evidence_ids": [docs[0], self.u]}, {"currency": "kzt"}):
+            with self.subTest(changed):
+                self.assertEqual({k: score({**f, **changed})[k] for k in ("tp", "fp", "fn")},
+                                 {"tp": 0, "fp": 1, "fn": 1})
+
     def test_score_episode(self):
         good = ja.score_episode(self.e_dir, oracle_findings(self.e), 10)
         self.assertEqual({k: good[k] for k in ("tp", "fp", "fn")}, {"tp": 1, "fp": 0, "fn": 0})

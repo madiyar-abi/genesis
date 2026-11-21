@@ -182,13 +182,16 @@ container); it imports `auditenv` and needs nothing else. The adapter only trans
 environment, matcher and reward are the ones described above.
 
 ```python
+import os, tempfile
 import judge_adapter as ja
-ja.generate_episode(seed, config, output_dir)       # writes public/ and grader/ of one episode into output_dir
+out = os.path.join(tempfile.mkdtemp(), "ep")
+ja.generate_episode(7, {"errors": {"fx_error": 1}, "interacting": {"I1": 0, "I2": 0}}, out)  # public/ + grader/
 env = ja.make_env()
-obs, info = env.reset(0, {"mode": "closed", "episode_dir": output_dir, "team_config": {}})
-obs, reward, terminated, truncated, info = env.step({"name": "list_records",
-                                                     "args": {"table": "ledger", "cursor": None, "limit": 50}})
-ja.score_episode(output_dir, findings, inspection_steps)  # {"tp","fp","fn","precision","recall","f1","return"}
+first, info = env.reset(0, {"mode": "closed", "episode_dir": out, "team_config": {}})
+obs, reward, terminated, truncated, _ = env.step({"name": "list_records",
+                                                  "args": {"table": "ledger", "cursor": None, "limit": 50}})
+print(first["remaining_steps"], obs["remaining_steps"], len(obs["result"]["records"]), reward)  # 100 99 50 0.0
+print(ja.score_episode(out, {"episode_id": info["episode_id"], "findings": []}, 1))  # tp 0, fn 1, return -1
 ```
 
 | call | behaviour |
