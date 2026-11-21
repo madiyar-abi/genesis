@@ -1,6 +1,8 @@
 """Run policies on episodes and write trajectories.jsonl (CONTRACT §7).
 
-    uv run python -m auditenv.run --policy reconcile --seeds 2000-2009 --out trajectories.jsonl
+    uv run python -m auditenv.run --policy reconcile --seeds 2000-2009 --out /tmp/dev_reconcile.jsonl
+    uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json \
+        --out trajectories.jsonl    # the committed trajectories.jsonl (README)
 """
 
 from __future__ import annotations
@@ -96,13 +98,14 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--policy", choices=sorted(POLICIES), default="reconcile")
     ap.add_argument("--seeds", type=parse_seeds, default=None, help="e.g. 2000-2009 or 1,2,3 (default 2000-2009)")
-    ap.add_argument("--config", help="configs/*.json episode list (ignored if --seeds is given)")
+    ap.add_argument("--config", action="append",
+                    help="configs/*.json episode list; repeat to run several in order (ignored if --seeds is given)")
     ap.add_argument("--mode", choices=("train", "eval"), default="train")
     ap.add_argument("--out", help="write trajectories.jsonl here")
     ap.add_argument("--policy-seed", type=int, default=0)
     args = ap.parse_args(argv)
     if args.config and args.seeds is None:
-        episodes = load_episodes(args.config)
+        episodes = [episode for path in args.config for episode in load_episodes(path)]
     else:
         episodes = [(s, {}) for s in (args.seeds if args.seeds is not None else parse_seeds("2000-2009"))]
     episodes = [(s, {**c, "mode": args.mode}) for s, c in episodes]
