@@ -163,3 +163,10 @@ Wrote config files `/tmp/r18-gemini2b/a6000.json` (seeds 6000-6019, default conf
   Violations: 0
 Total violations across all 4 runs (44,000 mutations): 0 violations.
 Next: T12 (auditenv.verify --seeds 2000-2999).
+
+2026-11-21 22:18 gemini2b — T12 complete: verify on seeds 2000–2999.
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 2000-2999`
+  Exit code: 0
+  Wall time: 18.44 s
+  Summary: 3000/3000 episodes valid; episodes with problems: 0
+All assigned gemini2b tasks (T10, T11, T12) complete.
