@@ -44,7 +44,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   clear message; LOG lists every other exception, silent count mismatch, or step-budget overrun with a reproduction.
 
 ## codex2 — jury-run realism (strong)
-- [ ] Y1 (codex2) Jury copy robustness beyond the published paired transform: take 10 exported episodes (5 default,
+- [x] Y1 (codex2) Jury copy robustness beyond the published paired transform: take 10 exported episodes (5 default,
   5 hard; `episodes/dev`, `episodes/hard`) and write variants a jury tool could plausibly produce when it re-writes
   files: CSV column order shuffled, CRLF line endings, UTF-8 BOM on CSV/JSON, trailing newline missing, JSON pretty-
   printed vs compact, JSONL with keys reordered. For each variant: `judge_adapter` reset on `episode_dir` + replay of
@@ -99,7 +99,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   accept: exit code and the final "Audited ... unexpected failures" line verbatim, wall time.
 
 ## gemini2b — reproducibility (evidence only, files: night/LOG.md)
-- [ ] G10 (gemini2b) Re-export into scratch dirs and diff against the committed exports:
+- [x] G10 (gemini2b) Re-export into scratch dirs and diff against the committed exports:
   `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r21-gemini2b/dev` then
   `diff -r episodes/dev /tmp/r21-gemini2b/dev`; same for every split under episodes/ (config names in configs/) —
   accept: per split the diff exit code; any differing file named.
@@ -121,7 +121,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
 ## gemini3b — exports, demo, docs drift (evidence only, files: night/LOG.md)
 - [x] G16 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
   accept: per split the `N/N episodes valid` line.
-- [ ] G17 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, the final reward/score lines
+- [x] G17 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, the final reward/score lines
   quoted; compare them with the numbers in docs/DEMO.md and call out any difference.
 - [ ] G18 (gemini3b) `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r21-gemini3b/c.json` then
   `uv run python scripts/sync_docs.py --check --json /tmp/r21-gemini3b/c.json` — accept: both exit codes; drift lines
