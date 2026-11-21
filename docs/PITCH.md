@@ -45,12 +45,12 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 | policy | split | P | R | F1 | return |
 |---|---|---|---|---|---|
 | oracle (grader-side) | dev | 1.000 | 1.000 | 1.000 | 1.000 |
-| reconcile (policy-aware) | dev | 1.000 | 1.000 | 1.000 | 0.957 |
-| naive reconcile | dev | 0.169 | 0.700 | 0.273 | −0.506 |
+| reconcile (policy-aware) | dev | 1.000 | 1.000 | 1.000 | 0.956 |
+| naive reconcile | dev | 0.177 | 0.733 | 0.286 | −0.480 |
 | random explorer | dev | 0.000 | 0.000 | 0.000 | −0.807 |
 | flag-everything | dev | 0.000 | 0.000 | 0.000 | −1.000 |
 | reconcile_hard | hard | 1.000 | 1.000 | 1.000 | 0.916 |
-| reconcile (default) | hard | 0.651 | 0.891 | 0.752 | 0.288 |
+| reconcile (default) | hard | 0.667 | 0.870 | 0.755 | 0.293 |
 | oracle (grader-side) | hard | 1.000 | 1.000 | 1.000 | 1.000 |
 
 - Both reconciliation policies averaged 43.2 actions on hard episodes. The default rules produced 22 false positives and missed five findings. With line normalization and credit-note handling, the policy found all 46 issues with zero false positives.

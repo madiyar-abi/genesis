@@ -115,8 +115,8 @@ the episode with −1. Code: `auditenv/matcher.py`, `metrics.py`.
 | policy | P | R | F1 | mean return | mean steps |
 |---|---|---|---|---|---|
 | oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 |
-| reconcile (policy-aware rules) | 1.000 | 1.000 | 1.000 | 0.957 | 22.5 |
-| naive reconcile | 0.169 | 0.700 | 0.273 | −0.506 | 17.2 |
+| reconcile (policy-aware rules) | 1.000 | 1.000 | 1.000 | 0.956 | 22.8 |
+| naive reconcile | 0.177 | 0.733 | 0.286 | −0.480 | 17.5 |
 | random explorer | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 |
 | flag-everything | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 |
 
