@@ -2157,3 +2157,69 @@ All tasks for gemini2b in Round 21 finished.
 2026-11-22 04:06 lead — Merged all worker branches (G1–G18, X1–X3, Y1–Y3, Z1–Z3 done). X1 text-only auditor F1 1.000 on 4,200 episodes, 0 disagreements. X3: 300 extreme configs valid with exact counts, >12 issues rejected with ValueError. X2: 1,335 clean-config violations; lead inspected the largest (D01 seed 41006, E0342, −500,336 KZT minor): a full refund debited to 2900 at the refund-date rate after the receipt credited it at the receipt-date rate. This follows the documented CONTRACT rule (refund Dr 2900 / Cr 1000 at payment-date rate); the document-currency credit is exactly 0 (chronology c_neg_credit = 0). Decision: no posting-rule change 13 h before freeze (would change policy text, every export and golden hashes); measure (X4) and document as a limitation in DESIGN §10 / README. Y3: README fixes by lead next (incl. real defect #13: closed-server command aborts in bash when GRADER_KEY is unset). Top-up 1 queued.
 2026-11-22 04:08 lead — README: first-read fixes (Y3 items 1–4, 6, 7, 9, 10, 12–14). #13 was a real defect: the closed-server command `AUDITENV_SECRET="${GRADER_KEY:?...}"` aborted in bash without GRADER_KEY although the server keys hidden episodes by default since round 19; now the plain command (verified: starts, warns about the key file, exit 0). Skipped #5 (mode key text already says eval hides the reward), #8 (export commands are labelled as re-export after a generator change), #11 (the README 199/200 sentence is per difficulty in its own table). check exit 0 50.7 s; sync_docs no drift.
 2026-11-22 04:08 lead — Correction to the previous entry: Y3 #11 was valid (README D01–D05 row gave 199/200 without saying it is the default count); now '199/200 default and 200/200 hard' per codex2's probe.
+
+2026-11-22 04:33 codex2 — Y4: verified the Y3 README fixes in a fresh clone at 544bd15, containing 55d4c34.
+
+The table uses README line numbers at that revision. Duplicate instructions use the same result (jury runner at 79 and 346, jury tests at 75 and 359, demo at 41 and 91). The Python rows pipe the corresponding fenced examples into Python. Public commands ran with AUDITENV_SECRET unset, input/output paths normally under /tmp redirected to /tmp/r21-codex2/y4, and a one-seed clean hidden.json plus reset/close input for the server. Several independent commands ran concurrently; wall times describe this shared-load run.
+
+| README line | Command | Exit | Wall seconds |
+|---|---|---:|---:|
+| checkout | `git checkout --detach 544bd15f8a788dc41e88eba3b772484983160588` | 0 | 0.07 |
+| clone | `git clone https://github.com/madiyar-abi/genesis.git && cd genesis` | 0 | 4.55 |
+| tracked | `git diff --exit-code` | 0 | 0.11 |
+| 30 | `uv run python -m auditenv.check` | 0 | 94.64 |
+| 35 | `python3.11 -m auditenv.check` | 0 | 94.72 |
+| 41 | `uv run python -m auditenv.demo` | 0 | 0.20 |
+| 47 | `docker build -t auditenv .` | 127 | 0.00 |
+| 48 | `docker run --rm --network none auditenv` | 127 | 0.01 |
+| 53 | `docker run --rm --network none auditenv python -m unittest discover -s tests -t .` | 127 | 0.00 |
+| 75 | `uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` | 0 | 3.83 |
+| 77 | `docker run --rm --network none auditenv python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` | 127 | 0.00 |
+| 79 | `uv run python -m auditenv.jury_run` | 0 | 2.69 |
+| 162 | `uv run python -` | 0 | 0.06 |
+| 194 | `uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/r21-codex2/y4/dev_reconcile.jsonl` | 0 | 0.17 |
+| 195 | `uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval` | 0 | 0.13 |
+| 207 | `uv run python -m auditenv.export --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard` | 0 | 0.26 |
+| 210 | `uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out /tmp/r21-codex2/y4/trajectories.jsonl` | 0 | 0.48 |
+| 210-cmp | `cmp trajectories.jsonl /tmp/r21-codex2/y4/trajectories.jsonl` | 0 | 0.01 |
+| 221-naive_reconcile | `uv run python -m auditenv.run --policy naive_reconcile --config configs/train.json --out /tmp/r21-codex2/y4/train_naive_reconcile.jsonl` | 0 | 0.16 |
+| 221-random | `uv run python -m auditenv.run --policy random --config configs/train.json --out /tmp/r21-codex2/y4/train_random.jsonl` | 0 | 0.14 |
+| 221-reconcile | `uv run python -m auditenv.run --policy reconcile --config configs/train.json --out /tmp/r21-codex2/y4/train_reconcile.jsonl` | 0 | 0.16 |
+| 224-naive_reconcile | `uv run python -m auditenv.run --policy naive_reconcile --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_naive_reconcile.jsonl` | 0 | 0.36 |
+| 224-random | `uv run python -m auditenv.run --policy random --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_random.jsonl` | 0 | 0.25 |
+| 224-reconcile | `uv run python -m auditenv.run --policy reconcile --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_reconcile.jsonl` | 0 | 0.37 |
+| 224-reconcile_hard | `uv run python -m auditenv.run --policy reconcile_hard --config configs/train_hard.json --out /tmp/r21-codex2/y4/train_hard_reconcile_hard.jsonl` | 0 | 0.37 |
+| 233 | `uv run python -` | 0 | 0.05 |
+| 267 | `uv run python -` | 0 | 0.08 |
+| 367 | `uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl` | 0 | 0.07 |
+| 383 | `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` | 0 | 0.14 |
+| 391 | `uv run python -m unittest discover -s tests -t .` | 0 | 78.27 |
+| 392 | `uv run python -m unittest tests.test_env` | 0 | 0.30 |
+| 393 | `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` | 0 | 0.12 |
+| 394 | `uv run python -m auditenv.verify --seeds 0-199` | 0 | 7.50 |
+| 395 | `uv run python -m auditenv.verify --dir episodes/train` | 0 | 0.17 |
+| 396 | `uv run python -m auditenv.verify --dir episodes/dev` | 0 | 0.17 |
+| 397 | `uv run python -m auditenv.verify --dir episodes/hard` | 0 | 0.55 |
+| 398 | `uv run python -m auditenv.attack` | 0 | 0.68 |
+| 399 | `uv run python -m tests.test_fuzz` | 0 | 1.57 |
+| 400 | `uv run python -m auditenv.check --json /tmp/r21-codex2/y4/metrics.json` | 0 | 93.29 |
+| 401 | `uv run python scripts/sync_docs.py --check --json /tmp/r21-codex2/y4/metrics.json` | 0 | 0.04 |
+| 402 | `uv run python -m auditenv.fuzz --seeds 0-999` | 0 | 90.66 |
+| 403 | `uv run python -m auditenv.fuzz --configs 3000` | 0 | 130.93 |
+| 404 | `uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299` | 0 | 12.45 |
+| 405 | `uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json` | 0 | 0.15 |
+| 406 | `uv run python -m auditenv.demo` | 0 | 0.17 |
+| 407 | `uv run python -m auditenv.export --config configs/dev.json --out episodes/dev` | 0 | 0.09 |
+| 408 | `uv run python -m auditenv.export --config configs/train.json --out episodes/train` | 0 | 0.09 |
+| 409 | `uv run python -m auditenv.export --config configs/eval_hard.json --out episodes/hard` | 0 | 0.29 |
+| 410 | `uv run python scripts/mutate_reward.py` | 0 | 141.70 |
+| 411 | `uv run python scripts/sensitivity.py` | 0 | 3.18 |
+| 412 | `uv run python scripts/shortcut_miner.py --report-only` | 0 | 28.81 |
+| 413 | `uv run python scripts/golden.py --check` | 0 | 0.79 |
+| 414 | `uv run python scripts/bench.py` | 0 | 16.63 |
+| 415 | `uv run python scripts/chart.py --json /tmp/r21-codex2/y4/metrics.json` | 0 | 0.04 |
+| 416 | `make check` | 0 | 76.64 |
+| 417 | `make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart` | 0 | 0.01 |
+| 420 | `uv run python -m auditenv.analyze --config configs/dev.json --seeds 2003` | 0 | 0.06 |
+
+The four Docker attempts each reported `bash: docker: command not found` (exit 127). Native quick start passed all 563 tests and gates, with wall times of 94.64 s via uv and 94.72 s via installed Python; the README's “about a minute” was optimistic under concurrent load. Demo took 0.20 s and scored 0.958. The jury replay matched the documented scores and its maximum was 0.049 s. The README example printed `100 99 50 0.0`, then TP 0, FN 1 and return −1. The keyless server used the scratch grader key file and wrote one closed result. Both fuzz commands passed with zero problems, all eight regenerated trajectory files matched by cmp, the explicit chart input and docs sync passed, and the re-exports and chart left tracked files byte-identical. The line-398 mutation count, line-410 22/22 caught and line-413 80/80 golden hashes matched the notes.

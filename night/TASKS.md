@@ -150,7 +150,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   result, only with the totals).
 - [ ] X5 (codex1) `env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor` on seeds 45000–45099 (add a
   `--seeds` flag if missing) — files: night/r21/text_auditor.py, night/LOG.md — accept: the table + discrepancy count.
-- [ ] Y4 (codex2) After the lead's README commit "README: first-read fixes (Y3)" lands (merge first; if it is not
+- [x] Y4 (codex2) After the lead's README commit "README: first-read fixes (Y3)" lands (merge first; if it is not
   there yet, do Y5 first): fresh clone at origin/night/2026-11-22-r21, run every command in the README sections the
   commit touched — files: night/LOG.md — accept: table command → exit code → wall time; any mismatch with the text.
 - [ ] Y5 (codex2) Re-run Y2's combined condition (low QoS + 6 parallel hard fuzz sweeps) on `auditenv.jury_run` only,
