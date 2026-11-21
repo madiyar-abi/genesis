@@ -117,7 +117,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
 - [x] G17 (gemini3b) `uv run python -m auditenv.demo` piped with enough newlines (`yes '' | ...`), and
   `uv run python -m auditenv.demo --help` — files: night/LOG.md — accept: exit code, the final reward/score lines
   quoted; compare them with the numbers in docs/DEMO.md and call out any difference.
-- [ ] G18 (gemini3b) `uv run python scripts/sync_docs.py --check --json /tmp/r20-gemini3b/c.json` after
+- [x] G18 (gemini3b) `uv run python scripts/sync_docs.py --check --json /tmp/r20-gemini3b/c.json` after
   `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r20-gemini3b/c.json` — files: night/LOG.md —
   accept: both exit codes; any drift line verbatim.
 
