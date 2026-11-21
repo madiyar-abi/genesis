@@ -575,3 +575,25 @@ Command: `env -u AUDITENV_SECRET uv run python -m unittest tests.test_load_redte
 - Run 10: Ran 15 tests in 2.873s, OK (wall time 2.93 s)
 Result: 0 failures across 10 runs (15 tests each, 150 test executions total). No flakiness detected.
 Next: T51 (`env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 9000-9999` and `--hard`).
+
+2026-11-21 22:45 gemini1a — T51 seed sweeps on seeds 9000–9999 (default + hard).
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 9000-9999`
+  Exit code: 0
+  Wall time: 58.91 s
+  Summary:
+  default mode, seeds 9000-9999: 3000 episodes (1989 dirty, 1011 clean) in 58.9 s
+    episodes with a problem (exception / verifier / oracle): 0
+    random explorer reward > 0: 251/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+    flag-all reward < 0: 3000/3000
+  FUZZ PASSED
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 9000-9999 --hard`
+  Exit code: 0
+  Wall time: 206.61 s
+  Summary:
+  hard mode, seeds 9000-9999: 3000 episodes (1992 dirty, 1008 clean) in 206.5 s
+    episodes with a problem (exception / verifier / oracle): 0
+    random explorer reward > 0: 258/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+    flag-all reward < 0: 3000/3000
+  FUZZ PASSED
+Result: 0 problems found across 6,000 episodes (default + hard).
+All assigned gemini1a tasks complete.

@@ -16,7 +16,7 @@ Lead review findings are added as T30+ below.
 - [x] T3 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 1000-1999` — files: night/LOG.md — accept: last line (`N/N episodes valid`) in LOG.
 
 - [x] T50 (gemini1a) Flakiness of the new red-team tests: run `env -u AUDITENV_SECRET uv run python -m unittest tests.test_load_redteam tests.test_server_redteam tests.test_jury_run` 10 times in a row (a shell `for i in $(seq 10)` loop) — files: night/LOG.md — accept: per run `Ran N tests` + OK/FAILED + wall time; any failure verbatim.
-- [ ] T51 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 9000-9999` and the same with `--hard` — files: night/LOG.md — accept: both summaries + wall times in LOG; any problem line verbatim.
+- [x] T51 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 9000-9999` and the same with `--hard` — files: night/LOG.md — accept: both summaries + wall times in LOG; any problem line verbatim.
 
 ## gemini1b — stress solvability (evidence only, files: night/LOG.md)
 - [x] T4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 5000-5299` and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 5000-5299` — files: night/LOG.md — accept: per command the summary line (imperfect / max steps / truncated) + wall time in LOG.
