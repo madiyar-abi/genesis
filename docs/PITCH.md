@@ -21,7 +21,7 @@
 
 - Each episode can contain duplicate invoices, missing or partial payment allocations, FX conversion errors, and period cutoff errors.
 - One scenario partially allocates a period-end foreign payment and converts its cash entry at the wrong day’s rate. Another backdates a next-period foreign invoice and converts it using a rate from the booking date or an earlier day.
-- Clean books include split payments, refunds, and recurring charges. Hard episodes add credit-note reissues and retyped invoice lines.
+- Clean books can include split payments, refunds, and recurring charges. Hard episodes add credit-note reissues and retyped invoice lines.
 - The verifier independently derives discrepancies from the records and checks the evidence cited for each issue. It also rejects books that break the published posting policy, such as an account used outside its journal type or a mislabelled customer.
 
 ## 5. How the environment runs
@@ -65,7 +65,7 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 ## 9. Limits and next experiment
 
 - The simulator covers synthetic receivables and uses fixed UTC offsets. Its benchmark measures performance on the generated cases.
-- Across 1,000 seeds per difficulty, when exactly two invoices shared a customer, currency and total, the fraction of flagged invoices affected by a duplicate was 0.996 on default and 0.358 on hard. Hard companies include legitimate lookalikes.
+- Across 1,000 seeds per difficulty, when exactly two invoices shared a customer, currency and total, the fraction of flagged invoices affected by a duplicate was 0.996 on default and 0.356 on hard. Hard companies include legitimate lookalikes.
 - The reported baselines are scripted. A next experiment would compare a learned policy with these baselines on held-out companies under the same investigation budget.
 
 ## 10. Team
