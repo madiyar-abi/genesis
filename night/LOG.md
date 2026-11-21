@@ -13,6 +13,22 @@
   Summary: reconcile_hard on 1200 hard episodes (seeds 5000-5299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 57, truncated 0 (70.7 s)
 Result: 0 imperfect, 0 truncated across 2,400 episodes. Max steps: 32 (default), 57 (hard).
 Next: T5 (jury_run on seed bases 7000, 8000, 9000).
+2026-11-21 21:48 gemini3a — T13 complete: verified relative markdown links and backticked repo paths across README.md, docs/CHECKS.md, docs/DESIGN.md, docs/CONTRACT.md, docs/DEMO.md, docs/PITCH.md.
+Command: python3 /tmp/r18-gemini3a/check_links.py (exit 0)
+- README.md: 14 markdown links checked, 85 repo paths checked; 0 missing
+- docs/CHECKS.md: 0 markdown links checked, 201 repo paths checked; 0 missing
+- docs/DESIGN.md: 1 markdown links checked, 13 repo paths checked; 0 missing
+- docs/CONTRACT.md: 0 markdown links checked, 11 repo paths checked; 0 missing
+- docs/DEMO.md: 0 markdown links checked, 1 repo paths checked; 0 missing
+- docs/PITCH.md: 0 markdown links checked, 2 repo paths checked; 0 missing
+Total: 15 markdown links, 313 repo paths checked across 6 files. 0 missing.
+Next: T14.
+
+2026-11-21 21:49 gemini3a — T14 complete: verified all CLI command lines and flags in README.md and docs/*.md.
+Command: python3 /tmp/r18-gemini3a/check_flags.py (exit 0)
+Number of command lines checked: 67 across 6 files (README.md, docs/CHECKS.md, docs/CONTRACT.md, docs/DEMO.md, docs/DESIGN.md, docs/PITCH.md).
+Result: 0 unknown flags.
+Next: T15.
 
 2026-11-21 21:49 lead — T98: fresh `auditenv.demo --seed 2003` matches every number in docs/DEMO.md (326 rows, 69 invoices, 21 inspection steps, 0.958, 0.333, 286 / 351331 minor units, 22 actions, TP 4) and the check (dev reconcile F1 1.000, hard 0.752). No edit needed.
 2026-11-21 21:49 lead — T99: `sync_docs --check` clean against a fresh `check --json`. Found one untracked stale number: `scripts/mutate_reward.py` now runs 22 mutants (22/22 killed, re-run tonight) but PITCH slide 8, CHECKS.md, README "Other commands" and HANDOFF "How to run" said 15. Fixed all four; historical round notes in HANDOFF left as they were.
@@ -53,3 +69,8 @@ Next: T6 (fuzz 3000 configs starting at 50000).
   FUZZ PASSED
 Result: 0 problems across 3,000 random configurations (1,222 hard). Max steps: 55.
 All gemini1b tasks (T4, T5, T6) complete.
+2026-11-21 21:51 gemini3a — T15 complete: checked all `tests/<file>.py::<Class>::<method>` references in docs/CHECKS.md.
+Command: python3 /tmp/r18-gemini3a/check_test_refs.py (exit 0)
+Checked 138 `tests/<file>.py::<Class>::<method>` references (and 9 class references).
+Result: 0 missing.
+All assigned gemini3a tasks (T13, T14, T15) complete.
