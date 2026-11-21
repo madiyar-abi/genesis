@@ -92,6 +92,16 @@ The marathon runs rounds back to back until the freeze time: each round is a
 new branch `night/<date>-r<N>` from `origin/main`; after `night/DONE` it merges
 `main`, runs the check, opens a PR, waits for CI and merges it, then starts the
 next round. The round's goal is in `night/ROUND.md` (read it first).
+- **Team in a marathon round** (`--workers` in the prompt lists them):
+  `gemini1a gemini1b gemini2a gemini2b gemini3a gemini3b` — Gemini Flash, huge quota, weakest:
+  monotonous, mechanical, fully specified tasks (one file or a few, exact commands, a test to run);
+  `codex1 codex2` — GPT-6.2 Astra, strong: hard tasks (logic, generator/verifier changes, tricky tests);
+  `rb` — Qwen 4 Max via ReformBoss: medium tasks. Tag each task with exactly one worker name.
+- **Keep the workers fed (most important):** the lead engines run out of quota and pause for
+  hours; the workers don't. Right after planning, push `night/TASKS.md` with **at least 2–3 queued
+  tasks per worker** (≈3 h of work), disjoint files per worker, each with its own mechanical check.
+  Top the queue up every time you merge worker branches. Do your own `(lead)` work only after that.
+  Commit and push after every subtask — a lead that hits its limit loses nothing pushed.
 - **Open improvement round** (lead): there is no fixed spec beyond SPEC.md, so
   find the work yourself:
   1. Read `night/archive/` (previous rounds' TASKS/LOG/ROUND), `REVIEW.md`,

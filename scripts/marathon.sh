@@ -8,13 +8,25 @@
 set -u
 
 FREEZE="${1:-2026-11-22 18:00}"                 # stop starting work here (humans submit after)
-C1=$HOME/.codex-acc1; C2=$HOME/.codex-acc2
-LEAD_SLOTS="${LEAD_SLOTS:-claude|default|;codex|$C2|gpt-6.2-astra;codex|$C2|gpt-6.2-sol;codex|$C1|gpt-6.2-astra;codex|$C1|gpt-6.2-sol}"
-GEM_MODEL="${GEM_MODEL:-Gemini 3.8 Flash (High)}"
-GEM1_DIR="${GEM1_DIR-../genesis-gemini1}"       # 3 parallel gemini workers on separate accounts
-GEM2_DIR="${GEM2_DIR-../genesis-gemini2}"
-GEM3_DIR="${GEM3_DIR-../genesis-gemini3}"
-DEEPSEEK_DIR="${DEEPSEEK_DIR-../genesis-deepseek}"
+C1=$HOME/.codex-acc1; C2=$HOME/.codex-acc2; A2=$HOME/.agy-acc2; A3=$HOME/.agy-acc3
+# Secrets (e.g. DEEPSEEK_API_KEY) live outside the repo; never in git.
+[ -f "$HOME/.config/genesis/secrets.env" ] && . "$HOME/.config/genesis/secrets.env"
+# Lead: Claude first, then both Codex accounts, then (machine-local) .night-logs/lead-extra-slots.
+LEAD_SLOTS="${LEAD_SLOTS:-claude|default|;codex|$C1|gpt-6.2-astra;codex|$C1|gpt-6.2-sol;codex|$C2|gpt-6.2-astra;codex|$C2|gpt-6.2-sol}"
+GEM="Gemini 3.8 Flash (High)"
+# Workers "name@slots", each in its own worktree ../genesis-<name>. Two chats per Google account
+# (gemini* = monotonous/mechanical tasks), both Codex accounts in parallel (codex* = hard tasks),
+# ReformBoss (rb = medium tasks). WORKERS_OFF="name,name" disables some.
+WORKER_SPECS=(
+  "gemini1a@agy|default|$GEM" "gemini1b@agy|default|$GEM"
+  "gemini2a@agy|$A2|$GEM"     "gemini2b@agy|$A2|$GEM"
+  "gemini3a@agy|$A3|$GEM"     "gemini3b@agy|$A3|$GEM"
+  "codex1@codex|$C1|gpt-6.2-astra;codex|$C1|gpt-6.2-sol"
+  "codex2@codex|$C2|gpt-6.2-astra;codex|$C2|gpt-6.2-sol"
+  "rb@deepseek|default|qwen4-max;deepseek|default|deepseek-v4.1-flash"
+)
+WORKERS_OFF="${WORKERS_OFF:-}"
+[ -z "${DEEPSEEK_API_KEY:-}" ] && WORKERS_OFF="$WORKERS_OFF,rb"
 CHECK_CMD="${CHECK_CMD:-uv run python -m auditenv.check}"
 PR="${PR:-1}"                                   # 0 = push only, no PR/merge (testing)
 EMPTY_SLEEP="${EMPTY_SLEEP:-7200}"              # after a round with no product change
@@ -79,56 +91,25 @@ fix_round() {     # same branch, new goal
 }
 
 run_team() {
-  local workers=""
-
-  # 3 parallel Gemini workers, each pinned to its own Google account
-  if [ -n "$GEM1_DIR" ]; then
-    workers="${workers:+$workers,}gemini1"
-    [ -d "$GEM1_DIR" ] || git worktree add -q --detach "$GEM1_DIR" "origin/$B"
-    ( cd "$GEM1_DIR" && git checkout -q -- . 2>/dev/null; git clean -fdq 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
-      && rm -f night/STOP night/DONE .night-logs/session-* 2>/dev/null && mkdir -p .night-logs \
-      && exec "$NIGHT_SH" --role worker --name gemini1 --engine agy --branch "$B" --model "$GEM_MODEL" \
-           --accounts "default" --until "$FREEZE" >> .night-logs/worker.out 2>&1 ) &
-    g1pid=$!
-  fi
-  if [ -n "$GEM2_DIR" ]; then
-    workers="${workers:+$workers,}gemini2"
-    [ -d "$GEM2_DIR" ] || git worktree add -q --detach "$GEM2_DIR" "origin/$B"
-    ( cd "$GEM2_DIR" && git checkout -q -- . 2>/dev/null; git clean -fdq 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
-      && rm -f night/STOP night/DONE .night-logs/session-* 2>/dev/null && mkdir -p .night-logs \
-      && exec "$NIGHT_SH" --role worker --name gemini2 --engine agy --branch "$B" --model "$GEM_MODEL" \
-           --accounts "$HOME/.agy-acc2" --until "$FREEZE" >> .night-logs/worker.out 2>&1 ) &
-    g2pid=$!
-  fi
-  if [ -n "$GEM3_DIR" ]; then
-    workers="${workers:+$workers,}gemini3"
-    [ -d "$GEM3_DIR" ] || git worktree add -q --detach "$GEM3_DIR" "origin/$B"
-    ( cd "$GEM3_DIR" && git checkout -q -- . 2>/dev/null; git clean -fdq 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
-      && rm -f night/STOP night/DONE .night-logs/session-* 2>/dev/null && mkdir -p .night-logs \
-      && exec "$NIGHT_SH" --role worker --name gemini3 --engine agy --branch "$B" --model "$GEM_MODEL" \
-           --accounts "$HOME/.agy-acc3" --until "$FREEZE" >> .night-logs/worker.out 2>&1 ) &
-    g3pid=$!
-  fi
-
-  # DeepSeek worker on ReformBoss API
-  if [ -n "$DEEPSEEK_DIR" ]; then
-    workers="${workers:+$workers,}deepseek"
-    [ -d "$DEEPSEEK_DIR" ] || git worktree add -q --detach "$DEEPSEEK_DIR" "origin/$B"
-    ( cd "$DEEPSEEK_DIR" && git checkout -q -- . 2>/dev/null; git clean -fdq 2>/dev/null; git fetch -q && git checkout -q --detach "origin/$B" \
-      && rm -f night/STOP night/DONE .night-logs/session-* 2>/dev/null && mkdir -p .night-logs \
-      && exec "$NIGHT_SH" --role worker --name deepseek --engine deepseek --branch "$B" --model "deepseek-v4.1-flash" \
-           --until "$FREEZE" >> .night-logs/worker-deepseek.out 2>&1 ) &
-    dpid=$!
-  fi
-
+  local workers="" pids="" spec name slots d
+  for spec in "${WORKER_SPECS[@]}"; do
+    name=${spec%%@*}; slots=${spec#*@}
+    case ",$WORKERS_OFF," in *",$name,"*) continue ;; esac
+    d="../genesis-$name"
+    [ -d "$d" ] || git worktree add -q --detach "$d" "origin/$B"
+    ( cd "$d" && git merge --abort 2>/dev/null; git checkout -q -- . 2>/dev/null; git clean -fdq 2>/dev/null
+      git fetch -q && git checkout -q --detach "origin/$B" && rm -f night/STOP night/DONE .night-logs/session-* \
+      && mkdir -p .night-logs \
+      && exec "$NIGHT_SH" --role worker --name "$name" --branch "$B" --slots "$slots" --until "$FREEZE" \
+           >> .night-logs/worker.out 2>&1 ) &
+    pids="$pids $!"; workers="${workers:+$workers,}$name"
+  done
   rm -f .night-logs/session-lead-*            # fresh lead conversation each round
   "$NIGHT_SH" --role lead --branch "$B" ${workers:+--workers "$workers"} --until "$FREEZE" --slots "$LEAD_SLOTS" \
     >> .night-logs/lead.out 2>&1
-
-  if [ -n "$GEM1_DIR" ]; then touch "$GEM1_DIR/night/STOP"; wait "$g1pid" 2>/dev/null; rm -f "$GEM1_DIR/night/STOP"; fi
-  if [ -n "$GEM2_DIR" ]; then touch "$GEM2_DIR/night/STOP"; wait "$g2pid" 2>/dev/null; rm -f "$GEM2_DIR/night/STOP"; fi
-  if [ -n "$GEM3_DIR" ]; then touch "$GEM3_DIR/night/STOP"; wait "$g3pid" 2>/dev/null; rm -f "$GEM3_DIR/night/STOP"; fi
-  if [ -n "$DEEPSEEK_DIR" ]; then touch "$DEEPSEEK_DIR/night/STOP"; wait "$dpid" 2>/dev/null; rm -f "$DEEPSEEK_DIR/night/STOP"; fi
+  for name in $(echo "$workers" | tr ',' ' '); do touch "../genesis-$name/night/STOP"; done
+  for d in $pids; do wait "$d" 2>/dev/null; done
+  for name in $(echo "$workers" | tr ',' ' '); do rm -f "../genesis-$name/night/STOP"; done
 }
 
 # Merge main, check, PR, CI, merge. Returns 0 = merged, 1 = needs a fix round (reason in FIX), 2 = nothing to merge.
@@ -162,8 +143,16 @@ integrate() {
 }
 
 log "marathon until $FREEZE, starting at round $round"
+RESUME=""
+cur=$(git branch --show-current)
+case "$cur" in night/*-r[0-9]*)
+  git fetch -q origin
+  if ! git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then
+    RESUME=1; B=$cur; round=${cur##*-r}; log "resuming unfinished round $round on $B"
+  fi ;;
+esac
 while ! stopped; do
-  start_round || { nap 600; continue; }
+  if [ -n "$RESUME" ]; then RESUME=""; save_leftovers; else start_round || { nap 600; continue; }; fi
   tries=0
   while :; do
     run_team
