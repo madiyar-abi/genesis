@@ -105,3 +105,26 @@ Next: T2 (config fuzz sweep: 3000 configs starting at 40000).
 Failing tests: 0 (none). No flakiness or timezone/hashseed sensitivity found across 523 tests.
 
 2026-11-21 22:00 lead (Claude, took over from the previous lead engine) — Merged gemini2a's WIP commit (T7; its LOG.md carried stash conflict markers — removed, kept every entry, dropped one duplicated codex1 T20 line). codex1 was idle: queued T45 (loader red-team via adapter/verify --dir), T46 (JSON-lines server red-team over a pipe), T47 (multi-cue shortcut cheater, evidence only — a generator fix would change default episodes). Started a lead subagent that re-reads the published jury check page line by line against judge_adapter + tests/test_judge_*. Next: merge workers every ~30 min. Assumption: marathon workers all alive (ps shows all 9 night.sh workers).
+
+
+2026-11-21 22:04 gemini1b — T40: seed fuzz sweeps on seeds 8000-8999 (default + hard).
+- Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 8000-8999`
+  Exit code: 0
+  Wall time: 66.46 s
+  Summary:
+  default mode, seeds 8000-8999: 3000 episodes (1986 dirty, 1014 clean) in 66.4 s
+    episodes with a problem (exception / verifier / oracle): 0
+    random explorer reward > 0: 246/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+    flag-all reward < 0: 3000/3000
+  FUZZ PASSED
+- Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 8000-8999 --hard`
+  Exit code: 0
+  Wall time: 213.90 s
+  Summary:
+  hard mode, seeds 8000-8999: 3000 episodes (1991 dirty, 1009 clean) in 213.8 s
+    episodes with a problem (exception / verifier / oracle): 0
+    random explorer reward > 0: 239/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+    flag-all reward < 0: 3000/3000
+  FUZZ PASSED
+Problems: 0 problem lines across 6,000 episodes (default + hard).
+Next: T41 (jury_run baseline evaluation on seed bases 10000, 11000, 12000, 13000, 14000).
