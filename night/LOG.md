@@ -837,8 +837,144 @@ The new public-entry tests cover a minimal policy with optional jury files absen
 
 2026-11-21 23:00 lead — Merged gemini1a–3b (T50–T58, T60, T61: 0 failures; new red-team tests 10/10 runs clean; 539 tests clean under 3 hash seeds/TZ; closed-reset error cases path-free), rb (T26, T27: doc command/flag and link tests) and codex1 (T62 CollidingIdPairTest — fails 6/6 with 0f33a0f reverted; T63 loader audit: relaxed policy/FX-rate spellings and expense-journal grouping by instant for loaded copies, strict export checks unchanged). check ALL PASSED, golden 80/80, verify 600/600, file-level jury transform 40/40. codex2 rate-limited since 21:40 (limit keeps moving, now 23:58) → retagged T22/T24 to codex1, T23 to lead (subagent running: independent matcher reimplementation vs matcher.grade). rb: T64 (error-code list in README == codes in source). README "Jury adapter" now states that closed reset validates the directory; CHECKS 72 jury block tests.
 
+2026-11-21 23:01 gemini3a — T59 complete: README walkthrough on the current tip (`origin/night/2026-11-21-r18` merged).
+Ran every `uv run ...` line inside README.md fenced code blocks in order, verbatim, each prefixed with `env -u AUDITENV_SECRET` (32 commands executed; redirecting `--out`/`--json` to /tmp/r18-gemini3a/).
+Results by README line:
+- Line 30: `uv run python -m auditenv.check` -> exit 0 (48.61 s), last line: "ALL CHECKS PASSED in 48.5 s"
+- Line 54: `uv run python -m auditenv.jury_run --policy-image genesis-policy` -> exit 2 (0.03 s), last line: "error: --policy-image needs the docker command on PATH (docker not found)"
+  Output verbatim:
+  `error: --policy-image needs the docker command on PATH (docker not found)`
+  (Note: clean exit 2 with clear error message when Docker is not on PATH; no raw traceback).
+- Line 184: `uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/r18-gemini3a/dev_reconcile.jsonl` -> exit 0 (0.09 s), last line: "ep_e7bf8f4e24b3   1.00  1.00  1.00   0.962    20   0.01"
+- Line 185: `uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval` -> exit 0 (0.08 s), last line: "ep_cc22f883e36f   0.00  0.00  0.00  -1.000    29   0.01"
+- Line 200: `uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out /tmp/r18-gemini3a/trajectories.jsonl` -> exit 0 (0.25 s), last line: "ep_9b7c728aea6d   1.00  1.00  1.00   0.914    44   0.02"
+- Line 334: `uv run python -m auditenv.jury_run` -> exit 0 (1.52 s), last line: "oracle            1.000  1.000  1.000    1.000     1.0     1    0.003   0.003"
+- Line 371: `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` -> exit 0 (0.07 s), last line: "[PASS] out-of-process eval run — policy saw no reward/truth; 2 results in the grader log"
+- Line 379: `uv run python -m unittest discover -s tests -t .` -> exit 0 (39.06 s), last line: "All documentation tables match measured data."
+- Line 380: `uv run python -m unittest tests.test_env` -> exit 0 (0.16 s), last line: "OK"
+- Line 381: `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` -> exit 0 (0.07 s), last line: "[PASS] out-of-process eval run — policy saw no reward/truth; 2 results in the grader log"
+- Line 382: `uv run python -m auditenv.verify --seeds 0-199` -> exit 0 (3.69 s), last line: "600/600 episodes valid; episodes with problems: 0"
+- Line 383: `uv run python -m auditenv.verify --dir episodes/train` -> exit 0 (0.09 s), last line: "10/10 episodes valid; episodes with problems: 0"
+- Line 384: `uv run python -m auditenv.verify --dir episodes/dev` -> exit 0 (0.08 s), last line: "10/10 episodes valid; episodes with problems: 0"
+- Line 385: `uv run python -m auditenv.verify --dir episodes/hard` -> exit 0 (0.23 s), last line: "20/20 episodes valid; episodes with problems: 0"
+- Line 386: `uv run python -m auditenv.attack` -> exit 0 (0.35 s), last line: "Elapsed time: 0.316 s"
+- Line 387: `uv run python -m tests.test_fuzz` -> exit 0 (0.83 s), last line: "Python 3.11.14, 20319 episode actions, 20524 total step calls in 0.795 s"
+- Line 388: `uv run python -m auditenv.check --json /tmp/r18-gemini3a/auditenv-metrics.json` -> exit 0 (48.95 s), last line: "ALL CHECKS PASSED in 48.9 s"
+- Line 389: `uv run python scripts/sync_docs.py --check --json /tmp/r18-gemini3a/auditenv-metrics.json` -> exit 0 (0.03 s), last line: "All documentation tables match measured data."
+- Line 390: `uv run python -m auditenv.fuzz --seeds 0-999` -> exit 0 (52.71 s), last line: "FUZZ PASSED"
+- Line 391: `uv run python -m auditenv.fuzz --configs 3000` -> exit 0 (85.97 s), last line: "FUZZ PASSED"
+- Line 392: `uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299` -> exit 0 (7.78 s), last line: "reconcile on 1200 default episodes (seeds 0-299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (7.7 s)"
+- Line 393: `uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json` -> exit 0 (0.10 s), last line: "| Total | 103 |"
+- Line 394: `uv run python -m auditenv.demo` -> exit 0 (0.11 s), last line: "Done. Full check: uv run python -m auditenv.check"
+- Line 395: `uv run python -m auditenv.export --config configs/dev.json --out /tmp/r18-gemini3a/episodes/dev` -> exit 0 (0.09 s), last line: "Exported 10 episodes to /tmp/r18-gemini3a/episodes/dev"
+- Line 396: `uv run python -m auditenv.export --config configs/train.json --out /tmp/r18-gemini3a/episodes/train` -> exit 0 (0.09 s), last line: "Exported 10 episodes to /tmp/r18-gemini3a/episodes/train"
+- Line 397: `uv run python -m auditenv.export --config configs/eval_hard.json --out /tmp/r18-gemini3a/episodes/hard` -> exit 0 (0.29 s), last line: "Exported 20 episodes to /tmp/r18-gemini3a/episodes/hard"
+- Line 398: `uv run python scripts/mutate_reward.py` -> exit 0 (144.97 s), last line: "22/22 mutants killed."
+- Line 399: `uv run python scripts/sensitivity.py` -> exit 0 (1.92 s), last line: "(re-grade with default parameters reproduced every env reward exactly; tolerances are fixed minor units: abs(claimed - expected) <= 0, 1 or 100; 1.9 s)"
+- Line 400: `uv run python scripts/shortcut_miner.py --report-only` -> exit 0 (16.44 s), last line: "| ledger | entity_id | E9977 | 47 |"
+- Line 401: `uv run python scripts/golden.py --check` -> exit 0 (0.47 s), last line: "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini3a/tests/golden_hashes.json."
+- Line 402: `uv run python scripts/bench.py` -> exit 0 (9.60 s), last line: "| flag_all | hard | 7.76 | 4 | -1.000 | 0.000 |"
+- Line 403: `uv run python scripts/chart.py` -> exit 0 (0.04 s), last line: "wrote /Users/caliskan/Projects/genesis-gemini3a/docs/baselines.svg"
+Working directory clean (`git status` clean, 0 tracked files modified).
+All assigned gemini3a tasks in Round 18 complete.
+
 2026-11-21 23:04 lead — T23 done (subagent): independent reference grader vs matcher.grade, 60 000 + 6 000 (adapter) submissions, 0 disagreements; mutation sanity check of the harness 5/5 caught. No code change. REVIEW updated.
 
+2026-11-21 23:15 codex1 — T22. `env -u AUDITENV_SECRET PYTHONPATH=. uv run python -u /tmp/r18-codex1/t22.py` independently classified visible accounting records, compared recovered identity/type/amount with truth only after classification, and checked each scenario's special promise. Used 10000–10199 per scenario, both difficulties, 8,000 episodes. Initial run exited 1: 10 D03 payments had a matching refund dated before the corresponding overpayment. In seed 10086 the JPY 91,831 refund was posted Sep 10 and the merged overpayment Sep 14. The merge now leaves overpayments separate for the opt-in ensure_distractors config. Regression JudgeScenariosTest.test_refunds_follow_their_posted_overpayments failed on default 10086 and hard 10066 before the fix and passes after it.
+
+Before:
+```text
+VIOLATION default D03 seed=10086: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10093: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10106: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10114: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10129: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10151: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10192: ['no posted refund matching an earlier overpayment']
+VIOLATION hard D03 seed=10066: ['no posted refund matching an earlier overpayment']
+VIOLATION hard D03 seed=10120: ['no posted refund matching an earlier overpayment']
+VIOLATION hard D03 seed=10153: ['no posted refund matching an earlier overpayment']
+```
+After (exit 0):
+```text
+default D01: 200 checked, 0 violations
+default D02: 200 checked, 0 violations
+default D03: 200 checked, 0 violations
+default D04: 200 checked, 0 violations
+default D05: 200 checked, 0 violations
+default D06: 200 checked, 0 violations
+default D07: 200 checked, 0 violations
+default D08: 200 checked, 0 violations
+default D09: 200 checked, 0 violations; missing=200 partial=0
+default D10: 200 checked, 0 violations; missing=0 partial=200
+default D11: 200 checked, 0 violations; missing=77 partial=123
+default D12: 200 checked, 0 violations
+default D13: 200 checked, 0 violations
+default D14: 200 checked, 0 violations
+default D15: 200 checked, 0 violations
+default D16: 200 checked, 0 violations; missing=0 partial=200
+default D17: 200 checked, 0 violations; missing=0 partial=200
+default D18: 200 checked, 0 violations; missing=0 partial=200
+default D19: 200 checked, 0 violations
+default D20: 200 checked, 0 violations
+hard D01: 200 checked, 0 violations
+hard D02: 200 checked, 0 violations
+hard D03: 200 checked, 0 violations
+hard D04: 200 checked, 0 violations
+hard D05: 200 checked, 0 violations
+hard D06: 200 checked, 0 violations
+hard D07: 200 checked, 0 violations
+hard D08: 200 checked, 0 violations
+hard D09: 200 checked, 0 violations; missing=200 partial=0
+hard D10: 200 checked, 0 violations; missing=0 partial=200
+hard D11: 200 checked, 0 violations; missing=92 partial=108
+hard D12: 200 checked, 0 violations
+hard D13: 200 checked, 0 violations
+hard D14: 200 checked, 0 violations
+hard D15: 200 checked, 0 violations
+hard D16: 200 checked, 0 violations; missing=0 partial=200
+hard D17: 200 checked, 0 violations; missing=0 partial=200
+hard D18: 200 checked, 0 violations; missing=0 partial=200
+hard D19: 200 checked, 0 violations
+hard D20: 200 checked, 0 violations
+Total: 0 violating episodes
+real 51.92
+user 51.64
+sys 0.16
+```
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` exit 0 (ALL CHECKS PASSED in 56.6 s); `scripts/golden.py --check` 80/80 and `auditenv.verify --seeds 0-199` 600/600. Next: T24.
+
+2026-11-21 23:18 codex1 — T24. `env -u AUDITENV_SECRET PYTHONPATH=. uv run python -u /tmp/r18-codex1/t24.py` exited 0. Exported seeds 0–29 in each difficulty and drove the public `verify --dir` entry point after one file mutation at a time. It rejected 4,173/4,173 invalid mutations, with zero accepted before or after and no production changes. The FX mutations selected used rate cells whose last-digit change altered at least one rounded public conversion; for controls, changing an unused published rate does not contradict the books. All 60 unmodified exports and 60 unused-rate controls were accepted. The allocations were moved between distinct existing invoices of the same currency and entity, by editing a remittance reference or the receivables row in isolation.
+
+```text
+default affected_ids_swapped: checked=276, accepted=0
+default amount_off_by_one: checked=268, accepted=0
+default issue_type_relabelled: checked=402, accepted=0
+default last_fx_decimal_changed: checked=90, accepted=0
+default ledger_account_changed: checked=60, accepted=0
+default one_evidence_id_dropped: checked=922, accepted=0
+default original_control: checked=30, accepted=30
+default payment_ar_moved: checked=60, accepted=0
+default payment_reference_moved: checked=60, accepted=0
+default unused_fx_decimal_control: checked=30, accepted=30
+hard affected_ids_swapped: checked=265, accepted=0
+hard amount_off_by_one: checked=256, accepted=0
+hard issue_type_relabelled: checked=384, accepted=0
+hard last_fx_decimal_changed: checked=90, accepted=0
+hard ledger_account_changed: checked=60, accepted=0
+hard one_evidence_id_dropped: checked=860, accepted=0
+hard original_control: checked=30, accepted=30
+hard payment_ar_moved: checked=60, accepted=0
+hard payment_reference_moved: checked=60, accepted=0
+hard unused_fx_decimal_control: checked=30, accepted=30
+Total unexpected outcomes: 0
+real 45.59
+user 43.53
+sys 1.47
+```
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0 (ALL CHECKS PASSED in 55.0 s).
+
+2026-11-21 23:27 lead — Integrated T59, T22 and T24. Scenario checks passed, all 80 golden hashes matched and the verifier passed 600/600. T65 corrected README CI triggers and recording status, the handoff folder-link checklist, and the jury test transcript (73 passed). Used the dated organiser FAQ already recorded in HANDOFF. Demo replay and SPEC reviewed independently. T64 remains on rb.
 ## 2026-11-21 23:27 — rb — T64 done (tests/test_error_codes_doc.py)
 
 New `tests/test_error_codes_doc.py`: the error codes a policy can see through `judge_adapter.py` are a

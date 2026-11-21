@@ -70,7 +70,7 @@ uv run python -m unittest tests.test_judge_contract tests.test_judge_reward test
 ```
 
 ```
-Ran 72 tests in 2.219s
+Ran 73 tests in 3.011s
 
 OK
 ```
