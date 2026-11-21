@@ -165,3 +165,7 @@ Diffs:
 Differing files: none.
 2026-11-22 01:14 lead — Merged top-up 1 (G19-G24): all green (hard fuzz 3000, stress 0 imperfect max 57/32 steps, config sweep 3000 max 58, -X dev 0 ResourceWarnings, -O check passes and 0 product asserts, 71 modules pass alone, trajectories byte-identical). Queued G25-G30 to re-test the generator fix.
 2026-11-22 01:15 lead — L1 done. REVIEW.md Round 20, HANDOFF header, DESIGN posting-lag row updated. L2 waits for codex X2/Y1-Y3.
+2026-11-22 01:28 gemini2b — G28: Ran config sweep and seed verification on generator fix 299c5e7. Commands and results:
+  - `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 0`: exit 0, wall 1:28.40 (88.4 s). Summary: "config sweep, cases 0-2999: 3000 random configs (1186 hard) in 88.4 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56" / "FUZZ PASSED".
+  - `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 0-1999`: exit 0, wall 38.463s. Summary: "6000/6000 episodes valid; episodes with problems: 0".
+  0 problems across 3,000 random configs and 6,000 generated episodes on seeds 0-1999.
