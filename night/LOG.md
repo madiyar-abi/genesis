@@ -667,3 +667,30 @@ Failing tests: 0 (none). 539 tests passed cleanly across all three runs with zer
 All assigned gemini2a tasks (T7, T8, T9, T54, T55) complete.
 
 
+2026-11-21 22:40 gemini2b — T56 complete: attack search on seeds 7000–7019 (default and hard, steps 0 and 40).
+Wrote config files `/tmp/r18-gemini2b/a7000.json` (seeds 7000-7019, default config) and `/tmp/r18-gemini2b/a7000h.json` (seeds 7000-7019, difficulty: hard).
+- Run 1: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a7000.json --seeds 7000-7019 --steps 0`
+  Exit code: 0
+  Wall time: 0.81 s
+  Summary: Seeds evaluated: 20 (clean: 1, dirty: 19), Total mutations tested: 11000, Total violations detected: 0
+- Run 2: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a7000.json --seeds 7000-7019 --steps 40`
+  Exit code: 0
+  Wall time: 0.81 s
+  Summary: Seeds evaluated: 20 (clean: 1, dirty: 19), Total mutations tested: 11000, Total violations detected: 0
+- Run 3: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a7000h.json --seeds 7000-7019 --steps 0`
+  Exit code: 0
+  Wall time: 0.85 s
+  Summary: Seeds evaluated: 20 (clean: 1, dirty: 19), Total mutations tested: 11000, Total violations detected: 0
+- Run 4: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a7000h.json --seeds 7000-7019 --steps 40`
+  Exit code: 0
+  Wall time: 0.86 s
+  Summary: Seeds evaluated: 20 (clean: 1, dirty: 19), Total mutations tested: 11000, Total violations detected: 0
+Total violations across all 4 runs (44,000 mutations): 0 violations.
+Next: T57 (auditenv.verify --seeds 3000-3999).
+
+2026-11-21 22:42 gemini2b — T57 complete: verify on seeds 3000–3999.
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999`
+  Exit code: 0
+  Wall time: 22.95 s
+  Summary: 3000/3000 episodes valid; episodes with problems: 0
+All assigned gemini2b tasks (T56, T57) complete.
