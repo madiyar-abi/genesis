@@ -124,7 +124,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
 ## lead
 - [x] L1 (lead) Baseline: full check on the round start; review worker findings, fix every real defect test-first,
   re-export if the generator changes — files: as needed — accept: `env -u AUDITENV_SECRET uv run python -m auditenv.check` exit 0.
-- [ ] L2 (lead) Record Round 20 findings with evidence in REVIEW.md, sync doc numbers (`scripts/sync_docs.py`),
+- [x] L2 (lead) Record Round 20 findings with evidence in REVIEW.md, sync doc numbers (`scripts/sync_docs.py`),
   update HANDOFF.md — files: REVIEW.md, HANDOFF.md, README.md, docs/ — accept: sync_docs --check no drift.
 - [x] D (lead) `docs/DEMO.md` — re-verify the numbered 2–3 min recording script against the actual demo output — accept:
   every number in it reproduced.

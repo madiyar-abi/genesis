@@ -647,3 +647,4 @@ OBSERVED retyped_reissues: 5238
 OBSERVED split_payments: 24733
 Audited 8400 episodes across 42 configurations; 33079641 checks, 0 unexpected failures.
 ```
+2026-11-22 03:28 lead — X2 merged (33,079,641 checks on 8,400 episodes, 0 unexpected; allocation remainder wording left as is: it describes correct postings and the error is defined as the departure). L2: REVIEW Round 20 complete, HANDOFF header updated. Final: check 563 tests all gates 50.7 s, sync_docs no drift, golden 80/80. SPEC acceptance unchanged by this round (no contract/reward change; generator change verified by check, fuzz, verify, attack). All tasks [x]; creating night/DONE.

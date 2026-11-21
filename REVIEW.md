@@ -458,3 +458,21 @@ evidence tasks (night/TASKS.md, night/LOG.md).
 - Docs: slide 7 and DESIGN §9 still quoted the hard-split failure analysis of 20 November (22 false positives,
   duplicate recall 3/8, 43.2 actions); `auditenv.analyze --config configs/eval_hard.json` gives 20, 2/8 and 43.
   `sync_docs` covers tables, not numbers in prose.
+- Slide-7 chart: `docs/baselines.svg` still showed returns from before rounds 18–19 (reconcile hard 0.288 vs 0.293,
+  naive dev −0.506 vs −0.480). Regenerated; `scripts/sync_docs.py --check` (run in CI) now renders the chart from the
+  same metrics and reports a stale one (`test_stale_chart_is_drift`).
+- Docs claims audit (codex2, Y1–Y3): all 36 eligible README commands exit 0 on a fresh clone; ~20 wrong or stale
+  statements fixed after re-verification — hard F1 0.752 → 0.755, jury mean actions 21.4 → 21.3, the seed-2003
+  worked example (ledger ids from an older generator), sensitivity rows, seed-sweep and naive-analysis counts, miner
+  precisions, refund remittance and posting (Dr 2900 / Cr 1000) in CONTRACT, `ensure_distractors` described as a
+  guarantee (seed 25 with 10 invoices gets no refund), the per-process key fallback, the time-limit wording, and
+  "cannot be gamed" / "still learnable" replaced by what was measured.
+- Policy text vs data (codex1, X2, `night/r20/policy_text.py`): every rule sentence of task.txt and policy.json
+  checked on 8,400 episodes (seeds 31000–31199 × 42 configs), 33,079,641 checks, 0 unexpected failures. One reading
+  note, left as is: the payment rule describes correct postings ("remainder … Cr 2900"); in a misallocated journal
+  the shortfall sits on 2900, which is exactly the documented `payment_allocation` definition.
+- CHECKS.md semantics (rb, Z3): 23 of 25 sampled rows fully asserted by the cited test, 2 enforced by the cited
+  command. Hand-driven server session (rb, Z4) matched CONTRACT key for key; the framing errors and `close` (no
+  response line) are now documented in CONTRACT §4.
+- End: `env -u AUDITENV_SECRET uv run python -m auditenv.check` 563 tests, all gates, 50.7 s; sync_docs no drift;
+  golden 80/80.
