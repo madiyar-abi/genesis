@@ -76,7 +76,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   where oracle F1 < 1, reconcile F1 < 1, or random/flag_all return > -0.5.
 
 ## gemini1a — seed sweeps (evidence only, files: night/LOG.md)
-- [ ] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 13000-13999` and the same with
+- [x] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 13000-13999` and the same with
   `--hard` — accept: both summaries + wall times in LOG; any problem line verbatim.
 - [ ] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 69000` — accept:
   summary + wall time + max steps.
