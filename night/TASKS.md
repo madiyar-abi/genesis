@@ -162,7 +162,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   + summary lines (reproduction of codex1/codex2 results by another worker).
 - [x] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 15000-15999` and the same with
   `--hard` — files: night/LOG.md — accept: both summaries + wall times.
-- [ ] G20 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 75000` — files:
+- [x] G20 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 75000` — files:
   night/LOG.md — accept: summary + wall time + max steps.
 - [ ] G21 (gemini2a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 39000-39299`
   — files: night/LOG.md — accept: exit code, totals and "unexplained violations" lines verbatim.
