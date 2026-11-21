@@ -132,7 +132,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   every number matches.
 
 ## Top-up 1 (00:50) — same rules as above
-- [ ] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 12000-12999 --hard` and
+- [x] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 12000-12999 --hard` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 9000-9299` — files: night/LOG.md —
   accept: both summaries + wall times; any problem line verbatim.
 - [ ] G20 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 66000` and
