@@ -27,9 +27,17 @@ class RemoteEnv:
         return cmd
 
     def _call(self, req: dict) -> dict:
-        self.proc.stdin.write(json.dumps(req) + "\n")
-        self.proc.stdin.flush()
-        resp = json.loads(self.proc.stdout.readline())
+        if self.proc.poll() is not None or self.proc.stdin.closed:
+            raise RuntimeError("server closed")
+        try:
+            self.proc.stdin.write(json.dumps(req) + "\n")
+            self.proc.stdin.flush()
+        except (BrokenPipeError, ConnectionResetError):
+            raise RuntimeError("server closed") from None
+        line = self.proc.stdout.readline()
+        if not line:
+            raise RuntimeError("server closed")
+        resp = json.loads(line)
         if "error" in resp:
             raise RuntimeError(resp["error"])
         return resp
@@ -43,10 +51,21 @@ class RemoteEnv:
         return r["observation"], r["reward"], r["terminated"], r["truncated"], r["info"]
 
     def close(self) -> None:
-        if self.proc.poll() is None:
-            self.proc.stdin.write(json.dumps({"cmd": "close"}) + "\n")
-            self.proc.stdin.flush()
-            self.proc.wait(timeout=10)
+        try:
+            if self.proc.poll() is None and not self.proc.stdin.closed:
+                try:
+                    self.proc.stdin.write(json.dumps({"cmd": "close"}) + "\n")
+                    self.proc.stdin.flush()
+                except (BrokenPipeError, ConnectionResetError):
+                    pass
+                self.proc.wait(timeout=10)
+        finally:
+            try:
+                self.proc.stdin.close()
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+            finally:
+                self.proc.stdout.close()
 
     def __enter__(self):
         return self
