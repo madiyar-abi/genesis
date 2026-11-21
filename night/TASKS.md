@@ -132,22 +132,22 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   every number matches.
 
 ## Top-up 1 (00:50) — same rules as above
-- [ ] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 12000-12999 --hard` and
+- [x] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 12000-12999 --hard` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 9000-9299` — files: night/LOG.md —
   accept: both summaries + wall times; any problem line verbatim.
-- [ ] G20 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 66000` and
+- [x] G20 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 66000` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 9000-9299` — files:
   night/LOG.md — accept: summaries + wall times + max steps.
-- [ ] G21 (gemini2a) Resource-leak and warning run: `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning
+- [x] G21 (gemini2a) Resource-leak and warning run: `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning
   -m unittest discover -s tests -t . 2>&1 | tail -40` — files: night/LOG.md — accept: `Ran N tests` + OK/FAILED; every
   warning or error line (file:line) quoted verbatim, deduplicated with counts.
-- [ ] G22 (gemini2b) Optimized-mode run (asserts stripped): `env -u AUDITENV_SECRET uv run python -O -m auditenv.check`;
+- [x] G22 (gemini2b) Optimized-mode run (asserts stripped): `env -u AUDITENV_SECRET uv run python -O -m auditenv.check`;
   plus `grep -n "^\s*assert " auditenv/*.py auditenv/policies/*.py judge_adapter.py` — files: night/LOG.md — accept:
   exit code + last line of the check; the list of product-code asserts (file:line) in LOG.
-- [ ] G23 (gemini3a) Order independence: run every test module alone, `for f in tests/test_*.py; do m=$(basename $f .py);
+- [x] G23 (gemini3a) Order independence: run every test module alone, `for f in tests/test_*.py; do m=$(basename $f .py);
   env -u AUDITENV_SECRET uv run python -m unittest tests.$m >/tmp/r20-gemini3a/$m.out 2>&1; echo "$m $?"; done` —
   files: night/LOG.md — accept: number of modules, every module with a non-zero exit and its failure quoted.
-- [ ] G24 (gemini3b) Regenerate the committed trajectories exactly as README says into /tmp/r20-gemini3b/ and
+- [x] G24 (gemini3b) Regenerate the committed trajectories exactly as README says into /tmp/r20-gemini3b/ and
   `diff` them against `trajectories/` and `trajectories.jsonl` — files: night/LOG.md — accept: the commands used, diff
   exit codes, any differing file named.
 - [ ] Z3 (rb) Semantic review of docs/CHECKS.md: for 25 rows spread over all blocks, open the cited test and state
@@ -157,3 +157,17 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   list_records, a get_record, a malformed line, submit and one step after submit; compare each response with the
   documented example/shape — files: night/LOG.md — accept: every request/response pair quoted; any difference from
   the docs called out with doc file:line.
+
+## Top-up 2 (01:15) — evidence on the generator fix `299c5e7` (merge origin/night/2026-11-22-r20 first!)
+- [ ] G25 (gemini1a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 33000-33299` —
+  files: night/LOG.md — accept: exit code, the totals line and the "unexplained violations" line verbatim.
+- [ ] G26 (gemini1b) Same as G25 with `--seeds 34000-34299` — files: night/LOG.md — accept: as G25.
+- [ ] G27 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999` and the same with `--hard` —
+  files: night/LOG.md — accept: both summaries + wall times.
+- [ ] G28 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 0` and
+  `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 0-1999` — files: night/LOG.md — accept: summaries.
+- [ ] G29 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice and
+  `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning -m unittest discover -s tests -t .` — files:
+  night/LOG.md — accept: exit codes, last lines, wall times.
+- [ ] G30 (gemini3b) Repeat G10 (export diff of dev/train/hard) and G24 (trajectory regeneration diff) on the fix —
+  files: night/LOG.md — accept: every diff exit code; any differing file named.
