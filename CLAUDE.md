@@ -69,6 +69,8 @@ every finished task.
 ## Overnight / autonomous runs
 - Unattended runs follow `NIGHT.md` (launched by `scripts/night.sh`). If the
   prompt says "night run" or `night/SPEC.md` exists and is not DONE, read it first.
+- Lead rotation: 2 Claude accounts (~/.claude-acc2, default) rotate as the primary
+  team leads. The 2 Codex accounts take over as lead only if both Claudes run out of quota.
 
 ## When stuck
 State the plan and the single least-certain assumption before writing more
