@@ -172,3 +172,15 @@ Checks:
 - Random explorer return <= -0.710 on all runs (none > -0.5).
 - Flag_all return = -1.000 on all runs (none > -0.5).
 Next: T42 (stress reconcile and reconcile_hard on seeds 6000-6299).
+
+2026-11-21 22:06 gemini1b — T42: stress solvability on seeds 6000-6299.
+- Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 6000-6299`
+  Exit code: 0
+  Wall time: 14.27 s
+  Summary: reconcile on 1200 default episodes (seeds 6000-6299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 32, truncated 0 (14.2 s)
+- Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 6000-6299`
+  Exit code: 0
+  Wall time: 41.73 s
+  Summary: reconcile_hard on 1200 hard episodes (seeds 6000-6299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 57, truncated 0 (41.7 s)
+Result: 0 imperfect, 0 truncated across 2,400 episodes. Max steps: 32 (default), 57 (hard).
+All assigned gemini1b tasks (T4, T5, T6, T40, T41, T42) complete.
