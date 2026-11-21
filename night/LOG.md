@@ -560,3 +560,31 @@ hard reconcile submissions: P=0.780478 R=0.909893 F1=0.840232 (TP=1959 FP=551 FN
 `env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0. ALL CHECKS PASSED in 52.1 s.
 
 2026-11-21 22:31 lead — Merged gemini1a/1b/2a/2b/3a/3b (all evidence tasks done, 0 problems; miner/cheater cues match DESIGN §10) and codex1 T45–T47 (loader + server hardening, multi-cue cheater F1 0.163 default / 0.153 hard vs reconcile 1.000 / 0.840). Review of codex1: (1) its stricter loader rejected a ledger row_id equal to a doc_id; the published paired definitions rename each id space separately and expect equal strings across tables → an independent file-level jury transform failed closed reset after the merge; fixed in 0f33a0f (uniqueness per id space in loaded episodes, strict for our exports), harness 40/40 again, regression test SeparateIdSpaces. (2) T46 narrowed the server's except to ValueError/RuntimeError, so any other exception would end the server → restored a message-free catch-all ({"error": "internal error"}) with a test. (3) jury_run --policy-image without docker printed a raw traceback → clean error, exit 2 (test). Also D05 now asserted (b45cd76). check ALL PASSED, golden 80/80, verify 600/600, load 2.5 ms/episode. Queued T50–T61 (gemini, re-verify the tip) and T62–T63 (codex1: committed colliding-id paired test, loader strictness audit). Assumption: the loader's new validation is acceptable because jury fixtures come from generate_episode or transforms of our exports.
+
+2026-11-21 22:52 gemini3a — T58 complete: re-ran T44 error-code script and tested closed-reset failure cases on current branch tip.
+1. Error-code table through `judge_adapter` (`JudgeEnv`):
+| Action / Input                                                              | Code               | Steps Before | Steps After  | Cost (Delta) |
+|-----------------------------------------------------------------------------|--------------------|--------------|--------------|--------------|
+| malformed envelope `{"x": 1}`                                               | unknown_action     | 100          | 99           | 1            |
+| unknown action name `{"name": "unknown", "args": {}}`                       | unknown_action     | 99           | 98           | 1            |
+| bad_params `{"name": "list_records", "args": {"table": "ledger", "limit": -1}}` | bad_params         | 98           | 97           | 1            |
+| unknown_table `{"name": "list_records", "args": {"table": "nonexistent"}}`  | unknown_table      | 97           | 96           | 1            |
+| not_found `{"name": "get_record", "args": {"table": "ledger", "id": "NONEXISTENT"}}` | not_found          | 96           | 95           | 1            |
+| not_found `{"name": "get_document", "args": {"doc_id": "NONEXISTENT"}}`     | not_found          | 95           | 94           | 1            |
+| calc_error `{"name": "calculator", "args": {"expression": "1/0"}}`          | calc_error         | 94           | 93           | 1            |
+| invalid_findings `{"name": "submit", "args": {"findings": {"episode_id": "x", "findings": "no"}}}` | invalid_findings   | 100          | 99           | 1            |
+| episode_over (action after submit)                                          | episode_over       | 99           | 99           | 0            |
+| time_limit `{"name": "calculator", "args": {"expression": "1+1"}}` (after timeout) | time_limit         | 100          | 99           | 1            |
+
+2. Closed-reset error cases (first dev episode: `ep_14eca11ac929`):
+| Case                                                  | Exception  | Message                                 | Path-free | Prev step works |
+|-------------------------------------------------------|------------|-----------------------------------------|-----------|-----------------|
+| nonexistent path `/nonexistent`                       | ValueError | manifest.json: required file is missing | yes       | True            |
+| empty directory                                       | ValueError | manifest.json: required file is missing | yes       | True            |
+| copy of ep_14eca11ac929 with public/ledger.csv deleted | ValueError | ledger.csv: required file is missing    | yes       | True            |
+
+Verification:
+- Each closed-reset error case raises `ValueError`.
+- Messages do not leak any filesystem paths or '/' characters (`path-free: yes`).
+- An active episode retains state and `env.step({"name": "calculator", "args": {"expression": "1"}})` executes successfully and consumes 1 step following each rejected reset.
+Next: T59.
