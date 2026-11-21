@@ -17,7 +17,7 @@ Responses: {"observation", "info"} | {"observation", "reward", "terminated", "tr
 With --episodes FILE (kept secret from the agent) — either the configs/*.json format
 `{"episodes": [{"seed": int, "config": {...}}, ...]}` (per-episode configs, e.g. 5 clean + 5 interacting)
 or `{"seeds": [...], "config": {...}}` —
-every reset loads the next hidden episode; after the last one reset returns {"error": "no more episodes"}.
+every reset loads the next hidden episode in eval mode; after the last one reset returns {"error": "no more episodes"}.
 On close or EOF the open episode and every hidden episode not yet reset are logged as abandoned (empty answer).
 """
 
@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 
@@ -36,8 +37,34 @@ MAX_LINE: int = 1 << 20  # 1 MiB
 TOO_LARGE = object()
 
 
-def _reject_constant(name: str):
-    raise ValueError(f"non-standard JSON constant {name}")
+def _finite_float(literal: str) -> float:
+    value = float(literal)
+    if not math.isfinite(value):
+        raise ValueError("nonfinite number")
+    return value
+
+
+def _unique_object(pairs: list[tuple]) -> dict:
+    obj = {}
+    for key, value in pairs:
+        if key in obj:
+            raise ValueError("duplicate object key")
+        obj[key] = value
+    return obj
+
+
+def _hidden_config(config: dict) -> dict:
+    if config.get("mode", "eval") not in ("train", "eval"):
+        raise ValueError("mode must be 'train' or 'eval'")
+    return {**config, "mode": "eval"}
+
+
+def _validation_error(error: ValueError) -> str:
+    # Unknown config keys are client-supplied and can contain paths or control characters.
+    message = str(error)
+    if message.startswith("unknown config keys:"):
+        return "unknown config keys"
+    return message[:160]
 
 
 def _lines(inp):
@@ -92,7 +119,7 @@ def serve(inp, out, grader_log: str | None = None, episodes: list[tuple[int, dic
     finally:
         env.abandon()  # close / EOF with an open episode: graded as truncated, empty answer
         for seed, config in queue or ():  # hidden episodes never reset: graded the same way, so none is skipped
-            env.reset(seed, {**config, "mode": config.get("mode", "eval")})
+            env.reset(seed, _hidden_config(config))
             env.abandon()
         flush_log()
 
@@ -125,11 +152,10 @@ def _serve_lines(inp, env, queue, flush_log, send_resp) -> None:
             continue
 
         line_str = line_str.strip()
-        if not line_str:
-            continue
         try:
-            req = json.loads(line_str, parse_constant=_reject_constant)
-        except (ValueError, RecursionError):  # malformed or too deeply nested JSON, or NaN / Infinity (not strict JSON)
+            req = json.loads(line_str, object_pairs_hook=_unique_object,
+                             parse_float=_finite_float, parse_constant=_finite_float)
+        except (ValueError, RecursionError):
             send_resp({"error": "invalid json"})
             continue
         if not isinstance(req, dict):
@@ -145,7 +171,7 @@ def _serve_lines(inp, env, queue, flush_log, send_resp) -> None:
                         send_resp({"error": "no more episodes"})
                         continue
                     seed, config = queue.pop(0)
-                    config = {**config, "mode": config.get("mode", "eval")}
+                    config = _hidden_config(config)
                 else:
                     seed, config = req.get("seed"), req.get("config")
                 obs, info = env.reset(seed, config, abandon_open=True)  # a rejected reset keeps the open episode
@@ -160,8 +186,10 @@ def _serve_lines(inp, env, queue, flush_log, send_resp) -> None:
                 break
             else:
                 resp = {"error": "unknown cmd"}
-        except Exception as e:  # bounded error, never a traceback with internals
-            resp = {"error": f"{type(e).__name__}: {str(e)[:160]}"}
+        except ValueError as e:
+            resp = {"error": f"ValueError: {_validation_error(e)}"}
+        except RuntimeError:
+            resp = {"error": "RuntimeError: call reset() first"}
         send_resp(resp)
 
 
@@ -178,17 +206,24 @@ def main(argv=None) -> int:
               "(README, closed run) or pass --public for a deliberately public list.", file=sys.stderr, flush=True)
     try:
         episodes = load_episodes(args.episodes) if args.episodes else None
-    except (OSError, ValueError, KeyError, TypeError) as e:
-        print(f"auditenv.server: cannot read the hidden episode list: {e}", file=sys.stderr, flush=True)
+    except (OSError, ValueError, KeyError, TypeError, RecursionError):
+        print("auditenv.server: cannot read the hidden episode list", file=sys.stderr, flush=True)
         return 2
     for i, (seed, config) in enumerate(episodes or (), start=1):  # fail fast: a typo must not surface at close
         try:
-            AuditEnv().reset(seed, {**config, "mode": config.get("mode", "eval")})
-        except (ValueError, TypeError, AttributeError) as e:
-            print(f"auditenv.server: hidden episode {i}: {e}", file=sys.stderr, flush=True)
+            AuditEnv().reset(seed, _hidden_config(config))
+        except ValueError as e:
+            print(f"auditenv.server: hidden episode {i}: {_validation_error(e)}", file=sys.stderr, flush=True)
             return 2
     inp = getattr(sys.stdin, "buffer", sys.stdin)
-    serve(inp, sys.stdout, args.grader_log, episodes)
+    try:
+        if args.grader_log:
+            with open(args.grader_log, "a"):
+                pass
+        serve(inp, sys.stdout, args.grader_log, episodes)
+    except OSError:
+        print("auditenv.server: cannot write the grader log or response", file=sys.stderr, flush=True)
+        return 2
     try:
         sys.stdout.flush()
     except BrokenPipeError:  # the policy is gone; keep the interpreter's exit flush quiet
