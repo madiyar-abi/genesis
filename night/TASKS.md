@@ -70,7 +70,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   accept: last line (`N/N episodes valid`) in LOG.
 
 ## gemini1b — stress solvability (evidence only, files: night/LOG.md)
-- [ ] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 8000-8299` and
+- [x] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 8000-8299` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 8000-8299` — files:
   night/LOG.md — accept: per command the summary line + wall time in LOG.
 - [ ] G5 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 11000-11999` and the same with
