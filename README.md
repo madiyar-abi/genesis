@@ -392,7 +392,7 @@ uv run python -m auditenv.demo                       # narrated demo (see docs/D
 uv run python -m auditenv.export --config configs/dev.json --out episodes/dev       # re-export files
 uv run python -m auditenv.export --config configs/train.json --out episodes/train   #   (all three after
 uv run python -m auditenv.export --config configs/eval_hard.json --out episodes/hard  #  a generator change)
-uv run python scripts/mutate_reward.py               # 15 one-line mutants of matcher/reward, all must be caught
+uv run python scripts/mutate_reward.py               # 22 one-line mutants of matcher/reward, all must be caught
 uv run python scripts/sensitivity.py                 # baseline ranking under other step costs / tolerances
 uv run python scripts/shortcut_miner.py --report-only  # single-feature data-leak search (add --hard)
 uv run python scripts/golden.py --check              # 80 golden hashes: generator drift detector

@@ -14,6 +14,9 @@
 Result: 0 imperfect, 0 truncated across 2,400 episodes. Max steps: 32 (default), 57 (hard).
 Next: T5 (jury_run on seed bases 7000, 8000, 9000).
 
+2026-11-21 21:49 lead — T98: fresh `auditenv.demo --seed 2003` matches every number in docs/DEMO.md (326 rows, 69 invoices, 21 inspection steps, 0.958, 0.333, 286 / 351331 minor units, 22 actions, TP 4) and the check (dev reconcile F1 1.000, hard 0.752). No edit needed.
+2026-11-21 21:49 lead — T99: `sync_docs --check` clean against a fresh `check --json`. Found one untracked stale number: `scripts/mutate_reward.py` now runs 22 mutants (22/22 killed, re-run tonight) but PITCH slide 8, CHECKS.md, README "Other commands" and HANDOFF "How to run" said 15. Fixed all four; historical round notes in HANDOFF left as they were.
+
 2026-11-21 21:50 gemini1b — T5 jury_run baseline evaluation on seed bases 7000, 8000, 9000.
 Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 7000 --json /tmp/r18-gemini1b/j7000.json` (exit 0, wall time 3.85 s)
 ```
