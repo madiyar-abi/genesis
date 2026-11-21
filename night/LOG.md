@@ -10,3 +10,20 @@
   - `uv run python scripts/golden.py --check` (exit 0, wall 0.650s): "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json."
   - `uv run python scripts/mutate_reward.py` (exit 0, wall 3:40.49 total / 219.12s user): "22/22 mutants killed."
   All 80 golden hashes match; all 22 reward/matcher/schema/metrics mutants successfully killed.
+2026-11-22 00:33 gemini2b — G12: Ran `uv run python scripts/shortcut_miner.py` (seeds 0-999, configs random_mix/heavy, 2000 episodes, wall 22.4s, exit 1 due to flagged values without --report-only).
+Max precision per issue type:
+| type | affected max P | evidence max P | flagged (aff/ev) |
+|---|---|---|---|
+| duplicate_invoice | 0.996 | 0.996 | 2/2 |
+| payment_allocation | 0.964 | 0.964 | 8/1 |
+| fx_error | 0.704 | 0.308 | 3/0 |
+| period_cutoff | 0.452 | 0.452 | 0/0 |
+
+Total flagged values: 16 (precision > 0.5):
+- affected duplicate_invoice (2): `invoices same_entity_currency_total_count == 2` (P=0.996), `invoices total_count_in_table == 2` (P=0.972).
+- affected payment_allocation (8): `ledger amount_count_in_table@acct2900 == 4+` (P=0.964), `ledger day_rel_period@acct2900 == end-0` (P=0.789), `ledger amount_digits@acct2900 == 9` (P=0.750), `ledger position_decile@acct2900 == 9` (P=0.671), `ledger amount_count_in_table@acct2900 == 1` (P=0.622), `ledger day_rel_period@acct7900 == end-0` (P=0.568), `ledger amount_digits@acct2900 == 6` (P=0.566), `ledger payment_journal_size@acct2900 == 4+` (P=0.557).
+- affected fx_error (3): `ledger day_rel_period@acct2900 == end-0` (P=0.704), `ledger position_decile@acct2900 == 9` (P=0.549), `ledger day_rel_period@acct7900 == end-0` (P=0.548).
+- evidence duplicate_invoice (2): `invoices same_entity_currency_total_count == 2` (P=0.996), `invoices total_count_in_table == 2` (P=0.972).
+- evidence payment_allocation (1): `ledger amount_count_in_table@acct2900 == 4+` (P=0.964).
+
+Comparison with `docs/DESIGN.md` §10: Exactly 16 flagged values in default mode, precisely matching the 16 flagged values documented in DESIGN §10 (duplicate definitions at P=0.996, last-day 2900/7900 fx_error cues at P=0.70, 2900 payment_allocation hints at P=0.75-0.78 and repeated amount at P=0.964). 0 unlisted columns/features with precision > 0.5.

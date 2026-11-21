@@ -98,7 +98,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   differing file named.
 - [x] G11 (gemini2b) `uv run python scripts/golden.py --check` and `uv run python scripts/mutate_reward.py` — files:
   night/LOG.md — accept: both summary lines and exit codes in LOG.
-- [ ] G12 (gemini2b) `uv run python scripts/shortcut_miner.py` (see its `--help`) — files: night/LOG.md — accept:
+- [x] G12 (gemini2b) `uv run python scripts/shortcut_miner.py` (see its `--help`) — files: night/LOG.md — accept:
   printed table in LOG; any column with precision > 0.5 that is NOT listed in docs/DESIGN.md §10 called out.
 
 ## gemini3a — jury modules repeat (evidence only, files: night/LOG.md)
