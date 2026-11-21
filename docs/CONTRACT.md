@@ -112,7 +112,8 @@ the current episode unchanged. A successful server reset grades an open episode 
 
 Grader secret: if the env var `AUDITENV_SECRET` is set (grader process only), it keys both the
 generator RNG and the HMAC `episode_id`, so a policy cannot recover the seed or regenerate the
-episode. Unset = public, reproducible train/dev episodes.
+episode. Unset = public, reproducible train/dev episodes. `judge_adapter.generate_episode` never
+uses the public key: without `AUDITENV_SECRET` it uses a random grader key file (README "Jury adapter").
 
 First observation: `{task, manifest, policy, tools, steps_remaining}`; reset `info` =
 `{episode_id, mode, max_steps}`. Step `info` is `{}` except on the terminal step in `mode="train"`:

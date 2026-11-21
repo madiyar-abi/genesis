@@ -22,6 +22,8 @@ import sys
 import tempfile
 import time
 
+from .export import export_episode
+from .generator import generate
 from .policy_worker import JuryPolicy, POLICIES, worker
 from .jury import SCENARIOS
 from .load import load_episode
@@ -41,9 +43,10 @@ def play(env, first: dict, policy_name: str, truth: dict | None = None, policy_i
     if policy_image:
         command = ["docker", "run", "--pull=never", "--rm", "-i", "--network", "none", "--read-only", "--cap-drop=ALL",
                    "--security-opt=no-new-privileges", "--user", "65534:65534", policy_image, policy_name]
+    grader_only = ("AUDITENV_SECRET", "AUDITENV_KEY_FILE")
     proc = subprocess.Popen(command, cwd=ROOT,
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
-                            env={k: v for k, v in os.environ.items() if k != "AUDITENV_SECRET"})
+                            env={k: v for k, v in os.environ.items() if k not in grader_only})
     steps, obs, done = 0, first, False
     try:
         while not done:
@@ -60,13 +63,14 @@ def play(env, first: dict, policy_name: str, truth: dict | None = None, policy_i
 def run(seed_base: int = 3000, policy_image: str | None = None) -> dict:
     import judge_adapter as ja  # repository root
 
-    ja._WARNED = True  # a deliberately public run on published seeds: no grader-key warning
     rows = {}
     with tempfile.TemporaryDirectory() as tmp:
         episodes = []
         for n, (name, cfg) in enumerate(SCENARIOS.items(), start=1):
             path = os.path.join(tmp, name)
-            ja.generate_episode(seed_base + n, cfg, path)
+            # a deliberately public replay on published seeds, reproducible anywhere: the same files as
+            # ja.generate_episode writes, but without its grader key (judge_adapter.grader_key)
+            export_episode(generate(seed_base + n, cfg), path)
             episodes.append((name, path, load_episode(path)["truth"]))
         for policy_name in (*POLICIES, "oracle"):
             tp = fp = fn = 0

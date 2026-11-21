@@ -12,10 +12,12 @@ from decimal import Decimal
 from unittest.mock import patch
 
 import judge_adapter as ja
+from auditenv.generator import generate
 from auditenv.load import load_episode
 from auditenv.matcher import public_ids
 
 ja._WARNED = True  # public test seeds: the grader-key warning is tested on its own
+os.environ.setdefault("AUDITENV_KEY_FILE", os.path.join(tempfile.mkdtemp(), "grader.key"))  # not ~/.auditenv
 
 ONLY = {"I1": 0, "I2": 0}
 FORBIDDEN_KEYS = {"truth", "provenance", "seed", "evidence_sets", "expected_amount_minor", "issue_id", "scenario",
@@ -307,9 +309,11 @@ class JudgeContractTest(unittest.TestCase):
 
     def test_train_mode_generates_and_returns_the_terminal_reward(self):
         env = ja.make_env()
-        obs, info = env.reset(12, {"mode": "train", "team_config": {"errors": {"fx_error": 1}, "interacting": ONLY}})
-        self.assertEqual(obs["manifest"]["episode_id"], self.e["episode_id"])  # same generator, same seed
-        _, reward, terminated, _, info = env.step(act("submit", findings=oracle_findings(self.e)))
+        cfg = {"errors": {"fx_error": 1}, "interacting": ONLY}
+        obs, info = env.reset(12, {"mode": "train", "team_config": cfg})
+        public = generate(12, cfg)  # open mode is the public generator; closed fixtures carry the grader key
+        self.assertEqual(obs["manifest"]["episode_id"], public["episode_id"])
+        _, reward, terminated, _, info = env.step(act("submit", findings=oracle_findings(public)))
         self.assertTrue(terminated)
         self.assertEqual(reward, 1.0)
         self.assertEqual(info["tp"], 1)

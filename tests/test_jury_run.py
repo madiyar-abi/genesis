@@ -4,6 +4,7 @@ takes the same actions and gets the same grade as the same policy on `AuditEnv` 
 import os
 import tempfile
 import unittest
+from unittest import mock
 
 import judge_adapter as ja
 from auditenv.env import AuditEnv
@@ -15,9 +16,11 @@ from auditenv.policies.reconcile import Reconcile
 from auditenv.run import run_episode
 
 ja._WARNED = True  # public test seeds: the grader-key warning is tested on its own
+os.environ.setdefault("AUDITENV_KEY_FILE", os.path.join(tempfile.mkdtemp(), "grader.key"))  # not ~/.auditenv
 
 
 class JuryPolicyTest(unittest.TestCase):
+    @mock.patch.dict(os.environ, {"AUDITENV_SECRET": "test-only-key"})  # one key for the adapter and AuditEnv
     def test_same_actions_and_grade_as_on_auditenv(self):
         with tempfile.TemporaryDirectory() as tmp:
             for name in ("D06", "D10", "D16", "D19", "D03"):

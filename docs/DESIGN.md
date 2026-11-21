@@ -349,8 +349,10 @@ to explore.
 - Synthetic and simplified: receivables only (no payables, tax, accruals), one functional
   currency ledger, foreign → base rates only, fixed UTC offsets (no DST). Not an audit opinion;
   the reward does not prove fitness for real audits.
-- The generator is open and deterministic: hidden runs must set `AUDITENV_SECRET` in the grader
-  process (otherwise, as for the public splits, anyone can regenerate an episode from its seed).
+- The generator is open and deterministic. The jury path keys hidden episodes by default (`AUDITENV_SECRET`, else a
+  random grader key file: `judge_adapter.grader_key`, `tests/test_grader_key.py`); a key file kept on the jury
+  machine makes them reproducible there only. Our own server (`auditenv.server --episodes`) still needs
+  `AUDITENV_SECRET` for a hidden list (it warns without it); the public splits are regenerable from their seeds.
 - Shortcut miner (`uv run python scripts/shortcut_miner.py [--hard]`, 1 000 seeds): single observable
   features that predict truth records with precision > 0.5 (16 flagged in default mode, 11 in hard mode).
   Fixed: re-typed descriptions marked hard-mode duplicate copies (1.000 → 0.449 on 1 000 seeds, 0.467 on 500

@@ -54,9 +54,10 @@ class AuditEnv:
 
     # ------------------------------------------------------------------ API
     def reset(self, seed: int, config: dict | None = None, abandon_open: bool = False, *,
-              started_at: float | None = None):
+              started_at: float | None = None, key: str | None = None):
         """Start an episode. A rejected seed or config raises ValueError and leaves the current episode as it was.
-        `abandon_open` (server): grade the open episode as abandoned once the new one is generated."""
+        `abandon_open` (server): grade the open episode as abandoned once the new one is generated.
+        `key` (grader side): generator key overriding AUDITENV_SECRET, see `generator.generate`."""
         if started_at is None:
             started_at = self._clock()
         if isinstance(seed, bool) or not isinstance(seed, int):
@@ -68,7 +69,7 @@ class AuditEnv:
         if unknown:
             raise ValueError(f"unknown config keys: {sorted(unknown)}")
         cfg = _limits(config)
-        ep = generate(seed, config)
+        ep = generate(seed, config, key)
         return self._open(ep, cfg, abandon_open, started_at)
 
     def reset_episode(self, episode: dict, config: dict | None = None, abandon_open: bool = False, *,

@@ -41,9 +41,6 @@ venv/
 #     rollback fails (its old/ then holds the previous files) or the process is killed ---
 .*.export-*/
 
-# --- Example output of the README's `auditenv.run ... --out trajectories.jsonl` (committed logs: trajectories/) ---
-/trajectories.jsonl
-
 # --- Night-run watchdog logs (local only) ---
 .night-logs/
 

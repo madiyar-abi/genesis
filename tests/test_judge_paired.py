@@ -19,6 +19,7 @@ from auditenv.load import load_episode
 from auditenv.verify import verify_episode
 
 ja._WARNED = True  # public test seeds: the grader-key warning is tested on its own
+os.environ.setdefault("AUDITENV_KEY_FILE", os.path.join(tempfile.mkdtemp(), "grader.key"))  # not ~/.auditenv
 
 SCENARIOS = list(jury.SCENARIOS.values())  # D01-D20 of Block 2 (README "Jury adapter")
 ID_FIELDS = {"row_id": "R", "doc_id": "D", "invoice_id": "I", "payment_id": "P", "entity_id": "E"}

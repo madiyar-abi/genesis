@@ -4,6 +4,15 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
+**Grader key by default (21 November, evening, branch `feature/ten-of-ten`).** The jury runs every team the same
+way and will not set our `AUDITENV_SECRET`; its rules treat a seed leak as blocking. Before this change
+`generate_episode` without the variable gave `episode_id = HMAC(public constant, seed)` and public-RNG records, so a
+policy could recover the seed. Now `judge_adapter.grader_key` uses `AUDITENV_SECRET` if set, else a random key created
+once in `~/.auditenv/grader.key` (`$AUDITENV_KEY_FILE`), else a per-process key if the file is unusable. Public splits,
+open mode and `auditenv.jury_run` keep the public generator (golden 80/80, docs numbers unchanged).
+Check: `uv run python -m unittest tests.test_grader_key` (failed 4 of 6 before the change, passes after);
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` → 521 tests, all gates pass.
+
 **Current state (21 November 2026).** PR #42 merged the jury adapter checks and public scenario runs into `main`. The follow-up below fixes a C18 failure found on that revision and adds an isolated run for C20. Before submission the team still needs to revoke the DeepSeek key, make the repository public, record the video, and share and submit the Google Doc. See “Deadline & submission”.
 
 ## C18 and C20 follow-up (Khasuetolog)
@@ -140,7 +149,11 @@ Genesis Hackathon, online stage. **Cases are published on the hackathon site on
 Results: 7 teams per case (14 finalists) go to the offline final in Astana,
 planned for 2026-11-28/29 (exact dates and venue TBA).
 
-Submit via the personal account on the hackathon site: a link to **one Google
+**Organisers' FAQ (21 November, later than the message below): put everything from §09 into a Google Drive
+folder, share it "Anyone with the link", and paste the folder link into the form — the form checks the access.**
+Safest: a shared folder holding the Doc with the links, the video as mp4, and (optional) a source zip.
+
+Earlier instruction: submit via the personal account on the hackathon site: a link to **one Google
 Docs document** with the links — GitHub repo and demo video (a presentation is optional since the organisers'
 message of 21 November: the jury looks at §09 of the case — code, README, demo video and description).
 Every material must be viewable by anyone with the link. (The earlier
@@ -164,7 +177,7 @@ Genesis Hackathon 2026 — FinTech: auditenv, an RL environment for AI financial
 GitHub: https://github.com/madiyar-abi/genesis  (start with README → "For the jury")
 Demo video: <link>
 One check command: uv run python -m auditenv.check  (container: docker build -t auditenv . && docker run --rm --network none auditenv)
-Jury adapter: judge_adapter.py in the repository root; set AUDITENV_SECRET in the process that generates hidden episodes.
+Jury adapter: judge_adapter.py in the repository root; hidden episodes are keyed by default (README "Jury adapter").
 Design note: docs/DESIGN.md · Contract: docs/CONTRACT.md · Check map: docs/CHECKS.md
 ```
 - [ ] Doc link submitted in the personal account on the site

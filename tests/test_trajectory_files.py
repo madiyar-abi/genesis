@@ -11,6 +11,7 @@ from unittest import mock
 from auditenv import run
 from auditenv.env import AuditEnv
 from auditenv.run import load_episodes
+from tests.test_schemas import _matches, load_schemas
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KEYS = {"episode_id", "step", "action", "observation", "reward", "terminated", "truncated"}
@@ -118,6 +119,55 @@ class TrajectoryFilesTest(unittest.TestCase):
                     run.main(["--policy", policy, "--config", cfg, "--out", out])
                 with open(out, "rb") as fresh, open(os.path.join(ROOT, "trajectories", name), "rb") as committed:
                     self.assertTrue(fresh.read() == committed.read(), f"{name} differs from a fresh run")
+
+
+# The case's §09 deliverable under its literal name, in the repository root: one policy, so (episode_id, step) is a
+# unique key and no extra field is needed. reconcile_hard plays default books exactly like reconcile.
+CASE_FILE = os.path.join(ROOT, "trajectories.jsonl")
+CASE_ARGS = ["--policy", "reconcile_hard", "--config", "configs/train.json", "--config", "configs/train_hard.json"]
+CASE_PARTS = ("train_reconcile.jsonl", "train_hard_reconcile_hard.jsonl")  # action-replayed above
+
+
+class CaseTrajectoriesTest(unittest.TestCase):
+    def test_section_09_fields_traceable_steps_no_truth(self):
+        schemas = load_schemas()
+        with open(CASE_FILE) as fh:
+            recs = [json.loads(line) for line in fh]
+        episodes = {}
+        for rec in recs:
+            self.assertEqual(set(rec), KEYS)
+            self.assertTrue(_matches(rec, schemas["trajectory_step.schema.json"], "trajectory_step.schema.json",
+                                     schemas), (rec["episode_id"], rec["step"]))
+            text = json.dumps(rec["observation"])
+            for word in FORBIDDEN:
+                self.assertNotIn(word, text)
+            episodes.setdefault(rec["episode_id"], []).append(rec)
+        self.assertEqual(len(episodes), 20)
+        for steps in episodes.values():
+            self.assertEqual([r["step"] for r in steps], list(range(len(steps))))  # each (episode_id, step) once
+            self.assertTrue(steps[-1]["terminated"] or steps[-1]["truncated"])
+            self.assertTrue(all(not r["terminated"] and not r["truncated"] for r in steps[:-1]))
+            self.assertTrue(all(r["reward"] == 0.0 for r in steps[:-1]))
+        self.assertEqual(sum(HARD_MARK in s[0]["observation"]["task"] for s in episodes.values()), 10)
+
+    def test_regenerates_byte_for_byte_with_the_readme_command(self):
+        with open(os.path.join(ROOT, "README.md")) as fh:
+            self.assertIn(" ".join(["uv run python -m auditenv.run", *CASE_ARGS, "--out trajectories.jsonl"]), fh.read())
+        with open(CASE_FILE, "rb") as fh:
+            committed = fh.read()
+        parts = b""
+        for name in CASE_PARTS:
+            with open(os.path.join(ROOT, "trajectories", name), "rb") as fh:
+                parts += fh.read()
+        self.assertTrue(committed == parts, "trajectories.jsonl is not the concatenation of " + " + ".join(CASE_PARTS))
+        with mock.patch.dict(os.environ), tempfile.TemporaryDirectory() as tmp:
+            os.environ.pop("AUDITENV_SECRET", None)
+            out = os.path.join(tmp, "trajectories.jsonl")
+            args = [os.path.join(ROOT, a) if a.startswith("configs/") else a for a in CASE_ARGS]
+            with contextlib.redirect_stdout(io.StringIO()):
+                run.main([*args, "--out", out])
+            with open(out, "rb") as fresh:
+                self.assertTrue(fresh.read() == committed, "trajectories.jsonl differs from a fresh run")
 
 
 if __name__ == "__main__":

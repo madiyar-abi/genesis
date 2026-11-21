@@ -30,7 +30,9 @@ git clone https://github.com/madiyar-abi/genesis.git && cd genesis
 uv run python -m auditenv.check        # the single official check (exit code 0 = pass)
 ```
 
-For an offline checkout with Python 3.11 already installed, run `python3.11 -m auditenv.check` from the repository root.
+Needs only [`uv`](https://docs.astral.sh/uv/getting-started/installation/): it fetches Python 3.11 (pinned in
+`.python-version`); there are no other dependencies. For an offline checkout with Python 3.11 already installed, run
+`python3.11 -m auditenv.check` from the repository root, or use the container below.
 
 ### Container
 
@@ -56,8 +58,9 @@ Each non-oracle baseline runs as UID 65534 with a read-only filesystem, no netwo
 
 ## For the jury
 
-1. **Set `AUDITENV_SECRET`** (any private string) in the process that generates hidden episodes, never in the
-   policy's process: without it `episode_id` is keyed by a public constant and a policy can recover the seed.
+1. **No key to set.** `generate_episode` keys hidden episodes so that neither `episode_id` nor the records reveal
+   the seed: by `AUDITENV_SECRET` if you set it, otherwise by a random grader key created once in
+   `~/.auditenv/grader.key` (or `$AUDITENV_KEY_FILE`). Keep both out of the policy's process.
 2. Connect through **`judge_adapter.py`** in the repository root (working directory `/app` in the container):
    `generate_episode`, `make_env()` → `reset` / `step({"name", "args"})`, `score_episode` — see
    [Jury adapter](#jury-adapter-judge_adapterpy). The `{"type": ...}` actions further down are the environment's
@@ -76,7 +79,7 @@ Each non-oracle baseline runs as UID 65534 with a read-only filesystem, no netwo
 | 10 train + 10 dev episodes | `episodes/train`, `episodes/dev` (plus 20 public hard episodes in `episodes/hard`) |
 | tests | `tests/` (environment, matching, reward, verifier, jury checks) |
 | four baseline-policy adapters | `auditenv/policies/` (random explorer, reconcile, flag-all, oracle; plus naive reconcile and reconcile_hard); `auditenv.jury_run.JuryPolicy` runs them behind the jury protocol |
-| `trajectories.jsonl` | `trajectories/train_*.jsonl`, one file per policy, each line `{episode_id, step, action, observation, reward, terminated, truncated}`; no truth in observations (checked by the tests) |
+| `trajectories.jsonl` | [`trajectories.jsonl`](trajectories.jsonl) in the repository root: 20 train episodes (10 default, 10 hard) played by `reconcile_hard`, 674 lines, each exactly `{episode_id, step, action, observation, reward, terminated, truncated}`; no truth in observations; the tests regenerate it byte for byte ([how](#run-a-policy-write-trajectories)); per-policy logs of the other baselines in `trajectories/` |
 | design note | [`docs/DESIGN.md`](docs/DESIGN.md) (interfaces: [`docs/CONTRACT.md`](docs/CONTRACT.md)) |
 | demo | `uv run python -m auditenv.demo` (narrated, seed 2003 of the demo config), [`docs/demo.cast`](docs/demo.cast), script [`docs/DEMO.md`](docs/DEMO.md); the video link is in the submission document |
 
@@ -177,15 +180,28 @@ Omit both `errors` and `interacting` for a random mix. Supplying either object s
 ### Run a policy, write trajectories
 
 ```bash
-uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out trajectories.jsonl
+uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/dev_reconcile.jsonl
 uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval
 ```
 
 Policies: `random`, `naive_reconcile`, `reconcile`, `reconcile_hard`, `flag_all`, `oracle` (grader-side, reads truth — reward ceiling only).
-Each trajectory line: `episode_id, step, action, observation, reward, terminated, truncated` — the
-`trajectories.jsonl` format of the case; the committed logs are split per policy (`trajectories/train_<policy>.jsonl`).
+Each trajectory line has exactly the case's fields `episode_id, step, action, observation, reward, terminated, truncated`.
 
-The committed `trajectories/` files are reproduced byte-for-byte by (train mode, no truth in observations):
+**`trajectories.jsonl`** (repository root, the case's deliverable) holds the policy-aware script `reconcile_hard` on the
+10 train and 10 hard train episodes (seeds 1000–1009 and 1100–1109, train mode), 674 lines. One policy per file keeps
+`(episode_id, step)` a unique key, so no extra `policy` field is needed; `reconcile_hard` plays default books exactly
+like `reconcile`, so the file equals `trajectories/train_reconcile.jsonl` followed by
+`trajectories/train_hard_reconcile_hard.jsonl`. It is reproduced byte for byte by:
+
+```bash
+uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out trajectories.jsonl
+```
+
+`tests/test_trajectory_files.py` (part of the check) fails if any committed log differs from a fresh run, has another
+field, misses a step, or carries a grader marker (`truth`, `evidence_sets`, `expected_amount_minor`, `provenance`,
+`issue_id`) in an observation, and replays the saved actions against the environment.
+
+The other baselines are logged per policy in `trajectories/`, reproduced byte for byte by (train mode, no truth in observations):
 
 ```bash
 for p in random naive_reconcile reconcile; do
@@ -224,10 +240,14 @@ The jury's single connection point ([check definitions](https://genesis-exe.com/
 container); it imports `auditenv` and needs nothing else. The adapter only translates names and shapes; the
 environment, matcher and reward are the ones described above.
 
-**Set `AUDITENV_SECRET` (any private string) in the jury process that calls `generate_episode`**, and never in the
-policy's process. Without it `episode_id` is keyed by a public constant, so a policy can recover the seed of a hidden
-episode by enumeration and regenerate its truth (`generate_episode` prints a warning on stderr). Loading, `reset` and
-`score_episode` read the files and need no key.
+**Hidden episodes are keyed by default.** The generator is open source, so a public key would let a policy recover
+the seed of a hidden episode by enumeration and regenerate its truth. `generate_episode` (and a closed `reset` without
+`episode_dir`) therefore use `AUDITENV_SECRET` if it is set, and otherwise a random grader key that is created once in
+`~/.auditenv/grader.key` (`$AUDITENV_KEY_FILE` overrides the path; mode 0600) and named on stderr. The same seed and
+config give the same episode again on that machine. If the file cannot be written (read-only home), a random key of
+the process is used and stderr says so. Keep the key out of the policy's process. Loading, `reset` with
+`episode_dir` and `score_episode` read the files and need no key. Open mode (`train` without `episode_dir`) and the
+published splits use the public generator on purpose.
 
 ```python
 import os, tempfile
@@ -406,6 +426,7 @@ To compare variants of the same seed, list each configuration as a separate epis
 | `schemas/` | JSON Schemas: action, observation, findings, manifest, truth, trajectory step |
 | `configs/` | versioned episode lists: train (1000–1009), dev (2000–2009), eval_example (9000–9019), eval_hard (9100–9119), train_hard (1100–1109) |
 | `episodes/` | exported 10 train + 10 dev + 20 public hard episodes (`public/` for agents: task text, manifest, policy, four tables; `grader/` closed) |
+| `trajectories.jsonl` | the case's training trajectories: `reconcile_hard` on the train and hard train splits (20 episodes) |
 | `trajectories/` | training trajectories (JSONL) of reconcile, naive reconcile and random on the train split, and the same three plus reconcile_hard on the hard train split (`train_hard_*`) |
 | `tests/` | Unit tests; `tests/test_jury.py` maps the jury checklist to tests |
 | `docs/` | contract, design note, demo script, pitch outline, `CHECKS.md` (jury criteria → test → command → result) |
@@ -416,9 +437,10 @@ To compare variants of the same seed, list each configuration as a separate epis
 
 - Synthetic data only: all companies, people and money are fictional; the reward does not prove
   fitness for real audits.
-- The generator is deterministic and public: for hidden evaluation set `AUDITENV_SECRET` in the
-  grader process — it keys the generator and the HMAC `episode_id`, so seeds can't be recovered
-  and episodes can't be regenerated by the agent.
+- The generator is deterministic and public. Hidden episodes from `judge_adapter.generate_episode` are keyed by
+  `AUDITENV_SECRET` or, without it, by a random grader key file (`tests/test_grader_key.py`), so seeds can't be
+  recovered and episodes can't be regenerated by the agent. Our own closed server (`auditenv.server`) still needs
+  `AUDITENV_SECRET` for a hidden list and warns without it.
 - Simplified books: receivables only (no payables, tax or accruals), one base-currency ledger,
   fixed UTC offsets (no DST).
 - Scriptable: a policy-aware rule script solves the default distribution (F1 1.0) and, with two extra
