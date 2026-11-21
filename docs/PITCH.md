@@ -33,7 +33,7 @@
 
 ## 6. How the grader scores an answer
 
-- A match requires the correct issue type, affected IDs, currency, amount, and one complete evidence set. The amount tolerance in minor units is `max(1, expected_minor // 1000)`.
+- A match requires the correct issue type, affected IDs, currency, amount, and one complete evidence set. The amount must be exact: the policy publishes `tolerance_minor: 0`.
 - Each truth issue matches once. Repeated findings count as false positives.
 - Terminal return is `clip(2 × F1 − 1 − 0.002 × inspection_steps, −1, 1)`. Invalid submissions score −1. On clean books, an empty answer has F1 of 1.
 - On the demo company, repeating every oracle finding in one submission earns 0.333. Flagging everything earns −1.
