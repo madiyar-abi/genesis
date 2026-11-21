@@ -365,3 +365,27 @@ below failed on `main` at `87b1b4c` against a test that replays the definitions,
   process, a policy recovered the seed from `episode_id` in 3.2 s and scored 1.0; `generate_episode` now warns and the
   README requires the key. A fixture with only the listed files (no task.txt, provenance.json or fx_id column) could
   not be graded; it can now.
+
+## Round 18 (21 November, evening)
+
+Base `night/2026-11-21-r18` at `266a495` (main after PRs #44–#45). `auditenv.check` passed (523 tests, all gates).
+Three read-only jury-style passes (docs claims, data ambiguity, §09/§10 engineering) plus the workers' red-team and
+evidence tasks (night/TASKS.md, night/LOG.md).
+
+- Engineering (§10, 5 × 0/1/2): scored 2 on every criterion; nothing in the §10 blocking clause (no leak through the
+  adapter in closed mode, no grader write path, synthetic data, core runs; Docker job green in CI run 44925790975).
+  Gap fixed: 10 of the 20 episode ids in `trajectories.jsonl` (hard train, seeds 1100–1109) were not under
+  `episodes/`; README now gives the export command that reproduces them (checked: all 20 ids covered).
+- Docs, ~150 claims checked against code and fresh runs; 10 wrong, all fixed. Behaviour: README and CONTRACT said
+  `episode_over` costs a step — `AuditEnv.step` returns before counting it (submit, then three actions: remaining
+  steps stay at 97). README said jury_run used `judge_adapter.generate_episode`; it uses the public generator. README's
+  list of invalid submissions omitted an unknown key and another episode's `episode_id`. Numbers: reward mutants 15 →
+  22 (README, CHECKS, PITCH), jury block tests 69 → 70, verify_semantics 10 → 12, verify_redteam 10 → 11, README
+  snippets 2 → 3, DESIGN limitations 11 → 14, fuzz actions 20 312 → 20 319, hard random > 0 on 50 → 47 clean episodes;
+  DESIGN §10 omitted the strongest remaining payment_allocation cue (2900 amount repeated in ≥ 4 ledger rows, 0.964).
+- Closed reset stderr (codex1, T21): a closed `reset` without `episode_dir` and without `AUDITENV_SECRET` printed the
+  grader key file path to stderr, which a policy sharing the process can read. Now only `generate_episode` warns;
+  regression `JudgeContractTest.test_closed_reset_keeps_key_path_off_stderr` failed before the fix.
+- Paired (codex1, T20): an independent transform (all surrogate ids renamed, dates shifted one 400-year cycle so every
+  fx_id changes, four tables shuffled) on seeds 0–49 default and hard: 100/100 pairs same closed and oracle reward,
+  `verify --dir` 50/50 each. No defect.

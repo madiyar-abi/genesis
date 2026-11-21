@@ -76,3 +76,5 @@ Checked 138 `tests/<file>.py::<Class>::<method>` references (and 9 class referen
 Result: 0 missing.
 All assigned gemini3a tasks (T13, T14, T15) complete.
 2026-11-21 21:50 gemini3b — T16: Fresh clone in path with spaces ('/tmp/r18 gemini3b clone'). Ran: (1) `env -u AUDITENV_SECRET uv run python -m auditenv.check` — exit 0, wall 177.55s, last line: 'ALL CHECKS PASSED in 177.4 s'; (2) `env -u AUDITENV_SECRET uv run python -m auditenv.demo` — exit 0, wall 0.30s, last line: 'Done. Full check: uv run python -m auditenv.check'; (3) `env -u AUDITENV_SECRET uv run python judge_adapter.py --help` — exit 0, wall 0.07s, no CLI implemented (exits 0 with empty output). Removed clone. Next: T17.
+
+2026-11-21 21:56 lead — Merged codex1 (T20, T21 + fix), rb (T25), gemini1b (T4–T6), gemini3a (T13–T15), gemini3b (T16); reviewed each diff (only codex1 touched code: closed reset no longer prints the grader key path; regression test added). `auditenv.check` on the merged tip: 526 tests, ALL CHECKS PASSED in 101.0 s. REVIEW.md → "Round 18" written. Topped up gemini1b (T40–T42) and gemini3a (T43–T44).
