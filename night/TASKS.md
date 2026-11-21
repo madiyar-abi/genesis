@@ -44,7 +44,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   clear message; LOG lists every other exception, silent count mismatch, or step-budget overrun with a reproduction.
 
 ## codex2 — jury-run realism (strong)
-- [ ] Y1 (codex2) Jury copy robustness beyond the published paired transform: take 10 exported episodes (5 default,
+- [x] Y1 (codex2) Jury copy robustness beyond the published paired transform: take 10 exported episodes (5 default,
   5 hard; `episodes/dev`, `episodes/hard`) and write variants a jury tool could plausibly produce when it re-writes
   files: CSV column order shuffled, CRLF line endings, UTF-8 BOM on CSV/JSON, trailing newline missing, JSON pretty-
   printed vs compact, JSONL with keys reordered. For each variant: `judge_adapter` reset on `episode_dir` + replay of
@@ -99,7 +99,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   accept: exit code and the final "Audited ... unexpected failures" line verbatim, wall time.
 
 ## gemini2b — reproducibility (evidence only, files: night/LOG.md)
-- [ ] G10 (gemini2b) Re-export into scratch dirs and diff against the committed exports:
+- [x] G10 (gemini2b) Re-export into scratch dirs and diff against the committed exports:
   `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r21-gemini2b/dev` then
   `diff -r episodes/dev /tmp/r21-gemini2b/dev`; same for every split under episodes/ (config names in configs/) —
   accept: per split the diff exit code; any differing file named.
@@ -112,7 +112,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
 - [x] G13 (gemini3a) Four jury modules 5 times: `env -u AUDITENV_SECRET uv run python -m unittest
   tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` — accept: per
   run `Ran N tests` + result.
-- [ ] G14 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
+- [x] G14 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
   — accept: summaries + exit codes.
 - [ ] G15 (gemini3a) Full suite under `PYTHONHASHSEED=7 TZ=America/St_Johns env -u AUDITENV_SECRET uv run python -m
   unittest discover -s tests -t .` and `PYTHONHASHSEED=99 TZ=Pacific/Chatham ...` — accept: `Ran N tests`,
