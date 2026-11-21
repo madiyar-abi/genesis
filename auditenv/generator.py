@@ -601,7 +601,8 @@ def policy_for(st: State) -> dict:
             "amount": "misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the "
                       "AR debit of the later-issued copy; fx_error: abs(posted - correct); period_cutoff: the AR "
                       "debit posted; payment_allocation: expected AR credit for the ref - AR credit posted",
-            "tolerance": "abs(claimed - expected) <= max(1, expected // 1000)",
+            "tolerance": "abs(claimed - expected) <= tolerance_minor; tolerance_minor is 0, so the amount must be exact",
+            "tolerance_minor": 0,
             "affected_ids": {"duplicate_invoice": "[original_invoice_id, duplicate_invoice_id]",
                              "payment_allocation": "[invoice_id, payment_id]",
                              "fx_error": "[invoice_id] or [payment_id]",
