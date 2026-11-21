@@ -755,3 +755,56 @@ Removed clone2 worktree. Next: T61.
   | fx_error | 0.701 | 0.311 | 3/0 |
   | period_cutoff | 0.470 | 0.470 | 0/0 |
 Next: none queued for gemini3b.
+## 2026-11-21 22:34 — rb — T26 done (tests/test_doc_commands.py)
+
+New `tests/test_doc_commands.py`: extracts every `python -m auditenv.<mod>` / `python scripts/<x>.py`
+invocation from fenced code blocks in README.md and docs/*.md (31 command lines, 17 distinct programs),
+asserts each module/script exists (`importlib.util.find_spec` / `is_file`) and that every `--long-flag`
+of the command appears in the program's `--help` output (subprocess with `sys.executable`, cwd = repo
+root, 30 s timeout, cached per program; 12 programs carry flags). 4 tests:
+real docs clean; fake `--no-such-flag` caught; missing module/script caught; comment/separator flags
+not mixed between commands.
+
+Evidence:
+- `env -u AUDITENV_SECRET uv run python -m unittest tests.test_doc_commands -v` → Ran 4 tests in 0.234 s, OK
+  (wall 0.29 s, well under the 30 s budget).
+- Scratch-copy check (acceptance): copied README.md text, appended `--no-such-flag` to the
+  `auditenv.check --json` line, ran the checker on the scratch text →
+  `README-scratch.md:388: ... --no-such-flag / auditenv.check --help does not mention --no-such-flag`. Caught.
+- `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, ALL CHECKS PASSED in 48.8 s.
+
+Assumptions (instead of asking):
+- Shell comments (`# ...`) are stripped before matching, so prose like the Docker line
+  `# runs python -m auditenv.check offline` is not treated as an invocation and flags mentioned only
+  in comments (e.g. `--start`, `--hard`) are not attributed to the command; flags are scoped to the
+  command's own argument span (up to the next command on the line or `&&` / `;` / `|`).
+- Programs whose doc lines carry no flags are only checked for existence (no `--help` run), so
+  flag-less scripts like `scripts/mutate_reward.py` are never executed by the test.
+- `python`, `python3` and `python3.11` spellings are all recognised.
+
+Next: T27 (tests/test_doc_links.py).
+
+## 2026-11-21 22:37 — rb — T27 done (tests/test_doc_links.py)
+
+New `tests/test_doc_links.py`: extracts every inline `[text](path)` markdown link (images included)
+from README.md, HANDOFF.md and docs/*.md, strips `#anchor` fragments, skips external URLs
+(scheme-prefixed and protocol-relative `//`) and pure anchors, and asserts the target exists.
+Relative paths resolve against the document's own directory, root-relative `/path` against the repo
+root. 5 tests: real docs clean; broken link detected; anchor stripping / pure anchors; external links
+skipped; per-document base dir.
+
+Evidence:
+- `env -u AUDITENV_SECRET uv run python -m unittest tests.test_doc_links -v` → Ran 5 tests in 0.002 s, OK.
+- Link census: 19 inline links in scope, 17 relative file links + 2 pure anchors; **0 broken links** —
+  no `expectedFailure` needed, nothing for the lead to fix.
+- `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, ALL CHECKS PASSED in 48.8 s.
+
+Assumptions (instead of asking):
+- Existence check uses `Path.exists()` (a link to a directory would also pass, matching GitHub's
+  rendering); all 17 current targets are files anyway.
+- Links are scanned on every line, including fenced code blocks (none currently contain link syntax);
+  reference-style `[x][ref]` links are out of scope — the task specifies inline `[x](path)` only, and
+  the docs use none.
+- Optional link titles `(path "title")` and angle-bracket targets `(<path>)` are tolerated by the regex.
+
+rb queue empty (T25, T26, T27 all [x]). Next: IDLE until the lead queues more (rb) tasks.
