@@ -49,3 +49,12 @@ F1 stability analysis:
 - No policy differed in F1 across runs (random_explorer: 0.000, reconcile: 1.000, flag_all: 0.000, oracle: 1.000 in all 3 runs; max diff = 0.000, well below threshold 0.2).
 - Reconcile achieved F1 1.000 with mean return ~0.961 and average steps 20.1–20.6 (max steps 26).
 Next: T6 (fuzz 3000 configs starting at 50000).
+
+2026-11-21 21:54 gemini1b — T6 fuzz 3000 configs starting at 50000.
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 50000`
+  Exit code: 0
+  Wall time: 211.31 s (3m 31.31s)
+  Summary: config sweep, cases 50000-52999: 3000 random configs (1222 hard) in 211.2 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 55
+  FUZZ PASSED
+Result: 0 problems across 3,000 random configurations (1,222 hard). Max steps: 55.
+All gemini1b tasks (T4, T5, T6) complete.
