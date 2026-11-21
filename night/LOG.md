@@ -13,3 +13,36 @@
   Summary: reconcile_hard on 1200 hard episodes (seeds 5000-5299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 57, truncated 0 (70.7 s)
 Result: 0 imperfect, 0 truncated across 2,400 episodes. Max steps: 32 (default), 57 (hard).
 Next: T5 (jury_run on seed bases 7000, 8000, 9000).
+
+2026-11-21 21:50 gemini1b — T5 jury_run baseline evaluation on seed bases 7000, 8000, 9000.
+Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 7000 --json /tmp/r18-gemini1b/j7000.json` (exit 0, wall time 3.85 s)
+```
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.059   0.071
+reconcile         1.000  1.000  1.000    0.961    20.6    24    0.057   0.066
+flag_all          0.000  0.000  0.000   -1.000     3.4     4    0.051   0.059
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.008
+```
+
+Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 8000 --json /tmp/r18-gemini1b/j8000.json` (exit 0, wall time 3.81 s)
+```
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.903    33.0    33    0.056   0.062
+reconcile         1.000  1.000  1.000    0.961    20.5    26    0.057   0.065
+flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.049   0.055
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.007
+```
+
+Command 3: `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 9000 --json /tmp/r18-gemini1b/j9000.json` (exit 0, wall time 3.71 s)
+```
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.054   0.058
+reconcile         1.000  1.000  1.000    0.962    20.1    23    0.055   0.059
+flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.049   0.051
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.006   0.010
+```
+
+F1 stability analysis:
+- No policy differed in F1 across runs (random_explorer: 0.000, reconcile: 1.000, flag_all: 0.000, oracle: 1.000 in all 3 runs; max diff = 0.000, well below threshold 0.2).
+- Reconcile achieved F1 1.000 with mean return ~0.961 and average steps 20.1–20.6 (max steps 26).
+Next: T6 (fuzz 3000 configs starting at 50000).
