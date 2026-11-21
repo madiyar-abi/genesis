@@ -973,3 +973,5 @@ user 43.53
 sys 1.47
 ```
 `env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0 (ALL CHECKS PASSED in 55.0 s).
+
+2026-11-21 23:27 lead — Integrated T59, T22 and T24. Scenario checks passed, all 80 golden hashes matched and the verifier passed 600/600. T65 corrected README CI triggers and recording status, the handoff folder-link checklist, and the jury test transcript (73 passed). Used the dated organiser FAQ already recorded in HANDOFF. Demo replay and SPEC reviewed independently. T64 remains on rb.

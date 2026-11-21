@@ -423,3 +423,5 @@ evidence tasks (night/TASKS.md, night/LOG.md).
   0 disagreements; five deliberately broken reference variants were each caught (91–2 779 disagreements), so the
   harness can see a difference. Documented choices the page leaves open: `10000.0` is not an integer amount; an
   unknown key and a wrong `episode_id` invalidate the submission; `explanation` is optional but must be a string.
+- D03 generated a refund before its overpayment in 10 of 8,000 scenario episodes. Preserving the original receipt date in the opt-in distractor generator resolved all ten. The repeated sweep passed all 8,000 episodes across both difficulties.
+- The on-disk verifier rejected all 4,173 accounting and truth mutations on 60 episodes and accepted all 120 controls. The sweep only treated an FX edit as an error when it changed a rounded conversion used in the books.

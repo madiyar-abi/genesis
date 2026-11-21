@@ -41,7 +41,7 @@ docker build -t auditenv .
 docker run --rm --network none auditenv            # runs python -m auditenv.check offline
 ```
 
-The container path is exercised on every push by `.github/workflows/check.yml` (build, run without
+The container path is exercised on pushes to `main` and on pull requests by `.github/workflows/check.yml` (build, run without
 network, plus the verifier and the seed sweep on plain Python 3.11). To run just the unit tests in the same image, use
 `docker run --rm --network none auditenv python -m unittest discover -s tests -t .`.
 
@@ -81,7 +81,7 @@ Each non-oracle baseline runs as UID 65534 with a read-only filesystem, no netwo
 | four baseline-policy adapters | `auditenv/policies/` (random explorer, reconcile, flag-all, oracle; plus naive reconcile and reconcile_hard); `auditenv.jury_run.JuryPolicy` runs them behind the jury protocol |
 | `trajectories.jsonl` | [`trajectories.jsonl`](trajectories.jsonl) in the repository root: 20 train episodes (10 default, 10 hard) played by `reconcile_hard`, 674 lines, each exactly `{episode_id, step, action, observation, reward, terminated, truncated}`; no truth in observations; the tests regenerate it byte for byte ([how](#run-a-policy-write-trajectories)); per-policy logs of the other baselines in `trajectories/` |
 | design note | [`docs/DESIGN.md`](docs/DESIGN.md) (interfaces: [`docs/CONTRACT.md`](docs/CONTRACT.md)) |
-| demo | `uv run python -m auditenv.demo` (narrated, seed 2003 of the demo config), [`docs/demo.cast`](docs/demo.cast), script [`docs/DEMO.md`](docs/DEMO.md); the video link is in the submission document |
+| demo | `uv run python -m auditenv.demo` (narrated, seed 2003 of the demo config), [`docs/demo.cast`](docs/demo.cast), script [`docs/DEMO.md`](docs/DEMO.md) |
 
 ## Errors the agent must find
 

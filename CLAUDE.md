@@ -18,7 +18,7 @@ every finished task.
 - Genesis Hackathon, online stage. Case published 2026-11-19 12:00 →
   `night/SPEC.md`. Final deadline **2026-11-22 22:00**
   (PDF says 23:59 Astana; we plan for 22:00).
-- Jury gets one Google Doc with 3 links: GitHub repo, demo video, presentation.
+- Submit the shared Drive folder containing the repo link, demo video and optional presentation.
   Submission checklist: `HANDOFF.md` → "Deadline & submission".
 - So: a working, demo-able end-to-end flow beats breadth of features, and the
   README run steps must always work — the jury opens the repo.
