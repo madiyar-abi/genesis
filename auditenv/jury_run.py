@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -103,6 +104,9 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     if args.policy_worker:
         return worker(args.policy_worker)
+    if args.policy_image and shutil.which("docker") is None:
+        print("error: --policy-image needs the docker command on PATH (docker not found)", file=sys.stderr)
+        return 2
     rows = run(args.seed_base, args.policy_image)
     print(f"20 jury scenarios D01-D20 (seeds {args.seed_base + 1}-{args.seed_base + 20}) through judge_adapter, "
           "closed mode, policies in their own process (oracle grader-side)")
