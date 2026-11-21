@@ -4,7 +4,7 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Round 19 in progress (night/2026-11-21-r19).** Worker assignments are in `night/TASKS.md`. The lead is reviewing ordinary refund chronology and the private default for closed server queues. The demo and pitch will be rechecked after the fixes.
+**Round 19 in progress (night/2026-11-21-r19).** Worker assignments are in `night/TASKS.md`. The lead is reviewing ordinary refund chronology and the private default for closed server queues. The seed-2003 demo reproduced 4 TP and 0.958 return. Its 16-second cast previews the live 2:40 recording script. Recheck the fixture after generator changes.
 
 **Round 18 complete (21 November, branch `night/2026-11-21-r18`).** The opt-in refund scenario now keeps the receipt before the refund. All 8,000 scenario episodes passed after the fix, all 80 golden hashes matched, and the on-disk verifier rejected 4,173 invalid edits. The four jury test modules passed 73 tests. The round also hardened closed reset and the server and checked matcher behavior against an independent grader. See `REVIEW.md` under “Round 18” and `night/LOG.md` for evidence. All eight adapter error codes match README. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. The final run passed 560 tests and all gates in 51.9 seconds, and the documentation tables match its metrics. The marathon owns PR integration. The submission owner has the recording, access and upload checklist below.
 
