@@ -15,7 +15,7 @@ TABLES = {"ledger": "row_id", "invoices": "invoice_id", "payments": "payment_id"
 PAGE_MAX = 50
 DEFAULTS = {"mode": "train", "max_steps": 100, "time_limit_s": 60.0}
 CONFIG_KEYS = {"mode", "max_steps", "time_limit_s", "errors", "interacting", "n_invoices", "distractors",
-               "transform_seed", "difficulty"}
+               "transform_seed", "difficulty", "allocation"}
 ACTION_KEYS = {  # schemas/action.schema.json: additionalProperties false
     "list_records": {"type", "table", "cursor", "limit"}, "get_record": {"type", "table", "id"},
     "get_document": {"type", "doc_id"}, "calculator": {"type", "expression"}, "submit": {"type", "findings"},
@@ -31,6 +31,19 @@ TOOLS = [
      "returns": "{value}"},
     {"type": "submit", "params": {"findings": "{episode_id, findings:[...]}"}, "returns": "ends the episode"},
 ]
+
+
+def _limits(config: dict) -> dict:
+    """Defaults plus config; validates the episode limits and mode (CONTRACT §4)."""
+    cfg = {**DEFAULTS, **config}
+    if cfg["mode"] not in ("train", "eval"):
+        raise ValueError("mode must be 'train' or 'eval'")
+    if isinstance(cfg["max_steps"], bool) or not (isinstance(cfg["max_steps"], int) and 1 <= cfg["max_steps"] <= 100):
+        raise ValueError("max_steps must be an int in [1, 100]")
+    tl = cfg["time_limit_s"]
+    if isinstance(tl, bool) or not isinstance(tl, (int, float)) or not 0 <= tl <= sys.float_info.max:
+        raise ValueError("time_limit_s must be a finite non-negative number")
+    return cfg
 
 
 class ToolError(Exception):
@@ -59,15 +72,22 @@ class AuditEnv:
         unknown = set(config) - CONFIG_KEYS
         if unknown:
             raise ValueError(f"unknown config keys: {sorted(unknown)}")
-        cfg = {**DEFAULTS, **config}
-        if cfg["mode"] not in ("train", "eval"):
-            raise ValueError("mode must be 'train' or 'eval'")
-        if isinstance(cfg["max_steps"], bool) or not (isinstance(cfg["max_steps"], int) and 1 <= cfg["max_steps"] <= 100):
-            raise ValueError("max_steps must be an int in [1, 100]")
-        tl = cfg["time_limit_s"]
-        if isinstance(tl, bool) or not isinstance(tl, (int, float)) or not 0 <= tl <= sys.float_info.max:
-            raise ValueError("time_limit_s must be a finite non-negative number")
+        cfg = _limits(config)
         ep = generate(seed, config)
+        return self._open(ep, cfg, abandon_open)
+
+    def reset_episode(self, episode: dict, config: dict | None = None, abandon_open: bool = False):
+        """Start an episode that already exists, e.g. `load.load_episode(dir)` of an exported or jury-transformed
+        copy: it is served as given (no generation, ids unchanged). `config` may hold only mode, max_steps and
+        time_limit_s. A rejected config raises ValueError and leaves the current episode as it was."""
+        if config is not None and not isinstance(config, dict):
+            raise ValueError("config must be an object or null")
+        unknown = set(config or {}) - set(DEFAULTS)
+        if unknown:
+            raise ValueError(f"unknown config keys for a loaded episode: {sorted(unknown)}")
+        return self._open(copy.deepcopy(episode), _limits(dict(config or {})), abandon_open)
+
+    def _open(self, ep: dict, cfg: dict, abandon_open: bool):
         if abandon_open:
             self.abandon()
         self._ep = ep
