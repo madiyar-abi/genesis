@@ -1,6 +1,7 @@
 import json
 import unittest
 from collections import defaultdict
+from datetime import datetime
 
 from auditenv.generator import ISSUE_TYPES, generate
 from auditenv.money import convert, local_date, parse_offset
@@ -64,6 +65,22 @@ class GeneratorTest(unittest.TestCase):
             types = sorted(i["type"] for i in ep["truth"]["issues"])
             self.assertEqual(types, sorted(list(ISSUE_TYPES) + ["payment_allocation", "fx_error",
                                                                   "period_cutoff", "fx_error"]))
+
+    def test_customer_credit_covers_each_refund(self):
+        # A multi-invoice receipt can move to the date of the later payment.
+        for difficulty, seed in (("default", 0), ("hard", 16)):
+            with self.subTest(difficulty=difficulty, seed=seed):
+                books = generate(seed, {"errors": {}, "difficulty": difficulty}, key="")["tables"]
+                entities = {r["payment_id"]: r["entity_id"] for r in books["ledger"] if r["account"] == "2900"}
+                credits = defaultdict(int)
+                for payment in sorted(books["payments"], key=lambda p: datetime.fromisoformat(p["timestamp"])):
+                    entity = entities.get(payment["payment_id"])
+                    if entity is None:  # unidentified receipts do not fund a customer's refund
+                        continue
+                    key = (entity, payment["currency"])
+                    allocated = sum(ref["amount_minor"] for ref in payment["invoice_refs"] or [])
+                    credits[key] += payment["amount_minor"] - allocated
+                    self.assertGreaterEqual(credits[key], 0, payment["payment_id"])
 
     def test_evidence_exists_and_amounts_positive(self):
         for seed in range(40):

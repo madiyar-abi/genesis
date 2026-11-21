@@ -3,98 +3,97 @@
   "issues": [
     {
       "affected_ids": [
-        "INV-358266"
+        "INV-959754"
       ],
       "currency": "USD",
       "evidence_sets": [
         [
-          "557c6646",
-          "R1520"
+          "R4224",
+          "d6211dfd"
         ],
         [
-          "557c6646",
-          "R1521"
+          "R4223",
+          "d6211dfd"
         ]
       ],
-      "expected_amount_minor": 526744,
+      "expected_amount_minor": 1110820,
       "issue_id": "ISS-1",
       "scenario": "I2",
       "type": "period_cutoff"
     },
     {
       "affected_ids": [
-        "INV-358266"
+        "INV-959754"
       ],
       "currency": "USD",
       "evidence_sets": [
         [
           "2026-10-01:GBP:USD",
-          "557c6646",
-          "R1520"
+          "R4224",
+          "d6211dfd"
         ],
         [
           "2026-10-01:GBP:USD",
-          "557c6646",
-          "R1521"
+          "R4223",
+          "d6211dfd"
         ]
       ],
-      "expected_amount_minor": 3514,
+      "expected_amount_minor": 2288,
       "issue_id": "ISS-2",
       "scenario": "I2",
       "type": "fx_error"
     },
     {
       "affected_ids": [
-        "INV-112285",
-        "INV-726919"
+        "INV-441644",
+        "INV-588950"
       ],
       "currency": "USD",
       "evidence_sets": [
         [
-          "6c25e6dc",
-          "802da18b",
-          "R1344",
-          "R1350"
+          "0f31feca",
+          "4af8ffb1",
+          "R4132",
+          "R4153"
         ],
         [
-          "6c25e6dc",
-          "802da18b",
-          "R1344",
-          "R1351"
+          "0f31feca",
+          "4af8ffb1",
+          "R4132",
+          "R4154"
         ],
         [
-          "6c25e6dc",
-          "802da18b",
-          "R1345",
-          "R1350"
+          "0f31feca",
+          "4af8ffb1",
+          "R4133",
+          "R4153"
         ],
         [
-          "6c25e6dc",
-          "802da18b",
-          "R1345",
-          "R1351"
+          "0f31feca",
+          "4af8ffb1",
+          "R4133",
+          "R4154"
         ]
       ],
-      "expected_amount_minor": 1876000,
+      "expected_amount_minor": 831638,
       "issue_id": "ISS-3",
       "scenario": "single",
       "type": "duplicate_invoice"
     },
     {
       "affected_ids": [
-        "INV-677785",
-        "PAY-874814"
+        "INV-336399",
+        "PAY-779598"
       ],
       "currency": "USD",
       "evidence_sets": [
         [
-          "2026-09-10:KZT:USD",
-          "3d84e8de",
-          "R1509",
-          "a4e88373"
+          "492a1561",
+          "R4163",
+          "c9dbc583"
         ]
       ],
-      "expected_amount_minor": 665398,
+      "expected_amount_minor": 837100,
       "issue_id": "ISS-4",
       "scenario": "single",
       "type": "payment_allocation"

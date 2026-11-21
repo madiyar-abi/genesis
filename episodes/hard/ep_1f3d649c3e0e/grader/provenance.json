@@ -34,34 +34,23 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "USD",
-              "debit_minor": 596247,
-              "entity_id": "C-0645",
+              "debit_minor": 377985,
+              "entity_id": "C-4538",
               "invoice_id": null,
-              "payment_id": "PAY-019751",
-              "row_id": "R4335",
-              "timestamp": "2026-01-18T14:49:00+05:30"
-            },
-            {
-              "account": "1200",
-              "credit_minor": 315920,
-              "currency": "USD",
-              "debit_minor": 0,
-              "entity_id": "C-0645",
-              "invoice_id": "INV-125559",
-              "payment_id": "PAY-019751",
-              "row_id": "R4336",
-              "timestamp": "2026-01-18T14:49:00+05:30"
+              "payment_id": "PAY-527767",
+              "row_id": "R1371",
+              "timestamp": "2026-01-18T19:44:00+05:30"
             },
             {
               "account": "2900",
-              "credit_minor": 280327,
+              "credit_minor": 377985,
               "currency": "USD",
               "debit_minor": 0,
-              "entity_id": "C-0645",
+              "entity_id": "C-4538",
               "invoice_id": null,
-              "payment_id": "PAY-019751",
-              "row_id": "R4334",
-              "timestamp": "2026-01-18T14:49:00+05:30"
+              "payment_id": "PAY-527767",
+              "row_id": "R1372",
+              "timestamp": "2026-01-18T19:44:00+05:30"
             }
           ],
           "before": [
@@ -69,29 +58,51 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "USD",
-              "debit_minor": 596247,
-              "entity_id": "C-0645",
+              "debit_minor": 377985,
+              "entity_id": "C-4538",
               "invoice_id": null,
-              "payment_id": "PAY-019751",
-              "row_id": "R4335",
-              "timestamp": "2026-01-18T14:49:00+05:30"
+              "payment_id": "PAY-527767",
+              "row_id": "R1371",
+              "timestamp": "2026-01-18T19:44:00+05:30"
             },
             {
               "account": "1200",
-              "credit_minor": 596247,
+              "credit_minor": 349515,
               "currency": "USD",
               "debit_minor": 0,
-              "entity_id": "C-0645",
-              "invoice_id": "INV-125559",
-              "payment_id": "PAY-019751",
-              "row_id": "R4336",
-              "timestamp": "2026-01-18T14:49:00+05:30"
+              "entity_id": "C-4538",
+              "invoice_id": "INV-423385",
+              "payment_id": "PAY-527767",
+              "row_id": "pre-124",
+              "timestamp": "2026-01-18T19:44:00+05:30"
+            },
+            {
+              "account": "2900",
+              "credit_minor": 15409,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-4538",
+              "invoice_id": null,
+              "payment_id": "PAY-527767",
+              "row_id": "R1372",
+              "timestamp": "2026-01-18T19:44:00+05:30"
+            },
+            {
+              "account": "7900",
+              "credit_minor": 13061,
+              "currency": "USD",
+              "debit_minor": 0,
+              "entity_id": "C-4538",
+              "invoice_id": null,
+              "payment_id": "PAY-527767",
+              "row_id": "pre-126",
+              "timestamp": "2026-01-18T19:44:00+05:30"
             }
           ],
-          "journal": "pay:PAY-019751"
+          "journal": "pay:PAY-527767"
         }
       ],
-      "description": "payment PAY-019751 allocated partially to INV-125559; the rest went to unapplied cash",
+      "description": "payment PAY-527767 allocated nothing to INV-423385; the rest went to unapplied cash",
       "documents_added": [],
       "issue_id": "ISS-1",
       "scenario": "single",
@@ -105,45 +116,23 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "USD",
-              "debit_minor": 22227,
-              "entity_id": "C-4248",
+              "debit_minor": 3994604,
+              "entity_id": "C-2064",
               "invoice_id": null,
-              "payment_id": "PAY-365120",
-              "row_id": "R3872",
-              "timestamp": "2026-01-06T13:50:00+05:30"
-            },
-            {
-              "account": "1200",
-              "credit_minor": 10433,
-              "currency": "USD",
-              "debit_minor": 0,
-              "entity_id": "C-4248",
-              "invoice_id": "INV-818546",
-              "payment_id": "PAY-365120",
-              "row_id": "R3874",
-              "timestamp": "2026-01-06T13:50:00+05:30"
+              "payment_id": "PAY-330345",
+              "row_id": "R1844",
+              "timestamp": "2026-01-30T21:46:00+05:30"
             },
             {
               "account": "2900",
-              "credit_minor": 11747,
+              "credit_minor": 3994604,
               "currency": "USD",
               "debit_minor": 0,
-              "entity_id": "C-4248",
+              "entity_id": "C-2064",
               "invoice_id": null,
-              "payment_id": "PAY-365120",
-              "row_id": "R3871",
-              "timestamp": "2026-01-06T13:50:00+05:30"
-            },
-            {
-              "account": "7900",
-              "credit_minor": 47,
-              "currency": "USD",
-              "debit_minor": 0,
-              "entity_id": "C-4248",
-              "invoice_id": null,
-              "payment_id": "PAY-365120",
-              "row_id": "R3873",
-              "timestamp": "2026-01-06T13:50:00+05:30"
+              "payment_id": "PAY-330345",
+              "row_id": "R1845",
+              "timestamp": "2026-01-30T21:46:00+05:30"
             }
           ],
           "before": [
@@ -151,40 +140,40 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "USD",
-              "debit_minor": 22227,
-              "entity_id": "C-4248",
+              "debit_minor": 3994604,
+              "entity_id": "C-2064",
               "invoice_id": null,
-              "payment_id": "PAY-365120",
-              "row_id": "R3872",
-              "timestamp": "2026-01-06T13:50:00+05:30"
+              "payment_id": "PAY-330345",
+              "row_id": "R1844",
+              "timestamp": "2026-01-30T21:46:00+05:30"
             },
             {
               "account": "1200",
-              "credit_minor": 22129,
+              "credit_minor": 3960689,
               "currency": "USD",
               "debit_minor": 0,
-              "entity_id": "C-4248",
-              "invoice_id": "INV-818546",
-              "payment_id": "PAY-365120",
-              "row_id": "R3874",
-              "timestamp": "2026-01-06T13:50:00+05:30"
+              "entity_id": "C-2064",
+              "invoice_id": "INV-773974",
+              "payment_id": "PAY-330345",
+              "row_id": "pre-157",
+              "timestamp": "2026-01-30T21:46:00+05:30"
             },
             {
               "account": "7900",
-              "credit_minor": 98,
+              "credit_minor": 33915,
               "currency": "USD",
               "debit_minor": 0,
-              "entity_id": "C-4248",
+              "entity_id": "C-2064",
               "invoice_id": null,
-              "payment_id": "PAY-365120",
-              "row_id": "R3873",
-              "timestamp": "2026-01-06T13:50:00+05:30"
+              "payment_id": "PAY-330345",
+              "row_id": "pre-158",
+              "timestamp": "2026-01-30T21:46:00+05:30"
             }
           ],
-          "journal": "pay:PAY-365120"
+          "journal": "pay:PAY-330345"
         }
       ],
-      "description": "payment PAY-365120 allocated partially to INV-818546; the rest went to unapplied cash",
+      "description": "payment PAY-330345 allocated nothing to INV-773974; the rest went to unapplied cash",
       "documents_added": [],
       "issue_id": "ISS-2",
       "scenario": "single",
