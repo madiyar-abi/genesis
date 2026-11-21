@@ -166,7 +166,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   files: night/LOG.md — accept: both summaries + wall times.
 - [ ] G28 (gemini2b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 0` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 0-1999` — files: night/LOG.md — accept: summaries.
-- [ ] G29 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice and
+- [x] G29 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice and
   `env -u AUDITENV_SECRET uv run python -X dev -W error::ResourceWarning -m unittest discover -s tests -t .` — files:
   night/LOG.md — accept: exit codes, last lines, wall times.
 - [ ] G30 (gemini3b) Repeat G10 (export diff of dev/train/hard) and G24 (trajectory regeneration diff) on the fix —
