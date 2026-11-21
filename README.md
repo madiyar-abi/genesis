@@ -191,7 +191,9 @@ Each trajectory line has exactly the case's fields `episode_id, step, action, ob
 10 train and 10 hard train episodes (seeds 1000–1009 and 1100–1109, train mode), 674 lines. One policy per file keeps
 `(episode_id, step)` a unique key, so no extra `policy` field is needed; `reconcile_hard` plays default books exactly
 like `reconcile`, so the file equals `trajectories/train_reconcile.jsonl` followed by
-`trajectories/train_hard_reconcile_hard.jsonl`. It is reproduced byte for byte by:
+`trajectories/train_hard_reconcile_hard.jsonl`. The 10 train episodes are shipped in `episodes/train`; the 10 hard train
+episodes are not exported (`episodes/hard` holds the hard evaluation seeds 9100–9119) — write them with
+`uv run python -m auditenv.export --config configs/train_hard.json --out /tmp/train_hard`. The file is reproduced byte for byte by:
 
 ```bash
 uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out trajectories.jsonl
@@ -392,7 +394,7 @@ uv run python -m auditenv.demo                       # narrated demo (see docs/D
 uv run python -m auditenv.export --config configs/dev.json --out episodes/dev       # re-export files
 uv run python -m auditenv.export --config configs/train.json --out episodes/train   #   (all three after
 uv run python -m auditenv.export --config configs/eval_hard.json --out episodes/hard  #  a generator change)
-uv run python scripts/mutate_reward.py               # 15 one-line mutants of matcher/reward, all must be caught
+uv run python scripts/mutate_reward.py               # 22 one-line mutants of matcher/reward, all must be caught
 uv run python scripts/sensitivity.py                 # baseline ranking under other step costs / tolerances
 uv run python scripts/shortcut_miner.py --report-only  # single-feature data-leak search (add --hard)
 uv run python scripts/golden.py --check              # 80 golden hashes: generator drift detector
