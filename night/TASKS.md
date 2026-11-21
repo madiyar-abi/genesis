@@ -86,7 +86,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
 - [x] G8 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.check` twice while
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 0-999 --hard` runs in the background — files:
   night/LOG.md — accept: both exit codes, last lines, wall times; any timing failure verbatim.
-- [ ] G9 (gemini2a) `LC_ALL=C LANG=C env -u AUDITENV_SECRET uv run python -m auditenv.check` and
+- [x] G9 (gemini2a) `LC_ALL=C LANG=C env -u AUDITENV_SECRET uv run python -m auditenv.check` and
   `LC_ALL=tr_TR.UTF-8 env -u AUDITENV_SECRET uv run python -m auditenv.check` — files: night/LOG.md — accept: both
   exit codes, last lines, wall times.
 
