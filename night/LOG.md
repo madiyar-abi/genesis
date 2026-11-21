@@ -165,3 +165,25 @@ Results by README line:
 - Line 403: `uv run python scripts/chart.py` -> exit 0 (0.05 s), last line: "wrote /Users/caliskan/Projects/genesis-gemini3a/docs/baselines.svg"
 Working directory clean (`git status` clean, 0 tracked files modified).
 Next: T44.
+
+2026-11-21 22:14 gemini3a — T44 complete: Error-code table check through the jury adapter.
+Script: /tmp/r18-gemini3a/errors.py run via `env -u AUDITENV_SECRET uv run python /tmp/r18-gemini3a/errors.py` (exit 0).
+Provoked each error code listed in README.md "Jury adapter" through `JudgeEnv`:
+
+| Action / Input                                                              | Code               | Steps Before | Steps After  | Cost (Delta) |
+|-----------------------------------------------------------------------------|--------------------|--------------|--------------|--------------|
+| malformed envelope `{"x": 1}`                                               | unknown_action     | 100          | 99           | 1            |
+| unknown action name `{"name": "unknown", "args": {}}`                       | unknown_action     | 99           | 98           | 1            |
+| bad_params `{"name": "list_records", "args": {"table": "ledger", "limit": -1}}` | bad_params         | 98           | 97           | 1            |
+| unknown_table `{"name": "list_records", "args": {"table": "nonexistent"}}`  | unknown_table      | 97           | 96           | 1            |
+| not_found `{"name": "get_record", "args": {"table": "ledger", "id": "NONEXISTENT"}}` | not_found          | 96           | 95           | 1            |
+| not_found `{"name": "get_document", "args": {"doc_id": "NONEXISTENT"}}`     | not_found          | 95           | 94           | 1            |
+| calc_error `{"name": "calculator", "args": {"expression": "1/0"}}`          | calc_error         | 94           | 93           | 1            |
+| invalid_findings `{"name": "submit", "args": {"findings": {"episode_id": "x", "findings": "no"}}}` | invalid_findings   | 100          | 99           | 1            |
+| episode_over (action after submit)                                          | episode_over       | 99           | 99           | 0            |
+| time_limit `{"name": "calculator", "args": {"expression": "1+1"}}` (after timeout) | time_limit         | 100          | 99           | 1            |
+
+Comparison with README:
+README states: "Errors are {"code", "message"} with no paths, seeds or truth, and every one costs a step: unknown_action (also a malformed envelope), bad_params, unknown_table, not_found, calc_error, time_limit, and in train mode invalid_findings. Only episode_over (any action after the episode ended) is free and changes nothing."
+All provoked error codes cost exactly 1 step (delta = 1), except `episode_over` which costs 0 steps (free, delta = 0). 0 rows disagree.
+All assigned gemini3a tasks in Round 18 (T13, T14, T15, T43, T44) complete.
