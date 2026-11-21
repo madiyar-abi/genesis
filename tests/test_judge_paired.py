@@ -16,6 +16,7 @@ import judge_adapter as ja
 from auditenv import jury
 from auditenv.export import export_episode
 from auditenv.load import load_episode
+from auditenv.verify import verify_episode
 
 SCENARIOS = list(jury.SCENARIOS.values())  # D01-D20 of Block 2 (README "Jury adapter")
 ID_FIELDS = {"row_id": "R", "doc_id": "D", "invoice_id": "I", "payment_id": "P", "entity_id": "E"}
@@ -48,11 +49,13 @@ def jury_transform(ep: dict, permute: bool, rename: bool, seed: int) -> tuple[di
         if permute:
             rng.shuffle(table)
 
-    def deep(obj):  # closed files: every string that is an old id
+    def deep(obj):  # closed files: every string that is an old id, and provenance journal keys "inv:<id>", "pay:<id>"
         if isinstance(obj, dict):
             return {k: deep(v) for k, v in obj.items()}
         if isinstance(obj, list):
             return [deep(v) for v in obj]
+        if isinstance(obj, str) and obj[:4] in ("inv:", "pay:"):
+            return obj[:4] + ren(obj[4:])
         return ren(obj)
 
     ep["truth"], ep["provenance"] = deep(ep["truth"]), deep(ep["provenance"])
@@ -113,6 +116,7 @@ class JudgePairedTest(unittest.TestCase):
         for n, src, dst, inverse in self.pairs:
             with self.subTest(pair=f"P{n:02d}"):
                 orig, copy = load_episode(src), load_episode(dst)
+                self.assertEqual(verify_episode(copy), [])  # the copy is still consistent, evidence still sufficient
                 a, b = oracle(orig), oracle(copy)
                 # 1. replay on the original is exact
                 self.assertEqual(json.dumps(run(src, a, steps)), json.dumps(run(src, a, steps)))
