@@ -23,8 +23,8 @@ import json
 import re
 from functools import lru_cache
 from collections import defaultdict
-from datetime import date
-from decimal import Decimal
+from datetime import date, timezone
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from .money import EXPONENT, convert, local_date, parse_offset
@@ -40,7 +40,8 @@ def _journals(ledger: list[dict]) -> dict[str, list[dict]]:
         elif r["invoice_id"]:
             groups["inv:" + r["invoice_id"]].append(r)
         else:
-            groups["exp:" + r["timestamp"]].append(r)
+            instant = datetime_key(r["timestamp"]).astimezone(timezone.utc)
+            groups["exp:" + instant.isoformat()].append(r)
     return groups
 
 
@@ -292,6 +293,52 @@ def datetime_key(ts: str):
 RATE = re.compile(r"[0-9]+(\.[0-9]+)?")  # plain ASCII decimal, as the generator writes it (no sign, exponent, _)
 
 
+DECIMAL_TEXT = re.compile(r"[+]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?")
+
+
+def _valid_rate(value, strict_export: bool) -> bool:
+    if not isinstance(value, str):
+        return False
+    if strict_export:
+        # Generated exports use the plain decimal spelling and a realistic rate bound.
+        return bool(RATE.fullmatch(value)) and 0 < Decimal(value) < 10 ** 9
+    literal = value.strip()
+    if not DECIMAL_TEXT.fullmatch(literal):
+        return False
+    try:
+        return Decimal(literal) > 0
+    except InvalidOperation:
+        return False
+
+
+def _policy_problems(policy: dict, manifest: dict, strict_export: bool) -> list[str]:
+    if not isinstance(policy, dict):
+        return ["policy period, ledger and ledger.accounts must be objects"]
+    period = policy.get("period", None if strict_export else {})
+    ledger = policy.get("ledger", None if strict_export else {})
+    accounts = ledger.get("accounts", None if strict_export else {}) if isinstance(ledger, dict) else None
+    if not isinstance(period, dict) or not isinstance(accounts, dict):
+        return ["policy period, ledger and ledger.accounts must be objects"]
+
+    findings = policy.get("findings", {})
+    if findings is None and not strict_export:
+        findings = {}
+    if (not isinstance(findings, dict) or type(findings.get("tolerance_minor", 0)) is not int
+            or findings.get("tolerance_minor", 0) < 0):
+        return ["policy findings.tolerance_minor must be a non-negative int"]
+
+    problems = []
+    for section, key, manifest_key in ((policy, "base_currency", "base_currency"),
+                                       (policy, "timezone", "timezone"),
+                                       (period, "start", "period_start"), (period, "end", "period_end")):
+        if (strict_export or key in section) and section.get(key) != manifest[manifest_key]:
+            problems.append("policy contradicts the manifest (base currency, timezone or period)")
+            break
+    if (strict_export and accounts.keys() != CHART) or not accounts.keys() <= CHART:
+        problems.append("policy chart of accounts contradicts the contract")
+    return problems
+
+
 def _structure(ep: dict, *, strict_export: bool = True) -> list[str]:
     error = _schema_error(ep.get("manifest"), _schema("manifest.schema.json"), "manifest")
     if error:
@@ -336,24 +383,10 @@ def _structure(ep: dict, *, strict_export: bool = True) -> list[str]:
             problems.append("FX date must be a valid YYYY-MM-DD date")
         if rate["fx_id"] != ":".join(key):
             problems.append(f"fx_id differs from date and currency pair: {rate['fx_id']}")
-        # every published rate, used or not: a reader must be able to convert with any of them; above 10^9 is no
-        # real currency pair and would exceed the conversion's decimal precision
-        value = rate.get("rate")
-        if not isinstance(value, str) or not RATE.fullmatch(value) or not 0 < Decimal(value) < 10 ** 9:
-            problems.append(f"fx rate {rate['fx_id']}: rate must be a positive decimal below 10^9")
-    pol = ep["policy"]
-    if (not isinstance(pol, dict) or not isinstance(pol.get("period"), dict)
-            or not isinstance(pol.get("ledger"), dict) or not isinstance(pol["ledger"].get("accounts"), dict)):
-        return [*problems, "policy period, ledger and ledger.accounts must be objects"]
-    findings = pol.get("findings", {})
-    if (not isinstance(findings, dict) or type(findings.get("tolerance_minor", 0)) is not int
-            or findings.get("tolerance_minor", 0) < 0):
-        return [*problems, "policy findings.tolerance_minor must be a non-negative int"]
-    if (pol.get("base_currency"), pol.get("timezone"), pol["period"].get("start"), pol["period"].get("end")) != \
-            (m["base_currency"], m["timezone"], m["period_start"], m["period_end"]):
-        problems.append("policy contradicts the manifest (base currency, timezone or period)")
-    if set(pol["ledger"]["accounts"]) != CHART:
-        problems.append("policy chart of accounts contradicts the contract")
+        if not _valid_rate(rate.get("rate"), strict_export):
+            requirement = "a positive decimal below 10^9" if strict_export else "a finite positive decimal"
+            problems.append(f"fx rate {rate['fx_id']}: rate must be {requirement}")
+    problems.extend(_policy_problems(ep["policy"], m, strict_export))
     currencies = {m["base_currency"]}
     currencies.update(row["currency"] for table in ("ledger", "invoices", "payments") for row in t[table])
     currencies.update(row[key] for row in t["fx"] for key in ("source_currency", "target_currency"))
@@ -639,7 +672,7 @@ def verify_episode(ep: dict) -> list[str]:
     # the bookkeeping checks below assume a valid manifest, int amounts, string refs, offset-aware timestamps
     # and convertible rates
     if any(p.startswith(("manifest.", "manifest:", "manifest key")) or "must be an integer" in p
-           or p.startswith(("policy period,", "row_id/doc_id must be", "payment payment_id ", "payment currency ",
+           or p.startswith(("policy period,", "policy findings.", "row_id/doc_id must be", "payment payment_id ", "payment currency ",
                             "payment invoice_refs ", "FX date "))
            or "timestamp must be" in p or "fx rate " in p or "invoice_id must be" in p for p in problems):
         return problems
