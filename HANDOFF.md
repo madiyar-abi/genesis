@@ -4,11 +4,11 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Current state (21 November 2026, evening).** Branch `feature/jury-checks` (PR into `main`) makes the environment
-pass the jury's published check definitions ([genesis-exe.com/fintech-checks.html](https://genesis-exe.com/fintech-checks.html),
-20 November): the adapter `judge_adapter.py`, the matcher conventions, the 20 scenario configs and tests that replay
-all four blocks. PR #40 (the five PR #39 audit defects) is merged. What is left before the deadline is the human
-submission checklist under "Deadline & submission".
+**Current state (21 November 2026, night).** Engineering is complete: PR #41 (the jury's check definitions) is on
+`main`; branch `feature/final-polish` adds the jury flow end to end (`auditenv/jury_run.py`, a gate in the check),
+the README "For the jury" block with the §09 map, and the fixes of a full scoring audit, which scored the code
+100/100. Left for people, in this order: revoke the DeepSeek key → make the repository public → record the video →
+fill and share the Google Doc → submit (checklist under "Deadline & submission").
 
 ## Jury check definitions (published 20 November) — implemented
 
@@ -145,7 +145,18 @@ message says a Google Doc — follow the latest, re-check the form before submit
 - [ ] (Optional) presentation — 10-slide outline with numbers: `docs/PITCH.md`; add it to the Doc only if made
 - [ ] Google Doc with the links (repo, video, presentation if any); the Doc and all
       materials shared as **"Anyone with the link — Viewer"**
-- [ ] Read README "Jury adapter" once more: it is how the jury runs us (`judge_adapter.py`)
+- [ ] Read README "For the jury" once more: it is how the jury runs us (`judge_adapter.py`)
+
+Text for the Google Doc (replace the video link; every link must open in a logged-out browser):
+
+```
+Genesis Hackathon 2026 — FinTech: auditenv, an RL environment for AI financial auditors
+GitHub: https://github.com/madiyar-abi/genesis  (start with README → "For the jury")
+Demo video: <link>
+One check command: uv run python -m auditenv.check  (container: docker build -t auditenv . && docker run --rm --network none auditenv)
+Jury adapter: judge_adapter.py in the repository root; set AUDITENV_SECRET in the process that generates hidden episodes.
+Design note: docs/DESIGN.md · Contract: docs/CONTRACT.md · Check map: docs/CHECKS.md
+```
 - [ ] Doc link submitted in the personal account on the site
 - [ ] **Before the repo goes public: revoke the ReformBoss (DeepSeek) API key** — it is in git
       history (commit `b8249ac`, removed in `5e73918` but still readable). Issue a new key and pass
