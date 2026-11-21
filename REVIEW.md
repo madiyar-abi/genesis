@@ -476,3 +476,39 @@ evidence tasks (night/TASKS.md, night/LOG.md).
   response line) are now documented in CONTRACT §4.
 - End: `env -u AUDITENV_SECRET uv run python -m auditenv.check` 563 tests, all gates, 50.7 s; sync_docs no drift;
   golden 80/80.
+
+## Round 21
+
+- Start `2f7b31e`: `auditenv.check` passed 563 tests and all gates in 50.9 s (peak RSS 203 MB). Workers re-ran every
+  sweep on unseen seeds (fuzz 13000–15999 default and hard, config sweeps 69000–77999, verify 3000–5999, stress
+  10000–11299, chronology 37000–39299 and 42000–42299, policy text 38000–38199 and 42000–42199, jury_run seed bases
+  24000–27000, D01–D20 through `judge_adapter` on seeds 43000–43004, the suite under two more hash seed/timezone
+  pairs, golden, mutants, miner, exports, demo): 0 problems.
+- Independent text-only auditor (codex1, `night/r21/text_auditor.py`, written from task.txt + policy.json only, no
+  look at policies/inject/verify/matcher): F1 1.000 with 0 missed or extra findings on 8,400 episodes (seeds
+  40000–40099 and 45000–45099 × default, hard and D01–D20 in both difficulties, scored by `score_episode`). Every
+  truth issue is derivable from the stated rules, and nothing the rules flag is missing from truth.
+- Independent balance re-derivation (codex1, `night/r21/ledger_identity.py`, 12,600 episodes): every journal and
+  the trial balance sum to 0, every 7900 row equals the documented FX difference. Running balances found two
+  artefacts of the published per-document rules in clean books, and nothing else (`--classify`: 1,335 clean
+  violations = 920 refund FX + 415 rounding, 0 other): a full foreign refund debits 2900 at the refund-date rate
+  after the receipt credited it at the receipt-date rate (e.g. D01 seed 41006, E0342, −500,336 KZT minor; up to
+  7.3 % of the refund in hard mode), and separately rounded cash applications can leave an invoice's AR a few minor
+  units off. Decision: documented (DESIGN §10, README limitations), not changed 13 h before the freeze — a 7900
+  realised-FX row would change the posting rule, policy text, every export and the golden hashes; no truth record
+  depends on these balances, and the document-currency credit is exactly 0.
+- Extreme configs (codex1, `night/r21/extreme_configs.py`): 300 accepted configs (n_invoices 10 with 12 issues of one
+  type, interacting only, the full allocation × ensure_distractors × distractors × difficulty × transform_seed
+  product, n_invoices 100) verify with exactly the requested count, reconcile F1 1.0; more than 12 issues →
+  `ValueError: at most 12 issues per episode`. rb reproduced it.
+- Jury copy robustness (codex2, `night/r21/jury_copy.py`): shuffled CSV columns, CRLF, UTF-8 BOM, no final newline,
+  pretty/compact JSON, reordered JSONL keys and all combined, on 10 exported episodes — all accepted by closed reset,
+  scores equal to the original.
+- Timing under load (codex2): low QoS + six parallel hard fuzz sweeps, one random_explorer episode took 54.05 s (of
+  60 s); three repeats at two seed bases peaked at 0.165 s, the outlier did not recur.
+- Docs defect (codex2 README first read, Y3): the closed-server quick start
+  `AUDITENV_SECRET="${GRADER_KEY:?...}"` aborted in bash without `GRADER_KEY`, although the server keys hidden
+  episodes by default since round 19; replaced by the plain command. Ten further README clarifications (network
+  needs, `AUDITENV_SECRET` unset for published numbers, shortest review path, `JuryPolicy` location, tuple shapes,
+  period_cutoff wording, opt-in jury keys, per-difficulty foreign-document count, timing, chart input); codex2
+  re-ran every touched command on a fresh clone (Y4): all exit 0 except Docker (not installed).

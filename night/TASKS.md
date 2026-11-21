@@ -130,13 +130,13 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
 ## lead
 - [x] L0 (lead) Baseline on round start `2f7b31e`: `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0,
   50.9 s.
-- [ ] L1 (lead) Review worker findings, fix every real defect test-first, re-export if the generator changes — files:
+- [x] L1 (lead) Review worker findings, fix every real defect test-first, re-export if the generator changes — files:
   as needed — accept: `env -u AUDITENV_SECRET uv run python -m auditenv.check` exit 0.
-- [ ] L2 (lead) Record Round 21 findings with evidence in REVIEW.md, sync doc numbers (`scripts/sync_docs.py`),
+- [x] L2 (lead) Record Round 21 findings with evidence in REVIEW.md, sync doc numbers (`scripts/sync_docs.py`),
   update HANDOFF.md — files: REVIEW.md, HANDOFF.md, README.md, docs/ — accept: sync_docs --check no drift.
-- [ ] D (lead) `docs/DEMO.md` — re-verify the numbered 2–3 min recording script against the actual demo output —
+- [x] D (lead) `docs/DEMO.md` — re-verify the numbered 2–3 min recording script against the actual demo output —
   accept: every number in it reproduced.
-- [ ] P (lead) `docs/PITCH.md` — re-verify slide outline facts and numbers against the current check output — accept:
+- [x] P (lead) `docs/PITCH.md` — re-verify slide outline facts and numbers against the current check output — accept:
   every number matches.
 
 ## Top-up 1 (04:30) — same rules as above

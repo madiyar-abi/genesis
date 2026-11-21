@@ -38,7 +38,7 @@ base image (the built image then runs with `--network none`). For the published 
 exports, run commands with `AUDITENV_SECRET` unset (`env -u AUDITENV_SECRET uv run python -m ...`); set a key only in
 the grader process.
 
-Shortest review: `uv run python -m auditenv.demo` (under a second), then the full check above (about a minute).
+Shortest review: `uv run python -m auditenv.demo` (under a second), then the full check above (about a minute on an idle machine).
 To connect the official harness, go straight to [For the jury](#for-the-jury); Docker is optional.
 
 ### Container
@@ -463,6 +463,9 @@ To compare variants of the same seed, list each configuration as a separate epis
 - Measured shortcut cues remain in default mode (`scripts/shortcut_miner.py`): "same entity, currency and
   total exactly twice" finds duplicates with precision 0.996, because default mode has no near-miss decoys
   (hard mode has them: 0.356). Each cue names a record, not the amount — scoring still needs reconciliation.
+- Refunds book no realised FX difference and receivables no rounding plug: by the published rules a full
+  foreign-currency refund can leave a customer's unapplied cash (2900) below zero in base currency (largest
+  measured 7.3 % of the refund), although the credit is exactly 0 in the document currency (DESIGN §10).
 - No model was trained; we make no claim about training improvements.
 - Full list with measurements: [`docs/DESIGN.md`](docs/DESIGN.md) §10.
 
