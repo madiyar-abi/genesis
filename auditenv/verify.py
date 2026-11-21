@@ -278,8 +278,28 @@ def datetime_key(ts: str):
     return parse_ts(ts)
 
 
+@lru_cache(maxsize=1)
+def _manifest_schema():
+    path = Path(__file__).resolve().parents[1] / "schemas/manifest.schema.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def _structure(ep: dict) -> list[str]:
     problems = []
+    schema = _manifest_schema()
+    m = ep.get("manifest")
+    if not isinstance(m, dict):
+        m = {}
+    for name in schema.get("required", []):
+        if name not in m:
+            problems.append(f"manifest.{name}: required")
+    for name in ("schema_version", "generator_version", "episode_id"):
+        if name in m:
+            val = m[name]
+            if not isinstance(val, str) or not val.strip():
+                problems.append(f"manifest.{name}: must be a non-empty string")
+    if problems:
+        return problems
     if not isinstance(ep.get("task"), str) or not ep["task"].strip():
         problems.append("public task text must contain instructions")
     m, t = ep["manifest"], ep["tables"]
@@ -303,6 +323,12 @@ def _structure(ep: dict) -> list[str]:
         rate_keys.add(key)
         if rate["fx_id"] != ":".join(key):
             problems.append(f"fx_id differs from date and currency pair: {rate['fx_id']}")
+        try:  # every published rate, used or not: a reader must be able to convert with any of them
+            value = Decimal(rate["rate"]) if isinstance(rate.get("rate"), str) else None
+        except ArithmeticError:  # decimal.InvalidOperation
+            value = None
+        if value is None or not value.is_finite() or value <= 0:
+            problems.append(f"fx rate {rate['fx_id']}: rate must be a finite positive decimal")
     pol = ep["policy"]
     if (pol["base_currency"], pol["timezone"], pol["period"]["start"], pol["period"]["end"]) != \
             (m["base_currency"], m["timezone"], m["period_start"], m["period_end"]):
@@ -575,7 +601,8 @@ def verify_episode(ep: dict) -> list[str]:
     if error:
         return [error]
     problems = _structure(ep)
-    if any("must be an integer" in p or "timestamp must be" in p for p in problems):
+    if any("must be an integer" in p or "timestamp must be" in p
+           or "fx rate " in p or "manifest." in p for p in problems):
         return problems  # the bookkeeping checks below assume int amounts and offset-aware timestamps
     m, t = ep["manifest"], ep["tables"]
     if ep["truth"].get("episode_id") != m["episode_id"]:
