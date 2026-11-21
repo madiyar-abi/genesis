@@ -66,7 +66,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
 - [x] Z1 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 42000-42299` and
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 42000-42199` — files:
   night/LOG.md — accept: exit codes, totals and "unexplained" lines verbatim, wall times.
-- [ ] Z2 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py` with seeds changed
+- [x] Z2 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py` with seeds changed
   to 43000–43004 (read its `--help`; if it has no seed flag, copy it to `night/r21/scenarios_adapter_43000.py` and
   change only the seed constant) — files: night/r21/scenarios_adapter_43000.py (if needed), night/LOG.md — accept:
   scenario × difficulty table of mean scores; any reconcile score below README's documented value or flag_all > 0

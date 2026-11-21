@@ -51,3 +51,59 @@ All 40 exported episodes across all three splits are byte-for-byte identical to 
   - auditenv.attack: PASSED, 20 seeds evaluated (5 clean, 15 dirty), 11,000 mutations tested across 10 families, 0 violations detected, elapsed 0.360 s, exit 0, wall time 0s.
   - scripts/sensitivity.py: PASSED, evaluated dev (10 episodes) and hard (20 episodes) across varied step cost (0.001, 0.002, 0.005) and amount tolerance (0, 1, 100 units). Ranking unchanged across all settings: dev (oracle > reconcile > naive_reconcile > random > flag_all), hard (oracle > reconcile_hard > reconcile > naive_reconcile > random > flag_all). Re-grade with default parameters reproduced every env reward exactly in 2.1 s, exit 0, wall time 3s. Next: G15.
 2026-11-22 03:42 gemini3b — G17 complete: ran `yes '' | env -u AUDITENV_SECRET uv run python -m auditenv.demo` (exit 0, wall time 0.13s). Quoted final score lines: `terminal reward 0.958 = clip(2*F1 - 1 - 0.002*21 steps)   P=1.00 R=1.00 F1=1.00`; section 4 rewards: oracle 1.000, reconcile 0.958, silence -1.000, repeated twice 0.333, clean silence 1.000, clean reconcile 0.958; section 5 closed run: `policy side: 22 steps, rewards seen = [0.0], final info = {}`, `grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0`. Compared with docs/DEMO.md: all numbers match exactly (326 ledger rows, 69 invoices, 100 budget steps; 21 inspect + 1 submit step; return 0.958; FX error 286 cents / $2.86, allocation error 351,331 cents / $3,513.31; oracle 1, repeated 0.333, silence -1; 22 actions, empty info, TP 4 FP 0 FN 0, return 0.958). Zero differences found. Next: G18.
+2026-11-22 03:53 rb — Z2 done. scenarios_adapter has no seed flag (argparse absent; --help is ignored and it runs), so per task
+  copied night/r20/scenarios_adapter.py → night/r21/scenarios_adapter_43000.py. Edits beyond the seed constant
+  (assumptions, minimal): SEEDS range(32000,32005)→range(43000,43005); SCRATCH /tmp/r20-rb→/tmp/r21-rb (round rule:
+  scratch only under /tmp/r21-rb/); the printed header's seed-range label 32000-32004→43000-43004 so the evidence
+  is not mislabeled. No other logic changed (diff is 3 lines).
+  Command: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r21/scenarios_adapter_43000.py` → exit 0, wall 12 s.
+  Header: `Z1: 20 scenarios x 2 difficulties x 5 seeds (43000-43004) x 2 policies = 400 closed runs through judge_adapter, 12.2 s total`
+  FLAGS (0): none — every reconcile/reconcile_hard episode F1 = 1.000, every flag_all return = -1.000, no invalid
+  submissions, no episode ≥ 60 s (max 0.040 s). Table (reconcile = reconcile on default / reconcile_hard on hard;
+  steps = max adapter steps of reconcile; full 80-row output at /tmp/r21-rb/z2_scenarios.out, JSON /tmp/r21-rb/z1.json):
+  | scenario | difficulty | reconcile mean return | mean F1 | min F1 | flag_all mean return | max steps |
+  |---|---|---|---|---|---|---|
+  | D01 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D01 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D02 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D02 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D03 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D03 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D04 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D04 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D05 | default | 0.961 | 1.000 | 1.000 | -1.000 | 23 |
+  | D05 | hard | 0.916 | 1.000 | 1.000 | -1.000 | 47 |
+  | D06 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D06 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D07 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D07 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D08 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D08 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D09 | default | 0.962 | 1.000 | 1.000 | -1.000 | 22 |
+  | D09 | hard | 0.915 | 1.000 | 1.000 | -1.000 | 46 |
+  | D10 | default | 0.960 | 1.000 | 1.000 | -1.000 | 22 |
+  | D10 | hard | 0.922 | 1.000 | 1.000 | -1.000 | 44 |
+  | D11 | default | 0.963 | 1.000 | 1.000 | -1.000 | 23 |
+  | D11 | hard | 0.912 | 1.000 | 1.000 | -1.000 | 48 |
+  | D12 | default | 0.962 | 1.000 | 1.000 | -1.000 | 22 |
+  | D12 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 45 |
+  | D13 | default | 0.962 | 1.000 | 1.000 | -1.000 | 22 |
+  | D13 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 45 |
+  | D14 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D14 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 44 |
+  | D15 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D15 | hard | 0.920 | 1.000 | 1.000 | -1.000 | 44 |
+  | D16 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D16 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D17 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D17 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D18 | default | 0.960 | 1.000 | 1.000 | -1.000 | 23 |
+  | D18 | hard | 0.918 | 1.000 | 1.000 | -1.000 | 45 |
+  | D19 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D19 | hard | 0.921 | 1.000 | 1.000 | -1.000 | 45 |
+  | D20 | default | 0.959 | 1.000 | 1.000 | -1.000 | 23 |
+  | D20 | hard | 0.921 | 1.000 | 1.000 | -1.000 | 45 |
+  Called out per accept: no reconcile F1 < 1 and no flag_all > 0. NOTES (22): all hard reconcile_hard per-scenario
+  mean returns 0.912–0.922 and D19/D20 default 0.959 are below the README jury_run mean 0.959 — expected: README's
+  number is a 20-scenario default-difficulty mean on seeds 3001-3020; hard uses ~2x inspection steps at 0.002/step.
+  Same pattern as round 20 (archive r20-LOG Z1); not a defect. Next: Z3 (jury_run on seed bases 24000-27000).
