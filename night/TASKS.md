@@ -119,7 +119,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   OK/FAILED, wall time; failures verbatim.
 
 ## gemini3b — exports, demo, docs drift (evidence only, files: night/LOG.md)
-- [ ] G16 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
+- [x] G16 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
   accept: per split the `N/N episodes valid` line.
 - [ ] G17 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, the final reward/score lines
   quoted; compare them with the numbers in docs/DEMO.md and call out any difference.

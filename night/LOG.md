@@ -8,3 +8,4 @@
   Run 4: Ran 73 tests in 2.249s, OK, exit 0, wall time 2s
   Run 5: Ran 73 tests in 2.528s, OK, exit 0, wall time 3s
   Total: 365 tests, 0 failures. Next: G14.
+2026-11-22 03:42 gemini3b — G16 complete: verified all splits under episodes/ (dev: 10/10 valid, exit 0, 0.13s; hard: 20/20 valid, exit 0, 0.35s; train: 10/10 valid, exit 0, 0.11s). Next: G17.
