@@ -83,7 +83,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
 - [ ] G3 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 3000-3999` — accept: last line.
 
 ## gemini1b — stress solvability (evidence only, files: night/LOG.md)
-- [ ] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 10000-10299` and
+- [x] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 10000-10299` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 10000-10299` —
   accept: per command the summary line + wall time.
 - [ ] G5 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 14000-14999` and the same with
@@ -109,7 +109,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   `--hard` — accept: printed tables; any value with precision > 0.5 that is NOT listed in docs/DESIGN.md §10 called out.
 
 ## gemini3a — repeatability (evidence only, files: night/LOG.md)
-- [ ] G13 (gemini3a) Four jury modules 5 times: `env -u AUDITENV_SECRET uv run python -m unittest
+- [x] G13 (gemini3a) Four jury modules 5 times: `env -u AUDITENV_SECRET uv run python -m unittest
   tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` — accept: per
   run `Ran N tests` + result.
 - [ ] G14 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
