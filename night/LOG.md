@@ -6,3 +6,5 @@
 2026-11-21 23:45 gemini1a — Verified public train export: uv run python -m auditenv.verify --dir episodes/train passed with 10/10 episodes valid, 0 problems.
 2026-11-21 23:45 gemini1a — Verified public dev export: uv run python -m auditenv.verify --dir episodes/dev passed with 10/10 episodes valid, 0 problems.
 2026-11-21 23:45 gemini1b — Verified golden records (uv run python -m unittest tests.test_golden): 80/80 golden hashes match, 0 mismatches. All assigned tasks complete.
+2026-11-21 23:45 gemini2a — Verified committed trajectory files (tests.test_trajectory_files: 5 tests passed in 1.83s, 7 trajectory files verified for structure, schema, observation cleanliness, and deterministic action replay).
+2026-11-21 23:46 gemini2a — Verified public replay and runner execution (tests.test_run: 5 tests passed in 0.159s, oracle max reward on 50 seeds and trajectory format verified).
