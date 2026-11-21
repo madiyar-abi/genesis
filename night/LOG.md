@@ -879,3 +879,97 @@ Working directory clean (`git status` clean, 0 tracked files modified).
 All assigned gemini3a tasks in Round 18 complete.
 
 2026-11-21 23:04 lead — T23 done (subagent): independent reference grader vs matcher.grade, 60 000 + 6 000 (adapter) submissions, 0 disagreements; mutation sanity check of the harness 5/5 caught. No code change. REVIEW updated.
+
+2026-11-21 23:15 codex1 — T22. `env -u AUDITENV_SECRET PYTHONPATH=. uv run python -u /tmp/r18-codex1/t22.py` independently classified visible accounting records, compared recovered identity/type/amount with truth only after classification, and checked each scenario's special promise. Used 10000–10199 per scenario, both difficulties, 8,000 episodes. Initial run exited 1: 10 D03 payments had a matching refund dated before the corresponding overpayment. In seed 10086 the JPY 91,831 refund was posted Sep 10 and the merged overpayment Sep 14. The merge now leaves overpayments separate for the opt-in ensure_distractors config. Regression JudgeScenariosTest.test_refunds_follow_their_posted_overpayments failed on default 10086 and hard 10066 before the fix and passes after it.
+
+Before:
+```text
+VIOLATION default D03 seed=10086: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10093: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10106: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10114: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10129: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10151: ['no posted refund matching an earlier overpayment']
+VIOLATION default D03 seed=10192: ['no posted refund matching an earlier overpayment']
+VIOLATION hard D03 seed=10066: ['no posted refund matching an earlier overpayment']
+VIOLATION hard D03 seed=10120: ['no posted refund matching an earlier overpayment']
+VIOLATION hard D03 seed=10153: ['no posted refund matching an earlier overpayment']
+```
+After (exit 0):
+```text
+default D01: 200 checked, 0 violations
+default D02: 200 checked, 0 violations
+default D03: 200 checked, 0 violations
+default D04: 200 checked, 0 violations
+default D05: 200 checked, 0 violations
+default D06: 200 checked, 0 violations
+default D07: 200 checked, 0 violations
+default D08: 200 checked, 0 violations
+default D09: 200 checked, 0 violations; missing=200 partial=0
+default D10: 200 checked, 0 violations; missing=0 partial=200
+default D11: 200 checked, 0 violations; missing=77 partial=123
+default D12: 200 checked, 0 violations
+default D13: 200 checked, 0 violations
+default D14: 200 checked, 0 violations
+default D15: 200 checked, 0 violations
+default D16: 200 checked, 0 violations; missing=0 partial=200
+default D17: 200 checked, 0 violations; missing=0 partial=200
+default D18: 200 checked, 0 violations; missing=0 partial=200
+default D19: 200 checked, 0 violations
+default D20: 200 checked, 0 violations
+hard D01: 200 checked, 0 violations
+hard D02: 200 checked, 0 violations
+hard D03: 200 checked, 0 violations
+hard D04: 200 checked, 0 violations
+hard D05: 200 checked, 0 violations
+hard D06: 200 checked, 0 violations
+hard D07: 200 checked, 0 violations
+hard D08: 200 checked, 0 violations
+hard D09: 200 checked, 0 violations; missing=200 partial=0
+hard D10: 200 checked, 0 violations; missing=0 partial=200
+hard D11: 200 checked, 0 violations; missing=92 partial=108
+hard D12: 200 checked, 0 violations
+hard D13: 200 checked, 0 violations
+hard D14: 200 checked, 0 violations
+hard D15: 200 checked, 0 violations
+hard D16: 200 checked, 0 violations; missing=0 partial=200
+hard D17: 200 checked, 0 violations; missing=0 partial=200
+hard D18: 200 checked, 0 violations; missing=0 partial=200
+hard D19: 200 checked, 0 violations
+hard D20: 200 checked, 0 violations
+Total: 0 violating episodes
+real 51.92
+user 51.64
+sys 0.16
+```
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` exit 0 (ALL CHECKS PASSED in 56.6 s); `scripts/golden.py --check` 80/80 and `auditenv.verify --seeds 0-199` 600/600. Next: T24.
+
+2026-11-21 23:18 codex1 — T24. `env -u AUDITENV_SECRET PYTHONPATH=. uv run python -u /tmp/r18-codex1/t24.py` exited 0. Exported seeds 0–29 in each difficulty and drove the public `verify --dir` entry point after one file mutation at a time. It rejected 4,173/4,173 invalid mutations, with zero accepted before or after and no production changes. The FX mutations selected used rate cells whose last-digit change altered at least one rounded public conversion; for controls, changing an unused published rate does not contradict the books. All 60 unmodified exports and 60 unused-rate controls were accepted. The allocations were moved between distinct existing invoices of the same currency and entity, by editing a remittance reference or the receivables row in isolation.
+
+```text
+default affected_ids_swapped: checked=276, accepted=0
+default amount_off_by_one: checked=268, accepted=0
+default issue_type_relabelled: checked=402, accepted=0
+default last_fx_decimal_changed: checked=90, accepted=0
+default ledger_account_changed: checked=60, accepted=0
+default one_evidence_id_dropped: checked=922, accepted=0
+default original_control: checked=30, accepted=30
+default payment_ar_moved: checked=60, accepted=0
+default payment_reference_moved: checked=60, accepted=0
+default unused_fx_decimal_control: checked=30, accepted=30
+hard affected_ids_swapped: checked=265, accepted=0
+hard amount_off_by_one: checked=256, accepted=0
+hard issue_type_relabelled: checked=384, accepted=0
+hard last_fx_decimal_changed: checked=90, accepted=0
+hard ledger_account_changed: checked=60, accepted=0
+hard one_evidence_id_dropped: checked=860, accepted=0
+hard original_control: checked=30, accepted=30
+hard payment_ar_moved: checked=60, accepted=0
+hard payment_reference_moved: checked=60, accepted=0
+hard unused_fx_decimal_control: checked=30, accepted=30
+Total unexpected outcomes: 0
+real 45.59
+user 43.53
+sys 1.47
+```
+`env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0 (ALL CHECKS PASSED in 55.0 s).
