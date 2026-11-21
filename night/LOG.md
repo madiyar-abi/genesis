@@ -975,3 +975,55 @@ sys 1.47
 `env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0 (ALL CHECKS PASSED in 55.0 s).
 
 2026-11-21 23:27 lead — Integrated T59, T22 and T24. Scenario checks passed, all 80 golden hashes matched and the verifier passed 600/600. T65 corrected README CI triggers and recording status, the handoff folder-link checklist, and the jury test transcript (73 passed). Used the dated organiser FAQ already recorded in HANDOFF. Demo replay and SPEC reviewed independently. T64 remains on rb.
+## 2026-11-21 23:27 — rb — T64 done (tests/test_error_codes_doc.py)
+
+New `tests/test_error_codes_doc.py`: the error codes a policy can see through `judge_adapter.py` are a
+public interface (README "Jury adapter" documents them and promises no paths/seeds/truth), so the test
+keeps README and code in sync. The source side is parsed with `ast` from `auditenv/env.py`,
+`auditenv/calculator.py` and `judge_adapter.py` (no hand list): the string value of a `code` key in a
+`{"code": ..., "message": ...}` dict literal, and the first positional or `code=` argument of a
+`ToolError(...)` call; the dynamic `{"code": e.code, ...}` path is skipped because its values come from
+the `ToolError` literals collected anyway. The README side is the "Errors are ..." paragraph of the
+"Jury adapter" section, limited to the section and to identifier-shaped backticked tokens (so the
+`{"code", "message"}` shape is ignored). The two sets are compared; failures list both directions with
+`file:line` for the code side.
+
+Current census: 8 codes on both sides, **sets equal — no README edit and no `skipTest` needed**:
+`bad_params`, `calc_error`, `episode_over`, `invalid_findings`, `not_found`, `time_limit`,
+`unknown_action`, `unknown_table` (all produced in `auditenv/env.py`; `auditenv/calculator.py` raises
+`CalculatorError` and `judge_adapter.py` emit no `code` values, so neither adds one — they are scanned
+so a future code added there is caught).
+
+6 tests: real code and README agree; both sides are non-vacuous (≥ 5 codes each, `bad_params` present,
+so a rename of `ToolError` or of the README paragraph cannot leave two empty sets comparing equal);
+dict-literal + `ToolError` positional/keyword collection with computed values ignored; the README
+scanner ignores code-shaped words outside the section and stops at the next same-level heading; a
+missing section or a missing "Errors are ..." paragraph is an error, not an empty pass.
+
+Evidence:
+- `env -u AUDITENV_SECRET uv run python -m unittest tests.test_error_codes_doc -v` → Ran 6 tests in
+  0.006 s, OK.
+- Scratch-copy check, fake code in the source (accept): copied `auditenv/env.py`, `auditenv/calculator.py`,
+  `judge_adapter.py` and `README.md` to a temp dir, appended
+  `raise ToolError("zzz_fake_code", "scratch")` to the copied `env.py`, repointed `REPO_ROOT`/`README_PATH`
+  → `test_error_codes_match_readme` fails: `returned by the code but missing from README.md ("Jury
+  adapter" -> "Errors are"): zzz_fake_code (auditenv/env.py:241)`.
+- Scratch-copy check, fake code in the README (reverse direction): same temp tree, added
+  `` `zzz_doc_only` `` to the README paragraph → fails with `documented in README.md but never returned
+  by auditenv/env.py, auditenv/calculator.py or judge_adapter.py: zzz_doc_only`.
+- `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, ALL CHECKS PASSED in 51.1 s.
+- `env -u AUDITENV_SECRET uv run python -m unittest discover -s tests -t .` → Ran 558 tests, OK.
+
+Assumptions (instead of asking):
+- Only the three files named in the task are scanned; `auditenv/server.py`/`auditenv/loader.py` errors
+  reach the policy through `judge_adapter` as exceptions/ValueError, not as `{"code", "message"}`.
+- "Documented" means the single "Errors are ..." paragraph of the "Jury adapter" section: it is the one
+  list of codes, and scanning the whole section would pick up prose identifiers. A missing section or
+  paragraph raises instead of quietly returning an empty set.
+- Collected codes are compared as sets (the README lists each once); the code side keeps the first
+  `file:line` per code for the failure message.
+- Adding a test module changes the test total (558 now, docs quote older numbers): left to the lead's
+  `scripts/sync_docs.py` pass — no doc table was edited here. A row in `docs/CHECKS.md` for this guard
+  is optional; not added to avoid touching files other owners may edit.
+
+rb queue empty again (T25, T26, T27, T64 all [x]). Next: IDLE until the lead queues more (rb) tasks.

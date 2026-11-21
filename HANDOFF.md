@@ -4,7 +4,7 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Round 18 (21 November, branch `night/2026-11-21-r18`).** The opt-in refund scenario now keeps the receipt before the refund. All 8,000 scenario episodes passed after the fix, all 80 golden hashes matched, and the on-disk verifier rejected 4,173 invalid edits. The four jury test modules passed 73 tests. The round also hardened closed reset and the server and checked matcher behavior against an independent grader. See `REVIEW.md` under “Round 18” and `night/LOG.md` for evidence. The documentation test for adapter error codes is the last open worker task.
+**Round 18 (21 November, branch `night/2026-11-21-r18`).** The opt-in refund scenario now keeps the receipt before the refund. All 8,000 scenario episodes passed after the fix, all 80 golden hashes matched, and the on-disk verifier rejected 4,173 invalid edits. The four jury test modules passed 73 tests. The round also hardened closed reset and the server and checked matcher behavior against an independent grader. See `REVIEW.md` under “Round 18” and `night/LOG.md` for evidence. The adapter error codes in README are now checked against the source.
 
 **Grader key by default (21 November, evening, branch `feature/ten-of-ten`).** The jury runs every team the same
 way and will not set our `AUDITENV_SECRET`; its rules treat a seed leak as blocking. Before this change
@@ -51,9 +51,7 @@ only a wrong value type / missing field / unknown key / limit is a structural er
 negative amount is now a FP), and the reward is no longer rounded to 6 places. The policy text changed, so all 40
 exported episodes, the 7 trajectory files and the 80 golden hashes were regenerated; no measured number changed.
 
-An adversarial review that played the jury with its own harness passed all four blocks and found one blocker, now
-handled: **the jury must set `AUDITENV_SECRET` in the process that calls `generate_episode`**, otherwise a policy
-recovers the seed from `episode_id` in seconds (the adapter warns on stderr; README says so in bold).
+The original harness exposed predictable episode IDs when the secret was unset. Closed generation now creates a private key by default, as described above.
 
 Verified on the branch head (Python 3.11): `env -u AUDITENV_SECRET uv run python -m auditenv.check` → 512 tests, all
 gates pass; `sync_docs --check` no drift; `verify --seeds 0-199` 600/600 and the three splits 10/10, 10/10, 20/20;
