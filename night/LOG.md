@@ -155,3 +155,11 @@ Problems: 0
   - `env -u AUDITENV_SECRET uv run python -O -m auditenv.check`: exit 0, wall 53.591s (50.69s user, 2.18s system). Last line: "ALL CHECKS PASSED in 53.4 s" (562 unit tests, 200/200 verifier, all baselines/gates passed).
   - `grep -n "^\s*assert " auditenv/*.py auditenv/policies/*.py judge_adapter.py`: exit 1 (0 matches). Product code contains 0 assertions (proper exception handling throughout; python -O removes nothing required for validation).
 2026-11-22 01:01 gemini3a — G23: Ran every test module alone (`env -u AUDITENV_SECRET uv run python -m unittest tests.$m >/tmp/r20-gemini3a/$m.out 2>&1`). Checked 71 test modules. All 71 modules exited with code 0 (0 non-zero exits, 0 failures, total wall time 46.63s). Outputs saved to /tmp/r20-gemini3a/*.out.
+2026-11-22 01:00 gemini3b — G24: regenerated committed trajectories into /tmp/r20-gemini3b/. Commands:
+  env -u AUDITENV_SECRET uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out /tmp/r20-gemini3b/trajectories.jsonl
+  for p in random naive_reconcile reconcile; do env -u AUDITENV_SECRET uv run python -m auditenv.run --policy $p --config configs/train.json --out /tmp/r20-gemini3b/trajectories/train_$p.jsonl; done
+  for p in random naive_reconcile reconcile reconcile_hard; do env -u AUDITENV_SECRET uv run python -m auditenv.run --policy $p --config configs/train_hard.json --out /tmp/r20-gemini3b/trajectories/train_hard_$p.jsonl; done
+Diffs:
+  diff -u trajectories.jsonl /tmp/r20-gemini3b/trajectories.jsonl -> exit 0 (identical)
+  diff -ru trajectories /tmp/r20-gemini3b/trajectories -> exit 0 (all 7 files identical)
+Differing files: none.
