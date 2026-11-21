@@ -243,6 +243,11 @@ while [ "$(now)" -lt "$DEADLINE" ]; do
   esac
 
   if [ "$failed" -eq 1 ] && grep -qiE 'usage limit|hit your limit|limit reached|rate.?limit|429|overloaded|quota|resource.?exhausted|resets|try again at|authentication required|not logged in' "$out"; then
+    # Push unfinished work right away, so the next engine/round continues from it.
+    if [ -n "$(git status --porcelain)" ]; then
+      git add -A && git commit -qm "WIP: $NAME ($ENG) hit its usage limit — unfinished work, continue it" \
+        && git push -q origin HEAD 2>/dev/null && log "pushed unfinished work before the limit pause"
+    fi
     r=$(reset_epoch "$out"); [ -z "$r" ] && r=$(( $(now) + LIMIT_SLEEP ))
     avail_set "$slot" "$r"
     log "usage limit on slot $slot until $(date -r "$r" '+%m-%d %H:%M')"; nap "$NEXT_SLEEP"
