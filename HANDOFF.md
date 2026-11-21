@@ -4,7 +4,28 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Integration snapshot (20 November 2026).** Round 17 is on main at `b799231`. The following audit fixes were reviewed against that revision.
+## Next participant: five open audit defects
+
+Baseline: `main` at `f270e4d`, after [PR #37](https://github.com/madiyar-abi/genesis/pull/37) merged. Python and offline Docker passed on [the merge commit](https://github.com/madiyar-abi/genesis/actions/runs/44785710113). All five cases below were reproduced separately from the passing test suite. Fixes are pending.
+
+| Priority | Reproduction and observed result | Suggested change and acceptance test |
+|---|---|---|
+| High — export consistency | Start with a valid seed-1 split. Export seeds 1, 2 and 3 to the same directory, requesting 13 FX issues for seed 3. Generation rejects seed 3 after seed 2 has been written. The old index remains, and the previously valid split fails verification. | Start in `auditenv/export.py`. Prepare the full export before publishing it. Compare hashes and paths before and after a failed export, verify the original split and test a successful retry. |
+| Medium — unused FX rates | In clean seed 2000, replace the rate for `2025-03-02:GBP:USD` with `not-a-rate`. The on-disk verifier reports 1/1 valid. | In `auditenv/verify.py`, validate every published rate as a finite positive decimal before any conversion. Report its FX ID. Test an unused rate as well as a valid control. |
+| Medium — payment references outside the period | Add a future payment with no posting. The control passes. Give it a nonexistent invoice reference and an allocation exceeding the payment. It still passes because verification skips reference checks outside the period. | Check document-level reference integrity independently of posting-period rules. Test the two corruptions individually and retain the valid future-payment control. |
+| Medium — manifest version | Remove the required `schema_version` from the exported manifest. Directory verification reports 1/1 valid. | Check required manifest fields against `schemas/manifest.schema.json` and identify the missing field. Verify an intact export still passes. |
+| Low — timestamp diagnostics | Set a ledger timestamp to `not-a-date`. Direct `verify_episode()` raises `ValueError`. The CLI rejects the episode but its message omits the row ID. | Finish structural validation before doing date arithmetic. Assert that the API returns a problem with the row ID and field and that the CLI exits 1 with the same diagnostic. |
+
+From the repository root, run the reproducer on temporary copies and then the existing test modules:
+
+```sh
+env -u AUDITENV_SECRET uv run python night/archive/audit-f270e4d.py
+env -u AUDITENV_SECRET uv run python -m unittest tests.test_export tests.test_verify_dir tests.test_verify_semantics
+```
+
+Read the individual CLI statuses printed by the reproducer. On this baseline the control and the three malformed FX, remittance and manifest examples all return 0. The malformed ledger timestamp and the split left behind by the failed export return 1. The 25 existing tests passed. Add a focused regression for each fix and run the full acceptance commands below.
+
+## Integrated work
 
 | Branch or PR | What it covers |
 |---|---|
@@ -12,7 +33,7 @@
 | [PR #36](https://github.com/madiyar-abi/genesis/pull/36) | Check both timestamps of invoice postings and reversals. Require the configured 20 public hard episodes and verify the hard export in CI. |
 | [PR #37](https://github.com/madiyar-abi/genesis/pull/37) | Reject ambiguous CSV headers and malformed invoice fields. Detect duplicate episode IDs and leftover episode directories before export writes. Check uniqueness of evidence IDs in schema tests. |
 
-PR #37 contains #35, #36 and [#38](https://github.com/madiyar-abi/genesis/pull/38). The merged verifier checks both invoice/truth structure and accounting semantics. For release, review #37 against main and check its GitHub Actions run. After integrating #38, Python 3.11.18 passed 410 tests and the seed sweep completed 3,000 episodes with zero problems. Local checks verified 600/600 generated episodes, matched all 80 golden hashes, and found zero violations across 11,000 reward mutations on 20 seeds. To reproduce:
+PR #37 contains #35, #36 and [#38](https://github.com/madiyar-abi/genesis/pull/38). The merged verifier checks both invoice/truth structure and accounting semantics. After integrating #38, Python 3.11.18 passed 410 tests and the seed sweep completed 3,000 episodes with zero problems. Local checks verified 600/600 generated episodes, matched all 80 golden hashes, and found zero violations across 11,000 reward mutations on 20 seeds. To reproduce:
 
 ```sh
 env -u AUDITENV_SECRET uv run python -m unittest tests.test_export tests.test_verify_dir tests.test_schemas tests.test_posting_period tests.test_load
@@ -23,7 +44,7 @@ uv run python -m auditenv.verify --seeds 0-199
 for split in train dev hard; do uv run python -m auditenv.verify --dir "episodes/$split" || exit 1; done
 ```
 
-The next participant should review PR #37, confirm Python and Docker CI, and merge after team approval. E3 pins the multi-platform Python image by digest. E4 includes the [terminal recording](docs/demo.cast) with verified public demo output. The submission owner still has the narrated video, deck, access checks and submission listed below. No model training was started.
+E3 pins the multi-platform Python image by digest. E4 includes the [terminal recording](docs/demo.cast) with verified public demo output. The submission owner still has the narrated video, deck, access checks and submission listed below. No model training was started.
 
 ## Export verifier follow-up
 
