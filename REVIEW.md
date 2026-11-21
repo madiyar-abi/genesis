@@ -365,3 +365,63 @@ below failed on `main` at `87b1b4c` against a test that replays the definitions,
   process, a policy recovered the seed from `episode_id` in 3.2 s and scored 1.0; `generate_episode` now warns and the
   README requires the key. A fixture with only the listed files (no task.txt, provenance.json or fx_id column) could
   not be graded; it can now.
+
+## Round 18 (21 November, evening)
+
+Base `night/2026-11-21-r18` at `266a495` (main after PRs #44–#45). `auditenv.check` passed (523 tests, all gates).
+Three read-only jury-style passes (docs claims, data ambiguity, §09/§10 engineering) plus the workers' red-team and
+evidence tasks (night/TASKS.md, night/LOG.md).
+
+- Engineering (§10, 5 × 0/1/2): scored 2 on every criterion; nothing in the §10 blocking clause (no leak through the
+  adapter in closed mode, no grader write path, synthetic data, core runs; Docker job green in CI run 44925790975).
+  Gap fixed: 10 of the 20 episode ids in `trajectories.jsonl` (hard train, seeds 1100–1109) were not under
+  `episodes/`; README now gives the export command that reproduces them (checked: all 20 ids covered).
+- Docs, ~150 claims checked against code and fresh runs; 10 wrong, all fixed. Behaviour: README and CONTRACT said
+  `episode_over` costs a step — `AuditEnv.step` returns before counting it (submit, then three actions: remaining
+  steps stay at 97). README said jury_run used `judge_adapter.generate_episode`; it uses the public generator. README's
+  list of invalid submissions omitted an unknown key and another episode's `episode_id`. Numbers: reward mutants 15 →
+  22 (README, CHECKS, PITCH), jury block tests 69 → 70, verify_semantics 10 → 12, verify_redteam 10 → 11, README
+  snippets 2 → 3, DESIGN limitations 11 → 14, fuzz actions 20 312 → 20 319, hard random > 0 on 50 → 47 clean episodes;
+  DESIGN §10 omitted the strongest remaining payment_allocation cue (2900 amount repeated in ≥ 4 ledger rows, 0.964).
+- Closed reset stderr (codex1, T21): a closed `reset` without `episode_dir` and without `AUDITENV_SECRET` printed the
+  grader key file path to stderr, which a policy sharing the process can read. Now only `generate_episode` warns;
+  regression `JudgeContractTest.test_closed_reset_keeps_key_path_off_stderr` failed before the fix.
+- Paired (codex1, T20): an independent transform (all surrogate ids renamed, dates shifted one 400-year cycle so every
+  fx_id changes, four tables shuffled) on seeds 0–49 default and hard: 100/100 pairs same closed and oracle reward,
+  `verify --dir` 50/50 each. No defect.
+- Data ambiguity (case §10: "contradictory or unsolvable data do not count as difficulty"): an independent checker
+  that reads only task.txt, policy.json and the public tables and applies the written definitions literally (no
+  verifier, policy or truth code) reproduced the truth exactly — type, affected ids, amount — in all 44 000 episodes
+  (seeds 20000–20999 × 44 configs: default, hard, heavy, D01–D20 in both difficulties). The 0.4 % of the default
+  duplicate cue that misses (18 of 4 920) are same-customer invoices with equal totals but different line items:
+  not duplicates under the written definition. One unstated rule found in a baseline, not in the data: `reconcile`
+  pairs duplicates only within 3 days; it never changes a result. DESIGN §10 now says so.
+- Published check page, re-read line by line (lead subagent): 92 numbered checks (C01–C20, Block 3 rows 1–20,
+  M01–M12, D01–D20, P01–P20) plus the interface clauses (function names and keywords, observation/list/error key
+  sets, `score_episode` keys, step accounting, closed reward 0 and `info` `{}`) — the code meets all 92. Independent
+  harnesses: limits as full closed episodes, the tie rule vs brute force on 3000 random graphs (0 mismatches), the
+  jury transform done directly on the CSV/JSONL files with colliding renames (40/40 pairs equal). One test gap: D05
+  (currency/period boundary in a clean episode) was not asserted; `test_clean_scenarios_hold_the_legitimate_lookalikes`
+  now requires a foreign-currency document and a record whose own-offset and company-timezone dates straddle the
+  period edge (holds on 40/40 seeds 900–939). Two readings left as designed, no published check exercises them: a
+  closed-mode invalid submit answers `{"accepted": true}` (graded −1 grader-side, as documented), and an unknown key
+  in a finding is a structural error although the page lists only wrong type, missing field and limit.
+- Loader and server hardening (codex1, T45/T46): 123 corrupted-export cases and 93 hostile wire requests; fixed path
+  echoes, silent acceptance of symlinks/NUL/empty/header-only files, duplicate JSON keys, nonfinite numbers, blank
+  lines without a response and a train-mode hidden list exposing scores (`tests/test_load_redteam.py`,
+  `tests/test_server_redteam.py`). Lead review of that change: the stricter loader rejected a row_id equal to a
+  doc_id, which the published paired definitions allow ("different id spaces are handled separately") — a jury copy
+  renamed per space would have failed closed reset; loaded episodes now need uniqueness per id space only. The
+  server again answers any unexpected exception with a bounded `internal error` instead of exiting.
+- Multi-cue cheater (codex1, T47): rules over position, id patterns, timestamps, amount digits and wording, fit on
+  seeds 0–499 and scored on 5000–5499 through the adapter: F1 0.163 (default) / 0.153 (hard) vs reconcile 1.000 /
+  0.840. Its strongest cues (I1 payment is the last-evening payment; cutoff bookings at the period start) are the
+  ones DESIGN §10 already lists.
+- Matcher differential (lead subagent, T23): a reference grader written from the published page (before reading
+  `matcher.py`) agreed with `matcher.grade` on 60 000 random submissions from 400 episodes (default, hard, D01–D20;
+  tie-rule clones in 5 234 cases; tolerance 0/1/5; all 12 invalid classes) and with `score_episode` on 6 000 more,
+  0 disagreements; five deliberately broken reference variants were each caught (91–2 779 disagreements), so the
+  harness can see a difference. Documented choices the page leaves open: `10000.0` is not an integer amount; an
+  unknown key and a wrong `episode_id` invalidate the submission; `explanation` is optional but must be a string.
+- D03 generated a refund before its overpayment in 10 of 8,000 scenario episodes. Preserving the original receipt date in the opt-in distractor generator resolved all ten. The repeated sweep passed all 8,000 episodes across both difficulties.
+- The on-disk verifier rejected all 4,173 accounting and truth mutations on 60 episodes and accepted all 120 controls. The sweep only treated an FX edit as an error when it changed a rounded conversion used in the books.

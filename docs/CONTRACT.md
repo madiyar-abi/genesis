@@ -133,10 +133,10 @@ Actions (`type` + params):
 Errors (unknown action/table/id, bad params — including parameters not listed for the action, as in
 `schemas/action.schema.json`; a `submit` with such parameters still ends the episode, as an invalid
 submission) consume a step; codes:
-`unknown_action, bad_params, unknown_table, not_found, calc_error, episode_over`, plus
+`unknown_action, bad_params, unknown_table, not_found, calc_error`, plus
 `time_limit` (wall-clock limit hit → truncated) and `invalid_findings` (train mode only; in eval
 the policy just sees `{"submitted": true}`).
-A non-submit action at the configured `max_steps` (default 100) truncates the episode and grades empty findings. After termination or truncation, `episode_over` preserves the final step counter.
+A non-submit action at the configured `max_steps` (default 100) truncates the episode and grades empty findings. After termination or truncation, every action returns the error `episode_over` without consuming a step: the final step counter and the outcome are preserved.
 Reward is 0.0 on every non-terminal step. Terminal reward is returned to the policy
 only in `mode="train"`; in `"eval"` it is 0.0 and the result goes to the grader log only.
 

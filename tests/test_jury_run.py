@@ -9,7 +9,7 @@ from unittest import mock
 import judge_adapter as ja
 from auditenv.env import AuditEnv
 from auditenv.jury import SCENARIOS
-from auditenv.jury_run import JuryPolicy, run
+from auditenv.jury_run import JuryPolicy, main, run
 from auditenv.policies.flag_all import FlagAll
 from auditenv.policies.random_explorer import RandomExplorer
 from auditenv.policies.reconcile import Reconcile
@@ -49,6 +49,13 @@ class JuryPolicyTest(unittest.TestCase):
         self.assertEqual(rows["oracle"]["mean_return"], 1.0)
         self.assertEqual(rows["reconcile"]["f1"], 1.0)
         self.assertTrue(all(r["episodes"] == 20 for r in rows.values()))
+
+
+class PolicyImageTest(unittest.TestCase):
+    def test_missing_docker_is_a_clean_error(self):
+        with mock.patch("shutil.which", return_value=None), mock.patch("sys.stderr") as err:
+            self.assertEqual(main(["--policy-image", "genesis-policy"]), 2)
+        self.assertIn("docker", "".join(c.args[0] for c in err.write.call_args_list))
 
 
 if __name__ == "__main__":

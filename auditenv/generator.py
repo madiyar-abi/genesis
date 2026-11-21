@@ -430,16 +430,20 @@ def _build_payments(st: State, distractors: bool) -> None:
     plans = [p for p in plans if st.in_period(p[0])]
     if st.gen.get("ensure_distractors"):
         _ensure_split_and_refund(st, plans)
-    # multi-invoice payments: merge some full payments of the same entity+currency
+    # Keep the opt-in refund distractor's overpayment on its original date and amount.
+    # Merging it into a later receipt can move it after the corresponding refund.
+    preserve_overpayments = st.gen.get("ensure_distractors", False)
     merged, used = [], set()
     plans.sort(key=lambda p: (p[0], p[1], p[2]))
     for i, p in enumerate(plans):
         if i in used:
             continue
-        if p[3] and len(p[3]) == 1 and rng.random() < 0.25:
+        if (p[3] and len(p[3]) == 1 and (not preserve_overpayments or p[2] == p[3][0][1])
+                and rng.random() < 0.25):
             for j in range(i + 1, len(plans)):
                 q = plans[j]
                 if (j not in used and q[3] and len(q[3]) == 1 and q[4] == p[4] and q[1] == p[1]
+                        and (not preserve_overpayments or q[2] == q[3][0][1])
                         and q[3][0][0] is not p[3][0][0] and (q[0] - p[0]).days <= 10):
                     used.add(j)
                     p = (q[0], p[1], p[2] + q[2], p[3] + q[3], p[4])

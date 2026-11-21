@@ -23,13 +23,35 @@ import json
 import re
 from functools import lru_cache
 from collections import defaultdict
-from datetime import date
-from decimal import Decimal
+from datetime import date, timezone
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from .money import EXPONENT, convert, local_date, parse_offset
 
 CHART = {"1000", "1200", "2900", "4000", "6100", "6200", "6300", "6400", "7900"}  # docs/CONTRACT.md §2
+
+
+def _journals(ledger: list[dict]) -> dict[str, list[dict]]:
+    groups = defaultdict(list)
+    for r in ledger:
+        if r["payment_id"]:
+            groups["pay:" + r["payment_id"]].append(r)
+        elif r["invoice_id"]:
+            groups["inv:" + r["invoice_id"]].append(r)
+        else:
+            instant = datetime_key(r["timestamp"]).astimezone(timezone.utc)
+            groups["exp:" + instant.isoformat()].append(r)
+    return groups
+
+
+def ledger_balance_problems(ledger: list[dict]) -> list[str]:
+    return _balance_problems(_journals(ledger))
+
+
+def _balance_problems(journals: dict[str, list[dict]]) -> list[str]:
+    return [f"unbalanced journal {jid}" for jid, rows in journals.items()
+            if sum(r["debit_minor"] for r in rows) != sum(r["credit_minor"] for r in rows)]
 
 
 class Books:
@@ -102,15 +124,7 @@ class Books:
         return problems
 
     def journals(self) -> dict[str, list[dict]]:
-        groups = defaultdict(list)
-        for r in self.ledger:
-            if r["payment_id"]:
-                groups["pay:" + r["payment_id"]].append(r)
-            elif r["invoice_id"]:
-                groups["inv:" + r["invoice_id"]].append(r)
-            else:
-                groups["exp:" + r["timestamp"]].append(r)
-        return groups
+        return _journals(self.ledger)
 
     def discrepancies(self) -> tuple[list[tuple], list[str]]:
         """Return (issues, problems): issues = (type, tuple(sorted ids), amount)."""
@@ -119,9 +133,7 @@ class Books:
             if not self.in_period(r["timestamp"]):
                 problems.append(f"ledger row {r['row_id']} outside the period")
         js = self.journals()
-        for jid, rows in js.items():
-            if sum(r["debit_minor"] for r in rows) != sum(r["credit_minor"] for r in rows):
-                problems.append(f"unbalanced journal {jid}")
+        problems.extend(_balance_problems(js))
         # invoices: booking, period, FX
         booked, self.voided = {}, {}  # voided: cancelled invoice -> instant of its credit note
         for jid, rows in js.items():
@@ -281,12 +293,58 @@ def datetime_key(ts: str):
 RATE = re.compile(r"[0-9]+(\.[0-9]+)?")  # plain ASCII decimal, as the generator writes it (no sign, exponent, _)
 
 
-def _structure(ep: dict) -> list[str]:
+DECIMAL_TEXT = re.compile(r"[+]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?")
+
+
+def _valid_rate(value, strict_export: bool) -> bool:
+    if not isinstance(value, str):
+        return False
+    if strict_export:
+        # Generated exports use the plain decimal spelling and a realistic rate bound.
+        return bool(RATE.fullmatch(value)) and 0 < Decimal(value) < 10 ** 9
+    literal = value.strip()
+    if not DECIMAL_TEXT.fullmatch(literal):
+        return False
+    try:
+        return Decimal(literal) > 0
+    except InvalidOperation:
+        return False
+
+
+def _policy_problems(policy: dict, manifest: dict, strict_export: bool) -> list[str]:
+    if not isinstance(policy, dict):
+        return ["policy period, ledger and ledger.accounts must be objects"]
+    period = policy.get("period", None if strict_export else {})
+    ledger = policy.get("ledger", None if strict_export else {})
+    accounts = ledger.get("accounts", None if strict_export else {}) if isinstance(ledger, dict) else None
+    if not isinstance(period, dict) or not isinstance(accounts, dict):
+        return ["policy period, ledger and ledger.accounts must be objects"]
+
+    findings = policy.get("findings", {})
+    if findings is None and not strict_export:
+        findings = {}
+    if (not isinstance(findings, dict) or type(findings.get("tolerance_minor", 0)) is not int
+            or findings.get("tolerance_minor", 0) < 0):
+        return ["policy findings.tolerance_minor must be a non-negative int"]
+
+    problems = []
+    for section, key, manifest_key in ((policy, "base_currency", "base_currency"),
+                                       (policy, "timezone", "timezone"),
+                                       (period, "start", "period_start"), (period, "end", "period_end")):
+        if (strict_export or key in section) and section.get(key) != manifest[manifest_key]:
+            problems.append("policy contradicts the manifest (base currency, timezone or period)")
+            break
+    if (strict_export and accounts.keys() != CHART) or not accounts.keys() <= CHART:
+        problems.append("policy chart of accounts contradicts the contract")
+    return problems
+
+
+def _structure(ep: dict, *, strict_export: bool = True) -> list[str]:
     error = _schema_error(ep.get("manifest"), _schema("manifest.schema.json"), "manifest")
     if error:
         return [error]  # the checks below index the manifest's fields
     problems = []
-    if not isinstance(ep.get("task"), str) or not ep["task"].strip():
+    if strict_export and (not isinstance(ep.get("task"), str) or not ep["task"].strip()):
         problems.append("public task text must contain instructions")
     m, t = ep["manifest"], ep["tables"]
     for name in ("ledger", "invoices", "payments", "fx"):
@@ -295,8 +353,20 @@ def _structure(ep: dict) -> list[str]:
     actual_docs = len(t["invoices"]) + len(t["payments"])
     if m["counts"].get("documents") != actual_docs:
         problems.append("manifest count mismatch for documents")
-    ids = [r["row_id"] for r in t["ledger"]] + [d["doc_id"] for d in t["invoices"] + t["payments"]]
-    if len(ids) != len(set(ids)):
+    for p in t["payments"]:
+        if not isinstance(p.get("doc_id"), str) or not p["doc_id"].strip():
+            return [*problems, "row_id/doc_id must be a non-empty string"]
+        for field in ("payment_id", "currency"):
+            if not isinstance(p.get(field), str) or not p[field].strip():
+                return [*problems, f"payment {field} must be a nonblank string"]
+        if "invoice_refs" not in p:
+            return [*problems, "payment invoice_refs field is required"]
+    row_ids = [r["row_id"] for r in t["ledger"]]
+    doc_ids = [d["doc_id"] for d in t["invoices"] + t["payments"]]
+    ids = row_ids + doc_ids
+    # our exports keep row and doc ids disjoint; a jury copy renames each id space on its own (check definitions,
+    # paired block), so a loaded episode only needs each space to be unique
+    if any(len(s) != len(set(s)) for s in ((ids,) if strict_export else (row_ids, doc_ids))):
         problems.append("duplicate row_id/doc_id")
     if not all(isinstance(i, str) and i.strip() for i in ids):
         problems.append("row_id/doc_id must be a non-empty string")
@@ -309,19 +379,14 @@ def _structure(ep: dict) -> list[str]:
         if key in rate_keys:
             problems.append(f"duplicate FX rate for {key}")
         rate_keys.add(key)
+        if _schema_error(rate["date"], {"type": "string", "format": "date"}, "FX date"):
+            problems.append("FX date must be a valid YYYY-MM-DD date")
         if rate["fx_id"] != ":".join(key):
             problems.append(f"fx_id differs from date and currency pair: {rate['fx_id']}")
-        # every published rate, used or not: a reader must be able to convert with any of them; above 10^9 is no
-        # real currency pair and would exceed the conversion's decimal precision
-        value = rate.get("rate")
-        if not isinstance(value, str) or not RATE.fullmatch(value) or not 0 < Decimal(value) < 10 ** 9:
-            problems.append(f"fx rate {rate['fx_id']}: rate must be a positive decimal below 10^9")
-    pol = ep["policy"]
-    if (pol["base_currency"], pol["timezone"], pol["period"]["start"], pol["period"]["end"]) != \
-            (m["base_currency"], m["timezone"], m["period_start"], m["period_end"]):
-        problems.append("policy contradicts the manifest (base currency, timezone or period)")
-    if set(pol["ledger"]["accounts"]) != CHART:
-        problems.append("policy chart of accounts contradicts the contract")
+        if not _valid_rate(rate.get("rate"), strict_export):
+            requirement = "a positive decimal below 10^9" if strict_export else "a finite positive decimal"
+            problems.append(f"fx rate {rate['fx_id']}: rate must be {requirement}")
+    problems.extend(_policy_problems(ep["policy"], m, strict_export))
     currencies = {m["base_currency"]}
     currencies.update(row["currency"] for table in ("ledger", "invoices", "payments") for row in t[table])
     currencies.update(row[key] for row in t["fx"] for key in ("source_currency", "target_currency"))
@@ -350,7 +415,7 @@ def _structure(ep: dict) -> list[str]:
         elif refs and any(not isinstance(r.get("invoice_id"), str) for r in refs):
             problems.append(f"payment {p.get('payment_id')}: invoice_refs invoice_id must be a string")
     stamps = [(f"ledger row {r['row_id']}", r["timestamp"]) for r in t["ledger"]]
-    stamps += [(f"payment {p['payment_id']}", p["timestamp"]) for p in t["payments"]]
+    stamps += [(f"payment {p['payment_id']}", p.get("timestamp")) for p in t["payments"]]
     stamps += [(f"invoice {i['invoice_id']}", i[k]) for i in t["invoices"] for k in ("issued_at", "due_at")]
     for label, ts in stamps:
         try:
@@ -359,7 +424,7 @@ def _structure(ep: dict) -> list[str]:
             aware = False
         if not aware:
             problems.append(f"{label}: timestamp must be ISO-8601 with a timezone offset")
-    if not 200 <= len(t["ledger"]) <= 2000 or not 20 <= actual_docs <= 200:
+    if strict_export and (not 200 <= len(t["ledger"]) <= 2000 or not 20 <= actual_docs <= 200):
         problems.append("episode size outside 200-2000 rows / 20-200 documents")
     return problems
 
@@ -607,6 +672,8 @@ def verify_episode(ep: dict) -> list[str]:
     # the bookkeeping checks below assume a valid manifest, int amounts, string refs, offset-aware timestamps
     # and convertible rates
     if any(p.startswith(("manifest.", "manifest:", "manifest key")) or "must be an integer" in p
+           or p.startswith(("policy period,", "policy findings.", "row_id/doc_id must be", "payment payment_id ", "payment currency ",
+                            "payment invoice_refs ", "FX date "))
            or "timestamp must be" in p or "fx rate " in p or "invoice_id must be" in p for p in problems):
         return problems
     m, t = ep["manifest"], ep["tables"]

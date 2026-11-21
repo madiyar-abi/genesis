@@ -4,6 +4,8 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
+**Round 18 complete (21 November, branch `night/2026-11-21-r18`).** The opt-in refund scenario now keeps the receipt before the refund. All 8,000 scenario episodes passed after the fix, all 80 golden hashes matched, and the on-disk verifier rejected 4,173 invalid edits. The four jury test modules passed 73 tests. The round also hardened closed reset and the server and checked matcher behavior against an independent grader. See `REVIEW.md` under “Round 18” and `night/LOG.md` for evidence. All eight adapter error codes match README. Run `env -u AUDITENV_SECRET uv run python -m auditenv.check` from the repository root. The final run passed 560 tests and all gates in 51.9 seconds, and the documentation tables match its metrics. The marathon owns PR integration. The submission owner has the recording, access and upload checklist below.
+
 **Grader key by default (21 November, evening, branch `feature/ten-of-ten`).** The jury runs every team the same
 way and will not set our `AUDITENV_SECRET`; its rules treat a seed leak as blocking. Before this change
 `generate_episode` without the variable gave `episode_id = HMAC(public constant, seed)` and public-RNG records, so a
@@ -13,7 +15,7 @@ open mode and `auditenv.jury_run` keep the public generator (golden 80/80, docs 
 Check: `uv run python -m unittest tests.test_grader_key` (failed 4 of 6 before the change, passes after);
 `env -u AUDITENV_SECRET uv run python -m auditenv.check` → 521 tests, all gates pass.
 
-**Current state (21 November 2026).** PR #42 merged the jury adapter checks and public scenario runs into `main`. The follow-up below fixes a C18 failure found on that revision and adds an isolated run for C20. Before submission the team still needs to revoke the DeepSeek key, make the repository public, record the video, and share and submit the Google Doc. See “Deadline & submission”.
+**Current state (21 November 2026).** PR #42 merged the jury adapter checks and public scenario runs into `main`. The follow-up below fixes a C18 failure found on that revision and adds an isolated run for C20. Before submission the team still needs to revoke the DeepSeek key, make the repository public, record the video, and share the materials and submit the Drive folder link. See “Deadline & submission”.
 
 ## C18 and C20 follow-up (Khasuetolog)
 
@@ -49,9 +51,7 @@ only a wrong value type / missing field / unknown key / limit is a structural er
 negative amount is now a FP), and the reward is no longer rounded to 6 places. The policy text changed, so all 40
 exported episodes, the 7 trajectory files and the 80 golden hashes were regenerated; no measured number changed.
 
-An adversarial review that played the jury with its own harness passed all four blocks and found one blocker, now
-handled: **the jury must set `AUDITENV_SECRET` in the process that calls `generate_episode`**, otherwise a policy
-recovers the seed from `episode_id` in seconds (the adapter warns on stderr; README says so in bold).
+The original harness exposed predictable episode IDs when the secret was unset. Closed generation now creates a private key by default, as described above.
 
 Verified on the branch head (Python 3.11): `env -u AUDITENV_SECRET uv run python -m auditenv.check` → 512 tests, all
 gates pass; `sync_docs --check` no drift; `verify --seeds 0-199` 600/600 and the three splits 10/10, 10/10, 20/20;
@@ -156,9 +156,7 @@ Safest: a shared folder holding the Doc with the links, the video as mp4, and (o
 Earlier instruction: submit via the personal account on the hackathon site: a link to **one Google
 Docs document** with the links — GitHub repo and demo video (a presentation is optional since the organisers'
 message of 21 November: the jury looks at §09 of the case — code, README, demo video and description).
-Every material must be viewable by anyone with the link. (The earlier
-`submit.exe` form asked for a Google Drive folder; the organizers' latest
-message says a Google Doc — follow the latest, re-check the form before submitting.)
+Every material must be viewable by anyone with the link. Confirm access in a logged-out browser before submitting the shared folder.
 
 - [x] Working end-to-end demo flow (`uv run python -m auditenv.demo`)
 - [x] `README.md`: what it is, how to run — the jury opens the repo
@@ -180,7 +178,7 @@ One check command: uv run python -m auditenv.check  (container: docker build -t 
 Jury adapter: judge_adapter.py in the repository root; hidden episodes are keyed by default (README "Jury adapter").
 Design note: docs/DESIGN.md · Contract: docs/CONTRACT.md · Check map: docs/CHECKS.md
 ```
-- [ ] Doc link submitted in the personal account on the site
+- [ ] Shared Drive folder link submitted in the personal account on the site
 - [ ] **Before the repo goes public: revoke the ReformBoss (DeepSeek) API key** — it is in git
       history (commit `b8249ac`, removed in `5e73918` but still readable). Issue a new key and pass
       it only via the `DEEPSEEK_API_KEY` env var.
@@ -414,7 +412,7 @@ All eight tasks on `night/2026-11-19-r4` passed. The verifier now compares invoi
 
 Run `uv run python -m auditenv.check` from the repository root. All 295 tests passed. All 323 exported files and all 2,258 recorded trajectory steps reproduced byte for byte. Seed sweeps passed on 3,000 default and 600 hard episodes. All 80 golden hashes matched, reward tests caught all 15 mutants, and the 11,000 reward mutations produced zero violations. The shortcut miner still flags 16 default and 11 hard feature values. See the limitations in `docs/DESIGN.md` §10. [Python and offline Docker CI on the verified implementation](https://github.com/madiyar-abi/genesis/actions/runs/44591400232)
 
-The marathon handles branch integration. The team records the demo, supplies team names, exports the deck, arranges jury access and submits the three-link Google Doc. Engineering freeze is **22 November at 18:00 Astana**.
+The marathon handles branch integration. The team records the demo, supplies team names, exports the deck, arranges jury access and submits the shared Drive folder link. Engineering freeze is **22 November at 18:00 Astana**.
 
 ## Round 3 complete · 19 November 2026
 
@@ -480,7 +478,7 @@ Run these commands from the repository root with Python 3.11 (`uv run python`).
 - **Demo and slides:** record the walkthrough from `docs/DEMO.md` and build the deck from `docs/PITCH.md` (chart: `docs/baselines.svg`), including the Team slide.
 - **Access and submission:** the repository is **private** (checked 2026-11-20), so the owner must make it public or
   otherwise give the jury access. The team checks the repo, video and presentation links, adds them to the Google
-  Doc, and submits the Doc through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
+  Doc, and submits the shared Drive folder link through the hackathon account by the internal deadline of **22 November, 22:00 Astana**.
 
 ## Decisions & assumptions
 - Hidden evaluation: set `AUDITENV_SECRET` in the grader process only (keys generator RNG + HMAC episode_id).
@@ -568,7 +566,7 @@ uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out
 uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json
 uv run python -m auditenv.fuzz --seeds 0-999          # seed sweep (3 000 episodes, ~45 s)
 uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299
-uv run python scripts/mutate_reward.py                # 15/15 reward mutants caught
+uv run python scripts/mutate_reward.py                # 22/22 reward mutants caught
 uv run python scripts/golden.py --check               # generator drift detector (80 hashes)
 make -n fuzz stress attack miner sensitivity bench chart  # preview available targets
 ```
