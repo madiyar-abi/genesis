@@ -82,3 +82,19 @@ All assigned gemini3a tasks (T13, T14, T15) complete.
 
 2026-11-21 21:57 lead — T30 (part): data-ambiguity review subagent — independent definition-only checker matched truth on 44 000 episodes (seeds 20000–20999 × default, hard, heavy, D01–D20 × 2 difficulties), 0 contradictory/ambiguous episodes. The 0.4 % duplicate-cue misses are equal totals with different line items (legitimately not duplicates). Recorded in REVIEW; added a DESIGN §10 bullet on the baseline's unstated 3-day duplicate window (never changes a result) and bumped CHECKS' limitation count to 15. T30 done.
 2026-11-21 21:54 codex1 — T19. `env -u AUDITENV_SECRET PYTHONPATH=. uv run python /tmp/r18-codex1/contract_cases.py` exited 0 in 0.15 s: `116 total contract cases passed; peak step time 0.000241 s`. Independent fixed-input reset/step checks covered malformed envelopes and argument types, extra and missing keys, cursor/limit extremes, long Unicode/NUL IDs, calculator grammar/length boundaries, malformed submissions, interleaved adapters, reset while open, and calls after both terminal states. JSON serialization with allow_nan=False succeeded. Active steps cost one; after the episode ended its balance remained fixed as required by C15/C17. Zero defects found. `env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0 in 117.17 s: `ALL CHECKS PASSED in 117.0 s`. No queued codex1 tasks.
+2026-11-21 21:55 gemini1a — T1: seed sweeps on seeds 7000-7999 (default + hard).
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 7000-7999`
+  Exit code: 0
+  Wall time: 193.53 s
+  Summary:
+  default mode, seeds 7000-7999: 3000 episodes (1986 dirty, 1014 clean) in 193.4 s
+    episodes with a problem (exception / verifier / oracle): 0
+    random explorer reward > 0: 254/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+    flag-all reward < 0: 3000/3000
+  FUZZ PASSED
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 7000-7999 --hard`
+  Wall time: 350.80 s
+  hard mode, seeds 7000-7999: 3000 episodes (1986 dirty, 1014 clean) in 350.6 s
+    random explorer reward > 0: 268/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+Problems: 0 problems found across 6,000 episodes (default + hard).
+Next: T2 (config fuzz sweep: 3000 configs starting at 40000).
