@@ -15,7 +15,7 @@ Audit scripts go under `night/r20/` (one file per task, named in the task) and m
 files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inject.py or policies.
 
 ## codex1 — independent defect hunts (strong)
-- [ ] X1 (lead, was codex1: rate-limited until 02:41) Chronology and causality audit. Write `night/r20/chronology.py`: generate episodes in memory via
+- [x] X1 (lead, was codex1: rate-limited until 02:41) Chronology and causality audit. Write `night/r20/chronology.py`: generate episodes in memory via
   `auditenv.generator` (public tables only) for default, `--hard` and every D01–D20 config in `auditenv/jury.py`
   (both difficulties), seeds 30000–30299. Check from the public tables only: every payment / credit note / refund /
   reversal is dated on or after the document it references; a reversal follows its original posting; every
@@ -29,7 +29,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   data on seeds 31000–31199 of each config. — files: night/r20/policy_text.py, night/LOG.md — accept: LOG lists every
   sentence checked, the check and its count; any statement the data contradicts (or that is unstated but needed to
   find a truth issue) quoted with seed and record ids.
-- [ ] X3 (lead, was codex1: rate-limited until 02:41) Jury-machine reality check of `judge_adapter.py`: (a) fresh `HOME` with no `~/.auditenv`, (b) read-only
+- [x] X3 (lead, was codex1: rate-limited until 02:41) Jury-machine reality check of `judge_adapter.py`: (a) fresh `HOME` with no `~/.auditenv`, (b) read-only
   `HOME`, (c) 8 processes calling `judge_adapter.generate_episode` + `reset` at the same moment on an empty key dir
   (race on `grader.key` creation — do all 8 agree on one key, does any crash or write a partial key?), (d) `episode_dir`
   given as a relative path, a path with spaces and non-ASCII, and a symlinked directory. Scripts in

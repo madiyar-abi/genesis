@@ -82,6 +82,25 @@ class GeneratorTest(unittest.TestCase):
                     credits[key] += payment["amount_minor"] - allocated
                     self.assertGreaterEqual(credits[key], 0, payment["payment_id"])
 
+    def test_cash_is_applied_after_the_invoice_is_posted(self):
+        # A posting lag used to let a receipt settle a receivable that the ledger had not booked yet
+        # (D01 default seed 30010: RCPT0548981 credits 1200 for 2608-742998 a day before its booking).
+        from auditenv.jury import SCENARIOS
+        cases = [(30010, SCENARIOS["D01"]), (30033, SCENARIOS["D01"])]
+        cases += [(s, {"errors": {}, "difficulty": d}) for s in range(60) for d in ("default", "hard")]
+        for seed, config in cases:
+            with self.subTest(seed=seed, config=config):
+                ledger = generate(seed, config, key="")["tables"]["ledger"]
+                posted = {}
+                for r in ledger:
+                    if r["account"] == "1200" and r["invoice_id"] and not r["payment_id"] and r["debit_minor"]:
+                        t = datetime.fromisoformat(r["timestamp"])
+                        posted[r["invoice_id"]] = min(t, posted.get(r["invoice_id"], t))
+                for r in ledger:
+                    if r["account"] == "1200" and r["payment_id"] and r["invoice_id"] in posted:
+                        self.assertGreaterEqual(datetime.fromisoformat(r["timestamp"]), posted[r["invoice_id"]],
+                                                (r["row_id"], r["invoice_id"], r["payment_id"]))
+
     def test_evidence_exists_and_amounts_positive(self):
         for seed in range(40):
             ep = generate(seed, ALL)
