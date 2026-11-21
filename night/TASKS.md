@@ -44,7 +44,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
   clear message; LOG lists every other exception, silent count mismatch, or step-budget overrun with a reproduction.
 
 ## codex2 — jury-run realism (strong)
-- [ ] Y1 (codex2) Jury copy robustness beyond the published paired transform: take 10 exported episodes (5 default,
+- [x] Y1 (codex2) Jury copy robustness beyond the published paired transform: take 10 exported episodes (5 default,
   5 hard; `episodes/dev`, `episodes/hard`) and write variants a jury tool could plausibly produce when it re-writes
   files: CSV column order shuffled, CRLF line endings, UTF-8 BOM on CSV/JSON, trailing newline missing, JSON pretty-
   printed vs compact, JSONL with keys reordered. For each variant: `judge_adapter` reset on `episode_dir` + replay of
