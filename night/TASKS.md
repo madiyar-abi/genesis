@@ -160,7 +160,7 @@ must never read truth/provenance, `verify.py`, `inject.py` or `auditenv/policies
 - [x] Z4 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` and
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` — files: night/LOG.md — accept: exit codes
   + summary lines (reproduction of codex1/codex2 results by another worker).
-- [ ] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 15000-15999` and the same with
+- [x] G19 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 15000-15999` and the same with
   `--hard` — files: night/LOG.md — accept: both summaries + wall times.
 - [ ] G20 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 75000` — files:
   night/LOG.md — accept: summary + wall time + max steps.
