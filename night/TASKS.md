@@ -23,4 +23,4 @@ Use Python 3.11 via uv. For evidence tasks append measured counts and any mismat
 - [ ] F (lead) Correct ordinary refund chronology, including clean default books seed 0 — files: generator, regression tests, generated artifacts and derived metrics — accept: causal ordering on default and hard sweeps, all derived artifacts verified.
 - [ ] R (lead) Review results, closed-server documentation and SPEC acceptance — files: README.md, docs/CONTRACT.md, REVIEW.md, HANDOFF.md — accept: full check, fuzz, reward search, miner and docs sync verified.
 - [x] D (lead) Verify numbered recording script against actual demo — files: docs/DEMO.md — accept: timed demo fits 2–3 minute script.
-- [ ] P (lead) Verify slide outline and numbers — files: docs/PITCH.md — accept: slide facts match current code and measured results.
+- [x] P (lead) Verify slide outline and numbers — files: docs/PITCH.md — accept: slide facts match current code and measured results.

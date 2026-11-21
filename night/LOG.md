@@ -1,2 +1,3 @@
 2026-11-21 23:41 lead — Pushed worker queues. Review identified two separate defects: implicit public generation for hidden server queues and a default clean refund dated before its receipt. Default and hard baseline measurements underway.
 2026-11-21 23:41 lead — Demo seed 2003 reproduced four matches, 21 inspections and 0.958 return. Five Enter presses and the tab switch match the script. Clarified the difference between the 16-second preview and the full recording.
+2026-11-21 23:42 lead — Reviewed ten-slide outline against the check output. Corrected slide 8 split counts. Confirmed slide 7 metrics, paired checks, demo figures and archived 20k configuration sweep. Team credits await the human submission owner.

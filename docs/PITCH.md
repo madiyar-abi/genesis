@@ -57,7 +57,7 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 
 ## 8. How the jury can reproduce the checks
 
-- Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. It compares policies on 20 default companies and reproduces the 40 exported episodes and committed trajectories byte for byte.
+- Run `env -u AUDITENV_SECRET uv run python -m auditenv.check`. It compares policies on 10 dev, 20 example evaluation, and 20 hard companies and reproduces the 40 exported episodes and committed trajectories byte for byte.
 - Paired checks cover 20 default and 20 hard episodes. They replay actions, compare each public record after translating its IDs, and check that the oracle earns the same reward on the shuffled records.
 - Run `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 20000` to vary company size, error mix and difficulty. Across 20,000 cases, including 8,037 hard cases, the verifier reported zero problems. The oracle and the rule policy for each difficulty reached F1 1.0 within 59 actions.
 - A separate mutation test, `uv run python scripts/mutate_reward.py`, caught 22 of 22 deliberately introduced matcher and reward changes.
