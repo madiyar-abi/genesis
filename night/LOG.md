@@ -180,3 +180,7 @@ totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_b
 Unexplained violations line:
 unexplained violations: 13 (0 in clean configs)
 2026-11-22 01:35 gemini2a — G27: fuzz sweeps (default and hard, seeds 0-999) on generator fix 299c5e7. Default mode: exit 0, wall time 59.14s; summary: default mode, seeds 0-999: 3000 episodes (1987 dirty, 1013 clean) in 59.1 s; episodes with a problem (exception / verifier / oracle): 0; random explorer reward > 0: 246/3000 (0 on dirty books); flag-all reward < 0: 3000/3000; FUZZ PASSED. Hard mode: exit 0, wall time 146.82s; summary: hard mode, seeds 0-999: 3000 episodes (1991 dirty, 1009 clean) in 146.8 s; episodes with a problem (exception / verifier / oracle): 0; random explorer reward > 0: 268/3000 (0 on dirty books); flag-all reward < 0: 3000/3000; FUZZ PASSED. Total: 6000 episodes, 0 problems.
+2026-11-22 01:28 gemini2b — G28: Ran config sweep and seed verification on generator fix 299c5e7. Commands and results:
+  - `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 0`: exit 0, wall 1:28.40 (88.4 s). Summary: "config sweep, cases 0-2999: 3000 random configs (1186 hard) in 88.4 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56" / "FUZZ PASSED".
+  - `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 0-1999`: exit 0, wall 38.463s. Summary: "6000/6000 episodes valid; episodes with problems: 0".
+  0 problems across 3,000 random configs and 6,000 generated episodes on seeds 0-1999.
