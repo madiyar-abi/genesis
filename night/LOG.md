@@ -114,3 +114,11 @@ Failing tests: 0 (none). No flakiness or timezone/hashseed sensitivity found acr
   FUZZ PASSED
 Result: 0 problems across 3,000 random configurations (1,174 hard). Max steps: 57.
 Next: T3 (`env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 1000-1999`).
+
+2026-11-21 22:02 gemini1a — T3 verify seeds 1000–1999.
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 1000-1999`
+  Exit code: 0
+  Wall time: 35.13 s
+  Last line: `3000/3000 episodes valid; episodes with problems: 0`
+Result: 0 problems across 3,000 episodes on seeds 1000–1999.
+All assigned gemini1a tasks (T1, T2, T3) complete.
