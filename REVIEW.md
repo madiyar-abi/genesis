@@ -434,3 +434,45 @@ evidence tasks (night/TASKS.md, night/LOG.md).
 - Task F: Fixed ordinary refund chronology in `_build_payments` by preventing merged receipts from moving past subsequent customer refunds. Regression test `test_customer_credit_covers_each_refund` in `tests/test_generator.py` checks both default seed 0 and hard seed 16. Sweeps across 1,000 default and 1,000 hard seeds confirmed zero negative customer credits. Updated exact counts across 100 seeds in `tests/test_ledger_accounts.py`, `tests/test_ledger_timestamps.py`, and `tests/test_payment_entities.py`. Re-exported episodes and matched 80/80 golden records and 7 published trajectories.
 - Task K1 & K2: Extracted `grader_key()` and `_key_file()` into `auditenv/grader_key.py`. Updated `auditenv/server.py` to key hidden episode queues by default using `grader_key()` for startup validation, serving, and abandonment when `AUDITENV_SECRET` is unset. Explicit public runs (`--public`) retain the public generator. Updated `tests/test_server_secret.py` to assert unrecoverable default and recoverable `--public` behavior. Fixed `auditenv/jury_run.py` subprocess pipe cleanup to close `proc.stdout`. Verified all 25 server tests and 27 judge contract tests.
 - Acceptance checks: `auditenv.check` passed all 561 unit tests and all gates in 50.8 s. Fuzz sweep over 3,000 episodes passed with 0 problems. Automated attack search evaluated 11,000 mutations across 20 seeds with 0 violations. Shortcut miner confirmed documented baseline cues. Documentation tables verified in sync.
+
+## Round 20
+
+- Start `a85fc66`: `auditenv.check` passed 561 tests and all gates in 50.8 s. Workers re-ran every sweep on unseen
+  seeds (fuzz 10000–12999 default and hard, config sweeps 60000–68999, verify 2000–2999, stress 8000–9299, jury_run
+  seed bases 20000–23000, D01–D20 through `judge_adapter` on 400 closed runs, the suite under three hash seeds,
+  three timezones, two locales, `-O`, `-X dev -W error::ResourceWarning` and module by module): 0 problems.
+- Defect (data, ordinary use): the in-period posting lag (30 % of invoices booked 1–3 days after issue) was drawn
+  independently of the payment date, so a receipt could credit 1200 for an invoice before the invoice was booked —
+  a negative receivable in time order on clean books (575 rows in 520 of 3,000 clean D01–D05 episodes; e.g. D01
+  default seed 30010, `RCPT0548981` settles `2608-742998` 21 h before its booking). Found by
+  `night/r20/chronology.py`, an independent checker that reads only the public tables, task and policy (12,600
+  episodes: seeds 30000–30299 × default, hard and D01–D20 in both difficulties). Fix: such an invoice is posted at its
+  issue instant (`generator._post_before_payment`, rows moved in place without new random draws: 65 of 80 golden
+  hashes and the demo company unchanged). Regression `test_cash_is_applied_after_the_invoice_is_posted` failed in 29
+  subtests before. After the fix the checker finds nothing unexplained; the 32 remaining hits are the injected
+  prior-period `period_cutoff` invoice itself, paid in the period before its late booking (that late booking is the
+  error).
+- Jury-machine adapter run (`night/r20/adapter_reality.py`, 20/20): fresh, read-only and missing `HOME`, 8 processes
+  racing to create `grader.key` (20 rounds, one key, no partial file), relative / non-ASCII / symlinked /
+  trailing-slash `episode_dir`, a leak scan of every observation, two `JudgeEnv` interleaved. No defect.
+- Docs: slide 7 and DESIGN §9 still quoted the hard-split failure analysis of 20 November (22 false positives,
+  duplicate recall 3/8, 43.2 actions); `auditenv.analyze --config configs/eval_hard.json` gives 20, 2/8 and 43.
+  `sync_docs` covers tables, not numbers in prose.
+- Slide-7 chart: `docs/baselines.svg` still showed returns from before rounds 18–19 (reconcile hard 0.288 vs 0.293,
+  naive dev −0.506 vs −0.480). Regenerated; `scripts/sync_docs.py --check` (run in CI) now renders the chart from the
+  same metrics and reports a stale one (`test_stale_chart_is_drift`).
+- Docs claims audit (codex2, Y1–Y3): all 36 eligible README commands exit 0 on a fresh clone; ~20 wrong or stale
+  statements fixed after re-verification — hard F1 0.752 → 0.755, jury mean actions 21.4 → 21.3, the seed-2003
+  worked example (ledger ids from an older generator), sensitivity rows, seed-sweep and naive-analysis counts, miner
+  precisions, refund remittance and posting (Dr 2900 / Cr 1000) in CONTRACT, `ensure_distractors` described as a
+  guarantee (seed 25 with 10 invoices gets no refund), the per-process key fallback, the time-limit wording, and
+  "cannot be gamed" / "still learnable" replaced by what was measured.
+- Policy text vs data (codex1, X2, `night/r20/policy_text.py`): every rule sentence of task.txt and policy.json
+  checked on 8,400 episodes (seeds 31000–31199 × 42 configs), 33,079,641 checks, 0 unexpected failures. One reading
+  note, left as is: the payment rule describes correct postings ("remainder … Cr 2900"); in a misallocated journal
+  the shortfall sits on 2900, which is exactly the documented `payment_allocation` definition.
+- CHECKS.md semantics (rb, Z3): 23 of 25 sampled rows fully asserted by the cited test, 2 enforced by the cited
+  command. Hand-driven server session (rb, Z4) matched CONTRACT key for key; the framing errors and `close` (no
+  response line) are now documented in CONTRACT §4.
+- End: `env -u AUDITENV_SECRET uv run python -m auditenv.check` 563 tests, all gates, 50.7 s; sync_docs no drift;
+  golden 80/80.

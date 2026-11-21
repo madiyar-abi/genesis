@@ -36,8 +36,8 @@ If you need something not described here, choose the simplest option and log it.
 - `line_items`: `[{description, quantity:int, unit_price_minor:int, amount_minor:int}]`,
   `total_minor == sum(amount_minor)`.
 - `invoice_refs`: `null` (no remittance info) or `[{invoice_id, amount_minor}]` in the
-  payment currency; `sum(amount_minor) <= payment.amount_minor`. Negative
-  `amount_minor` on a payment = refund.
+  payment currency, each ref positive; `sum(amount_minor) <= max(payment.amount_minor, 0)`. Negative
+  `amount_minor` on a payment = refund, with `invoice_refs: null`.
 - `fx_id` = `"{date}:{source}:{target}"`.
 - Accounts: `1000` Cash, `1200` Accounts receivable, `2900` Unapplied cash,
   `4000` Revenue, `6100` Rent, `6200` Payroll, `6300` Software, `6400` Bank fees,
@@ -51,7 +51,8 @@ If you need something not described here, choose the simplest option and log it.
 - Payment received (inside the period): `Dr 1000 convert(amount, rate(payment date))`;
   per ref `Cr 1200 convert(ref.amount, rate(invoice issue date))` with invoice_id;
   remainder (amount − Σrefs, or all of it if refs are null) `Cr 2900` at the payment-date
-  rate; any difference `7900`. Every journal (rows sharing payment_id, or an invoice's
+  rate; any difference `7900`. A refund (negative amount) is `Dr 2900 / Cr 1000` at the payment-date
+  rate. Every journal (rows sharing payment_id, or an invoice's
   rows with payment_id null) balances: Σdebit == Σcredit.
 - Expenses: `Dr 6xxx / Cr 1000`, no invoice/payment ids.
 - Hard mode only (`difficulty: "hard"`): a cancelled invoice is reversed in full by a credit note,
@@ -103,18 +104,24 @@ either given → exactly the listed counts, the rest 0), `n_invoices` (10–100)
 (bool), `transform_seed` (int | null: benign relabel/permutation), `difficulty` ("default" |
 "hard"; default "default" — absent from the normalised config, so default episodes are unchanged), `allocation`
 ("partial" | "missing" | null: which variant an injected `payment_allocation` takes; null = drawn, 60 % partial),
-`ensure_distractors` (bool, default false: at least one invoice paid in two legitimate parts and one refunded
-overpayment). The last two are also absent from the normalised config unless set (jury scenarios, `auditenv/jury.py`).
+`ensure_distractors` (bool, default false: if missing, turns a full single payment into an invoice paid in two
+legitimate parts and another into a refunded overpayment; it needs suitable full payments, so a tiny company may
+lack one, e.g. seed 25 with `n_invoices: 10, distractors: false` gets no refund). The last two are also absent from the normalised config unless set (jury scenarios, `auditenv/jury.py`).
 Hard mode pads the ledger to a target of 900–1 400 rows before injection and selects up to three eligible invoices for credit-note reissues. Duplicates may be re-typed. The task text and `policy.ledger.credit_note` give the extra rules.
 
 A rejected seed or config raises `ValueError` (over `auditenv.server`: a bounded `{"error": ...}`) and leaves
 the current episode unchanged. A successful server reset grades an open episode as abandoned (empty answer).
+Server framing: one JSON object per line and one response line per `reset`/`step`; `{"cmd": "close"}` ends the
+session without a response. A line the server cannot handle gets `{"error": ...}` without consuming a step:
+`request too large`, `invalid utf-8`, `invalid input type`, `invalid json`, `request must be a JSON object`,
+`unknown cmd`, `no more episodes` (hidden queue exhausted), `RuntimeError: call reset() first`, `internal error`.
 
 Grader secret: if the env var `AUDITENV_SECRET` is set (grader process only), it keys both the
 generator RNG and the HMAC `episode_id`, so a policy cannot recover the seed or regenerate the
 episode. Unset = public, reproducible train/dev episodes. `judge_adapter.generate_episode` and
 closed server queues (`auditenv.server --episodes`, unless `--public`) never use the public key:
-without `AUDITENV_SECRET` they use a random grader key file (README "Jury adapter").
+without `AUDITENV_SECRET` they use a random grader key file, or a per-process random key if that file is
+unusable (README "Jury adapter").
 
 First observation: `{task, manifest, policy, tools, steps_remaining}`; reset `info` =
 `{episode_id, mode, max_steps}`. Step `info` is `{}` except on the terminal step in `mode="train"`:
@@ -135,7 +142,7 @@ Errors (unknown action/table/id, bad params — including parameters not listed 
 `schemas/action.schema.json`; a `submit` with such parameters still ends the episode, as an invalid
 submission) consume a step; codes:
 `unknown_action, bad_params, unknown_table, not_found, calc_error`, plus
-`time_limit` (wall-clock limit hit → truncated) and `invalid_findings` (train mode only; in eval
+`time_limit` (the action arrived after `time_limit_s` → it is not executed, even a submit; truncated) and `invalid_findings` (train mode only; in eval
 the policy just sees `{"submitted": true}`).
 A non-submit action at the configured `max_steps` (default 100) truncates the episode and grades empty findings. After termination or truncation, every action returns the error `episode_over` without consuming a step: the final step counter and the outcome are preserved.
 Reward is 0.0 on every non-terminal step. Terminal reward is returned to the policy

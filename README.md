@@ -120,7 +120,7 @@ the episode with −1. Code: `auditenv/matcher.py`, `metrics.py`.
 | random explorer | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 |
 | flag-everything | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 |
 
-Hard mode (`configs/eval_hard.json`): the same reconcile script drops to F1 0.752, oracle stays 1.0.
+Hard mode (`configs/eval_hard.json`): the same reconcile script drops to F1 0.755, oracle stays 1.0.
 Seed sweep over 3 000 episodes: 0 problems. Details and failure analysis: [`docs/DESIGN.md`](docs/DESIGN.md) §9.
 ## What the check does
 
@@ -246,11 +246,12 @@ environment, matcher and reward are the ones described above.
 **Hidden episodes are keyed by default.** The generator is open source, so a public key would let a policy recover
 the seed of a hidden episode by enumeration and regenerate its truth. `generate_episode` (and a closed `reset` without
 `episode_dir`) therefore use `AUDITENV_SECRET` if it is set, and otherwise a random grader key that is created once in
-`~/.auditenv/grader.key` (`$AUDITENV_KEY_FILE` overrides the path; mode 0600) and named on stderr. The same seed and
+`~/.auditenv/grader.key` (`$AUDITENV_KEY_FILE` overrides the path; mode 0600 on creation) and named on stderr by
+`generate_episode` (a closed `reset` is quiet). The same seed and
 config give the same episode again on that machine. If the file cannot be written (read-only home), a random key of
 the process is used and stderr says so. Keep the key out of the policy's process. Loading, `reset` with
 `episode_dir` and `score_episode` read the files and need no key. Open mode (`train` without `episode_dir`) and the
-published splits use the public generator on purpose.
+published splits use the public generator on purpose (open mode uses `AUDITENV_SECRET` if it is set).
 
 ```python
 import os, tempfile
@@ -270,7 +271,7 @@ print(ja.score_episode(out, {"episode_id": info["episode_id"], "findings": []}, 
 | `generate_episode(seed, config, output_dir)` | our generator with the config of `docs/CONTRACT.md` §4; writes `public/` (task.txt, manifest.json, ledger.csv, invoices.jsonl, payments.jsonl, fx.csv, policy.json) and `grader/` (truth.json, provenance.json) |
 | `reset(seed, {"mode": "closed", "episode_dir": d, "team_config": {...}})` | serves the episode in `d` as it is (no generation, ids unchanged); a second reset restarts it. The files are validated first (CONTRACT shapes, balanced journals, known references; ids unique within each id space, so a copy renamed per space may reuse a string across tables); a malformed directory raises `ValueError` with a path-free message and leaves the open episode untouched. `team_config` may set `max_steps` and `time_limit_s` only. Reward to the policy is 0 on every step and `info` holds only `episode_id`, `mode`, `max_steps` (reset) or `{}` (steps) |
 | `reset(seed, {"mode": "train", "team_config": cfg})` | generates `generate(seed, cfg)`; with `episode_dir` it serves that episode. The terminal step returns the reward and `info` = `{valid, tp, fp, fn, precision, recall, f1, reward, inspection_steps}` |
-| `step({"name": ..., "args": {...}})` | first observation `{task, manifest, policy, remaining_steps: 100}`, then `{result, error, remaining_steps}` |
+| `step({"name": ..., "args": {...}})` | first observation `{task, manifest, policy, remaining_steps}` (100 by default), then `{result, error, remaining_steps}` |
 | `score_episode(d, findings, inspection_steps)` | the shared matcher and reward on `d`'s truth; an invalid structure returns `return = -1` and nulls, and the reason goes to `judge_adapter.GRADER_LOG` (and to the JSON-lines file `$AUDITENV_GRADER_LOG`, if set) |
 
 | `name` | `args` | `result` |
@@ -284,8 +285,9 @@ print(ja.score_episode(out, {"episode_id": info["episode_id"], "findings": []}, 
 Errors are `{"code", "message"}` with no paths, seeds or truth, and every one costs a step: `unknown_action` (also a
 malformed envelope), `bad_params`, `unknown_table`, `not_found`, `calc_error`, `time_limit`, and in train mode
 `invalid_findings`. Only `episode_over` (any action after the episode ended) is free and changes nothing. The submit is one of the 100 actions but not an inspection step; every earlier step,
-including failed ones, is. 100 actions without a submit, or 60 s from reset (policy time included), end the
-episode as truncated with empty findings.
+including failed ones, is. 100 actions without a submit, or any action that arrives more than 60 s after reset (policy time included; that
+action, even a submit, is not executed), end the episode as truncated with empty findings (defaults; the team
+config may set both).
 
 The four error types (`type` in truth and findings; amounts in base-currency minor units):
 
@@ -306,7 +308,7 @@ Block 2 scenarios through the generator's config (`auditenv/jury.py`; the jury c
 
 | scenarios | config |
 |---|---|
-| D01–D05 clean | `{"errors": {}, "interacting": {"I1": 0, "I2": 0}, "ensure_distractors": true}` — guarantees an invoice paid in two parts (D02) and a refunded overpayment (D03); equal invoice totals (D04), unidentified receipts and records on the period's first and last day in company time (D05) are present anyway (200/200 on seeds 0–199, default and hard); foreign-currency documents in 199/200 (a company whose entities all bill in the base currency has none) |
+| D01–D05 clean | `{"errors": {}, "interacting": {"I1": 0, "I2": 0}, "ensure_distractors": true}` — adds an invoice paid in two parts (D02) and a refunded overpayment (D03) when the company has suitable full payments (with this config both appeared on all 200 seeds 0–199, default and hard); equal invoice totals (D04), unidentified receipts and records on the period's first and last day in company time (D05) are present anyway (200/200 on seeds 0–199, default and hard); foreign-currency documents in 199/200 (a company whose entities all bill in the base currency has none) |
 | D06–D08 duplicate invoice | `{"errors": {"duplicate_invoice": 1}, "interacting": {"I1": 0, "I2": 0}}` |
 | D09 missing allocation | `{"errors": {"payment_allocation": 1}, "interacting": {"I1": 0, "I2": 0}, "allocation": "missing"}` |
 | D10 partial allocation | the same with `"allocation": "partial"` |
@@ -337,7 +339,7 @@ uv run python -m auditenv.jury_run        # D01–D20, seeds 3001–3020
 | policy | P | R | F1 | return | steps |
 |---|---|---|---|---|---|
 | random explorer | 0.000 | 0.000 | 0.000 | −1.000 | 33.0 |
-| reconcile | 1.000 | 1.000 | 1.000 | 0.959 | 21.4 |
+| reconcile | 1.000 | 1.000 | 1.000 | 0.959 | 21.3 |
 | flag-everything | 0.000 | 0.000 | 0.000 | −1.000 | 3.6 |
 | oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 |
 
@@ -362,7 +364,7 @@ When `AUDITENV_SECRET` is unset, the server keys hidden episodes by default usin
 a reminder on stderr. `--public` uses the public generator without warning for lists that are public on purpose,
 as in the check's smoke test and the demo.
 
-`auditenv.server` communicates via JSON lines over stdin/stdout (`{"cmd": "reset"}`, `{"cmd": "step", "action": {...}}`, `{"cmd": "close"}`).
+`auditenv.server` communicates via JSON lines over stdin/stdout (`{"cmd": "reset"}`, `{"cmd": "step", "action": {...}}`, `{"cmd": "close"}`, which ends the session without a response line; framing errors: CONTRACT §4).
 `auditenv.client.RemoteEnv` manages the subprocess and speaks the same `reset/step` API; with `--episodes`
 the client cannot choose seeds, rewards are 0.0 and results are written only to `grader.jsonl`.
 
@@ -450,7 +452,7 @@ To compare variants of the same seed, list each configuration as a separate epis
   rules, hard mode; the baselines measure how much distractors hurt shortcuts, not agent difficulty.
 - Measured shortcut cues remain in default mode (`scripts/shortcut_miner.py`): "same entity, currency and
   total exactly twice" finds duplicates with precision 0.996, because default mode has no near-miss decoys
-  (hard mode has them: 0.358). Each cue names a record, not the amount — scoring still needs reconciliation.
+  (hard mode has them: 0.356). Each cue names a record, not the amount — scoring still needs reconciliation.
 - No model was trained; we make no claim about training improvements.
 - Full list with measurements: [`docs/DESIGN.md`](docs/DESIGN.md) §10.
 

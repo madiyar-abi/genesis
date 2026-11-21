@@ -251,6 +251,13 @@ def _updates(repo_root, data, *, preserve_time):
         else:
             updated, changed = render(content, data)
         yield path, updated, changed
+    chart_path = Path(repo_root) / "docs" / "baselines.svg"
+    if chart_path.exists():  # the slide-7 chart is rendered from the same metrics
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import chart
+        content = chart_path.read_text(encoding="utf-8")
+        updated = chart.render(data, chart.episode_counts())
+        yield chart_path, updated, updated != content
 
 
 def check_docs(repo_root: str, data: dict) -> list[str]:
@@ -258,7 +265,8 @@ def check_docs(repo_root: str, data: dict) -> list[str]:
     try:
         for path, _, changed in _updates(repo_root, data, preserve_time=True):
             if changed:
-                errors.append(f"{path.name}: results table differs from measured data")
+                errors.append(f"{path.name}: results table differs from measured data" if path.suffix == ".md"
+                              else f"{path.name}: chart differs from measured data")
     except (ValueError, OSError) as exc:
         errors.append(str(exc))
     return errors

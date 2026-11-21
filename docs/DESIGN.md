@@ -13,7 +13,7 @@ matcher + terminal reward. Interfaces: [`CONTRACT.md`](CONTRACT.md). Numbers bel
 | Integer minor units, decimal-string rates, `Decimal` + ROUND_HALF_UP | no float drift; every amount is exactly reproducible from the records |
 | Five narrow read-only tools, 50-row pages, 100 steps, 60 s | the agent must investigate; no shell/SQL/files means no way around the tools; step cost rewards efficiency |
 | Truth and provenance live only in the grader (eval mode, out-of-process server, HMAC ids + grader secret) | the jury can run closed evaluations; a policy cannot read or regenerate the answer |
-| One published matcher with explicit tolerance and tie rule, evidence required | the reward cannot be gamed by guessing ids, flagging everything or writing a persuasive story |
+| One published matcher with explicit tolerance and tie rule, evidence required | the matcher checks fields and evidence and ignores the explanation; guessed ids, flag-everything and 11 000 tested reward mutations (`auditenv.attack`) did not beat the honest answer |
 | Standard library only, one check command, Docker | the jury runs everything offline with one command |
 | Opt-in hard level instead of changing the default | default numbers stay comparable; hard mode shows the environment can be made harder than a rule script |
 
@@ -32,11 +32,12 @@ AuditEnv.reset -> first observation (task, manifest, policy, tools, budget)
 AuditEnv.step  -> read-only tools ... submit -> matcher -> terminal reward (train) / grader log (eval)
 ```
 
-Same `(seed, config, GENERATOR_VERSION)` → byte-identical episode (the config is normalised first,
+Same `(seed, config, GENERATOR_VERSION)` and key → byte-identical episode (the config is normalised first,
 so equivalent configs give the same company). `episode_id` is an HMAC of them; with the grader-only
 key `AUDITENV_SECRET` set, the key also enters the generator RNG, so the seed can neither be
-brute-forced from the id nor the episode regenerated from the open-source code. Episode size: 230–420 ledger rows by default
-(≤ 2000), 20–200 documents (enforced by `n_invoices` ∈ [10, 100]), 0–12 issues.
+brute-forced from the id nor the episode regenerated from the open-source code. Episode size: the default history is padded to 230–420 ledger rows
+before injection (236–434 after it on seeds 0–199; hard target 900–1 400); strict exports allow 200–2 000 rows and
+20–200 documents (enforced by `n_invoices` ∈ [10, 100]); 0–12 issues.
 
 ## 2. Company model and correct bookkeeping
 
@@ -58,7 +59,7 @@ brute-forced from the id nor the episode regenerated from the open-source code. 
 |---|---|---|---|
 | `duplicate_invoice` | a second invoice document with identical entity, currency and line items, issued strictly later, booked again | AR debit of the later copy | both invoice docs + one positive booking row for each invoice (AR debit or revenue credit) |
 | `payment_allocation` | remittance says the payment covers an invoice, the ledger credits only part (or none) of it to AR; the rest lands in 2900 | expected AR credit − posted AR credit | payment doc + invoice doc + payment’s AR credit for that invoice (2900 row when the credit is missing) + invoice-date FX rate if foreign |
-| `fx_error` | invoice or payment converted at the rate of a wrong date (the document's own local/UTC date, or ±1..7 days); difference ≥ 10 minor units | abs(posted − correct) | doc + AR/revenue row (invoice) or cash row (payment) + the correct-date FX rate |
+| `fx_error` | invoice or payment converted at the rate of a wrong date (the document's own local/UTC date, or 1, 2, 3, 5, 7 days later or 1, 2, 3, 5 days earlier); difference ≥ 10 minor units | abs(posted − correct) | doc + AR/revenue row (invoice) or cash row (payment) + the correct-date FX rate |
 | `period_cutoff` | invoice issued in the next period (backdated to the period end) or in the previous period, booked in this period | AR debit posted | invoice doc + AR (or revenue) row |
 
 **Interacting scenarios** (each yields two truth issues computed after both changes):
@@ -74,24 +75,25 @@ In `I2` the two amounts measure two different rule breaks on one booking, so the
 these books at all), and `fx_error` is how far that posted amount is from the policy's rate for the invoice date
 (the misvaluation an auditor must also report). A policy that finds only one of them gets partial credit.
 
-Every type is independently configurable (`errors: {type: count}`), injectors never touch an
-already-affected document, and amounts are the real ledger misstatement — not a "suspicious row".
+Every type is independently configurable (`errors: {type: count}`), single-error injectors never touch an
+already-affected document (I1/I2 put two issues on one document on purpose), and amounts are the real ledger misstatement — not a "suspicious row".
 
 ### Worked examples (real dev episodes; reproduce with `generate(seed, config)` from `configs/dev.json`)
 
 | type | episode (seed) | what the records show | truth amount |
 |---|---|---|---|
-| `duplicate_invoice` | `ep_14eca11ac929` (2003), base USD, tz +05:00 | `INV-112285` (issued 09-07) and `INV-726919` (09-09): same customer `CUST07389`, USD 18 760.00, identical line items; original AR debit `R1344`, later copy AR debit `R1350` | 1 876 000 (the later copy's AR debit) |
-| `payment_allocation` | `ep_14eca11ac929` (2003) | `PAY-874814` remits KZT 3 454 497.00 for `INV-677785`; the ledger credits nothing to its AR, `R1509` puts the money in 2900. Expected AR credit = KZT amount × 0.00192618 (rate of the invoice date 09-10) | 665 398 |
+| `duplicate_invoice` | `ep_14eca11ac929` (2003), base USD, tz +05:00 | `INV-441644` (issued 09-26 08:49) and `INV-588950` (09-26 16:00, company time): same customer `CUST52061`, GBP 6 787.00, identical line items; original AR debit `R4132`, later copy AR debit `R4153` = 6 787.00 × 1.22534 | 831 638 (the later copy's AR debit) |
+| `payment_allocation` | `ep_14eca11ac929` (2003) | `PAY-779598` remits USD 8 371.00 for `INV-336399`; the ledger credits nothing to its AR, `R4163` puts the money in 2900. Base-currency payment, so expected AR credit = the remitted amount | 837 100 |
 | `fx_error` | `ep_7f8a101fa36a` (2005), base KZT | `F0926539` is USD 14 007.00 issued 09-12; AR row `R944` = 698 834 443, correct = 14 007.00 × 494.388 (rate `2026-09-12:USD:KZT`) = 692 489 272 | 6 345 171 |
 | `period_cutoff` | `ep_d671645ebdd1` (2002), period 2026-03 | `INV-142472` is issued 2026-04-04 (next period) but its AR row `GL-000311` is dated 03-29 | 638 435 000 (the AR debit posted) |
 | `I1` | `ep_d671645ebdd1` (2002), base KZT | `PAY-827484` (EUR 9 610.00, 03-31 23:38 bank time) pays `INV-589644` in full; AR credit `GL-000333` = 218 992 539 instead of 9 610.00 × 509.208 = 489 348 888 → allocation 270 356 349; the cash row `GL-000332` = 486 321 738 instead of 9 610.00 × 504.218 (03-31) = 484 553 498 → fx 1 768 240 | two issues |
-| `I2` | `ep_14eca11ac929` (2003) | `INV-358266` (GBP 4 275.00) is issued 2026-10-01, booked 09-29 (`R1520`) → cutoff 526 744; and converted at a wrong rate: correct 4 275.00 × 1.24037 = 530 258 → fx 3 514 | two issues |
+| `I2` | `ep_14eca11ac929` (2003) | `INV-959754` (GBP 8 974.00) is issued 2026-10-01, booked 09-30 (`R4224`) → cutoff 1 110 820; and converted at the 09-30 rate 1.23782: correct 8 974.00 × 1.24037 = 1 113 108 → fx 2 288 | two issues |
 
 ## 4. Clean cases and distractors
 
-Clean companies (`errors: {}`) have empty truth. Every episode (unless `distractors: false`)
-contains legitimate look-alikes:
+Clean companies (`errors: {}` with no interacting pairs) have empty truth. With distractors on (default) the
+generator draws these legitimate look-alikes; which ones appear varies by company (clean default, seeds 0–199:
+a split payment in 186/200, a refund in 148/200; `ensure_distractors` adds the two when it can):
 
 | distractor | why it looks wrong | why it is correct |
 |---|---|---|
@@ -103,7 +105,7 @@ contains legitimate look-alikes:
 | weekly retainers | same entity, same amount, 4×/month | line items name different service weeks |
 | midnight documents | written date ≠ accounting date | period/rate use the company timezone |
 | next-period invoices in the document set | issued after the period end | correctly *not* booked |
-| posting lag | ledger timestamp 1–3 days after the invoice | still inside the period; issue-date rate used |
+| posting lag | ledger timestamp 1–3 days after the invoice | still inside the period and never after a payment applied to it; issue-date rate used |
 
 ## 5. Environment contract and isolation
 
@@ -111,7 +113,8 @@ contains legitimate look-alikes:
   truncated, info)`; all JSON-compatible. Five tools; pages ≤ 50 rows with stable cursors;
   invoice listings omit line items (use `get_document`). Every action, including errors
   (`unknown_action`, `bad_params`, `unknown_table`, `not_found`, `calc_error`), costs one step.
-- 100 steps including the submit; the 100th non-submit step, or 60 s wall time, ends the episode
+- 100 steps including the submit (`max_steps`); the 100th non-submit step, or any action that arrives after
+  60 s wall time (`time_limit_s`; checked on arrival, so a late submit is not executed), ends the episode
   with `truncated=true` and an empty answer is graded. A step after the end returns
   `episode_over` and changes nothing.
 - Observations contain only the requested records (deep copies) and bounded error messages that
@@ -142,7 +145,7 @@ contains legitimate look-alikes:
   reward is 0. The reward depends only on fields and evidence, never on the explanation text.
 - `tests/test_reward_attacks.py` proves on real episodes: correct answer > silence on dirty books;
   silence > false accusations on clean books; duplicates never help; flag-everything < 0;
-  0.002/step only separates equal answers; guessed ids, unsupported evidence, wrong currency,
+  0.002/step breaks ties between equal-F1 answers (it can also reverse a small F1 gap, §10); guessed ids, unsupported evidence, wrong currency,
   amounts off by one minor unit are FP; resubmission, malformed input and timeouts behave as specified.
   `tests/test_judge_reward.py` reproduces the organisers' matcher checks (Block 3 rows 1–20, M01–M12).
 
@@ -153,13 +156,13 @@ played once, then re-graded offline with the real matcher and the step cost / am
 | policy · split | cost 0.001 | **0.002** | 0.005 | **τ 0** | τ 1 | τ 100 |
 |---|---|---|---|---|---|---|
 | oracle · dev | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
-| reconcile · dev | 0.979 | 0.957 | 0.893 | 0.957 | 0.957 | 0.957 |
-| naive_reconcile · dev | −0.494 | −0.506 | −0.545 | −0.506 | −0.506 | −0.506 |
+| reconcile · dev | 0.978 | 0.956 | 0.891 | 0.956 | 0.956 | 0.956 |
+| naive_reconcile · dev | −0.467 | −0.480 | −0.519 | −0.480 | −0.480 | −0.480 |
 | random · dev | −0.803 | −0.807 | −0.817 | −0.807 | −0.807 | −0.807 |
 | flag_all · dev | −1.000 | −1.000 | −1.000 | −1.000 | −1.000 | −1.000 |
-| reconcile_hard · hard | 0.958 | 0.916 | 0.789 | 0.916 | 0.916 | 0.916 |
-| reconcile · hard | 0.323 | 0.288 | 0.180 | 0.288 | 0.288 | 0.288 |
-| naive_reconcile · hard | −0.690 | −0.711 | −0.773 | −0.711 | −0.711 | −0.711 |
+| reconcile_hard · hard | 0.958 | 0.916 | 0.790 | 0.916 | 0.916 | 0.916 |
+| reconcile · hard | 0.329 | 0.293 | 0.186 | 0.293 | 0.293 | 0.293 |
+| naive_reconcile · hard | −0.683 | −0.704 | −0.765 | −0.704 | −0.704 | −0.704 |
 
 The ranking (oracle > reconcile(_hard) > … > random > flag_all) is identical under all five settings on both
 splits: the step cost only spreads the middle, and tolerance never changes a mean (the rule policies compute
@@ -213,11 +216,11 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 
 ## 8. Reproducibility and generalisation
 
-- Replay: same seed + config + version + actions → identical records, transitions, rewards
+- Replay: same seed + config + version + key + actions → identical records, transitions, rewards
   (hash-compared in the check). `reset` rebuilds all episode state.
 - `transform_seed` relabels every id (rows, documents, invoices, payments, entities) and permutes
   row order; truth and provenance are remapped. The oracle answer under the new ids keeps the
-  same reward and the old answer scores 0 TP. Train (1000–1009) and dev (2000–2009) seeds are
+  same reward and, on dirty episodes, the old answer scores 0 TP. Train (1000–1009) and dev (2000–2009) seeds are
   public; evaluation should use secret large seeds, new parameter mixes and transforms.
 
 ## 9. Results
@@ -238,16 +241,16 @@ P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means 
 expected amount, FP by the claimed amount but at least the mean expected amount (a zero claim is no free
 accusation); reported separately, the shared reward is unchanged.
 Other gates in the same run: all unit tests pass (the check prints the count); verifier 200/200 episodes valid (50 seeds × 4 configs in check; 600/600 with
-`auditenv.verify --seeds 0-199` over 200 seeds × 3 configs); 20/20 paired checks on default and 20/20 on hard episodes; out-of-process run leaks nothing.
+`auditenv.verify --seeds 0-199` over 200 seeds × 3 configs); 20/20 paired checks on default and 20/20 on hard episodes; the two-episode out-of-process run shows the policy no reward or truth.
 
 Reconcile stress test (`uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299`): 1 200
 episodes (300 seeds × random mix / clean / 12 issues / 12 issues with 100 invoices): **0 imperfect
 episodes**, max 33 steps, no truncation — every truth issue can be found from the records within the budget.
 
 **Seed sweep** (`uv run python -m auditenv.fuzz --seeds 0-999`; generate → verifier → oracle, random
-explorer and flag-everything through the env, 3 configs per seed): 3 000 episodes (1 989 dirty, 1 011
-clean) — 0 exceptions, 0 verifier problems, oracle 1.0 on every episode; the random explorer
-scores > 0 on 245 episodes, all clean books where it submitted nothing (the correct answer), never on
+explorer and flag-everything through the env, 3 configs per seed): 3 000 episodes (1 987 dirty, 1 013
+clean) — 0 exceptions, 0 verifier problems, oracle > 0.9 on every dirty and 1.0 on every clean episode (the
+sweep's gate); the random explorer scores > 0 on 246 episodes, all clean books where it submitted nothing (the correct answer), never on
 dirty books; flag-everything is negative on 3 000/3 000. Hard mode, seeds 0–199: 600 episodes, 0 problems,
 random > 0 only on 47 clean episodes, flag-everything negative on 600/600. CI runs both sweeps.
 
@@ -255,14 +258,14 @@ random > 0 only on 47 clean episodes, flag-everything negative on 600/600. CI ru
 
 | | duplicate | allocation | fx | cutoff | I1 | I2 | FP |
 |---|---|---|---|---|---|---|---|
-| naive reconciliation, recall | 7/7 | 1/8 | 6/8 | 7/7 | 0/2 | 2/2 | 103 |
+| naive reconciliation, recall | 7/7 | 2/8 | 6/8 | 7/7 | 0/2 | 2/2 | 102 |
 | reconciliation, recall | 7/7 | 8/8 | 8/8 | 7/7 | 2/2 | 2/2 | 0 |
 
-Where the naive rules fail (103 FPs: 28 allocation, 30 duplicate, 27 fx, 18 cutoff; 22 of them
+Where the naive rules fail (102 FPs: 27 allocation, 30 duplicate, 27 fx, 18 cutoff; 22 of them
 on the 2 clean companies):
 - *allocation*: every 2900 credit is flagged → overpayments and refunds become false accusations;
   the truth amount is the AR shortfall, not the 2900 credit, and the evidence needs the invoice
-  document → allocation recall 1/8, I1 recall 0/2;
+  document → allocation recall 2/8, I1 recall 0/2;
 - *duplicate*: same entity + amount ignores line items → weekly retainers are flagged;
 - *fx / cutoff*: the date written in the timestamp is used instead of the company-timezone date →
   midnight documents get the wrong rate or the wrong period.
@@ -298,14 +301,14 @@ and checks that every credit note is in the period and after its booking.
 
 Gates in the check: hard verifier 50/50 episodes valid; oracle 1.0; `reconcile_hard` F1 ≥ 0.95;
 default `reconcile` F1 ≤ 0.8; flag-everything < 0. Failure analysis of the default rules
-(`auditenv.analyze --policy reconcile --config configs/eval_hard.json`): duplicate recall 3/8 (re-typed
-copies missed), all other types 100 %; 22 false positives, all `no_matching_issue` — the credit-note
+(`auditenv.analyze --policy reconcile --config configs/eval_hard.json`): duplicate recall 2/8 (re-typed
+copies missed), all other types 100 %; 20 false positives, all `no_matching_issue` — the credit-note
 reissues flagged as duplicates. `reconcile_hard` is the same script plus the two policy rules: it shows
 the level is solvable from the records, not that a learning agent finds those rules.
 Stress test of `reconcile_hard` (`auditenv.fuzz --stress reconcile_hard --seeds 0-299 --hard`, 1 200 hard
 episodes): 0 imperfect, max 57 steps, no truncation.
 
-**Timing.** On an Apple-silicon Mac running Python 3.11.14, `uv run python scripts/bench.py` reported the median of three runs for each workload. Policy timings use the first company in each split.
+**Timing** (historical snapshot, Round 11; not re-measured since). On an Apple-silicon Mac running Python 3.11.14, `uv run python scripts/bench.py` reported the median of three runs for each workload. Policy timings use the first company in each split.
 
 | operation | workload | time |
 |---|---|---|
@@ -335,7 +338,7 @@ to explore.
 | clean books, empty answer | F1 = 1, reward = 1 − 0.002·steps | `test_jury.RewardTests`, `test_metrics` |
 | clean books, any finding | F1 = 0, reward < 0 | `test_reward_attacks` |
 | invalid submission (structure, limits, wrong episode_id) | episode ends, reward −1, bounded error message | `test_env`, `test_jury.ContractTests` |
-| the 100th action is not a submit / 60 s elapsed | `truncated`, empty answer graded | `test_env`, `test_jury` |
+| the 100th action is not a submit / an action (even a submit) arrives after 60 s | `truncated`, empty answer graded | `test_env`, `test_jury` |
 | the 100th action is the submit | it is a submit (`terminated`) | `test_env.test_submit_on_last_step_is_submit` |
 | action after the end, resubmission | `episode_over`, nothing changes, the first grade stays | `test_jury` |
 | malformed actions (None, lists, nested dicts, huge strings, unicode digits in cursors) | bounded error, step consumed, never an exception | `test_fuzz` (20 319 episode actions) |
@@ -349,36 +352,37 @@ to explore.
 - Synthetic and simplified: receivables only (no payables, tax, accruals), one functional
   currency ledger, foreign → base rates only, fixed UTC offsets (no DST). Not an audit opinion;
   the reward does not prove fitness for real audits.
-- The generator is open and deterministic. The jury path keys hidden episodes by default (`AUDITENV_SECRET`, else a
-  random grader key file: `judge_adapter.grader_key`, `tests/test_grader_key.py`); a key file kept on the jury
-  machine makes them reproducible there only. Our own server (`auditenv.server --episodes`) still needs
-  `AUDITENV_SECRET` for a hidden list (it warns without it); the public splits are regenerable from their seeds.
+- The generator is open and deterministic. The jury adapter and our server's hidden queue (`auditenv.server
+  --episodes`) key hidden episodes by default: `AUDITENV_SECRET`, else a persistent random grader key file, else a
+  per-process key if the file is unusable (`auditenv/grader_key.py`, `tests/test_grader_key.py`). Reproducing a
+  hidden episode needs the same key (on another machine: the same secret or key file). `--public` opts the server
+  queue into public generation; the public splits are regenerable from their seeds.
 - Shortcut miner (`uv run python scripts/shortcut_miner.py [--hard]`, 1 000 seeds): single observable
   features that predict truth records with precision > 0.5 (16 flagged in default mode, 11 in hard mode).
-  Fixed: re-typed descriptions marked hard-mode duplicate copies (1.000 → 0.449 on 1 000 seeds, 0.467 on 500
-  seeds: invoices and re-issues are now keyed in by hand too). Left, measured: in default mode "same entity,
+  Fixed: re-typed descriptions marked hard-mode duplicate copies (1.000 → 0.458 on 1 000 seeds: invoices and
+  re-issues are now keyed in by hand too). Left, measured: in default mode "same entity,
   currency and total exactly twice" finds duplicates (0.996) — it is the duplicate definition, but default mode
-  has no near-miss decoys (hard mode has: 0.358); I1 payments are always on the last day, so a 2900/7900 row on
-  the last day hints at fx_error (0.70) and a large 2900 amount at payment_allocation (0.75–0.78);
-  a 2900 row whose amount occurs in four or more ledger rows points at payment_allocation too (0.964, 217 of
-  225 rows). Each hint names
+  has no near-miss decoys (hard mode has: 0.356); I1 payments are always on the last day, so a 2900/7900 row on
+  the last day hints at fx_error (0.70) and a large 2900 amount at payment_allocation (0.75–0.77);
+  a 2900 row whose amount occurs in four or more ledger rows points at payment_allocation too (0.964, 214 of
+  222 rows). Each hint names
   a record, not the claimed amount — scoring still needs the reconciliation.
 - Cutoff of a next-period invoice is booked *before* its issue instant; a policy can learn that
   direction-of-lag cue, but it is exactly the audit rule (document date outside the period).
 - The I1 payment is always on the last evening of the period (by the definition of the scenario);
   "last-evening payment" alone has precision 0.35. Narrowed to a foreign payment on the last company day after
   18:00 with one invoice ref equal to its amount, one page of `payments` flags it with precision 0.68 (random mix,
-  1 000 seeds, default and hard) and recall 1.0. It names the payment, not the two amounts, which still need the
+  1 000 seeds, default and hard; Round 17 probe) and recall 1.0. It names the payment, not the two amounts, which still need the
   reconciliation; changing it would change the default episodes, so it stays and is reported here.
 - Hard mode re-issues (credit note + new invoice) are drawn only from unpaid invoices, while duplicates may copy a
   paid one. A lookalike pair whose earlier invoice is already paid is a duplicate with precision 0.995 (recall
-  432/830, 1 000 hard seeds) without reading the ledger; the credit-note rows in the ledger separate all pairs.
+  432/830, 1 000 hard seeds; Round 17 probe) without reading the ledger; the credit-note rows in the ledger separate all pairs.
 - Expense journals carry no ids (the schema has no journal id); checks group them by timestamp.
 - A wrong conversion is always the published rate of another date (the document's local or UTC date, nearby days,
   the bank's date); a rate value that appears on no date, or a wrong currency pair, is not modelled.
 - The verifier does not bound the total settled on one invoice across payments: an extra future payment of 5×
-  an invoice's total verifies (the generator never over-settles: 0 of 9 386 settled invoices on seeds 0–199,
-  default and hard). The free-text rules in `policy.json` and `task.txt` are checked only where the books depend
+  an invoice's total verifies (the generator did not over-settle in our sample: 0 of 9 385 invoices with remittance refs on seeds
+  0–199, default and hard). The free-text rules in `policy.json` and `task.txt` are checked only where the books depend
   on them (base currency, timezone, period, chart of accounts, credit-note rule, non-blank task).
 - Default duplicates are exact copies; hard mode re-types the text, but changed amounts or quantities
   (a "near-duplicate" that is really a different sale) are not modelled.
@@ -387,12 +391,12 @@ to explore.
 - With eight issues and no false positives, submitting seven matches immediately earns 0.867.
   A complete answer after 60 inspections earns 0.880. At nine issues the order reverses: eight
   immediate matches earn 0.882. With twelve issues, eleven immediate matches earn 0.913.
-- A policy-aware rule script solves the default distribution (F1 1.0); the same script gets F1 0.752 in
-  hard mode, and only after adding the two hard rules (`reconcile_hard`) is it perfect again. Every level
-  a script can solve is still learnable for an agent that must discover the rules within 100 tool calls;
+- A policy-aware rule script solves the default distribution (F1 1.0); the same script gets F1 0.755 in
+  hard mode, and only after adding the two hard rules (`reconcile_hard`) is it perfect again. Whether an agent
+  that must discover the rules within 100 tool calls can learn them was not measured;
   the baselines measure how much the distractors hurt shortcuts, not agent difficulty.
 - The baseline `reconcile` pairs duplicate candidates only when they were issued within 3 days of each other, a
   window the task text does not state (the generator issues copies 0–3 days later). It never changes a result: an
   independent checker that applies only the written definitions, with no window, reproduced the truth exactly on
-  44 000 episodes (seeds 20000–20999 × default, hard, heavy and the 20 jury scenarios in both difficulties).
+  44 000 episodes in Round 18 (seeds 20000–20999 × default, hard, heavy and the 20 jury scenarios in both difficulties).
 - No model was trained; we make no claim about training improvements.
