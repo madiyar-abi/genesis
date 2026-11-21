@@ -1,4 +1,9 @@
 2026-11-22 03:38 lead — Round 21 started (open improvement round, freeze 18:00). Read NIGHT/HANDOFF/REVIEW/r20 archive. Baseline check at 2f7b31e: exit 0, 50.9 s. Wrote TASKS.md: codex1 independent text-only auditor / double-entry re-derivation / extreme configs; codex2 jury-copy file-format robustness, slow-machine timing, README first read; rb chronology+policy_text+adapter on new seeds; gemini sweeps on unseen seeds. Assumption: generator/product fixes stay with lead (single re-export owner).
+2026-11-22 03:43 gemini2b — G10 complete. Re-exported dev, train, and hard splits into /tmp/r21-gemini2b/ and diffed against committed episodes/:
+- dev: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/dev.json --out /tmp/r21-gemini2b/dev` (exit 0, wall time 0.119s, "Exported 10 episodes to /tmp/r21-gemini2b/dev") && `diff -r episodes/dev /tmp/r21-gemini2b/dev` (exit 0, 0 files differ).
+- train: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/train.json --out /tmp/r21-gemini2b/train` (exit 0, wall time 0.120s, "Exported 10 episodes to /tmp/r21-gemini2b/train") && `diff -r episodes/train /tmp/r21-gemini2b/train` (exit 0, 0 files differ).
+- hard: `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/eval_hard.json --out /tmp/r21-gemini2b/hard` (exit 0, wall time 0.374s, "Exported 20 episodes to /tmp/r21-gemini2b/hard") && `diff -r episodes/hard /tmp/r21-gemini2b/hard` (exit 0, 0 files differ).
+All 40 exported episodes across all three splits are byte-for-byte identical to the committed exports (0 differing files). Next: G11.
 
 2026-11-22 03:47 codex1 — X1 text-only auditor. `env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor` → exit 0, 150.76 s, 4,200 episodes.
 
@@ -62,6 +67,10 @@ Assumptions: use the public manifest for episode ID and currency exponents, comp
   Run 5: Ran 73 tests in 2.528s, OK, exit 0, wall time 3s
   Total: 365 tests, 0 failures. Next: G14.
 2026-11-22 03:42 gemini3b — G16 complete: verified all splits under episodes/ (dev: 10/10 valid, exit 0, 0.13s; hard: 20/20 valid, exit 0, 0.35s; train: 10/10 valid, exit 0, 0.11s). Next: G17.
+2026-11-22 03:51 gemini2b — G11 complete:
+- `uv run python scripts/golden.py --check` (exit 0, wall time 1.262s): "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json."
+- `uv run python scripts/mutate_reward.py` (exit 0, wall time 407.340s): "22/22 mutants killed."
+Next: G12.
 2026-11-22 03:43 codex2 — Y1: `/usr/bin/time -p env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` exited 0 (2.19 s). Cohort chosen to include clean, interacting, and other dirty cases: dev 2000/2002/2003/2004/2009, hard 9100/9105/9109/9112/9119. Public reconciler reference answers reached F1 1.000, then the same inspection and submission actions were replayed through closed reset and independently scored.
 
 | Variant | Accepted | Rejected | Scores equal |
@@ -2005,3 +2014,26 @@ From the fresh clone, `/usr/bin/time -p env -u AUDITENV_SECRET uv run python -m 
 2026-11-22 03:53 gemini2a — G9: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 38000-38199` exited 0 (wall time 99s).
   Audited 8400 episodes across 42 configurations; 33113438 checks, 0 unexpected failures.
   All gemini2a tasks (G7, G8, G9) complete.
+2026-11-22 03:55 gemini2b — G12 complete: ran `scripts/shortcut_miner.py --seeds 5000-5999 --report-only` (default, 32.7s, exit 0) and with `--hard` (42.1s, exit 0).
+Default mode: 16 flagged values (precision > 0.5):
+## Max precision per issue type (default)
+| type | affected max P | evidence max P | flagged (aff/ev) |
+|---|---|---|---|
+| duplicate_invoice | 0.997 | 0.997 | 2/2 |
+| payment_allocation | 0.981 | 0.981 | 8/1 |
+| fx_error | 0.714 | 0.320 | 3/0 |
+| period_cutoff | 0.460 | 0.460 | 0/0 |
+All 16 flagged values are consistent with docs/DESIGN.md §10 (e.g., duplicate count=2 at 0.997, 2900 amount_count>=4 at 0.981, 2900 end-0 at 0.804, 7900 end-0 at 0.577, fx_error end-0 at 0.714).
+
+Hard mode: 13 flagged values (precision > 0.5):
+## Max precision per issue type (hard)
+| type | affected max P | evidence max P | flagged (aff/ev) |
+|---|---|---|---|
+| duplicate_invoice | 0.404 | 0.404 | 0/0 |
+| payment_allocation | 1.000 | 0.840 | 9/2 |
+| fx_error | 0.668 | 0.303 | 2/0 |
+| period_cutoff | 0.454 | 0.454 | 0/0 |
+Values with precision > 0.5 called out:
+- `ledger | amount_digits@acct2900 | 10`: precision 1.000 (support 32, pos 32) for affected and 0.812 (support 32, pos 26) for evidence. This discrete 10-digit bucket (amounts >= $10,000,000 minor units) has support 32 on seeds 5000-5999, which exceeds the miner support threshold (>= 30). docs/DESIGN.md §10 noted "11 in hard mode" on seeds 0-999 (where this 10-digit bucket fell below 30 support) and noted "a large 2900 amount at payment_allocation (0.75-0.77)".
+All other 11 values match the documented hard-mode cues in DESIGN §10 (2900 amount_count>=4 at 0.840, 2900 end-0 at 0.765, 2900 9-digits at 0.730, 2900 6-digits at 0.562, fx_error 2900 end-0 at 0.668, fx_error 7900 end-0 at 0.551).
+All tasks for gemini2b in Round 21 finished.
