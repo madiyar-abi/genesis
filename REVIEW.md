@@ -396,3 +396,13 @@ evidence tasks (night/TASKS.md, night/LOG.md).
   duplicate cue that misses (18 of 4 920) are same-customer invoices with equal totals but different line items:
   not duplicates under the written definition. One unstated rule found in a baseline, not in the data: `reconcile`
   pairs duplicates only within 3 days; it never changes a result. DESIGN §10 now says so.
+- Published check page, re-read line by line (lead subagent): 92 numbered checks (C01–C20, Block 3 rows 1–20,
+  M01–M12, D01–D20, P01–P20) plus the interface clauses (function names and keywords, observation/list/error key
+  sets, `score_episode` keys, step accounting, closed reward 0 and `info` `{}`) — the code meets all 92. Independent
+  harnesses: limits as full closed episodes, the tie rule vs brute force on 3000 random graphs (0 mismatches), the
+  jury transform done directly on the CSV/JSONL files with colliding renames (40/40 pairs equal). One test gap: D05
+  (currency/period boundary in a clean episode) was not asserted; `test_clean_scenarios_hold_the_legitimate_lookalikes`
+  now requires a foreign-currency document and a record whose own-offset and company-timezone dates straddle the
+  period edge (holds on 40/40 seeds 900–939). Two readings left as designed, no published check exercises them: a
+  closed-mode invalid submit answers `{"accepted": true}` (graded −1 grader-side, as documented), and an unknown key
+  in a finding is a structural error although the page lists only wrong type, missing field and limit.
