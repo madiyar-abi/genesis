@@ -12,7 +12,13 @@ On `3180fe4`, 11 seconds spent loading an episode followed by 50 seconds of poli
 
 For C20, use the isolated baseline run in README. CI builds a public-only Docker image, checks the worker identity and module inventory, and runs closed episodes through stdio. The jury controls the operating-system permissions and wall-clock watchdog of its own runner. Final points depend on the hidden evaluation.
 
-Verified locally with Python 3.11.18 on this branch. The four jury test modules passed all 70 tests, the full check passed all 515 tests and gates, and the default fuzz sweep passed 3,000 episodes across seeds 0–999. Docker isolation is exercised by the PR's Linux `docker` job.
+Verified locally with Python 3.11.18 on this branch. The four jury test modules passed all 70 tests, the full check passed all 515 tests and gates, and the default fuzz sweep passed 3,000 episodes across seeds 0–999. On the implementation commit `744d79a`, Linux CI passed the isolated run. Each public baseline ran on all 20 scenarios. Reconcile reached F1 1.000 with at most 26 actions, and the grader-side oracle reached F1 1.000. [CI evidence](https://github.com/madiyar-abi/genesis/actions/runs/44918123574)
+
+**Next owner.** Review [PR #43](https://github.com/madiyar-abi/genesis/pull/43) before integration. The public-rubric estimate for this branch is 100/100. Hidden cases and the engineering marks are decided by the jury. After integration, continue the human submission checklist below.
+
+**Case §13 source check.** Section 04 adopts the JSON reset/step contract and makes Python Env inheritance optional. In `judge_adapter.py`, reset returns the initial observation and info. Step returns separate termination and truncation flags for submission and external limits. Run `uv run python -m unittest tests.test_judge_contract` (26 tests passed). [Gymnasium Env API](https://gymnasium.farama.org/api/env/)
+
+DeepMind describes how maximizing a reward can diverge from the intended task. The audit-specific test in `auditenv/attack.py` compares mutated and complete honest submissions at the same inspection cost and checks false accusations on clean books. Run `uv run python -m auditenv.attack`. The replay checked 11,000 mutations on 20 seeds (5 clean) with zero violations. [DeepMind on specification gaming](https://deepmind.google/blog/specification-gaming-the-flip-side-of-ai-ingenuity/)
 
 ## Jury check definitions (published 20 November) — implemented
 
