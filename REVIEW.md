@@ -425,3 +425,9 @@ evidence tasks (night/TASKS.md, night/LOG.md).
   unknown key and a wrong `episode_id` invalidate the submission; `explanation` is optional but must be a string.
 - D03 generated a refund before its overpayment in 10 of 8,000 scenario episodes. Preserving the original receipt date in the opt-in distractor generator resolved all ten. The repeated sweep passed all 8,000 episodes across both difficulties.
 - The on-disk verifier rejected all 4,173 accounting and truth mutations on 60 episodes and accepted all 120 controls. The sweep only treated an FX edit as an error when it changed a rounded conversion used in the books.
+
+## Round 19
+
+- At the starting revision `098d923`, all 560 tests and all jury gates passed. The default fuzz sweep passed 3,000 episodes, and the reward search found zero violations in 11,000 mutations. These checks missed two defects in ordinary use.
+- On clean default seed 0, the generator combined two receipts and moved the first receipt to August 14. A refund against its credit had already been posted on August 10. Round 18 had protected only the opt-in distractor scenario. Testing the running credit available to each customer in the payment currency also exposed the problem on hard seed 16.
+- Hidden stdio episode queues still selected public episode generation when `AUDITENV_SECRET` was absent. The standalone jury adapter already selected a private key in that case. The server regression on the starting revision explicitly asserted the obsolete public behavior.
