@@ -137,3 +137,61 @@ Comparison with `docs/DESIGN.md` §10: Exactly 16 flagged values in default mode
 2026-11-22 00:48 lead — Merged gemini1a/1b/2a/2b/3a/3b and rb: all evidence green (fuzz 6k+6k+3k+3k episodes, verify 3000/3000, stress 0 imperfect max 58 steps, suite 561 OK under 3 hashseeds/TZs and 2 locales, exports byte-identical, golden 80/80, mutants 22/22, miner 16 flagged = DESIGN §10, jury modules 5x, red-team 10x, D01-D20 through adapter F1 1.000 on 400 runs, jury_run 4 seed bases). No defect. Topped up queues (G19-G24, Z3-Z4). codex1 rate-limited until 02:41, codex2 until 01:04: X1 retagged lead (subagent).
 2026-11-22 00:52 lead — X3 (subagent): night/r20/adapter_reality.py, 20/20 checks pass twice: fresh HOME (key 0600, same episode_id across processes), read-only/missing HOME (per-process fallback, cross-process scoring still agrees), 8-process race x 20 rounds (one key, no partial file), relative/space/non-ASCII/NFD/symlink/trailing-slash episode_dir, leak scan of every observation (no key, path, seed or truth field), two JudgeEnv interleaved. No defect. Noted: with unwritable HOME closed episodes are not reproducible across processes (documented in README); stderr warning names the key path (grader-side only, documented).
 2026-11-22 01:02 lead — X1 (subagent): night/r20/chronology.py, an independent public-data checker (12,600 episodes: seeds 30000-30299 x default/hard/D01-D20 both difficulties). Found a real defect: a 30 % in-period posting lag (generator.py) let a receipt credit AR for an invoice up to 3 days before the invoice was booked (575 rows in 520 of 3,000 clean episodes; repro D01 default seed 30010 RCPT0548981 vs 2608-742998). Fix: _post_before_payment moves such an invoice's two rows to its issue instant in place (no new random draws, so 65/80 golden hashes and the demo are unchanged). Regression test_cash_is_applied_after_the_invoice_is_posted failed in 29 subtests before, passes after. After fix: checker exit 0, the remaining 32 hits are the injected prior-period period_cutoff invoice itself (explained). Re-exported dev/train/hard, regenerated 7 trajectory files + trajectories.jsonl + golden. check 562 tests all gates 54.2 s; sync_docs no drift; fuzz 0-999 and 0-199 --hard pass; attack 0/11000; verify 600/600 and splits 10/10/20. Assumption: dropping the lag (post at issue) is the least invasive fix, preferred over moving payments (which reshuffled the RNG stream and changed the demo company).
+
+2026-11-22 01:15 codex2 — Y1 fresh-clone sweep at 299c5e7 (Python 3.11.14).
+Cloned with `git clone /Users/caliskan/Projects/genesis /tmp/r20-codex2/clone` and checked out the fetched round tip by SHA. Commands ran at the clone root with `AUDITENV_SECRET` unset. Scratch output paths were moved under `/tmp/r20-codex2`; demo stdin received blank lines. CONTRACT has no shell fences. Shell control-flow blocks are timed as a unit. Full output is in `/tmp/r20-codex2/command-*.txt`.
+
+| Source | Command | Exit | Wall s | Output |
+|---|---|---:|---:|---|
+| README.md:29 | `git clone https://github.com/madiyar-abi/genesis.git && cd genesis` | skipped | — | Task exclusion |
+| README.md:30 | `uv run python -m auditenv.check` | 0 | 53.321 | ALL CHECKS PASSED in 53.2 s |
+| README.md:40 | `docker build -t auditenv .` | skipped | — | Task exclusion |
+| README.md:41 | `docker run --rm --network none auditenv` | skipped | — | Task exclusion |
+| README.md:53 | `docker build --target policy -t genesis-policy .` | skipped | — | Task exclusion |
+| README.md:54 | `uv run python -m auditenv.jury_run --policy-image genesis-policy` | skipped | — | Task exclusion |
+| README.md:184 | `uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/r20-codex2/dev_reconcile.jsonl` | 0 | 0.113 |  |
+| README.md:185 | `uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval` | 0 | 0.079 |  |
+| README.md:200 | `uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out trajectories.jsonl` | 0 | 0.250 |  |
+| README.md:210 | `for p in random naive_reconcile reconcile; do uv run python -m auditenv.run --policy $p --config configs/train.json --out trajectories/train_$p.jsonl; done` | 0 | 0.269 |  |
+| README.md:213 | `for p in random naive_reconcile reconcile reconcile_hard; do uv run python -m auditenv.run --policy $p --config configs/train_hard.json --out trajectories/train_hard_$p.jsonl; done` | 0 | 0.763 |  |
+| README.md:334 | `uv run python -m auditenv.jury_run` | 0 | 1.614 |  |
+| README.md:355 | `AUDITENV_SECRET="${GRADER_KEY:?Set GRADER_KEY in the organiser shell}" uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl` | skipped | — | Task exclusion |
+| README.md:371 | `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` | 0 | 0.078 | [PASS] out-of-process eval run — policy saw no reward/truth; 2 results in the grader log |
+| README.md:379 | `uv run python -m unittest discover -s tests -t .` | 0 | 51.975 | Ran 562 tests in 51.852s |
+| README.md:380 | `uv run python -m unittest tests.test_env` | 0 | 0.234 | Ran 33 tests in 0.178s |
+| README.md:381 | `uv run python -c "from auditenv.check import run_remote; assert run_remote()"` | 0 | 0.104 | [PASS] out-of-process eval run — policy saw no reward/truth; 2 results in the grader log |
+| README.md:382 | `uv run python -m auditenv.verify --seeds 0-199` | 0 | 5.485 | 600/600 episodes valid; episodes with problems: 0 |
+| README.md:383 | `uv run python -m auditenv.verify --dir episodes/train` | 0 | 0.140 | 10/10 episodes valid; episodes with problems: 0 |
+| README.md:384 | `uv run python -m auditenv.verify --dir episodes/dev` | 0 | 0.135 | 10/10 episodes valid; episodes with problems: 0 |
+| README.md:385 | `uv run python -m auditenv.verify --dir episodes/hard` | 0 | 0.427 | 20/20 episodes valid; episodes with problems: 0 |
+| README.md:386 | `uv run python -m auditenv.attack` | 0 | 0.500 | Total mutations tested: 11000; Total violations detected: 0 |
+| README.md:387 | `uv run python -m tests.test_fuzz` | 0 | 1.172 | Python 3.11.14, 20319 episode actions, 20524 total step calls in 1.119 s |
+| README.md:388 | `uv run python -m auditenv.check --json /tmp/r20-codex2/auditenv-metrics.json` | 0 | 76.342 | ALL CHECKS PASSED in 76.3 s |
+| README.md:389 | `uv run python scripts/sync_docs.py --check --json /tmp/r20-codex2/auditenv-metrics.json` | 0 | 0.047 | All documentation tables match measured data. |
+| README.md:390 | `uv run python -m auditenv.fuzz --seeds 0-999` | 0 | 86.569 | FUZZ PASSED |
+| README.md:391 | `uv run python -m auditenv.fuzz --configs 3000` | 0 | 93.398 | config sweep, cases 0-2999: 3000 random configs (1186 hard) in 93.4 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56 |
+| README.md:392 | `uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299` | 0 | 7.237 | reconcile on 1200 default episodes (seeds 0-299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (7.2 s) |
+| README.md:393 | `uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json` | 0 | 0.088 |  |
+| README.md:394 | `uv run python -m auditenv.demo` | 0 | 0.104 | grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0 |
+| README.md:395 | `uv run python -m auditenv.export --config configs/dev.json --out episodes/dev` | 0 | 0.081 | Exported 10 episodes to episodes/dev |
+| README.md:396 | `uv run python -m auditenv.export --config configs/train.json --out episodes/train` | 0 | 0.080 | Exported 10 episodes to episodes/train |
+| README.md:397 | `uv run python -m auditenv.export --config configs/eval_hard.json --out episodes/hard` | 0 | 0.257 | Exported 20 episodes to episodes/hard |
+| README.md:398 | `uv run python scripts/mutate_reward.py` | 0 | 139.540 | 22/22 mutants killed. |
+| README.md:399 | `uv run python scripts/sensitivity.py` | 0 | 1.860 |  |
+| README.md:400 | `uv run python scripts/shortcut_miner.py --report-only` | 0 | 15.958 |  |
+| README.md:401 | `uv run python scripts/golden.py --check` | 0 | 0.469 | All 80 golden hashes match /private/tmp/r20-codex2/clone/tests/golden_hashes.json. |
+| README.md:402 | `uv run python scripts/bench.py` | 0 | 9.684 |  |
+| README.md:403 | `uv run python scripts/chart.py` | 0 | 0.041 | wrote /private/tmp/r20-codex2/clone/docs/baselines.svg |
+| README.md:404 | `make check` | 0 | 52.696 | ALL CHECKS PASSED in 52.6 s |
+| README.md:405 | `make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart` | 0 | 0.008 |  |
+| docs/DEMO.md:9 | `env -u AUDITENV_SECRET uv run python -m auditenv.demo --seed 2003 --pause` | 0 | 0.103 | grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0 |
+
+Output comparisons:
+- README.md:123 reports hard reconcile F1 0.752. The check printed `[PASS] hard: default rules no longer suffice — reconcile F1 0.755`.
+- README.md:340 reports 21.4 mean reconcile actions for the jury cohort. The replay printed:
+  ```text
+  reconcile         1.000  1.000  1.000    0.959    21.3    26    0.024   0.026
+  ```
+- Chart from the scratch metrics: `env -u AUDITENV_SECRET uv run python scripts/chart.py --json /tmp/r20-codex2/auditenv-metrics.json --out /tmp/r20-codex2/baselines.svg`, exit 0, 0.047 s, `wrote /tmp/r20-codex2/baselines.svg`. `cmp docs/baselines.svg /tmp/r20-codex2/baselines.svg` exited 1 and printed `docs/baselines.svg /tmp/r20-codex2/baselines.svg differ: char 3401, line 35`. Bar titles changed from `reconcile, dev: 0.957` to `reconcile, dev: 0.956`, `reconcile, hard: 0.288` to `reconcile, hard: 0.293`, `naive_reconcile, dev: −0.506` to `naive_reconcile, dev: −0.480`, and `naive_reconcile, hard: −0.711` to `naive_reconcile, hard: −0.704`. The chart command's implicit metrics path requires the README's original JSON path or an explicit `--json` when relocated.
+- All 36 eligible entries exited 0, including both trajectory loops (seven invocations). The clone's episode and trajectory paths match HEAD after replay. The six exclusions were the GitHub clone, Docker build/run, the Docker-dependent jury run, and the organiser server. The bare chart command found an existing shared default-path metrics file, so the isolated chart comparison above used this sweep's own JSON.
+- The demo reproduced 326 ledger rows, 69 invoices, 100 steps, payment PAY-136430, 286 and 351331 USD minor units, four matches in 22 actions with 21 inspections, return 0.958, oracle 1.000, repeats 0.333, silence −1.000 on dirty books and 1.000 on clean books. Hard F1 0.755 rounds to the script's approximate 0.75.

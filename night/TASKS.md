@@ -37,7 +37,7 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
   LOG; any crash, disagreement or leak of a path/key into an observation quoted with a reproduction.
 
 ## codex2 — docs claims and fresh-clone runs (strong)
-- [ ] Y1 (codex2) Fresh-clone sweep: `git clone /Users/caliskan/Projects/genesis /tmp/r20-codex2/clone` at
+- [x] Y1 (codex2) Fresh-clone sweep: `git clone /Users/caliskan/Projects/genesis /tmp/r20-codex2/clone` at
   origin/night/2026-11-22-r20, then run every shell command in fenced blocks of README.md, docs/DEMO.md and
   docs/CONTRACT.md (skip docker, git clone of GitHub, asciinema, the organiser server and commands needing
   `AUDITENV_SECRET` unless they say how to set it) — files: night/LOG.md — accept: LOG table: command, exit code,
