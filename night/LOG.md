@@ -15,3 +15,13 @@
 | Combined | 10 | 0 | 10 |
 
 Semantically equivalent rewrite discrepancies: 0. Combined uses compact JSON, all three BOMs, shuffled CSV, reversed JSONL keys, CRLF, and no final newline. Next: Y2 low-QoS and loaded timing.
+
+2026-11-22 03:42 gemini1b — G4 stress solvability on seeds 10000-10299: reconcile default 1200 episodes imperfect 0, max steps 33, truncated 0 (wall time 7.7 s); reconcile_hard 1200 hard episodes imperfect 0, max steps 57, truncated 0 (wall time 21.4 s). Next: G5.
+2026-11-22 03:42 gemini3a — G13: Four jury modules 5 times (tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired). All 5 runs passed 73/73 tests cleanly.
+  Run 1: Ran 73 tests in 2.094s, OK, exit 0, wall time 2s
+  Run 2: Ran 73 tests in 2.083s, OK, exit 0, wall time 2s
+  Run 3: Ran 73 tests in 2.225s, OK, exit 0, wall time 3s
+  Run 4: Ran 73 tests in 2.249s, OK, exit 0, wall time 2s
+  Run 5: Ran 73 tests in 2.528s, OK, exit 0, wall time 3s
+  Total: 365 tests, 0 failures. Next: G14.
+2026-11-22 03:42 gemini3b — G16 complete: verified all splits under episodes/ (dev: 10/10 valid, exit 0, 0.13s; hard: 20/20 valid, exit 0, 0.35s; train: 10/10 valid, exit 0, 0.11s). Next: G17.
