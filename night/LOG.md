@@ -165,3 +165,10 @@ Diffs:
 Differing files: none.
 2026-11-22 01:14 lead — Merged top-up 1 (G19-G24): all green (hard fuzz 3000, stress 0 imperfect max 57/32 steps, config sweep 3000 max 58, -X dev 0 ResourceWarnings, -O check passes and 0 product asserts, 71 modules pass alone, trajectories byte-identical). Queued G25-G30 to re-test the generator fix.
 2026-11-22 01:15 lead — L1 done. REVIEW.md Round 20, HANDOFF header, DESIGN posting-lag row updated. L2 waits for codex X2/Y1-Y3.
+2026-11-22 01:32 gemini1a — G25: ran `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 33000-33299` (wall time 86.2 s, exit code 0).
+  Totals line: `totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3064, e_fx_missing=0, f_inv_booked_before_issue=2595, f_pay_posted_before_doc=0, f_ar_before_booking=26, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5057, c_tie=0`
+  Unexplained violations line: `unexplained violations: 26 (0 in clean configs)`
+  Logged for lead review: 26 instances of `f_ar_before_booking` (0 in clean configs, found in default/default (5), hard/hard (1), D14/default (6), D14/hard (4), D15/default (6), D15/hard (4)). Sample reproductions:
+    default/default seed=33060 ids=['BNK-916419', 'INV-802246', 'GL-003665'] ar credit 2026-07-03T17:45:00+00:00 booking 2026-07-04T20:25:00+00:00
+    hard/hard seed=33263 ids=['BNK-734657', '2609-638480', 'R469'] ar credit 2026-09-01T12:20:00+01:00 booking 2026-09-02T17:58:00+01:00
+    D14/default seed=33011 ids=['RCPT0856798', 'F0453837', 'GL-003501'] ar credit 2026-05-04T14:57:00-05:00 booking 2026-05-04T19:37:00-05:00
