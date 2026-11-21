@@ -370,3 +370,4 @@ Totals line:
 totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=6132, e_fx_missing=0, f_inv_booked_before_issue=5177, f_pay_posted_before_doc=0, f_ar_before_booking=46, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=10061, c_tie=3
 Unexplained violations line:
 unexplained violations: 46 (0 in clean configs)
+2026-11-22 01:54 lead — Applied codex2 Y2/Y3 doc corrections (subagent re-verified each; skipped rewording-only items and the CONTRACT:7 TASKS remark). check 563 tests pass, sync_docs no drift, doc tests 19 OK. Commit c8b8d70.
