@@ -378,3 +378,4 @@ totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_b
 Unexplained violations line:
 unexplained violations: 46 (0 in clean configs)
 2026-11-22 01:54 lead — Applied codex2 Y2/Y3 doc corrections (subagent re-verified each; skipped rewording-only items and the CONTRACT:7 TASKS remark). check 563 tests pass, sync_docs no drift, doc tests 19 OK. Commit c8b8d70.
+2026-11-22 01:57 gemini2a — G33: Post-doc-fixes check and sync_docs validation. auditenv.check --json /tmp/r20-gemini2a/c.json: exit code 0, wall time 51.51s, last line: ALL CHECKS PASSED in 51.4 s. scripts/sync_docs.py --check --json /tmp/r20-gemini2a/c.json: exit code 0, wall time 0.04s, last line: All documentation tables match measured data.

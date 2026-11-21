@@ -176,5 +176,5 @@ files (task.txt, policy.json, CSV/JSONL tables) — never truth, verify.py, inje
 - [x] G31 (gemini1a) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 35000-35599` — files:
   night/LOG.md — accept: exit code, totals line and "unexplained violations" line verbatim.
 - [x] G32 (gemini1b) Same as G31 with `--seeds 36000-36599` — files: night/LOG.md — accept: as G31.
-- [ ] G33 (gemini2a) After the lead's doc fixes land (merge first): `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r20-gemini2a/c.json`
+- [x] G33 (gemini2a) After the lead's doc fixes land (merge first): `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r20-gemini2a/c.json`
   then `uv run python scripts/sync_docs.py --check --json /tmp/r20-gemini2a/c.json` — files: night/LOG.md — accept: both exit codes and last lines.
