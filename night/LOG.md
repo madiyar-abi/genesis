@@ -6,3 +6,7 @@
   - `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/eval_hard.json --out /tmp/r20-gemini2b/hard` (exit 0, wall 0.253s, "Exported 20 episodes to /tmp/r20-gemini2b/hard"). `diff -r episodes/hard /tmp/r20-gemini2b/hard` exit 0 (0 differing files).
   - `env -u AUDITENV_SECRET uv run python -m auditenv.export --config configs/train_hard.json --out /tmp/r20-gemini2b/train_hard` (exit 0, wall 0.147s, "Exported 10 episodes to /tmp/r20-gemini2b/train_hard"). Committed `episodes/train_hard` does not exist (as documented in README line 195: hard train episodes are generated on demand into /tmp; `episodes/hard` holds eval_hard); verified exported directory with `env -u AUDITENV_SECRET uv run python -m auditenv.verify --dir /tmp/r20-gemini2b/train_hard` (exit 0: "10/10 episodes valid; episodes with problems: 0").
   All committed exports match byte for byte with fresh exports.
+2026-11-22 00:31 gemini2b — G11: Checked golden hashes and ran reward mutation tests. Commands and results:
+  - `uv run python scripts/golden.py --check` (exit 0, wall 0.650s): "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json."
+  - `uv run python scripts/mutate_reward.py` (exit 0, wall 3:40.49 total / 219.12s user): "22/22 mutants killed."
+  All 80 golden hashes match; all 22 reward/matcher/schema/metrics mutants successfully killed.
