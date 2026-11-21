@@ -19,6 +19,23 @@ jobs:
       - name: Run the check in the container (no network)
         run: docker run --rm --network none auditenv
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify isolated policy image and closed episodes
+        run: |
+          docker build --target policy -t genesis-policy .
+          docker run --rm --read-only --network none --cap-drop=ALL --security-opt=no-new-privileges \
+            --entrypoint python genesis-policy -c '
+          import importlib.util, os
+          from pathlib import Path
+          assert os.getuid() != 0
+          assert "AUDITENV_SECRET" not in os.environ
+          assert not Path("/app").exists() and not Path("/policy/episodes").exists()
+          assert all(importlib.util.find_spec(m) is None for m in ("judge_adapter", "auditenv.matcher", "auditenv.generator", "auditenv.policies.oracle"))
+          '
+          python3 -m auditenv.jury_run --policy-image genesis-policy --json /tmp/isolated.json
+          python3 -c 'import json; r=json.load(open("/tmp/isolated.json")); assert all(v["episodes"] == 20 for v in r.values()) and r["reconcile"]["f1"] == r["oracle"]["f1"] == 1'
   python:
     # The same check without Docker, on plain Python 3.11 (stdlib only, nothing to install).
     runs-on: ubuntu-latest

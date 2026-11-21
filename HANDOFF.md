@@ -4,11 +4,15 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Current state (21 November 2026, night).** Engineering is complete: PR #41 (the jury's check definitions) is on
-`main`; branch `feature/final-polish` adds the jury flow end to end (`auditenv/jury_run.py`, a gate in the check),
-the README "For the jury" block with the §09 map, and the fixes of a full scoring audit, which scored the code
-100/100. Left for people, in this order: revoke the DeepSeek key → make the repository public → record the video →
-fill and share the Google Doc → submit (checklist under "Deadline & submission").
+**Current state (21 November 2026).** PR #42 merged the jury adapter checks and public scenario runs into `main`. The follow-up below fixes a C18 failure found on that revision and adds an isolated run for C20. Before submission the team still needs to revoke the DeepSeek key, make the repository public, record the video, and share and submit the Google Doc. See “Deadline & submission”.
+
+## C18 and C20 follow-up (Khasuetolog)
+
+On `3180fe4`, 11 seconds spent loading an episode followed by 50 seconds of policy time still allowed an action. Reset now starts the episode clock before loading or generating data. Run `uv run python -m unittest tests.test_judge_contract` to check both paths.
+
+For C20, use the isolated baseline run in README. CI builds a public-only Docker image, checks the worker identity and module inventory, and runs closed episodes through stdio. The jury controls the operating-system permissions and wall-clock watchdog of its own runner. Final points depend on the hidden evaluation.
+
+Verified locally with Python 3.11.18 on this branch. The four jury test modules passed all 70 tests, the full check passed all 515 tests and gates, and the default fuzz sweep passed 3,000 episodes across seeds 0–999. Docker isolation is exercised by the PR's Linux `docker` job.
 
 ## Jury check definitions (published 20 November) — implemented
 

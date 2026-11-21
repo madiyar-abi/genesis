@@ -22,59 +22,26 @@ import sys
 import tempfile
 import time
 
-from .env import TOOLS
+from .policy_worker import JuryPolicy, POLICIES, worker
 from .jury import SCENARIOS
 from .load import load_episode
-from .policies.flag_all import FlagAll
 from .policies.oracle import Oracle
-from .policies.random_explorer import RandomExplorer
-from .policies.reconcile import Reconcile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-POLICIES = {"random_explorer": RandomExplorer, "reconcile": Reconcile, "flag_all": FlagAll}
-RESULT_KEY = {"get_record": "record", "get_document": "document", "calculator": "value"}
 
 
-class JuryPolicy:
-    """Baseline-policy adapter: jury observations in, jury actions `{"name", "args"}` out."""
-
-    def __init__(self, policy):
-        self.policy, self.last = policy, None
-
-    def act(self, observation: dict) -> dict:
-        if "task" in observation:  # first observation
-            ours = {"task": observation["task"], "manifest": observation["manifest"], "policy": observation["policy"],
-                    "tools": TOOLS, "steps_remaining": observation["remaining_steps"]}
-            self.policy.reset(ours)
-        else:
-            result = observation["result"]
-            if result is not None:
-                if self.last == "list_records":
-                    result = {"rows": result["records"], "next_cursor": result["next_cursor"]}
-                elif self.last in RESULT_KEY:
-                    result = {RESULT_KEY[self.last]: result}
-            ours = {"steps_remaining": observation["remaining_steps"], "result": result, "error": observation["error"]}
-        action = self.policy.act(ours)
-        self.last = action.get("type")
-        return {"name": action.get("type"), "args": {k: v for k, v in action.items() if k != "type"}}
-
-
-def _worker(name: str) -> int:
-    """Policy process: one jury observation per stdin line, one action per stdout line."""
-    policy = JuryPolicy(POLICIES[name](seed=0))
-    for line in sys.stdin:
-        print(json.dumps(policy.act(json.loads(line))), flush=True)
-    return 0
-
-
-def play(env, first: dict, policy_name: str, truth: dict | None = None) -> int:
+def play(env, first: dict, policy_name: str, truth: dict | None = None, policy_image: str | None = None) -> int:
     """Run one episode on the jury side; returns the number of actions."""
     if policy_name == "oracle":  # grader-side: it reads the truth, as in the jury's definitions
         oracle = JuryPolicy(Oracle(truth))
         steps, obs = 1, first
         env.step(oracle.act(obs))
         return steps
-    proc = subprocess.Popen([sys.executable, "-m", "auditenv.jury_run", "--policy-worker", policy_name], cwd=ROOT,
+    command = [sys.executable, "-m", "auditenv.policy_worker", policy_name]
+    if policy_image:
+        command = ["docker", "run", "--pull=never", "--rm", "-i", "--network", "none", "--read-only", "--cap-drop=ALL",
+                   "--security-opt=no-new-privileges", "--user", "65534:65534", policy_image, policy_name]
+    proc = subprocess.Popen(command, cwd=ROOT,
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
                             env={k: v for k, v in os.environ.items() if k != "AUDITENV_SECRET"})
     steps, obs, done = 0, first, False
@@ -90,7 +57,7 @@ def play(env, first: dict, policy_name: str, truth: dict | None = None) -> int:
     return steps
 
 
-def run(seed_base: int = 3000) -> dict:
+def run(seed_base: int = 3000, policy_image: str | None = None) -> dict:
     import judge_adapter as ja  # repository root
 
     ja._WARNED = True  # a deliberately public run on published seeds: no grader-key warning
@@ -108,7 +75,7 @@ def run(seed_base: int = 3000) -> dict:
                 env = ja.make_env()
                 t0 = time.monotonic()
                 first, _ = env.reset(0, {"mode": "closed", "episode_dir": path, "team_config": {}})
-                steps.append(play(env, first, policy_name, truth))
+                steps.append(play(env, first, policy_name, truth, policy_image))
                 times.append(time.monotonic() - t0)
                 res = env.grader_log[-1]  # the true result stays on the jury side
                 tp, fp, fn = tp + res["tp"], fp + res["fp"], fn + res["fn"]
@@ -127,11 +94,12 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--seed-base", type=int, default=3000, help="scenario Dnn uses seed seed_base + nn")
     ap.add_argument("--json", default=None, help="also write the table as JSON")
+    ap.add_argument("--policy-image", help="run each public baseline inside the specified policy-only Docker image")
     ap.add_argument("--policy-worker", default=None, help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     if args.policy_worker:
-        return _worker(args.policy_worker)
-    rows = run(args.seed_base)
+        return worker(args.policy_worker)
+    rows = run(args.seed_base, args.policy_image)
     print(f"20 jury scenarios D01-D20 (seeds {args.seed_base + 1}-{args.seed_base + 20}) through judge_adapter, "
           "closed mode, policies in their own process (oracle grader-side)")
     print(f"{'policy':<16}{'P':>7}{'R':>7}{'F1':>7}{'return':>9}{'steps':>8}{'max':>6}{'time s':>9}{'max s':>8}")

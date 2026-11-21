@@ -9,6 +9,12 @@ through the tools) and targeted data checks.
 
 Status legend: **OK** = checked, no problem; **ISSUE n** = see "Findings" below.
 
+## Jury clock and policy isolation (21 November 2026)
+
+On `3180fe4`, 11 seconds loading a closed fixture and 50 seconds before the first action left the episode open. C18 measures from entry to reset. The new regression advances a monotonic test clock during both disk loading and generation, then checks for truncation on the first action at 61 seconds. Run `python -m unittest tests.test_judge_contract.JudgeContractTest.test_c18_reset_work_counts_toward_deadline`.
+
+The original public baseline runner launched the policy from the grader checkout under the same OS user. That process could read files accessible to the grader. The isolated run in README uses a separate public-only image and sends observations over stdin. Use this mode when demonstrating C20.
+
 ## Public invoice, CSV and export validation
 
 Before the fix, a repeated debit column with conflicting values was accepted, as were a missing invoice due date and a floating-point total. The split exporter also reported success for duplicate episode IDs or when a smaller requested split left an old episode directory behind. The schema smoke checker accepted duplicate evidence IDs. Targeted regressions live in `tests/test_verify_dir.py`, `tests/test_export.py` and `tests/test_schemas.py`.

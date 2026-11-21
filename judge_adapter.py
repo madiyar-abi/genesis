@@ -61,6 +61,7 @@ class JudgeEnv:
         return self._env.grader_log
 
     def reset(self, seed, config: dict | None = None):
+        started_at = self._env._clock()
         config = dict(config or {})
         unknown = set(config) - {"mode", "episode_dir", "team_config"}
         if unknown:
@@ -74,9 +75,10 @@ class JudgeEnv:
         env_mode = "eval" if mode == "closed" else "train"  # closed: reward 0 and empty info for the policy
         if config.get("episode_dir") is not None:
             limits = {k: team[k] for k in LIMIT_KEYS if k in team}
-            obs, info = self._env.reset_episode(load_episode(config["episode_dir"]), {**limits, "mode": env_mode})
+            obs, info = self._env.reset_episode(load_episode(config["episode_dir"]), {**limits, "mode": env_mode},
+                                                started_at=started_at)
         else:
-            obs, info = self._env.reset(seed, {**team, "mode": env_mode})
+            obs, info = self._env.reset(seed, {**team, "mode": env_mode}, started_at=started_at)
         first = {"task": obs["task"], "manifest": obs["manifest"], "policy": obs["policy"],
                  "remaining_steps": obs["steps_remaining"]}
         return first, {"episode_id": info["episode_id"], "mode": mode, "max_steps": info["max_steps"]}

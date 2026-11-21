@@ -9,6 +9,7 @@ import shutil
 import tempfile
 import unittest
 from decimal import Decimal
+from unittest.mock import patch
 
 import judge_adapter as ja
 from auditenv.load import load_episode
@@ -225,6 +226,28 @@ class JudgeContractTest(unittest.TestCase):
         obs, _, terminated, truncated, _ = env.step(act("submit", findings=oracle_findings(self.e)))
         self.assertEqual((terminated, truncated, obs["error"]["code"]), (False, True, "time_limit"))
         self.assertEqual((env.grader_log[-1]["end"], env.grader_log[-1]["tp"]), ("time_limit", 0))
+
+    def test_c18_reset_work_counts_toward_deadline(self):
+        from auditenv.generator import generate
+
+        for mode, target, original, extra in (
+            ("closed", "judge_adapter.load_episode", load_episode, {"episode_dir": self.e_dir}),
+            ("train", "auditenv.env.generate", generate, {}),
+        ):
+            with self.subTest(mode=mode):
+                env = ja.make_env()
+                now = [0.0]
+                env._env._clock = lambda: now[0]
+
+                def slow(*args):
+                    now[0] += 11
+                    return original(*args)
+
+                with patch(target, side_effect=slow):
+                    env.reset(2, {"mode": mode, **extra})
+                now[0] = 61
+                obs, _, terminated, truncated, _ = env.step(act("calculator", expression="1"))
+                self.assertEqual((terminated, truncated, obs["error"]["code"]), (False, True, "time_limit"))
 
     def test_c19_closed_rewards_are_zero(self):
         env, _, info = self.open(self.e_dir)

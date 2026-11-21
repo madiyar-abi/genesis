@@ -43,6 +43,17 @@ The container path is exercised on every push by `.github/workflows/check.yml` (
 network, plus the verifier and the seed sweep on plain Python 3.11). To run just the unit tests in the same image, use
 `docker run --rm --network none auditenv python -m unittest discover -s tests -t .`.
 
+## Isolated baseline run (C20)
+
+From the repo root, build the public policy image and run the grader on the host:
+
+```sh
+docker build --target policy -t genesis-policy .
+uv run python -m auditenv.jury_run --policy-image genesis-policy
+```
+
+Each non-oracle baseline runs as UID 65534 with a read-only filesystem, no network and no host mounts. Only the public policy modules are copied into its image. Observations and actions travel over standard input and output. The episode directory, oracle, matcher and grading key stay with the host grader. The default subprocess command is for trusted public baselines. For organizer-supplied policies, apply the same restriction to their worker and monitor the 60-second deadline from the grader process.
+
 ## For the jury
 
 1. **Set `AUDITENV_SECRET`** (any private string) in the process that generates hidden episodes, never in the
