@@ -560,3 +560,18 @@ hard reconcile submissions: P=0.780478 R=0.909893 F1=0.840232 (TP=1959 FP=551 FN
 `env -u AUDITENV_SECRET uv run python -m auditenv.check` exited 0. ALL CHECKS PASSED in 52.1 s.
 
 2026-11-21 22:31 lead — Merged gemini1a/1b/2a/2b/3a/3b (all evidence tasks done, 0 problems; miner/cheater cues match DESIGN §10) and codex1 T45–T47 (loader + server hardening, multi-cue cheater F1 0.163 default / 0.153 hard vs reconcile 1.000 / 0.840). Review of codex1: (1) its stricter loader rejected a ledger row_id equal to a doc_id; the published paired definitions rename each id space separately and expect equal strings across tables → an independent file-level jury transform failed closed reset after the merge; fixed in 0f33a0f (uniqueness per id space in loaded episodes, strict for our exports), harness 40/40 again, regression test SeparateIdSpaces. (2) T46 narrowed the server's except to ValueError/RuntimeError, so any other exception would end the server → restored a message-free catch-all ({"error": "internal error"}) with a test. (3) jury_run --policy-image without docker printed a raw traceback → clean error, exit 2 (test). Also D05 now asserted (b45cd76). check ALL PASSED, golden 80/80, verify 600/600, load 2.5 ms/episode. Queued T50–T61 (gemini, re-verify the tip) and T62–T63 (codex1: committed colliding-id paired test, loader strictness audit). Assumption: the loader's new validation is acceptable because jury fixtures come from generate_episode or transforms of our exports.
+
+2026-11-21 22:40 gemini1a — T50 flakiness of new red-team tests (10 consecutive runs).
+Command: `env -u AUDITENV_SECRET uv run python -m unittest tests.test_load_redteam tests.test_server_redteam tests.test_jury_run` (10 iterations)
+- Run 1: Ran 15 tests in 3.007s, OK (wall time 3.07 s)
+- Run 2: Ran 15 tests in 3.079s, OK (wall time 3.14 s)
+- Run 3: Ran 15 tests in 3.048s, OK (wall time 3.11 s)
+- Run 4: Ran 15 tests in 3.150s, OK (wall time 3.21 s)
+- Run 5: Ran 15 tests in 3.010s, OK (wall time 3.07 s)
+- Run 6: Ran 15 tests in 3.242s, OK (wall time 3.31 s)
+- Run 7: Ran 15 tests in 3.135s, OK (wall time 3.20 s)
+- Run 8: Ran 15 tests in 2.860s, OK (wall time 2.92 s)
+- Run 9: Ran 15 tests in 2.868s, OK (wall time 2.93 s)
+- Run 10: Ran 15 tests in 2.873s, OK (wall time 2.93 s)
+Result: 0 failures across 10 runs (15 tests each, 150 test executions total). No flakiness detected.
+Next: T51 (`env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 9000-9999` and `--hard`).
