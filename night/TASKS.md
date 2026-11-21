@@ -12,7 +12,7 @@ Lead review findings are added as T30+ below.
 
 ## gemini1a — seed sweeps (evidence only, files: night/LOG.md)
 - [x] T1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 7000-7999` and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 7000-7999 --hard` — files: night/LOG.md — accept: both summaries + wall times in LOG; any problem line verbatim.
-- [ ] T2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 40000` — files: night/LOG.md — accept: summary + wall time + max steps in LOG.
+- [x] T2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 40000` — files: night/LOG.md — accept: summary + wall time + max steps in LOG.
 - [ ] T3 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 1000-1999` — files: night/LOG.md — accept: last line (`N/N episodes valid`) in LOG.
 
 ## gemini1b — stress solvability (evidence only, files: night/LOG.md)

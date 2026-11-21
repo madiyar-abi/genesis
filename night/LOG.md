@@ -99,3 +99,12 @@ All assigned gemini3a tasks (T13, T14, T15) complete.
 Problems: 0 problems found across 6,000 episodes (default + hard).
 Next: T2 (config fuzz sweep: 3000 configs starting at 40000).
 2026-11-21 21:55 gemini3b — T17: Other Python versions (3.12, 3.13) in fresh clone. Command `env -u AUDITENV_SECRET uv run --python 3.12 python -m auditenv.check` exited 2 in 9.17s; last line: 'error: The requested interpreter resolved to Python 3.12.12, which is incompatible with the project\'s Python requirement: `==3.11.*` (from `project.requires-python`)'. Command `env -u AUDITENV_SECRET uv run --python 3.13 python -m auditenv.check` exited 2 in 0.04s; last line: 'error: The requested interpreter resolved to Python 3.13.9, which is incompatible with the project\'s Python requirement: `==3.11.*` (from `project.requires-python`)'. Verified with `--no-project` that the codebase itself is fully compatible with both: all 521 unit tests and all gates pass cleanly on Python 3.12.12 (113.3s, exit 0, 'ALL CHECKS PASSED in 113.3 s') and Python 3.13.9 (111.3s, exit 0, 'ALL CHECKS PASSED in 111.3 s'). Removed worktree. Next: T18.
+
+2026-11-21 22:00 gemini1a — T2 config fuzz sweep: 3000 configs starting at 40000.
+- Command: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 40000`
+  Exit code: 0
+  Wall time: 105.90 s
+  Summary: config sweep, cases 40000-42999: 3000 random configs (1174 hard) in 105.8 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 57
+  FUZZ PASSED
+Result: 0 problems across 3,000 random configurations (1,174 hard). Max steps: 57.
+Next: T3 (`env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 1000-1999`).
