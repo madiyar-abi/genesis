@@ -138,3 +138,28 @@ Failing tests: 0 (none). No flakiness or timezone/hashseed sensitivity found acr
   - fx_error: affected max P 0.700, evidence max P 0.312, flagged 2/0
   - period_cutoff: affected max P 0.453, evidence max P 0.453, flagged 0/0
 Next: T11 (attack search on seeds 6000–6019).
+
+2026-11-21 22:14 gemini2b — T11 complete: attack search on seeds 6000–6019 (default and hard, steps 0 and 40).
+Wrote config files `/tmp/r18-gemini2b/a6000.json` (seeds 6000-6019, default config) and `/tmp/r18-gemini2b/a6000h.json` (seeds 6000-6019, difficulty: hard).
+- Run 1: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a6000.json --seeds 6000-6019 --steps 0`
+  Exit code: 0
+  Wall time: 0.61 s
+  Mutations: 11000
+  Violations: 0
+- Run 2: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a6000.json --seeds 6000-6019 --steps 40`
+  Exit code: 0
+  Wall time: 0.61 s
+  Mutations: 11000
+  Violations: 0
+- Run 3: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a6000h.json --seeds 6000-6019 --steps 0`
+  Exit code: 0
+  Wall time: 0.65 s
+  Mutations: 11000
+  Violations: 0
+- Run 4: `env -u AUDITENV_SECRET uv run python -m auditenv.attack --config /tmp/r18-gemini2b/a6000h.json --seeds 6000-6019 --steps 40`
+  Exit code: 0
+  Wall time: 0.66 s
+  Mutations: 11000
+  Violations: 0
+Total violations across all 4 runs (44,000 mutations): 0 violations.
+Next: T12 (auditenv.verify --seeds 2000-2999).
