@@ -544,3 +544,78 @@ for invoice F0753393 and payment PAY-564014 (ledger row L03921). `Old FP=1; upda
 
 `PYTHONPATH=. /usr/bin/time -p env -u AUDITENV_SECRET uv run python -m auditenv.check > /tmp/r22-codex1/x5-check.log 2>&1`
 (exit 0, real 136.37 s). `ALL CHECKS PASSED in 136.3 s` No further codex1 assignments at this revision.
+2026-11-22 05:46 codex2 — Y4 complete on c8cfe6f (generator d0fbb34). Policy audit indexes public remittance refs by invoice_id and payment instant, uses strictly earlier refs, and checks the completing credit as the converted total less the separately converted earlier refs. Chronology tests ordering and source-currency totals, so it required no code change.
+
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 59000-59199` → exit 0 in 120.78 s. `OBSERVED completing_remittances: 24500`. `Audited 8400 episodes across 42 configurations; 33026869 checks, 0 unexpected failures.`
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 59000-59299` → exit 0 in 157.66 s. Summary and all dirty-scenario exceptions verbatim below.
+- `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0 in 117.16 s, 565 tests. `ALL CHECKS PASSED in 117.1 s`.
+
+```text
+episodes checked: 12600 (seeds 59000-59299, 42 configs)
+unexplained violations: 21 (0 in clean configs)
+  default/default seed=59203 f_ar_before_booking ids=['RCPT0566178', 'F0470250', 'R4336'] ar credit 2026-02-02T12:35:00+01:00 booking 2026-02-02T17:32:00+01:00
+  default/default seed=59217 f_ar_before_booking ids=['RCPT0471290', 'INV-184960', 'GL-000706'] ar credit 2026-12-02T18:37:00+05:00 booking 2026-12-04T19:01:00+05:00
+  default/default seed=59217 f_ar_before_booking ids=['RCPT0924208', 'INV-184960', 'GL-000712'] ar credit 2026-12-03T11:29:00+05:00 booking 2026-12-04T19:01:00+05:00
+  default/default seed=59268 f_ar_before_booking ids=['PAY-490822', '2610-096760', 'R1560'] ar credit 2026-10-02T10:11:00+05:30 booking 2026-10-03T19:52:00+05:30
+  default/default seed=59294 f_ar_before_booking ids=['PAY-930048', '2601-145501', 'L00342'] ar credit 2026-01-01T22:40:00+05:00 booking 2026-01-03T14:35:00+05:00
+  hard/hard seed=59029 f_ar_before_booking ids=['PAY-336392', 'INV-421168', 'R4183'] ar credit 2026-05-02T13:18:00+05:00 booking 2026-05-02T17:18:00+05:00
+  hard/hard seed=59147 f_ar_before_booking ids=['BNK-975340', '2507-946254', 'L02117'] ar credit 2025-07-02T14:20:00+05:00 booking 2025-07-04T11:21:00+05:00
+  D14/default seed=59029 f_ar_before_booking ids=['PAY-185794', 'F0858586', 'R4443'] ar credit 2026-04-02T14:57:00+05:30 booking 2026-04-02T19:08:00+05:30
+  D14/default seed=59079 f_ar_before_booking ids=['PAY-965190', '2505-024697', 'R293'] ar credit 2025-05-02T13:31:00+05:00 booking 2025-05-04T18:47:00+05:00
+  D14/default seed=59193 f_ar_before_booking ids=['BNK-626695', 'INV-503027', 'R1144'] ar credit 2025-02-01T11:22:00+03:00 booking 2025-02-02T10:11:00+03:00
+  D14/default seed=59216 f_ar_before_booking ids=['RCPT0778160', '2601-862816', 'L02006'] ar credit 2026-01-01T19:50:00+09:00 booking 2026-01-04T12:53:00+09:00
+  D14/hard seed=59064 f_ar_before_booking ids=['RCPT0155948', 'F0623287', 'R2178'] ar credit 2025-02-01T22:22:00+01:00 booking 2025-02-03T15:16:00+01:00
+  D14/hard seed=59072 f_ar_before_booking ids=['RCPT0505170', 'INV-862826', 'GL-000545'] ar credit 2026-10-01T00:20:00-05:00 booking 2026-10-01T11:13:00-05:00
+  D14/hard seed=59126 f_ar_before_booking ids=['PAY-665354', 'INV-499788', 'L03697'] ar credit 2026-01-04T09:55:00-03:00 booking 2026-01-04T14:05:00-03:00
+  D15/default seed=59029 f_ar_before_booking ids=['PAY-185794', 'F0858586', 'R4443'] ar credit 2026-04-02T14:57:00+05:30 booking 2026-04-02T19:08:00+05:30
+  D15/default seed=59079 f_ar_before_booking ids=['PAY-965190', '2505-024697', 'R293'] ar credit 2025-05-02T13:31:00+05:00 booking 2025-05-04T18:47:00+05:00
+  D15/default seed=59193 f_ar_before_booking ids=['BNK-626695', 'INV-503027', 'R1144'] ar credit 2025-02-01T11:22:00+03:00 booking 2025-02-02T10:11:00+03:00
+  D15/default seed=59216 f_ar_before_booking ids=['RCPT0778160', '2601-862816', 'L02006'] ar credit 2026-01-01T19:50:00+09:00 booking 2026-01-04T12:53:00+09:00
+  D15/hard seed=59064 f_ar_before_booking ids=['RCPT0155948', 'F0623287', 'R2178'] ar credit 2025-02-01T22:22:00+01:00 booking 2025-02-03T15:16:00+01:00
+  D15/hard seed=59072 f_ar_before_booking ids=['RCPT0505170', 'INV-862826', 'GL-000545'] ar credit 2026-10-01T00:20:00-05:00 booking 2026-10-01T11:13:00-05:00
+  D15/hard seed=59126 f_ar_before_booking ids=['PAY-665354', 'INV-499788', 'L03697'] ar credit 2026-01-04T09:55:00-03:00 booking 2026-01-04T14:05:00-03:00
+```
+
+2026-11-22 05:49 codex2 — Y5 complete. Reviewed 7efcfb7 and swept the generator at d0fbb34. The expected AR credit is derivable from public documents, including prior-period invoices with no published AR debit. The formula uses nominal invoice-date value and independently converted earlier refs, including refs on unposted payments by rule. It groups by exact invoice_id, so duplicate documents and reissues never pool references. Published wording should explicitly define strictly earlier payment instants, clarify prior-period nominal amounts, and qualify exact closure for a tied final installment.
+
+`PYTHONPATH=. env -u AUDITENV_SECRET uv run python /tmp/r22-codex2/completing_ref_review.py` → exit 0, 126.53 s, seeds 0–999 × default/hard/D01–D20 in both difficulties. Counts are scenario executions, with some identical configurations. Credit note means an invoice-level 1200 reversal; reissues and duplicate candidates use a public same-content signature (hard mode normalized text), with credit-noted originals separated.
+
+| Case | Count |
+|---|---:|
+| completing | 124,905 |
+| rounding change | 12,099 |
+| tied instant groups | 3 |
+| tied full installments | 3 |
+| multiple completing refs | 0 |
+| out-of-period completing | 0 |
+| earlier out-of-period refs | 0 |
+| prior-period invoices without AR debit | 375,755 |
+| prior-period completing without AR debit | 33,357 |
+| credit notes | 52,607 |
+| completing credit note | 0 |
+| reissues | 52,607 |
+| completing reissue | 0 |
+| duplicate candidates | 15,280 |
+| completing duplicate candidate | 559 |
+| overpayment full refs | 198,657 |
+| completing overpayment full refs | 0 |
+| posting mismatch | 0 |
+
+Checked 42000 episodes and 124905 completing refs; 3 tied full installments, 0 multiple-completion groups, 0 posting mismatches.
+
+The three tied installments were the same base-currency case under D06–D08. They jointly reached the total and each ref had its ordinary credit, so the invoice closed. No sampled tie produced a nonzero residual. A foreign synthetic tie can leave one minor unit without leaving the credit rule ambiguous.
+
+```text
+CASE D06/default (877, 'completion tie', 'SI-2025-283512', '2025-01-18T22:58:00+00:00', 0, 128700, [('RCPT0967996', 55219), ('RCPT0192502', 73481)])
+CASE D07/default (877, 'completion tie', 'SI-2025-283512', '2025-01-18T22:58:00+00:00', 0, 128700, [('RCPT0967996', 55219), ('RCPT0192502', 73481)])
+CASE D08/default (877, 'completion tie', 'SI-2025-283512', '2025-01-18T22:58:00+00:00', 0, 128700, [('RCPT0967996', 55219), ('RCPT0192502', 73481)])
+D06/default seed=877 invoice_id=SI-2025-283512 instant=2025-01-18T22:58:00+00:00 USD->USD rate=1; nominal=128700, credits={'RCPT0967996': [('GL-000361', 55219)], 'RCPT0192502': [('GL-000356', 73481)]}, prior posted credit=0, nominal less credits=0
+D07/default seed=877 invoice_id=SI-2025-283512 instant=2025-01-18T22:58:00+00:00 USD->USD rate=1; nominal=128700, credits={'RCPT0967996': [('GL-000361', 55219)], 'RCPT0192502': [('GL-000356', 73481)]}, prior posted credit=0, nominal less credits=0
+D08/default seed=877 invoice_id=SI-2025-283512 instant=2025-01-18T22:58:00+00:00 USD->USD rate=1; nominal=128700, credits={'RCPT0967996': [('GL-000361', 55219)], 'RCPT0192502': [('GL-000356', 73481)]}, prior posted credit=0, nominal less credits=0
+Synthetic same-instant P2/P3: no single completing ref under strict instant order; 153 credits vs 152 nominal debit, so 1 minor unit remains. An arbitrary row-order tie-break would change which ref gets 50.
+Synthetic prior invoice: nominal 152, earlier out-of-period ref 101 converting to 51, in-period final ref 202 posting 101. The public nominal invoice amount and prior reference suffice without an in-period invoice debit.
+```
+
+Proposed exact replacement for the completing-reference clause in CONTRACT §2 and policy.json ledger.payment:
+
+> For each invoice_ref on an in-period payment, group public references by exact invoice_id. Earlier references are those on any payment whose timestamp is strictly earlier as an instant, including out-of-period payments. Use the invoice's company-local issue-date rate and round each conversion to base minor units with ROUND_HALF_UP. If there is at least one earlier reference and its source amount plus those of the other earlier references and the current reference equals the invoice total_minor, credit 1200 with convert(total_minor) minus the sum of the separately converted earlier references. Use the invoice document total even if no original debit appears in the public ledger. Otherwise credit the converted current reference. References on payments at the same instant do not count as earlier than one another. A final installment split across simultaneous payments can leave a rounding difference. The journal's balancing difference goes to 7900.
