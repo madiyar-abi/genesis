@@ -105,7 +105,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   summary lines + exit codes; any miner value with precision > 0.5 that is NOT in docs/DESIGN.md §10 called out.
 
 ## gemini3a (evidence only, files: night/LOG.md)
-- [ ] G9 (gemini3a, after FIX) Four jury modules 3 times: `env -u AUDITENV_SECRET uv run python -m unittest
+- [x] G9 (gemini3a, after FIX) Four jury modules 3 times: `env -u AUDITENV_SECRET uv run python -m unittest
   tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired` — accept: per
   run `Ran N tests` + result.
 - [ ] G10 (gemini3a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and
