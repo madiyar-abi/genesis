@@ -129,7 +129,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   accept: per command the summary line + wall time.
 - [x] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999` and the same with
   `--hard` — accept: both summaries + wall times.
-- [ ] G15 (gemini1b, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds
+- [x] G15 (gemini1b, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds
   15000-15299`, the same with `--hard --stress reconcile_hard`, and `env -u AUDITENV_SECRET uv run python -m
   auditenv.fuzz --configs 3000 --start 93000` — accept: summaries + wall times + max steps.
 
