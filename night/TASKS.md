@@ -45,7 +45,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   night/r21/text_auditor.py, night/LOG.md — accept: table + discrepancy count (expected F1 1.000, 0 discrepancies).
 
 ## codex2 (strong)
-- [ ] Y1 (codex2) Clean-room Block 4 paired transform written only from night/CASE_UPDATES.md lines 140–160
+- [x] Y1 (codex2) Clean-room Block 4 paired transform written only from night/CASE_UPDATES.md lines 140–160
   (P01–P20): `night/r22/paired_cleanroom.py`. Do NOT read auditenv/transform.py or tests/test_judge_paired.py.
   Copy an exported/generated episode, permute record order in every table, and replace every id by a fresh one
   through a bijection in *every* place it occurs — including ids embedded inside free-text fields (descriptions,
