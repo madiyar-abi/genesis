@@ -157,7 +157,7 @@ class LedgerTimestampsTest(unittest.TestCase):
         self.assertEqual(total_rows, 7057)
 
     def test_payment_journal_timestamps_heavy_hard(self):
-        """Check (a) on 100 seeds heavy hard: 0 instant mismatches across 7,189 payment rows."""
+        """Check (a) on 100 seeds heavy hard: 0 instant mismatches across 7,190 payment rows."""
         total_rows = 0
         cfg = {**HEAVY, "difficulty": "hard"}
         for seed in range(100):
@@ -165,7 +165,7 @@ class LedgerTimestampsTest(unittest.TestCase):
             problems = check_payment_journal_timestamps(ep)
             self.assertEqual(problems, [], f"Seed {seed} (hard) had payment timestamp problems: {problems}")
             total_rows += sum(1 for r in ep["tables"]["ledger"] if r["payment_id"])
-        self.assertEqual(total_rows, 7189)
+        self.assertEqual(total_rows, 7190)
 
     def test_invoice_booking_timestamps_heavy_default(self):
         """Check (b) on 100 seeds heavy default: 3,298 clean in-period invoices satisfy 0-3 lag days, 0 violations."""
@@ -198,7 +198,7 @@ class LedgerTimestampsTest(unittest.TestCase):
         self.assertEqual(all_exceptions, {})
 
     def test_invoice_booking_timestamps_heavy_hard(self):
-        """Check (b) on 100 seeds heavy hard: 3,552 clean in-period invoices satisfy 0-3 lag days, 0 violations."""
+        """Check (b) on 100 seeds heavy hard: 3,545 clean in-period invoices satisfy 0-3 lag days, 0 violations."""
         clean_invoices = 0
         issue_invoices = 0
         all_exceptions: dict[str, int] = {}
@@ -223,8 +223,8 @@ class LedgerTimestampsTest(unittest.TestCase):
                     else:
                         clean_invoices += 1
 
-        self.assertEqual(clean_invoices, 3552)
-        self.assertEqual(issue_invoices, 842)
+        self.assertEqual(clean_invoices, 3545)
+        self.assertEqual(issue_invoices, 849)
         self.assertEqual(all_exceptions, {})
 
     def test_credit_note_timestamps_heavy_hard(self):

@@ -111,6 +111,34 @@ class GeneratorTest(unittest.TestCase):
         self.assertGreater(foreign, 10)
         self.assertGreater(with_fx, 0)
 
+    def test_fully_paid_invoice_closes_its_receivable(self):
+        # Each cash application used to be converted and rounded on its own, so an invoice paid in foreign parts
+        # kept a minor unit in 1200 (18 % of clean D02 episodes, default and hard, seeds 0-299). The application that
+        # completes the invoice now credits the rest of the booked amount; the cash difference is realised FX.
+        from auditenv.jury import SCENARIOS
+        closed = 0
+        for seed in range(40):
+            for difficulty in ("default", "hard"):
+                tables = generate(seed, {**SCENARIOS["D02"], "difficulty": difficulty}, key="")["tables"]
+                paid, parts = defaultdict(int), defaultdict(int)
+                for p in tables["payments"]:
+                    for ref in p["invoice_refs"] or []:
+                        paid[ref["invoice_id"]] += ref["amount_minor"]
+                        parts[ref["invoice_id"]] += 1
+                ar, booked = defaultdict(int), set()
+                for r in tables["ledger"]:
+                    if r["account"] == "1200" and r["invoice_id"]:
+                        ar[r["invoice_id"]] += r["debit_minor"] - r["credit_minor"]
+                        if not r["payment_id"]:
+                            booked.add(r["invoice_id"])
+                for inv in tables["invoices"]:
+                    i = inv["invoice_id"]
+                    if i in booked and parts[i] >= 2 and paid[i] == inv["total_minor"]:
+                        closed += 1
+                        with self.subTest(seed=seed, difficulty=difficulty, invoice=i):
+                            self.assertEqual(ar[i], 0)
+        self.assertGreater(closed, 40)
+
     def test_cash_is_applied_after_the_invoice_is_posted(self):
         # A posting lag used to let a receipt settle a receivable that the ledger had not booked yet
         # (D01 default seed 30010: RCPT0548981 credits 1200 for 2608-742998 a day before its booking).
