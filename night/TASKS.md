@@ -116,7 +116,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   episodes/ — accept: per split the `N/N episodes valid` line.
 - [x] G12 (gemini3b, after FIX) `yes '' | uv run python -m auditenv.demo` — accept: exit code, final reward/score lines
   quoted; compare with the numbers in docs/DEMO.md and call out any difference.
-- [ ] G13 (gemini3b, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r22-gemini3b/c.json`
+- [x] G13 (gemini3b, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r22-gemini3b/c.json`
   then `uv run python scripts/sync_docs.py --check --json /tmp/r22-gemini3b/c.json` — accept: both exit codes; drift
   lines verbatim.
 
