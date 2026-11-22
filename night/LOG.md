@@ -872,3 +872,26 @@ Two stale figures for the lead to correct. In docs/DESIGN.md:262 and :265, updat
 
 Next for codex2: idle until another tagged task is assigned.
 2026-11-22 06:34 gemini1a — G1 done: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 19000-19999` exit 0, wall time 107.99 s (default mode, seeds 19000-19999: 3000 episodes (1987 dirty, 1013 clean) in 107.9 s; episodes with a problem: 0; random explorer reward > 0: 248/3000 episodes, dirty: 0; flag-all reward < 0: 3000/3000; FUZZ PASSED); `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --seeds 19000-19999` exit 0, wall time 459.12 s (hard mode, seeds 19000-19999: 3000 episodes (1993 dirty, 1007 clean) in 459.0 s; episodes with a problem: 0; random explorer reward > 0: 240/3000 episodes, dirty: 0; flag-all reward < 0: 3000/3000; FUZZ PASSED). 0 problems across 6,000 episodes.
+2026-11-22 06:26 gemini1b — G3 done: stress test on seeds 14000-14299:
+Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 14000-14299` -> exit 0, wall time 12.09 s.
+Summary: reconcile on 1200 default episodes (seeds 14000-14299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (12.0 s)
+Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 14000-14299` -> exit 0, wall time 34.60 s.
+Summary: reconcile_hard on 1200 hard episodes (seeds 14000-14299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (34.5 s)
+Task G3 complete.
+2026-11-22 06:36 gemini1b — G4 done: fuzz sweep on seeds 20000-20999 (default + hard):
+Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999` -> exit 0, wall time 157.22 s.
+Summary:
+default mode, seeds 20000-20999: 3000 episodes (1987 dirty, 1013 clean) in 157.1 s
+  episodes with a problem (exception / verifier / oracle): 0
+  random explorer reward > 0: 250/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+  flag-all reward < 0: 3000/3000
+FUZZ PASSED
+
+Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999 --hard` -> exit 0, wall time 425.55 s.
+Summary:
+hard mode, seeds 20000-20999: 3000 episodes (1987 dirty, 1013 clean) in 425.5 s
+  episodes with a problem (exception / verifier / oracle): 0
+  random explorer reward > 0: 253/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+  flag-all reward < 0: 3000/3000
+FUZZ PASSED
+Task G4 complete.
