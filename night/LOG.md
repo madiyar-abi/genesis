@@ -7,3 +7,20 @@ Summary: reconcile on 1200 default episodes (seeds 14000-14299 x random_mix, cle
 Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 14000-14299` -> exit 0, wall time 34.60 s.
 Summary: reconcile_hard on 1200 hard episodes (seeds 14000-14299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 58, truncated 0 (34.5 s)
 Task G3 complete.
+2026-11-22 06:36 gemini1b — G4 done: fuzz sweep on seeds 20000-20999 (default + hard):
+Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999` -> exit 0, wall time 157.22 s.
+Summary:
+default mode, seeds 20000-20999: 3000 episodes (1987 dirty, 1013 clean) in 157.1 s
+  episodes with a problem (exception / verifier / oracle): 0
+  random explorer reward > 0: 250/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+  flag-all reward < 0: 3000/3000
+FUZZ PASSED
+
+Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999 --hard` -> exit 0, wall time 425.55 s.
+Summary:
+hard mode, seeds 20000-20999: 3000 episodes (1987 dirty, 1013 clean) in 425.5 s
+  episodes with a problem (exception / verifier / oracle): 0
+  random explorer reward > 0: 253/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+  flag-all reward < 0: 3000/3000
+FUZZ PASSED
+Task G4 complete.

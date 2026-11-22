@@ -94,7 +94,7 @@ episodes only through `judge_adapter.generate_episode`.
 - [x] G3 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 14000-14299` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 14000-14299` —
   accept: per command the summary line + wall time.
-- [ ] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999` and the same with
+- [x] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999` and the same with
   `--hard` — accept: both summaries + wall times.
 
 ## gemini2a (evidence only, files: night/LOG.md)
