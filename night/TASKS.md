@@ -35,12 +35,12 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   values) vary across seeds — list which parameters vary. — files: night/r22/d_matrix.py, night/LOG.md — accept: LOG
   table scenario × requirement → holds in N/400 episodes; every requirement that fails in any episode quoted with
   seed, difficulty and ids.
-- [ ] X2 (codex1, after FIX) Update `night/r21/ledger_identity.py` to the new refund rule (policy.json
+- [x] X2 (codex1, after FIX) Update `night/r21/ledger_identity.py` to the new refund rule (policy.json
   `ledger.payment`: a refund debits 2900 at the payment-date rate of the receipt it returns, difference to 7900) and run
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.ledger_identity --classify --seeds 41000-41299` and
   `--seeds 53000-53299` — files: night/r21/ledger_identity.py, night/LOG.md — accept: per check × config counts; the
   refund class (a) must be 0 in clean configs; any remaining violation quoted with seed and row ids.
-- [ ] X3 (codex1, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds
+- [x] X3 (codex1, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds
   54000-54099` (update the auditor only if it relies on the old refund rule; say so in LOG) — files:
   night/r21/text_auditor.py, night/LOG.md — accept: table + discrepancy count (expected F1 1.000, 0 discrepancies).
 
