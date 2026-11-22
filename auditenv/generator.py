@@ -722,8 +722,9 @@ def policy_for(st: State) -> dict:
         },
         "findings": {
             "amount": "misstatement in the ledger, base currency minor units, positive; duplicate_invoice: the "
-                      "AR debit of the later-issued copy; fx_error: abs(posted - correct); period_cutoff: the AR "
-                      "debit posted; payment_allocation: expected AR credit for the ref - AR credit posted",
+                      "AR debit of the later-issued copy (by issued_at, whatever the posting order); fx_error: "
+                      "abs(posted - correct); period_cutoff: the AR debit posted; payment_allocation: expected AR "
+                      "credit for the ref - AR credit posted",
             "tolerance": "abs(claimed - expected) <= tolerance_minor; tolerance_minor is 0, so the amount must be exact",
             "tolerance_minor": 0,
             "affected_ids": {"duplicate_invoice": "[original_invoice_id, duplicate_invoice_id]",
@@ -734,8 +735,10 @@ def policy_for(st: State) -> dict:
                         "duplicate_invoice: both invoice docs + one AR (or revenue) row of each invoice, the original and the "
                         "later copy; "
                         "payment_allocation: payment doc + invoice doc + the AR credit row of that invoice in the "
-                        "payment (or, if nothing was allocated to it, the 2900 row) + the invoice-date fx_id if foreign; fx_error: doc + AR/revenue (invoice) or cash (payment) row "
-                        "+ the fx_id of the correct date; period_cutoff: invoice doc + AR (or revenue) row",
+                        "payment (or, if nothing was allocated to it, every ledger row of the payment: cash, 2900, "
+                        "any other AR credits and 7900) + the invoice-date fx_id if foreign; fx_error: doc + "
+                        "AR/revenue (invoice) or cash (payment) row + the fx_id of the correct date; period_cutoff: "
+                        "invoice doc + AR (or revenue) row",
         },
     }
 
@@ -754,7 +757,7 @@ TASK_TEXT = (
 
 TASK_HARD = (
     " Hard mode: the ledger is larger; line items keyed in by hand (some invoices, re-issues and duplicate "
-    "copies) may be re-typed (other order, case and punctuation of the descriptions) with the same products, "
+    "copies) may be re-typed (other order, case, spacing and punctuation of the descriptions) with the same products, "
     "quantities and prices; an invoice cancelled by a full credit note and re-issued with the same line items "
     "is legitimate."
 )
