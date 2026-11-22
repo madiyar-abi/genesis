@@ -120,7 +120,7 @@ episodes only through `judge_adapter.generate_episode`.
   — accept: summaries + exit codes; sensitivity values compared with the docs/DESIGN.md §6 table, differences called out.
 
 ## gemini3b (evidence only, files: night/LOG.md)
-- [ ] G11 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
+- [x] G11 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
   accept: per split the `N/N episodes valid` line.
 - [ ] G12 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, final reward/score lines quoted;
   compare with the numbers in docs/DEMO.md and call out any difference.
