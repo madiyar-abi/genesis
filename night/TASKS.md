@@ -82,7 +82,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   generator_version, uv.lock, Python pin) suffice to regenerate `episodes/` byte for byte; the measured failure
   analysis names a failure, its cause and a re-check. — files: night/LOG.md (scripts under /tmp/r23-codex2/) —
   accept: LOG table criterion → score → evidence; anything below 2 with the exact fix proposed (text or command).
-- [ ] Y3 (codex2, after FIX) Re-run `night/r23/provenance_rebuild.py` on seeds 72000–72099 and 74000–74099 (all
+- [x] Y3 (codex2, after FIX) Re-run `night/r23/provenance_rebuild.py` on seeds 72000–72099 and 74000–74099 (all
   scenarios, both difficulties). Do not loosen the evidence check; if it needs the new published rule text, read it
   from policy.json. — files: night/r23/provenance_rebuild.py, night/LOG.md — accept: evidence N/N in every row
   (expected 4,200/4,200 per range); any failure quoted with seed/issue/ids.
