@@ -177,7 +177,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
 ## lead
 - [x] L1 (lead) Baseline: `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r23-lead-check.json` and
   `scripts/sync_docs.py --check` — accept: exit 0, no drift.
-- [ ] L2 (lead) Red-team passes (subagents, read-only first): (a) judge_adapter + env against CASE_UPDATES Block 1/3
+- [x] L2 (lead) Red-team passes (subagents, read-only first): (a) judge_adapter + env against CASE_UPDATES Block 1/3
   boundary rules; (b) data: contradictory/unresolvable public data and evidence sufficiency on D01–D20; (c) jury-facing
   docs claims (README "For the jury", "Jury adapter", "Honest limitations", DESIGN §9–10) against the code. Fix
   every confirmed defect test-first — files: as found, REVIEW.md — accept: REVIEW.md "Round 23" with evidence;
