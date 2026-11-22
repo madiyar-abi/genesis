@@ -170,7 +170,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
 - [x] G13 (gemini3b) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 34000` and the same for
   35000, 36000 — accept: per run the policy table; call out oracle F1 < 1, reconcile F1 < 1, or random/flag_all
   return > -0.5.
-- [ ] G19 (gemini3b, after FIX) G11 + G12 again, then `env -u AUDITENV_SECRET uv run python -m auditenv.check --json
+- [x] G19 (gemini3b, after FIX) G11 + G12 again, then `env -u AUDITENV_SECRET uv run python -m auditenv.check --json
   /tmp/r23-gemini3b/c.json` and `uv run python scripts/sync_docs.py --check --json /tmp/r23-gemini3b/c.json` —
   accept: N/N per split, demo numbers equal docs/DEMO.md, check exit 0, no drift.
 

@@ -1023,3 +1023,8 @@ Verdict: the payment doc supplies the target remittance, the invoice identifies 
    - oracle dev (1.000), reconcile dev (0.978/0.956/0.891, tol 0.956), random dev (-0.803/-0.807/-0.817, tol -0.807), flag_all dev (-1.000) [exact match]
    - oracle hard (1.000), reconcile_hard (0.958/0.916/0.790, tol 0.916), reconcile hard (0.329/0.293/0.186, tol 0.293), random hard (-0.803/-0.806/-0.814, tol -0.806), flag_all hard (-1.000) [exact match]
    Differences called out: 0 differences found; all values match docs/DESIGN.md §6 exactly.
+2026-11-22 06:59 gemini3b — G19 done:
+- G11 repeat: episodes/dev 10/10 valid (0 problems), episodes/hard 20/20 valid (0 problems), episodes/train 10/10 valid (0 problems).
+- G12 repeat: `yes '' | env -u AUDITENV_SECRET uv run python -m auditenv.demo` exit 0. Numbers match docs/DEMO.md exactly (326 ledger rows, 69 invoices, PAY-136430 amounts 286 and 351331 minor units, 21 inspection steps, terminal 0.958, grader TP 4 FP 0 FN 0, table comparisons exact, closed run return 0.958).
+- `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r23-gemini3b/c.json`: ALL CHECKS PASSED in 64.9 s (568 unit tests, 200/200 verifier, 50/50 hard verifier, 20/20 paired, 20/20 hard paired, jury flow pass).
+- `uv run python scripts/sync_docs.py --check --json /tmp/r23-gemini3b/c.json`: exit 0, "All documentation tables match measured data." (no drift).
