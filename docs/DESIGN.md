@@ -249,9 +249,9 @@ episodes (300 seeds × random mix / clean / 12 issues / 12 issues with 100 invoi
 episodes**, max 33 steps, no truncation — every truth issue can be found from the records within the budget.
 
 **Seed sweep** (`uv run python -m auditenv.fuzz --seeds 0-999`; generate → verifier → oracle, random
-explorer and flag-everything through the env, 3 configs per seed): 3 000 episodes (1 987 dirty, 1 013
+explorer and flag-everything through the env, 3 configs per seed): 3 000 episodes (1 986 dirty, 1 014
 clean) — 0 exceptions, 0 verifier problems, oracle > 0.9 on every dirty and 1.0 on every clean episode (the
-sweep's gate); the random explorer scores > 0 on 246 episodes, all clean books where it submitted nothing (the correct answer), never on
+sweep's gate); the random explorer scores > 0 on 247 episodes, all clean books where it submitted nothing (the correct answer), never on
 dirty books; flag-everything is negative on 3 000/3 000. Hard mode, seeds 0–199: 600 episodes, 0 problems,
 random > 0 only on 47 clean episodes, flag-everything negative on 600/600. CI runs both sweeps.
 
@@ -259,10 +259,10 @@ random > 0 only on 47 clean episodes, flag-everything negative on 600/600. CI ru
 
 | | duplicate | allocation | fx | cutoff | I1 | I2 | FP |
 |---|---|---|---|---|---|---|---|
-| naive reconciliation, recall | 7/7 | 2/8 | 6/8 | 7/7 | 0/2 | 2/2 | 102 |
+| naive reconciliation, recall | 7/7 | 2/8 | 6/8 | 7/7 | 0/2 | 2/2 | 101 |
 | reconciliation, recall | 7/7 | 8/8 | 8/8 | 7/7 | 2/2 | 2/2 | 0 |
 
-Where the naive rules fail (102 FPs: 27 allocation, 30 duplicate, 27 fx, 18 cutoff; 22 of them
+Where the naive rules fail (101 FPs: 26 allocation, 30 duplicate, 27 fx, 18 cutoff; 22 of them
 on the 2 clean companies):
 - *allocation*: every 2900 credit is flagged → overpayments and refunds become false accusations;
   the truth amount is the AR shortfall, not the 2900 credit, and the evidence needs the invoice
@@ -340,7 +340,7 @@ to explore.
 | clean books, any finding | F1 = 0, reward < 0 | `test_reward_attacks` |
 | invalid submission (structure, limits, wrong episode_id) | episode ends, reward −1, bounded error message | `test_env`, `test_jury.ContractTests` |
 | the 100th action is not a submit / an action (even a submit) arrives after 60 s | `truncated`, empty answer graded | `test_env`, `test_jury` |
-| the 100th action is the submit | it is a submit (`terminated`) | `test_env.test_submit_on_last_step_is_submit` |
+| the 100th action is the submit | it is a submit (`terminated`) | `test_env.TerminationTests.test_submit_on_last_step_is_submit` |
 | action after the end, resubmission | `episode_over`, nothing changes, the first grade stays | `test_jury` |
 | malformed actions (None, lists, nested dicts, huge strings, unicode digits in cursors) | bounded error, step consumed, never an exception | `test_fuzz` (20 319 episode actions) |
 | cursor exactly at the end / past the end | empty page / `bad_params` | `test_jury` |
@@ -360,13 +360,13 @@ to explore.
   queue into public generation; the public splits are regenerable from their seeds.
 - Shortcut miner (`uv run python scripts/shortcut_miner.py [--hard]`, 1 000 seeds): single observable
   features that predict truth records with precision > 0.5 (16 flagged in default mode, 11 in hard mode).
-  Fixed: re-typed descriptions marked hard-mode duplicate copies (1.000 → 0.458 on 1 000 seeds: invoices and
+  Fixed: re-typed descriptions marked hard-mode duplicate copies (1.000 → 0.454 on 1 000 seeds: invoices and
   re-issues are now keyed in by hand too). Left, measured: in default mode "same entity,
   currency and total exactly twice" finds duplicates (0.996) — it is the duplicate definition, but default mode
   has no near-miss decoys (hard mode has: 0.356); I1 payments are always on the last day, so a 2900/7900 row on
   the last day hints at fx_error (0.70) and a large 2900 amount at payment_allocation (0.75–0.77);
-  a 2900 row whose amount occurs in four or more ledger rows points at payment_allocation too (0.964, 214 of
-  222 rows). Each hint names
+  a 2900 row whose amount occurs in four or more ledger rows points at payment_allocation too (0.949, 240 of
+  253 rows; hard mode 0.835). Each hint names
   a record, not the claimed amount — scoring still needs the reconciliation.
 - Cutoff of a next-period invoice is booked *before* its issue instant; a policy can learn that
   direction-of-lag cue, but it is exactly the audit rule (document date outside the period).
