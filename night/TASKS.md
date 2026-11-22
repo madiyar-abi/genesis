@@ -20,7 +20,7 @@ or the tests; they may import `judge_adapter`, `auditenv.jury` (for `SCENARIOS`)
 episodes only through `judge_adapter.generate_episode`.
 
 ## codex1 (strong)
-- [ ] X1 (codex1) Clean-room Block 1 run, written only from night/CASE_UPDATES.md lines 31–98 (adapter interface,
+- [x] X1 (codex1) Clean-room Block 1 run, written only from night/CASE_UPDATES.md lines 31–98 (adapter interface,
   boundary rules, fixtures C/E/L/U, C01–C20) and README "Jury adapter": `night/r23/c_matrix.py`. Build fixtures with
   `judge_adapter.generate_episode` (C = clean config, E = one declared error, L = a table with ≥ 101 rows, U = an id
   chosen after reading the fixture's public files), then drive `judge_adapter.make_env()` from a *separate policy
@@ -29,7 +29,7 @@ episodes only through `judge_adapter.generate_episode`.
   over-60-s scenario — use the documented clock injection or a policy that sleeps; say which). Run on fixture seeds
   70000–70004 × default and hard. — files: night/r23/c_matrix.py, night/LOG.md — accept: LOG table C01–C20 → pass N/10;
   every fail quoted (stimulus → observed) with a one-command reproduction; script exits 1 on any fail.
-- [ ] X2 (codex1) Clean-room matcher differential, written only from night/CASE_UPDATES.md lines 120–211 (Block 3,
+- [x] X2 (codex1) Clean-room matcher differential, written only from night/CASE_UPDATES.md lines 120–211 (Block 3,
   "Точные соглашения matcher", M01–M12): `night/r23/matcher_diff.py` with your own implementation (structure limits
   first, sets, exact ids/currency, τ from `policy.json` `findings.tolerance_minor`, maximum-cardinality matching with
   the published tie rule, the reward formula). For 40 generated episodes (seeds 71000–71019 × default/hard, plus
