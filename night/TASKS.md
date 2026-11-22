@@ -143,7 +143,7 @@ invoice-date rate; the cash difference goes to 7900. The allocation injector nev
   per-application residue) and run `--classify --seeds 41000-41299` and `--seeds 57000-57299` — files:
   night/r21/ledger_identity.py, night/LOG.md — accept: clean configs (a) 0, (b) 0, (c) 0; anything else quoted with
   seed and row ids.
-- [ ] X5 (codex1) Update `night/r21/text_auditor.py` to the FIX2 rule only if it needs it (a per-ref expected credit
+- [x] X5 (codex1) Update `night/r21/text_auditor.py` to the FIX2 rule only if it needs it (a per-ref expected credit
   now gives ±1 false payment_allocation findings on completing parts), run `--seeds 58000-58099` — files:
   night/r21/text_auditor.py, night/LOG.md — accept: table, F1 1.000, 0 discrepancies; say whether you changed it.
 - [ ] Y4 (codex2) Update `night/r20/policy_text.py` to the FIX2 rule where it checks AR credits, run `--seeds

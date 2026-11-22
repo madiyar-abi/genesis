@@ -41,6 +41,11 @@ class PublicBooks:
         self.timezone = datetime.fromisoformat("2000-01-01T00:00:00" + self.policy["timezone"]).tzinfo
         self.invoices = {row["invoice_id"]: row for row in read_rows(public, "invoices.jsonl")}
         self.payments = read_rows(public, "payments.jsonl")
+        self.ref_history = defaultdict(list)
+        for payment in self.payments:
+            paid_at = datetime.fromisoformat(payment["timestamp"])
+            for ref in payment["invoice_refs"] or []:
+                self.ref_history[ref["invoice_id"]].append((paid_at, ref["amount_minor"]))
         self.fx = {(row["date"], row["source_currency"], row["target_currency"]): row
                    for row in read_rows(public, "fx.csv")}
         self.ledger = read_rows(public, "ledger.csv")
@@ -68,6 +73,15 @@ class PublicBooks:
         shift = self.exponents[self.base] - self.exponents[currency]
         converted = (Decimal(amount) * Decimal(row["rate"])).scaleb(shift)
         return int(converted.to_integral_value(rounding=ROUND_HALF_UP)), [row["fx_id"]]
+
+    def expected_credit(self, invoice, ref, paid_at):
+        currency, issued = invoice["currency"], invoice["issued_at"]
+        earlier = [value for when, value in self.ref_history[invoice["invoice_id"]] if when < paid_at]
+        total, value = invoice["total_minor"], ref["amount_minor"]
+        if earlier and sum(earlier) + value == total:
+            converted, evidence = self.convert(total, currency, issued)
+            return converted - sum(self.convert(prior, currency, issued)[0] for prior in earlier), evidence
+        return self.convert(value, currency, issued)
 
     def audit(self):
         findings = []
@@ -118,10 +132,11 @@ class PublicBooks:
             if fx:
                 report("fx_error", [payment_id], abs(cash["debit_minor"] + cash["credit_minor"] - expected),
                        [payment["doc_id"], cash["row_id"]] + fx)
+            paid_at = datetime.fromisoformat(payment["timestamp"])
             for ref in payment["invoice_refs"] or []:
                 invoice_id = ref["invoice_id"]
                 invoice = self.invoices[invoice_id]
-                expected, fx = self.convert(ref["amount_minor"], invoice["currency"], invoice["issued_at"])
+                expected, fx = self.expected_credit(invoice, ref, paid_at)
                 credits = [row for row in rows if row["account"] == "1200" and
                            row["invoice_id"] == invoice_id and row["credit_minor"]]
                 posted = sum(row["credit_minor"] for row in credits)
@@ -143,7 +158,9 @@ def classify(books, finding):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seeds", default="40000-40099")
+    parser.add_argument("--scratch", type=Path, default=Path("/tmp/r21-codex1"))
     args = parser.parse_args()
+    args.scratch.mkdir(parents=True, exist_ok=True)
     lo, hi = map(int, args.seeds.split("-"))
     print("| Config | Difficulty | Scored | Mean F1 | Mean precision | Mean recall |")
     print("|---|---|---:|---:|---:|---:|")
@@ -154,7 +171,7 @@ def main():
             for seed in range(lo, hi + 1):
                 label = f"{name}/{difficulty} seed {seed}"
                 try:
-                    with TemporaryDirectory(dir="/tmp/r21-codex1") as scratch:
+                    with TemporaryDirectory(dir=args.scratch) as scratch:
                         episode = str(Path(scratch) / "episode")
                         generate_episode(seed, {**config, "difficulty": difficulty}, episode)
                         books = PublicBooks(Path(episode) / "public")
