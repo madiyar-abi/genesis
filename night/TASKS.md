@@ -94,13 +94,13 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   replacement text.
 
 ## rb (medium)
-- [ ] Z1 (rb) Re-run the existing independent checkers on unseen seeds:
+- [x] Z1 (rb) Re-run the existing independent checkers on unseen seeds:
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.ledger_identity --classify --seeds 62000-62299`,
   (text_auditor moved to codex1 X3 — it needs the new evidence rule first)
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix --seeds 65000-65199` — files: night/LOG.md
   — accept: exit codes, summary lines verbatim; clean violations 0, F1 1.000 with 0 discrepancies, 0 failed checks;
   anything else quoted with seed/config/ids.
-- [ ] Z2 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 64000-64199`,
+- [x] Z2 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 64000-64199`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 64000-64299`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom --seeds 66000-66009` — files:
   night/LOG.md — accept: as Z1 (0 unexpected failures, 0 unexplained clean violations, all pairs equal).
@@ -118,7 +118,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
 ## gemini1a (evidence only, files: night/LOG.md)
 - [x] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 19000-19999` and the same with
   `--hard` — accept: both summary lines + wall times; any problem line verbatim.
-- [ ] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 87000` — accept:
+- [x] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 87000` — accept:
   summary + wall time + max steps.
 - [ ] G14 (gemini1a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 21000-21999` and the
   same with `--hard` — accept: both summaries + wall times.
