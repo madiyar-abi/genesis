@@ -23,7 +23,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
 `judge_adapter` and `auditenv.money`, never truth/provenance, `verify.py`, `inject.py` or `auditenv/policies/`.
 
 ## codex1 (strong)
-- [ ] X1 (codex1) Clean-room Block 2 matrix check, written only from night/CASE_UPDATES.md lines 100–115 (the D01–D20
+- [x] X1 (codex1) Clean-room Block 2 matrix check, written only from night/CASE_UPDATES.md lines 100–115 (the D01–D20
   table, column "Что должно различаться") and README "Jury adapter": `night/r22/d_matrix.py`. For each scenario,
   generate seeds 50000–50199 × both difficulties via `judge_adapter.generate_episode(seed, auditenv.jury.SCENARIOS[D],
   dir)` and check from public data + the episode's truth count only (truth file may be read *only* for the number and
@@ -45,7 +45,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   night/r21/text_auditor.py, night/LOG.md — accept: table + discrepancy count (expected F1 1.000, 0 discrepancies).
 
 ## codex2 (strong)
-- [ ] Y1 (codex2) Clean-room Block 4 paired transform written only from night/CASE_UPDATES.md lines 140–160
+- [x] Y1 (codex2) Clean-room Block 4 paired transform written only from night/CASE_UPDATES.md lines 140–160
   (P01–P20): `night/r22/paired_cleanroom.py`. Do NOT read auditenv/transform.py or tests/test_judge_paired.py.
   Copy an exported/generated episode, permute record order in every table, and replace every id by a fresh one
   through a bijection in *every* place it occurs — including ids embedded inside free-text fields (descriptions,
@@ -67,7 +67,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   any wording fix proposed as exact replacement text.
 
 ## rb (medium)
-- [ ] Z1 (rb) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r22-rb/j<B>.json`
+- [x] Z1 (rb) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r22-rb/j<B>.json`
   for B in 28000, 29000 — files: night/LOG.md — accept: per run the policy table; call out oracle F1 < 1, reconcile
   F1 < 1, or random/flag_all return > -0.5.
 - [ ] Z2 (rb, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py` and
