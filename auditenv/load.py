@@ -120,6 +120,10 @@ def load_episode(path: str) -> dict:
         raise ValueError("public task text must contain instructions")
     manifest = _read_json(public / "manifest.json")
     policy = _read_json(public / "policy.json")
+    if not (public / "task.txt").exists():  # the task is a published constant; hard mode publishes credit notes
+        from .generator import TASK_HARD, TASK_TEXT
+        ledger_rules = policy.get("ledger") if isinstance(policy, dict) else None
+        task = TASK_TEXT + (TASK_HARD if isinstance(ledger_rules, dict) and "credit_note" in ledger_rules else "")
     ledger = _read_csv(public / "ledger.csv", LEDGER_FIELDS)
     invoices = _read_jsonl(public / "invoices.jsonl")
     payments = _read_jsonl(public / "payments.jsonl")
