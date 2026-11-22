@@ -1,6 +1,6 @@
 # CHECKS.md — Jury Criteria Verification Map
 
-Mapping of the five evaluation criteria from `night/SPEC.md` §10 (100 points total) to code locations, reproducible verification commands, and measured pass counts.
+Mapping of the five evaluation criteria from the case, §10 (100 points total) to code locations, reproducible verification commands, and measured pass counts.
 
 ---
 
@@ -80,7 +80,7 @@ OK
 
 ## 1. Contract and Isolation (Контракт и изоляция — 25 points)
 
-> **Criterion (`night/SPEC.md` §10):** 25 × passed/20 fixed checks of reset/step, schemas, limits, termination, invalid inputs, and leak-free isolation.
+> **Criterion (the case, §10):** 25 × passed/20 fixed checks of reset/step, schemas, limits, termination, invalid inputs, and leak-free isolation.
 
 | What the jury checks | Where it lives | Command to see it | Measured result |
 |---|---|---|---|
@@ -107,7 +107,7 @@ OK
 
 ## 2. Data and Ground Truth (Данные и эталон — 25 points)
 
-> **Criterion (`night/SPEC.md` §10):** 25 × valid/20 hidden episodes: pre-injection accounting balance, post-injection discrepancy match, and independent evidence sufficiency.
+> **Criterion (the case, §10):** 25 × valid/20 hidden episodes: pre-injection accounting balance, post-injection discrepancy match, and independent evidence sufficiency.
 
 | What the jury checks | Where it lives | Command to see it | Measured result |
 |---|---|---|---|
@@ -127,7 +127,7 @@ OK
 
 ## 3. Reward Reliability (Надёжность награды — 25 points)
 
-> **Criterion (`night/SPEC.md` §10):** 25 × passed/20 checks of matching, clean books, false positives, duplicates, step costs, and adversarial submissions.
+> **Criterion (the case, §10):** 25 × passed/20 checks of matching, clean books, false positives, duplicates, step costs, and adversarial submissions.
 
 | What the jury checks | Where it lives | Command to see it | Measured result |
 |---|---|---|---|
@@ -144,7 +144,7 @@ OK
 
 ## 4. Reproducibility and Generalization (Воспроизводимость и обобщение — 15 points)
 
-> **Criterion (`night/SPEC.md` §10):** 15 × passed/20 paired checks: seed and action replay is exact; ID relabelling and permutations preserve oracle answer and reward under new IDs.
+> **Criterion (the case, §10):** 15 × passed/20 paired checks: seed and action replay is exact; ID relabelling and permutations preserve oracle answer and reward under new IDs.
 
 | What the jury checks | Where it lives | Command to see it | Measured result |
 |---|---|---|---|
@@ -159,7 +159,7 @@ OK
 
 ## 5. Engineering and Explanation (Инженерия и объяснение — 10 points)
 
-> **Criterion (`night/SPEC.md` §10):** Five 0/1/2 rubric items: single-command run, versioned configs, trajectory logs, measured failure analysis, honest limitations.
+> **Criterion (the case, §10):** Five 0/1/2 rubric items: single-command run, versioned configs, trajectory logs, measured failure analysis, honest limitations.
 
 | What the jury checks | Where it lives | Command to see it | Measured result |
 |---|---|---|---|

@@ -5,21 +5,18 @@
 > Add a line the moment the agent makes a mistake a rule could have prevented.
 > Global behavior rules live in `~/.claude/CLAUDE.md`; don't repeat them here.
 
-**Start here:** read `HANDOFF.md` (current state, what's left). Update it after
-every finished task.
+**Start here:** read `README.md` (run steps, layout, results) and `docs/CONTRACT.md`.
 
 ## What this is
 - An RL environment (Gymnasium-style JSON `reset/step`) for training AI financial
   auditors: synthetic company generator with hidden errors, read-only investigation
-  tools, matcher and terminal reward. Spec: `night/SPEC.md` (case PDF: `night/case.pdf`).
-- Repo: https://github.com/madiyar-abi/genesis (private), default branch `main`.
+  tools, matcher and terminal reward. Spec: the FinTech case of Genesis Hackathon 2026 (not in the repo).
+- Repo: https://github.com/madiyar-abi/genesis (public), default branch `main`.
 
 ## Hackathon context
-- Genesis Hackathon, online stage. Case published 2026-11-19 12:00 →
-  `night/SPEC.md`. Final deadline **2026-11-22 22:00**
+- Genesis Hackathon, online stage. Case published 2026-11-19 12:00. Final deadline **2026-11-22 22:00**
   (PDF says 23:59 Astana; we plan for 22:00).
 - Submit the shared Drive folder containing the repo link, demo video and optional presentation.
-  Submission checklist: `HANDOFF.md` → "Deadline & submission".
 - So: a working, demo-able end-to-end flow beats breadth of features, and the
   README run steps must always work — the jury opens the repo.
 
@@ -59,18 +56,12 @@ every finished task.
 - Personal notes for the agent go in `CLAUDE.local.md` (ignored), not here.
 
 ## Do NOT touch
-- `night/SPEC.md`, `night/case.pdf` (the case — never edit). `episodes/`, `trajectories/`, `trajectories.jsonl` only via their generators.
+- `episodes/`, `trajectories/`, `trajectories.jsonl` only via their generators.
 
 ## Gotchas
 - `uv run` does not install the package (`package = false`): run modules from the repo root (`python -m auditenv.x`).
 - Expense journals carry no ids — group them by timestamp when checking balances.
 - Truth amounts are in the base currency (ledger misstatement), never the document currency.
-
-## Overnight / autonomous runs
-- Unattended runs follow `NIGHT.md` (launched by `scripts/night.sh`). If the
-  prompt says "night run" or `night/SPEC.md` exists and is not DONE, read it first.
-- Lead rotation: 2 Claude accounts (~/.claude-acc2, default) rotate as the primary
-  team leads. The 2 Codex accounts take over as lead only if both Claudes run out of quota.
 
 ## When stuck
 State the plan and the single least-certain assumption before writing more

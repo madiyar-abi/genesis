@@ -1,4 +1,4 @@
-"""Verifier regressions from the round-8 red-team review (REVIEW.md → "Round 8")."""
+"""Verifier regressions from the round-8 red-team review (internal review, round 8)."""
 
 import copy
 import unittest

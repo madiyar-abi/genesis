@@ -1,4 +1,4 @@
-"""The verifier enforces the published `policy.ledger` account usage (REVIEW.md, round 8)."""
+"""The verifier enforces the published `policy.ledger` account usage (internal review, round 8)."""
 
 import copy
 import unittest

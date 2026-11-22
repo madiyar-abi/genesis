@@ -1,4 +1,4 @@
-"""Round-2 jury-style review: strict input handling (REVIEW.md "Round 2", defects 3-5)."""
+"""Round-2 jury-style review: strict input handling (internal review round 2, defects 3-5)."""
 
 import io
 import json

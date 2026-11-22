@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
 
 class AllocationEvidenceTest(unittest.TestCase):
-    """REVIEW.md #1: every payment_allocation evidence set must reproduce the amount on its own."""
+    """Internal review #1: every payment_allocation evidence set must reproduce the amount on its own."""
 
     CFG = {"errors": {"payment_allocation": 3}, "interacting": {"I1": 1}}
 
@@ -206,7 +206,7 @@ class DuplicateEvidenceTest(unittest.TestCase):
             ev_rows = [rows[i] for i in iss["evidence_sets"][0] if i in rows]
             orig_row = next(r["row_id"] for r in ev_rows if r["invoice_id"] == orig_inv["invoice_id"])
             copy_row = next(r["row_id"] for r in ev_rows if r["invoice_id"] == dup_inv["invoice_id"])
-            if difficulty == "default":  # the original seed-7 gap from REVIEW.md
+            if difficulty == "default":  # the original seed-7 gap from the internal review
                 self.assertEqual((orig_row, copy_row), ("R391", "R446"))
 
             # Incomplete submission (the "before" pattern: 2 docs + copy row only)
