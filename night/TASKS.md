@@ -74,7 +74,7 @@ episodes only through `judge_adapter.generate_episode`.
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix --seeds 65000-65199` — files: night/LOG.md
   — accept: exit codes, summary lines verbatim; clean violations 0, F1 1.000 with 0 discrepancies, 0 failed checks;
   anything else quoted with seed/config/ids.
-- [ ] Z2 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 64000-64199`,
+- [x] Z2 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 64000-64199`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 64000-64299`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom --seeds 66000-66009` — files:
   night/LOG.md — accept: as Z1 (0 unexpected failures, 0 unexplained clean violations, all pairs equal).
