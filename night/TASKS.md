@@ -138,6 +138,6 @@ episodes only through `judge_adapter.generate_episode`.
   `auditenv.check` exit 0.
 - [ ] L3 (lead) Merge worker branches, review, fix what the clean-room checkers find (test-first) — accept: check
   exit 0 after each merge.
-- [ ] L4 (lead) `docs/DEMO.md` re-verified against a fresh demo run — accept: every number matches.
+- [x] L4 (lead) `docs/DEMO.md` re-verified against a fresh demo run — accept: every number matches.
 - [ ] L5 (lead) `docs/PITCH.md` re-verified against check/analyze/fuzz output; REVIEW "Round 23", HANDOFF, night/DONE —
   accept: `sync_docs --check` no drift, check exit 0.
