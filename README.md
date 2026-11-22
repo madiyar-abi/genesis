@@ -463,9 +463,9 @@ To compare variants of the same seed, list each configuration as a separate epis
 - Measured shortcut cues remain in default mode (`scripts/shortcut_miner.py`): "same entity, currency and
   total exactly twice" finds duplicates with precision 0.996, because default mode has no near-miss decoys
   (hard mode has them: 0.356). Each cue names a record, not the amount — scoring still needs reconciliation.
-- Refunds book no realised FX difference and receivables no rounding plug: by the published rules a full
-  foreign-currency refund can leave a customer's unapplied cash (2900) below zero in base currency (largest
-  measured 7.3 % of the refund), although the credit is exactly 0 in the document currency (DESIGN §10).
+- Receivables carry no rounding plug: each cash application is converted and rounded on its own, so an invoice
+  settled by two or more foreign payments can keep a few minor units in 1200 (DESIGN §10). Refunds book their
+  realised FX difference to 7900, so unapplied cash (2900) returns exactly to its earlier balance.
 - No model was trained; we make no claim about training improvements.
 - Full list with measurements: [`docs/DESIGN.md`](docs/DESIGN.md) §10.
 

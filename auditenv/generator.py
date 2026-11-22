@@ -273,10 +273,11 @@ class State:
         return pay
 
     # ---------- ledger ----------
-    def row(self, dt: datetime, account: str, signed: int, entity=None, invoice=None, payment=None) -> dict:
+    def row(self, dt: datetime, account: str, signed: int, entity=None, invoice=None, payment=None,
+            tie: float | None = None) -> dict:
         """signed > 0 -> debit, < 0 -> credit."""
         self._k += 1
-        return {"_k": self._k, "_dt": dt, "_tie": self.rng.random(), "timestamp": iso(dt.astimezone(self.tz)),
+        return {"_k": self._k, "_dt": dt, "_tie": self.rng.random() if tie is None else tie, "timestamp": iso(dt.astimezone(self.tz)),
                 "account": account, "debit_minor": max(signed, 0), "credit_minor": max(-signed, 0),
                 "currency": self.base, "entity_id": entity, "invoice_id": invoice, "payment_id": payment}
 
@@ -304,20 +305,36 @@ class State:
             allocated += ref["amount_minor"]
         rest = pay["amount_minor"] - allocated
         if rest:
-            rows.append(self.row(dt, "2900", -self.conv(rest, cur, pay["_cdate"]), ent, None, pid))
+            rate_date = pay["_cdate"]
+            if rest < 0:  # refund: return the receipt's carrying amount, the cash difference is realised FX
+                receipt = self.refunded_receipt(pay)
+                rate_date = receipt["_cdate"] if receipt else rate_date
+            rows.append(self.row(dt, "2900", -self.conv(rest, cur, rate_date), ent, None, pid))
         jid = "pay:" + pid
         self.journals[jid] = rows
-        self.rebalance(jid)
+        # a refund's realised FX row takes the cash row's tie: no new random draw, the rest of the episode stays put
+        self.rebalance(jid, tie=rows[0]["_tie"] if pay["amount_minor"] < 0 else None)
         return jid
 
-    def rebalance(self, jid: str) -> None:
+    def refunded_receipt(self, refund: dict) -> dict | None:
+        """The receipt a refund returns (policy.json ledger.payment): the same customer's latest earlier payment in
+        the same currency whose unallocated remainder equals the refunded amount."""
+        ent, cands = self.entity_of_payment[refund["payment_id"]], []
+        for p in self.payments:
+            rest = p["amount_minor"] - sum(r["amount_minor"] for r in p["invoice_refs"] or [])
+            if (p["_dt"] < refund["_dt"] and p["currency"] == refund["currency"] and rest == -refund["amount_minor"]
+                    and self.entity_of_payment[p["payment_id"]] == ent):
+                cands.append(p)
+        return max(cands, key=lambda p: p["_dt"], default=None)
+
+    def rebalance(self, jid: str, tie: float | None = None) -> None:
         """Set the 7900 FX gain/loss row so the journal balances (removed if zero)."""
         rows = [r for r in self.journals[jid] if r["account"] != "7900"]
         old = next((r for r in self.journals[jid] if r["account"] == "7900"), None)
         diff = sum(r["debit_minor"] - r["credit_minor"] for r in rows)
         if diff:
             r0 = rows[0]
-            fx = self.row(r0["_dt"], "7900", -diff, r0["entity_id"], None, r0["payment_id"])
+            fx = self.row(r0["_dt"], "7900", -diff, r0["entity_id"], None, r0["payment_id"], tie)
             if old is not None:
                 fx["_k"], fx["_tie"] = old["_k"], old["_tie"]
             rows.append(fx)
@@ -551,7 +568,9 @@ def _build_expenses(st: State) -> None:
     add(st.ps + timedelta(days=14), "6200", rng.uniform(20000, 80000))
     add(st.pe, "6200", rng.uniform(20000, 80000))
     target = rng.randint(900, 1400) if st.hard else rng.randint(230, 420)
-    while len(st.ledger_rows()) < target:
+    refunds = {p["payment_id"] for p in st.payments if p["amount_minor"] < 0}
+    refund_fx = sum(r["account"] == "7900" and r["payment_id"] in refunds for r in st.ledger_rows())
+    while len(st.ledger_rows()) - refund_fx < target:  # a refund's realised FX row does not displace an expense
         account = rng.choice(("6300", "6300", "6400", "6400", "6400"))
         usd = rng.uniform(20, 900) if account == "6300" else rng.uniform(1, 60)
         add(st.ps + timedelta(days=rng.randrange(st.ndays)), account, usd)
@@ -656,7 +675,10 @@ def policy_for(st: State) -> dict:
             "invoice": "Dr 1200 / Cr 4000 at the invoice issue-date rate, only for invoices issued in the period",
             "payment": "Dr 1000 at the payment-date rate; Cr 1200 per invoice_ref at that invoice's issue-date "
                        "rate; remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; "
-                       "difference to 7900; negative amount = refund (Dr 2900 / Cr 1000)",
+                       "difference to 7900; negative amount = refund: Dr 2900 at the payment-date rate of the receipt it "
+                       "returns (the same customer's latest earlier payment in that currency whose amount - sum of "
+                       "invoice_refs equals the refunded amount; the refund-date rate if there is none), Cr 1000 at "
+                       "the refund-date rate, difference to 7900",
             "expense": "Dr 6xxx / Cr 1000",
             **({"credit_note": "a cancelled invoice is reversed in full: Dr 4000 / Cr 1200 with the same "
                                "invoice_id and no payment_id; a re-issued replacement is booked as a new invoice"}

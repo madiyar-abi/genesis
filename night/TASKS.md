@@ -122,7 +122,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
 
 ## lead
 - [x] L0 (lead) Baseline on round start `774570d`: `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, 50.6 s.
-- [ ] L1 (lead) FIX: refund debits 2900 at the payment-date rate of the receipt it returns, difference to 7900 —
+- [x] L1 (lead) FIX: refund debits 2900 at the payment-date rate of the receipt it returns, difference to 7900 —
   test first (clean D01–D05 seeds: every customer's 2900 balance in base currency returns to its pre-overpayment
   value), then CONTRACT §2 → generator + policy text → verify.py → re-export episodes/trajectories/golden — files:
   docs/CONTRACT.md, auditenv/generator.py, auditenv/verify.py, tests/, episodes/, trajectories*, scripts/golden data

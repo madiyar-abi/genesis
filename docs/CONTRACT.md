@@ -51,9 +51,11 @@ If you need something not described here, choose the simplest option and log it.
 - Payment received (inside the period): `Dr 1000 convert(amount, rate(payment date))`;
   per ref `Cr 1200 convert(ref.amount, rate(invoice issue date))` with invoice_id;
   remainder (amount − Σrefs, or all of it if refs are null) `Cr 2900` at the payment-date
-  rate; any difference `7900`. A refund (negative amount) is `Dr 2900 / Cr 1000` at the payment-date
-  rate. Every journal (rows sharing payment_id, or an invoice's
-  rows with payment_id null) balances: Σdebit == Σcredit.
+  rate; any difference `7900`. A refund (negative amount) is `Dr 2900 / Cr 1000`: the 2900 debit is
+  converted at the payment-date rate of the receipt it returns (the same customer's — ledger `entity_id` — latest
+  earlier payment in that currency whose `amount_minor − Σ invoice_refs` equals the refunded amount; the refund-date
+  rate if there is none), the cash credit at the refund-date rate, any difference `7900` (realised FX).
+  Every journal (rows sharing payment_id, or an invoice's rows with payment_id null) balances: Σdebit == Σcredit.
 - Expenses: `Dr 6xxx / Cr 1000`, no invoice/payment ids.
 - Hard mode only (`difficulty: "hard"`): a cancelled invoice is reversed in full by a credit note,
   `Dr 4000 / Cr 1200` with the same invoice_id, payment_id null, inside the period and after the

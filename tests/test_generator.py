@@ -82,6 +82,35 @@ class GeneratorTest(unittest.TestCase):
                     credits[key] += payment["amount_minor"] - allocated
                     self.assertGreaterEqual(credits[key], 0, payment["payment_id"])
 
+    def test_refund_clears_the_unapplied_cash_it_returns(self):
+        # A foreign refund used to debit 2900 at the refund-date rate, after its receipt credited 2900 at the
+        # receipt-date rate, so clean books left the customer's unapplied cash below zero in base currency
+        # (round 21, night/r21/ledger_identity.py: D01 seed 41006, E0342). It is the receipt's carrying amount now;
+        # the cash difference is realised FX (7900).
+        from auditenv.jury import SCENARIOS
+        foreign = with_fx = 0
+        for seed in range(40):
+            for difficulty in ("default", "hard"):
+                ep = generate(seed, {**SCENARIOS["D03"], "difficulty": difficulty}, key="")
+                base, tables = ep["manifest"]["base_currency"], ep["tables"]
+                rows = defaultdict(list)
+                for r in tables["ledger"]:
+                    if r["payment_id"]:
+                        rows[r["payment_id"]].append(r)
+                balance = defaultdict(int)
+                for pay in sorted(tables["payments"], key=lambda p: datetime.fromisoformat(p["timestamp"])):
+                    entity = rows[pay["payment_id"]][0]["entity_id"]
+                    for r in rows[pay["payment_id"]]:
+                        if r["account"] == "2900":
+                            balance[entity] += r["credit_minor"] - r["debit_minor"]
+                    with self.subTest(seed=seed, difficulty=difficulty, payment=pay["payment_id"]):
+                        self.assertGreaterEqual(balance[entity], 0)
+                    if pay["amount_minor"] < 0 and pay["currency"] != base:
+                        foreign += 1
+                        with_fx += any(r["account"] == "7900" for r in rows[pay["payment_id"]])
+        self.assertGreater(foreign, 10)
+        self.assertGreater(with_fx, 0)
+
     def test_cash_is_applied_after_the_invoice_is_posted(self):
         # A posting lag used to let a receipt settle a receivable that the ledger had not booked yet
         # (D01 default seed 30010: RCPT0548981 credits 1200 for 2608-742998 a day before its booking).
