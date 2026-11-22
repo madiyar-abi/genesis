@@ -32,7 +32,7 @@
     "currency": "every ledger row is in base_currency",
     "expense": "Dr 6xxx / Cr 1000",
     "invoice": "Dr 1200 / Cr 4000 at the invoice issue-date rate, only for invoices issued in the period",
-    "payment": "Dr 1000 at the payment-date rate; Cr 1200 per invoice_ref at that invoice's issue-date rate (the ref that completes the invoice, i.e. adds up to its total_minor with the refs of earlier payments, credits the rest: convert(total_minor) - sum of the converted earlier refs); remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; difference to 7900; negative amount = refund: Dr 2900 at the payment-date rate of the receipt it returns (the same customer's latest earlier payment in that currency whose amount - sum of invoice_refs equals the refunded amount; the refund-date rate if there is none), Cr 1000 at the refund-date rate, difference to 7900"
+    "payment": "Dr 1000 at the payment-date rate; Cr 1200 per invoice_ref at that invoice's issue-date rate (the ref that completes the invoice, i.e. adds up to its total_minor with the refs of payments with a strictly earlier timestamp, credits the rest: convert(total_minor) - sum of the converted earlier refs); remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; difference to 7900; negative amount = refund: Dr 2900 at the payment-date rate of the receipt it returns (the same customer's latest earlier payment in that currency whose amount - sum of invoice_refs equals the refunded amount; the refund-date rate if there is none), Cr 1000 at the refund-date rate, difference to 7900"
   },
   "period": {
     "end": "2026-09-30",
