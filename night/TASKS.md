@@ -20,7 +20,7 @@ or the tests; they may import `judge_adapter`, `auditenv.jury` (for `SCENARIOS`)
 episodes only through `judge_adapter.generate_episode`.
 
 ## codex1 (strong)
-- [ ] X1 (codex1) Clean-room Block 1 run, written only from night/CASE_UPDATES.md lines 31–98 (adapter interface,
+- [x] X1 (codex1) Clean-room Block 1 run, written only from night/CASE_UPDATES.md lines 31–98 (adapter interface,
   boundary rules, fixtures C/E/L/U, C01–C20) and README "Jury adapter": `night/r23/c_matrix.py`. Build fixtures with
   `judge_adapter.generate_episode` (C = clean config, E = one declared error, L = a table with ≥ 101 rows, U = an id
   chosen after reading the fixture's public files), then drive `judge_adapter.make_env()` from a *separate policy
