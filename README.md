@@ -290,7 +290,7 @@ print(ja.score_episode(out, {"episode_id": info["episode_id"], "findings": []}, 
 | `get_record` | `table`, `id` (row_id, invoice_id, payment_id or fx_id) | the record |
 | `get_document` | `doc_id` | the invoice or payment document |
 | `calculator` | `expression` (`+ - * / ( )` and decimals) | a decimal string, e.g. `"0.3"` for `0.1+0.2` |
-| `submit` | `findings` (the findings.json object, §5 of the case) | `{"accepted": true}` with no correctness signal; it ends the episode |
+| `submit` | `findings` (the findings.json object, §5 of the case) | `{"accepted": true}` with no correctness signal, or the bounded structure error `invalid_findings` (limits, types, missing fields; return −1); either way it ends the episode |
 
 Errors are `{"code", "message"}` with no paths, seeds or truth, and every one costs a step: `unknown_action` (also a
 malformed envelope), `bad_params`, `unknown_table`, `not_found`, `calc_error`, `time_limit`, and in train mode
