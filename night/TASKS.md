@@ -57,7 +57,7 @@ episodes only through `judge_adapter.generate_episode`.
   night/LOG.md — accept: LOG table scenario × condition → holds N/M; every failure quoted with seed, difficulty,
   issue and ids; script exits 1 on any failure. If a condition cannot be checked from the documented provenance
   format, say exactly which fact is missing (that is a finding too).
-- [ ] Y2 (codex2) Engineering anchors as a strict jury member (CASE_UPDATES lines 168–175): for each of the five
+- [x] Y2 (codex2) Engineering anchors as a strict jury member (CASE_UPDATES lines 168–175): for each of the five
   criteria give 0/1/2 with evidence (file:line, command + its output). Specifically check: the single README command
   on a fresh clone in /tmp/r23-codex2/clone (no undocumented step); `trajectories.jsonl` at the repo root has
   episode_id, step, action, observation, reward, terminated, truncated on every line and no truth value in any
