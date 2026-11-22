@@ -67,3 +67,9 @@ A smoke check exercised embedded replacements, a longer ID sharing a prefix, and
   B=28000: random_explorer P/R/F1 0/0/0 return -0.903 steps 33.0 max 33 time 0.023 s max 0.024 s; reconcile 1.000/1.000/1.000 return 0.960 steps 21.1 max 24 time 0.023 s max 0.025 s; flag_all 0/0/0 return -1.000 steps 3.6 max 4 time 0.020 s max 0.022 s; oracle 1.000/1.000/1.000 return 1.000 steps 1.0 time 0.003 s max 0.004 s.
   B=29000: random_explorer 0/0/0 return -0.903 steps 33.0 max 33 time 0.022 s max 0.023 s; reconcile 1.000/1.000/1.000 return 0.960 steps 21.0 max 24 time 0.022 s max 0.023 s; flag_all 0/0/0 return -1.000 steps 3.6 max 4 time 0.020 s max 0.023 s; oracle 1.000/1.000/1.000 return 1.000 steps 1.0 time 0.003 s max 0.004 s.
   No call-outs: oracle F1 = 1.000 and reconcile F1 = 1.000 in both runs; random return -0.903 and flag_all -1.000, both ≤ -0.5. Next: Z2/Z3 are gated on the FIX commit (`generator: realised FX on refunds`), not yet on origin/night/2026-11-22-r22 — will re-check after fetch.
+2026-11-22 05:21 gemini2b — G8 complete.
+- scripts/golden.py --check: exit 0, "All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json."
+- scripts/mutate_reward.py: exit 0, "22/22 mutants killed."
+- scripts/shortcut_miner.py --seeds 5000-5999 --report-only: exit 0 (41.2 s), 16 flagged total (duplicate_invoice: 2/2, payment_allocation: 8/1, fx_error: 3/0, period_cutoff: 0/0).
+- scripts/shortcut_miner.py --seeds 5000-5999 --report-only --hard: exit 0 (84.3 s), 11 affected flagged (duplicate_invoice: 0/0, payment_allocation: 9/2, fx_error: 2/0, period_cutoff: 0/0).
+All miner values with precision > 0.5 match the known surface cues documented in docs/DESIGN.md §10 (duplicate counts, period-end acct2900/acct7900 rows, acct2900 amount counts for payment allocation and fx error). Zero undocumented miner values.
