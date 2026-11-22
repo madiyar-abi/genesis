@@ -85,7 +85,7 @@ episodes only through `judge_adapter.generate_episode`.
   quoted with its last 10 lines.
 
 ## gemini1a (evidence only, files: night/LOG.md)
-- [ ] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 19000-19999` and the same with
+- [x] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 19000-19999` and the same with
   `--hard` — accept: both summary lines + wall times; any problem line verbatim.
 - [ ] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 87000` — accept:
   summary + wall time + max steps.
