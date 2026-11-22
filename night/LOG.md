@@ -451,3 +451,35 @@ Task G4 complete.
 All miner values with precision > 0.5 match the known surface cues documented in docs/DESIGN.md §10 (duplicate counts, period-end acct2900/acct7900 rows, acct2900 amount counts for payment allocation and fx error). Zero undocumented miner values.
 2026-11-22 05:16 gemini3b — G13: ran env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r22-gemini3b/c.json (exit 0, wall time 79.2 s; 564 unit tests, all gates passed) then uv run python scripts/sync_docs.py --check --json /tmp/r22-gemini3b/c.json (exit 0, wall time 0.065 s). Drift lines verbatim: "All documentation tables match measured data." (zero drift).
 2026-11-22 05:39 lead — Merged all 9 worker branches (21 tasks done, all evidence green on FIX1: verify 6000–7999 6000/6000, fuzz 16000–17999 default+hard, config sweeps 78000–83999, stress 12000–12299, re-export diff 0, golden/mutants/miner, jury modules ×3, attack 0, demo, check+sync; codex1 X1 D-matrix 8000 eps 0 failures, X2 ledger_identity updated to the refund rule → (a) 0, X3 text auditor 54000–54099; codex2 Y1 clean-room paired 0 discrepancies / no ids in free text, Y2 policy_text 56000–56199 0 unexpected + chronology 0 unexplained in clean configs, Y3 refund-rule ambiguity 0 on 12000 eps; rb jury_run 28000–31000, scenarios, extreme configs, jury_copy). Acted on Y3: 28 refunds in default/hard (none in D01–D05) fell back to the refund-date rate because two overpayments of one customer merged into one receipt (default seeds 255, 284). FIX3: never merge two overpayments (no random draw added; 2 more of 660 compared episodes change) → 0 fallbacks on seeds 0–999 default and hard; regression extended (fails 4× without the fix). CONTRACT wording made explicit (booked receipt, ledger entity_id) per Y3. Heavy-hard snapshot counts updated; naive reconcile hard F1 0.186 → 0.185 (sync_docs). check exit 0 (55.8 s), sync no drift, golden 80/80, fuzz 0-999 + hard 0-199 PASSED, verify 600/600, attack 0. DESIGN worked examples re-checked.
+
+2026-11-22 05:46 codex2 — Y4 complete on c8cfe6f (generator d0fbb34). Policy audit indexes public remittance refs by invoice_id and payment instant, uses strictly earlier refs, and checks the completing credit as the converted total less the separately converted earlier refs. Chronology tests ordering and source-currency totals, so it required no code change.
+
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 59000-59199` → exit 0 in 120.78 s. `OBSERVED completing_remittances: 24500`. `Audited 8400 episodes across 42 configurations; 33026869 checks, 0 unexpected failures.`
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 59000-59299` → exit 0 in 157.66 s. Summary and all dirty-scenario exceptions verbatim below.
+- `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0 in 117.16 s, 565 tests. `ALL CHECKS PASSED in 117.1 s`.
+
+```text
+episodes checked: 12600 (seeds 59000-59299, 42 configs)
+unexplained violations: 21 (0 in clean configs)
+  default/default seed=59203 f_ar_before_booking ids=['RCPT0566178', 'F0470250', 'R4336'] ar credit 2026-02-02T12:35:00+01:00 booking 2026-02-02T17:32:00+01:00
+  default/default seed=59217 f_ar_before_booking ids=['RCPT0471290', 'INV-184960', 'GL-000706'] ar credit 2026-12-02T18:37:00+05:00 booking 2026-12-04T19:01:00+05:00
+  default/default seed=59217 f_ar_before_booking ids=['RCPT0924208', 'INV-184960', 'GL-000712'] ar credit 2026-12-03T11:29:00+05:00 booking 2026-12-04T19:01:00+05:00
+  default/default seed=59268 f_ar_before_booking ids=['PAY-490822', '2610-096760', 'R1560'] ar credit 2026-10-02T10:11:00+05:30 booking 2026-10-03T19:52:00+05:30
+  default/default seed=59294 f_ar_before_booking ids=['PAY-930048', '2601-145501', 'L00342'] ar credit 2026-01-01T22:40:00+05:00 booking 2026-01-03T14:35:00+05:00
+  hard/hard seed=59029 f_ar_before_booking ids=['PAY-336392', 'INV-421168', 'R4183'] ar credit 2026-05-02T13:18:00+05:00 booking 2026-05-02T17:18:00+05:00
+  hard/hard seed=59147 f_ar_before_booking ids=['BNK-975340', '2507-946254', 'L02117'] ar credit 2025-07-02T14:20:00+05:00 booking 2025-07-04T11:21:00+05:00
+  D14/default seed=59029 f_ar_before_booking ids=['PAY-185794', 'F0858586', 'R4443'] ar credit 2026-04-02T14:57:00+05:30 booking 2026-04-02T19:08:00+05:30
+  D14/default seed=59079 f_ar_before_booking ids=['PAY-965190', '2505-024697', 'R293'] ar credit 2025-05-02T13:31:00+05:00 booking 2025-05-04T18:47:00+05:00
+  D14/default seed=59193 f_ar_before_booking ids=['BNK-626695', 'INV-503027', 'R1144'] ar credit 2025-02-01T11:22:00+03:00 booking 2025-02-02T10:11:00+03:00
+  D14/default seed=59216 f_ar_before_booking ids=['RCPT0778160', '2601-862816', 'L02006'] ar credit 2026-01-01T19:50:00+09:00 booking 2026-01-04T12:53:00+09:00
+  D14/hard seed=59064 f_ar_before_booking ids=['RCPT0155948', 'F0623287', 'R2178'] ar credit 2025-02-01T22:22:00+01:00 booking 2025-02-03T15:16:00+01:00
+  D14/hard seed=59072 f_ar_before_booking ids=['RCPT0505170', 'INV-862826', 'GL-000545'] ar credit 2026-10-01T00:20:00-05:00 booking 2026-10-01T11:13:00-05:00
+  D14/hard seed=59126 f_ar_before_booking ids=['PAY-665354', 'INV-499788', 'L03697'] ar credit 2026-01-04T09:55:00-03:00 booking 2026-01-04T14:05:00-03:00
+  D15/default seed=59029 f_ar_before_booking ids=['PAY-185794', 'F0858586', 'R4443'] ar credit 2026-04-02T14:57:00+05:30 booking 2026-04-02T19:08:00+05:30
+  D15/default seed=59079 f_ar_before_booking ids=['PAY-965190', '2505-024697', 'R293'] ar credit 2025-05-02T13:31:00+05:00 booking 2025-05-04T18:47:00+05:00
+  D15/default seed=59193 f_ar_before_booking ids=['BNK-626695', 'INV-503027', 'R1144'] ar credit 2025-02-01T11:22:00+03:00 booking 2025-02-02T10:11:00+03:00
+  D15/default seed=59216 f_ar_before_booking ids=['RCPT0778160', '2601-862816', 'L02006'] ar credit 2026-01-01T19:50:00+09:00 booking 2026-01-04T12:53:00+09:00
+  D15/hard seed=59064 f_ar_before_booking ids=['RCPT0155948', 'F0623287', 'R2178'] ar credit 2025-02-01T22:22:00+01:00 booking 2025-02-03T15:16:00+01:00
+  D15/hard seed=59072 f_ar_before_booking ids=['RCPT0505170', 'INV-862826', 'GL-000545'] ar credit 2026-10-01T00:20:00-05:00 booking 2026-10-01T11:13:00-05:00
+  D15/hard seed=59126 f_ar_before_booking ids=['PAY-665354', 'INV-499788', 'L03697'] ar credit 2026-01-04T09:55:00-03:00 booking 2026-01-04T14:05:00-03:00
+```

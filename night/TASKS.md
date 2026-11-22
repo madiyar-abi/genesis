@@ -146,7 +146,7 @@ invoice-date rate; the cash difference goes to 7900. The allocation injector nev
 - [ ] X5 (codex1) Update `night/r21/text_auditor.py` to the FIX2 rule only if it needs it (a per-ref expected credit
   now gives ±1 false payment_allocation findings on completing parts), run `--seeds 58000-58099` — files:
   night/r21/text_auditor.py, night/LOG.md — accept: table, F1 1.000, 0 discrepancies; say whether you changed it.
-- [ ] Y4 (codex2) Update `night/r20/policy_text.py` to the FIX2 rule where it checks AR credits, run `--seeds
+- [x] Y4 (codex2) Update `night/r20/policy_text.py` to the FIX2 rule where it checks AR credits, run `--seeds
   59000-59199`; run `night/r20/chronology.py --seeds 59000-59299` — files: night/r20/policy_text.py,
   night/r20/chronology.py, night/LOG.md — accept: 0 unexpected failures; 0 unexplained violations in clean configs.
 - [ ] Y5 (codex2) Review the FIX2 commit (`7efcfb7`) as a strict reviewer, like Y3: can an auditor derive every
