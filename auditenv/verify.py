@@ -93,6 +93,18 @@ class Books:
                 best = p
         return best
 
+    def settling_credit(self, pay: dict, inv: dict, amount: int) -> int:
+        """CONTRACT §2: the expected AR credit of `pay`'s ref to `inv` — the ref converted at the invoice-date rate,
+        or, when it and the refs of earlier payments add up to the invoice total, the rest of the converted total."""
+        def conv(a):
+            return self.conv(a, pay["currency"], inv["issued_at"])
+        earlier = [r["amount_minor"] for p in self.payments.values()
+                   if datetime_key(p["timestamp"]) < datetime_key(pay["timestamp"])
+                   for r in p["invoice_refs"] or [] if r["invoice_id"] == inv["invoice_id"]]
+        if earlier and sum(earlier) + amount == inv["total_minor"]:
+            return conv(inv["total_minor"]) - sum(conv(a) for a in earlier)
+        return conv(amount)
+
     def allocated(self, credit: int, ref: int, cur: str, ts: str) -> set[int]:
         """Reference amounts a (0 <= a < ref, document currency) whose conversion at `ts` is the AR credit."""
         if cur == self.base:
@@ -268,7 +280,7 @@ class Books:
                 inv = self.invoices.get(ref["invoice_id"])
                 if inv is None:  # reported by ref_problems
                     continue
-                expected = self.conv(ref["amount_minor"], pay["currency"], inv["issued_at"])
+                expected = self.settling_credit(pay, inv, ref["amount_minor"])
                 credit = sum(r["credit_minor"] - r["debit_minor"] for r in rows
                              if r["account"] == "1200" and r["invoice_id"] == inv["invoice_id"])
                 if credit < expected:
