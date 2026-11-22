@@ -610,3 +610,8 @@ evidence tasks (night/TASKS.md, night/LOG.md).
 
 - Start `ed724f4` (code identical to rounds 24–25): `auditenv.check` exit 0, all gates, 56.0 s; `sync_docs --check` no drift.
 - No valuable improvement found (same inputs and reasoning as round 24). No change.
+
+## Round 28
+
+- Start `a535137` (code identical to rounds 24–26): `auditenv.check` exit 0, all gates, 56.2 s; `sync_docs --check` no drift.
+- No valuable improvement found (same inputs and reasoning as round 24). No change.
