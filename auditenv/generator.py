@@ -519,6 +519,8 @@ def _build_payments(st: State, distractors: bool) -> None:
                     break  # remaining plans are in date order
                 if (j not in used and q[3] and len(q[3]) == 1 and q[4] == p[4] and q[1] == p[1]
                         and (not preserve_overpayments or q[2] == q[3][0][1])
+                        # one overpayment per receipt: each refund then returns one receipt's whole remainder
+                        and (p[2] == sum(a for _, a in p[3]) or q[2] == q[3][0][1])
                         and q[3][0][0] is not p[3][0][0] and (q[0] - p[0]).days <= 10):
                     used.add(j)
                     p = (q[0], p[1], p[2] + q[2], p[3] + q[3], p[4])

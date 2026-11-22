@@ -231,7 +231,7 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 | policy | seeds | P | R | F1 | return | steps | time s | exp. return* |
 |---|---|---|---|---|---|---|---|---|
 | random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.005 | −0.807 |
-| naive reconciliation | 2000–2009 | 0.179 | 0.733 | 0.288 | −0.478 | 17.5 | 0.006 | −0.512 |
+| naive reconciliation | 2000–2009 | 0.179 | 0.733 | 0.288 | −0.478 | 17.5 | 0.007 | −0.512 |
 | reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.956 | 22.8 | 0.006 | 0.956 |
 | flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.004 | −1.000 |
 | oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.003 | 1.000 |
@@ -294,7 +294,7 @@ and checks that every credit note is in the period and after its booking.
 | policy | P | R | F1 | return | steps | exp. return* |
 |---|---|---|---|---|---|---|
 | random explorer (seeded) | 0.000 | 0.000 | 0.000 | −0.806 | 33.1 | −0.806 |
-| naive reconciliation | 0.108 | 0.652 | 0.186 | −0.704 | 33.1 | −0.749 |
+| naive reconciliation | 0.108 | 0.652 | 0.185 | −0.704 | 33.1 | −0.749 |
 | reconciliation (default rules) | 0.667 | 0.870 | 0.755 | 0.293 | 43.0 | 0.081 |
 | reconciliation + hard rules (`reconcile_hard`) | 1.000 | 1.000 | 1.000 | 0.916 | 43.0 | 0.916 |
 | flag-everything attack | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | −1.000 |
@@ -385,7 +385,9 @@ to explore.
   unapplied cash ended below zero in base currency (920 rows, up to 7.3 % of the refund), and a foreign invoice paid
   in parts kept a minor unit in 1200 (415 rows; 18 % of D02 episodes). Now a refund debits 2900 at the rate of the
   receipt it returns and the part that completes an invoice credits the rest of its booked amount; the cash
-  difference is realised FX (7900) — CONTRACT §2, `policy.json` `ledger.payment`. The allocation injector never
+  difference is realised FX (7900) — CONTRACT §2, `policy.json` `ledger.payment`; a merged receipt never carries two
+  overpayments, so every refund finds its receipt (0 refund-date fallbacks on seeds 0–999, default and hard; codex2's
+  public-data audit found 0 ambiguous receipts on 12 000 episodes). The allocation injector never
   picks such a last part, so "expected AR credit for the ref" stays the ref converted on its own. Regressions:
   `tests.test_generator.GeneratorTest.test_refund_clears_the_unapplied_cash_it_returns` and
   `...test_fully_paid_invoice_closes_its_receivable`.

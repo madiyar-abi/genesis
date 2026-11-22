@@ -145,13 +145,13 @@ class LedgerAccountsTest(unittest.TestCase):
             for k, v in counts.items():
                 aggregated_counts[k] += v
 
-        self.assertEqual(aggregated_counts["total"], 116450)
-        self.assertEqual(aggregated_counts["check_a"], 116450)
-        self.assertEqual(aggregated_counts["check_b"], 9886)
-        self.assertEqual(aggregated_counts["check_c"], 7190)
-        self.assertEqual(aggregated_counts["check_d"], 99374)
-        self.assertEqual(aggregated_counts["check_d_debit"], 49687)
-        self.assertEqual(aggregated_counts["check_d_credit"], 49687)
+        self.assertEqual(aggregated_counts["total"], 116391)
+        self.assertEqual(aggregated_counts["check_a"], 116391)
+        self.assertEqual(aggregated_counts["check_b"], 9882)
+        self.assertEqual(aggregated_counts["check_c"], 7197)
+        self.assertEqual(aggregated_counts["check_d"], 99312)
+        self.assertEqual(aggregated_counts["check_d_debit"], 49656)
+        self.assertEqual(aggregated_counts["check_d_credit"], 49656)
 
     def test_clean_seed_0_expense_row_account_9999_detected(self):
         """Tampering an expense row to account '9999' on clean seed 0 is reported by the checker."""

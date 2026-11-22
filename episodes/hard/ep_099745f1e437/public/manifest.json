@@ -7,11 +7,11 @@
   },
   "base_currency": "KZT",
   "counts": {
-    "documents": 86,
+    "documents": 87,
     "fx": 318,
     "invoices": 55,
     "ledger": 1333,
-    "payments": 31
+    "payments": 32
   },
   "episode_id": "ep_099745f1e437",
   "generator_version": "1.0.0",

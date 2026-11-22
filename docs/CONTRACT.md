@@ -54,9 +54,9 @@ If you need something not described here, choose the simplest option and log it.
   amount, `convert(total_minor) − Σ convert(earlier refs)`, so a fully paid invoice's receivable closes exactly;
   remainder (amount − Σrefs, or all of it if refs are null) `Cr 2900` at the payment-date
   rate; any difference `7900`. A refund (negative amount) is `Dr 2900 / Cr 1000`: the 2900 debit is
-  converted at the payment-date rate of the receipt it returns (the same customer's — ledger `entity_id` — latest
-  earlier payment in that currency whose `amount_minor − Σ invoice_refs` equals the refunded amount; the refund-date
-  rate if there is none), the cash credit at the refund-date rate, any difference `7900` (realised FX).
+  converted at the payment-date rate of the receipt it returns (the latest earlier booked payment in that currency
+  whose ledger rows carry the refund's `entity_id` and whose `amount_minor − Σ invoice_refs` equals the refunded
+  amount; the refund-date rate if there is none — the generator always books that receipt), the cash credit at the refund-date rate, any difference `7900` (realised FX).
   Every journal (rows sharing payment_id, or an invoice's rows with payment_id null) balances: Σdebit == Σcredit.
 - Expenses: `Dr 6xxx / Cr 1000`, no invoice/payment ids.
 - Hard mode only (`difficulty: "hard"`): a cancelled invoice is reversed in full by a credit note,

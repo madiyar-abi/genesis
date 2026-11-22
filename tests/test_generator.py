@@ -87,27 +87,37 @@ class GeneratorTest(unittest.TestCase):
         # receipt-date rate, so clean books left the customer's unapplied cash below zero in base currency
         # (round 21, night/r21/ledger_identity.py: D01 seed 41006, E0342). It is the receipt's carrying amount now;
         # the cash difference is realised FX (7900).
+        # Default seeds 255 and 284 used to merge two overpayments into one receipt, so no refund matched it.
         from auditenv.jury import SCENARIOS
+        cases = [(s, {**SCENARIOS["D03"], "difficulty": d}) for s in range(40) for d in ("default", "hard")]
         foreign = with_fx = 0
-        for seed in range(40):
-            for difficulty in ("default", "hard"):
-                ep = generate(seed, {**SCENARIOS["D03"], "difficulty": difficulty}, key="")
-                base, tables = ep["manifest"]["base_currency"], ep["tables"]
-                rows = defaultdict(list)
-                for r in tables["ledger"]:
-                    if r["payment_id"]:
-                        rows[r["payment_id"]].append(r)
-                balance = defaultdict(int)
-                for pay in sorted(tables["payments"], key=lambda p: datetime.fromisoformat(p["timestamp"])):
-                    entity = rows[pay["payment_id"]][0]["entity_id"]
-                    for r in rows[pay["payment_id"]]:
-                        if r["account"] == "2900":
-                            balance[entity] += r["credit_minor"] - r["debit_minor"]
-                    with self.subTest(seed=seed, difficulty=difficulty, payment=pay["payment_id"]):
-                        self.assertGreaterEqual(balance[entity], 0)
-                    if pay["amount_minor"] < 0 and pay["currency"] != base:
-                        foreign += 1
-                        with_fx += any(r["account"] == "7900" for r in rows[pay["payment_id"]])
+        for seed, config in cases + [(255, {}), (284, {})]:
+            difficulty = config.get("difficulty", "default")
+            ep = generate(seed, config, key="")
+            base, tables = ep["manifest"]["base_currency"], ep["tables"]
+            rows = defaultdict(list)
+            for r in tables["ledger"]:
+                if r["payment_id"]:
+                    rows[r["payment_id"]].append(r)
+            balance = defaultdict(int)
+            for pay in sorted(tables["payments"], key=lambda p: datetime.fromisoformat(p["timestamp"])):
+                entity = rows[pay["payment_id"]][0]["entity_id"]
+                for r in rows[pay["payment_id"]]:
+                    if r["account"] == "2900":
+                        balance[entity] += r["credit_minor"] - r["debit_minor"]
+                with self.subTest(seed=seed, difficulty=difficulty, payment=pay["payment_id"]):
+                    self.assertGreaterEqual(balance[entity], 0)
+                if pay["amount_minor"] < 0:  # the receipt it returns exists (CONTRACT §2), no refund-date fallback
+                    receipts = [p for p in tables["payments"] if p["payment_id"] in rows
+                                and rows[p["payment_id"]][0]["entity_id"] == entity and p["currency"] == pay["currency"]
+                                and p["amount_minor"] - sum(r["amount_minor"] for r in p["invoice_refs"] or [])
+                                == -pay["amount_minor"]
+                                and datetime.fromisoformat(p["timestamp"]) < datetime.fromisoformat(pay["timestamp"])]
+                    with self.subTest(seed=seed, difficulty=difficulty, refund=pay["payment_id"]):
+                        self.assertTrue(receipts)
+                if pay["amount_minor"] < 0 and pay["currency"] != base:
+                    foreign += 1
+                    with_fx += any(r["account"] == "7900" for r in rows[pay["payment_id"]])
         self.assertGreater(foreign, 10)
         self.assertGreater(with_fx, 0)
 
