@@ -67,7 +67,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   any wording fix proposed as exact replacement text.
 
 ## rb (medium)
-- [ ] Z1 (rb) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r22-rb/j<B>.json`
+- [x] Z1 (rb) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base <B> --json /tmp/r22-rb/j<B>.json`
   for B in 28000, 29000 — files: night/LOG.md — accept: per run the policy table; call out oracle F1 < 1, reconcile
   F1 < 1, or random/flag_all return > -0.5.
 - [ ] Z2 (rb, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py` and
