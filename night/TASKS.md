@@ -128,7 +128,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   docs/CONTRACT.md, auditenv/generator.py, auditenv/verify.py, tests/, episodes/, trajectories*, scripts/golden data
   — accept: `env -u AUDITENV_SECRET uv run python -m auditenv.check` exit 0; `night/r21/ledger_identity.py
   --classify` refund class 0.
-- [ ] L2 (lead) Merge worker branches, review, fix real defects; REVIEW.md "Round 22", DESIGN §10 / README limitation
+- [x] L2 (lead) Merge worker branches, review, fix real defects; REVIEW.md "Round 22", DESIGN §10 / README limitation
   text updated (refund artefact removed, rounding residue stays), sync_docs, HANDOFF — accept: sync_docs --check no
   drift.
 - [x] D (lead) `docs/DEMO.md` re-verified against the actual demo output — accept: every number reproduced.

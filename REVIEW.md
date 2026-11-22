@@ -544,3 +544,14 @@ evidence tasks (night/TASKS.md, night/LOG.md).
 - Evidence sweeps on unseen seeds (workers): verify 6000–7999, fuzz 16000–17999 default and hard, config sweeps
   78000–83999, stress 12000–12299, policy text 56000–56199, chronology 56000–56299, text auditor 54000–54099, jury_run
   28000–31000, re-export diff, golden, mutants, miner, attack, jury modules ×3: 0 problems.
+- Re-checks on the final generator (FIX1–3, wording `f713586`): `ledger_identity --classify` 41000–41299 and
+  57000–57299 → 0 clean violations of any class; text auditor (updated: a per-ref expected credit gives a 1-minor-unit
+  FP on a completing part, D01 hard seed 58001) 58000–58099 → F1 1.000, 0 discrepancies on 4,200 episodes; policy
+  text 59000–59199 → 0 unexpected failures (24,500 completing remittances); chronology 59000–59299 → 0 unexplained in
+  clean configs; codex2's FIX2 review → 124,905 completing refs, 0 posting mismatches (wording made explicit: strictly
+  earlier timestamps; same-instant final parts keep the per-ref rule, 3 base-currency cases); clean-room paired
+  60000–60009 → 400/400 pairs equal; D-matrix (updated to the final rules) 50000–50199 and 61000–61199 → 0 failures on
+  16,000 episodes; verify 8000–9999 6000/6000; fuzz 18000–18999 default and hard, configs 84000–86999, stress
+  13000–13299, `fuzz --configs 20000` (8,037 hard, max 59 steps, as PITCH says); scenarios through `judge_adapter`,
+  extreme configs, jury copies, jury_run 32000/33000; re-export diff 0, golden 80/80, mutants 22/22, attack 0,
+  sensitivity table equal to DESIGN; demo equal to DEMO.md. All green.
