@@ -631,3 +631,33 @@ Task G15 complete.
 - scripts/golden.py --check: exit 0 ("All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json.")
 - scripts/mutate_reward.py: exit 0 ("22/22 mutants killed.").
 2026-11-22 05:52 lead — Merged top-up results so far: codex1 X4 ledger_identity on the FIX2 rule → 0 clean violations on 41000–41299 and 57000–57299; X5 text auditor updated (old per-ref rule gave a 1-minor-unit FP, D01 hard seed 58001) → F1 1.000, 0 discrepancies on 58000–58099; codex2 Y4 policy_text 59000–59199 0 unexpected (24,500 completing remittances checked), chronology 59000–59299 0 unexplained in clean configs; Y5 FIX2 review: 124,905 completing refs, 0 posting mismatches, 0 out-of-period/credit-note/reissue completions; 3 same-instant final parts (base currency, closed anyway). Acted on Y5 wording: CONTRACT §2 and policy.json now say "strictly earlier timestamp, booked or not" and that two final parts at the same instant keep the per-ref rule. Re-exported (policy text), check exit 0, sync no drift, golden 80/80. PITCH/DEMO re-verified: demo seed 2003 output matches DEMO.md (326 rows, 69 invoices, 286 / 351 331, 0.958, 22 steps); PITCH hard-split facts (20 FP, 6 missed duplicates, 46 issues) re-derived with auditenv.analyze; 20,000-config fuzz for the "59 actions" claim running.
+2026-11-22 05:59 rb — Z4 done: re-checks on the final generator (HEAD 58bd488, includes FIX a8538c7, FIX2 and the
+Y5 completing-ref wording f713586/58bd488). Merged origin/night/2026-11-22-r22 (fast-forward). All commands from
+repo root; full logs in /tmp/r22-rb/z4_*.log.
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py` — exit 0, 4 s wall.
+  Summary: "Z1: 20 scenarios x 2 difficulties x 5 seeds (32000-32004) x 2 policies = 400 closed runs through
+  judge_adapter, 4.3 s total". FLAGS (0): none. Every scenario×difficulty row: reconcile/reconcile_hard mean F1
+  1.000, min F1 1.000; flag_all mean return −1.000 everywhere (never > 0, never > −0.5). Max steps 50 (D06–D08
+  hard), max episode time 0.013 s.
+  Call-out (Z2 criterion, same as Z2 on FIX): 23 NOTES where per-scenario mean return is below the README
+  20-scenario mean 0.959 — hard rows 0.914–0.922 and default D06–D08 0.956. Adapter's own note explains it:
+  "README value is a 20-scenario mean, per-scenario return varies with inspection cost 0.002/step"; F1 is 1.000
+  in all of them, so this is expected per-scenario variance, not a regression.
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` — exit 0, 11 s wall.
+  Summary: "Outcomes: {'valid': 300, 'rejected': 72, 'failure': 0}. Total: 372." All 72 rejections are the
+  expected "ValueError: at most 12 issues per episode" guard. All 300 valid configs: exact issue counts,
+  reconcile F1=1.0 (0 valid rows with F1 != 1.0).
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` — exit 0, 1 s wall.
+  10 rewrite variants (CSV columns shuffled, CRLF, CSV/JSON/JSONL BOM, no final newline, pretty/compact JSON,
+  JSONL keys reversed, combined) × 10 reference episodes: Accepted 10, Rejected 0, Scores equal 10 each.
+  Summary: "Semantically equivalent rewrite discrepancies: 0".
+- `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 32000` — exit 0, 2 s wall.
+  Seeds 32001–32020: random_explorer F1 0.000 return −1.000; reconcile F1 1.000 return 0.960 (max 25 steps);
+  flag_all F1 0.000 return −1.000; oracle F1 1.000 return 1.000. No Z1 call-outs (oracle/reconcile F1 = 1,
+  random/flag_all return ≤ −0.5).
+- `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 33000` — exit 0, 2 s wall.
+  Seeds 33001–33020: identical policy table (reconcile 1.000/0.960, max 24 steps; oracle 1.000/1.000;
+  random_explorer and flag_all −1.000). No Z1 call-outs.
+Assumption: "final generator" = current origin/night/2026-11-22-r22 HEAD at merge time (58bd488); scenarios_adapter
+uses its built-in seed base 32000–32004 (no flag needed). No product code touched; only night/TASKS.md (Z4 [x])
+and this log.
