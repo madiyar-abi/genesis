@@ -70,3 +70,21 @@ A smoke check exercised embedded replacements, a longer ID sharing a prefix, and
   B=28000: random_explorer P/R/F1 0/0/0 return -0.903 steps 33.0 max 33 time 0.023 s max 0.024 s; reconcile 1.000/1.000/1.000 return 0.960 steps 21.1 max 24 time 0.023 s max 0.025 s; flag_all 0/0/0 return -1.000 steps 3.6 max 4 time 0.020 s max 0.022 s; oracle 1.000/1.000/1.000 return 1.000 steps 1.0 time 0.003 s max 0.004 s.
   B=29000: random_explorer 0/0/0 return -0.903 steps 33.0 max 33 time 0.022 s max 0.023 s; reconcile 1.000/1.000/1.000 return 0.960 steps 21.0 max 24 time 0.022 s max 0.023 s; flag_all 0/0/0 return -1.000 steps 3.6 max 4 time 0.020 s max 0.023 s; oracle 1.000/1.000/1.000 return 1.000 steps 1.0 time 0.003 s max 0.004 s.
   No call-outs: oracle F1 = 1.000 and reconcile F1 = 1.000 in both runs; random return -0.903 and flag_all -1.000, both ≤ -0.5. Next: Z2/Z3 are gated on the FIX commit (`generator: realised FX on refunds`), not yet on origin/night/2026-11-22-r22 — will re-check after fetch.
+
+2026-11-22 05:20 gemini1b — G4 fuzz sweep on seeds 17000-17999 (default + hard):
+Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 17000-17999` -> exit 0, wall time 79.27 s.
+Summary:
+default mode, seeds 17000-17999: 3000 episodes (1989 dirty, 1011 clean) in 79.2 s
+  episodes with a problem (exception / verifier / oracle): 0
+  random explorer reward > 0: 252/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+  flag-all reward < 0: 3000/3000
+FUZZ PASSED
+
+Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 17000-17999 --hard` -> exit 0, wall time 287.16 s.
+Summary:
+hard mode, seeds 17000-17999: 3000 episodes (1991 dirty, 1009 clean) in 287.1 s
+  episodes with a problem (exception / verifier / oracle): 0
+  random explorer reward > 0: 237/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+  flag-all reward < 0: 3000/3000
+FUZZ PASSED
+Task G4 complete.

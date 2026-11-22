@@ -86,7 +86,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
 - [x] G3 (gemini1b, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds
   12000-12299` and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds
   12000-12299` — accept: per command the summary line + wall time.
-- [ ] G4 (gemini1b, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 17000-17999` and the same
+- [x] G4 (gemini1b, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 17000-17999` and the same
   with `--hard` — accept: both summaries + wall times.
 
 ## gemini2a (evidence only, files: night/LOG.md)
