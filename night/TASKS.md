@@ -73,7 +73,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
 - [x] Z2 (rb, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py` and
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` — files: night/LOG.md — accept:
   exit codes + summary tables; reconcile below README value or flag_all > 0 called out.
-- [ ] Z3 (rb, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` and the Z1
+- [x] Z3 (rb, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` and the Z1
   commands for B in 30000, 31000 — files: night/LOG.md — accept: as Z1 + jury_copy summary.
 
 ## gemini1a (evidence only, files: night/LOG.md)
