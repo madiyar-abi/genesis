@@ -124,7 +124,7 @@ episodes only through `judge_adapter.generate_episode`.
   accept: per split the `N/N episodes valid` line.
 - [x] G12 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, final reward/score lines quoted;
   compare with the numbers in docs/DEMO.md and call out any difference.
-- [ ] G13 (gemini3b) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 34000` and the same for
+- [x] G13 (gemini3b) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 34000` and the same for
   35000, 36000 — accept: per run the policy table; call out oracle F1 < 1, reconcile F1 < 1, or random/flag_all
   return > -0.5.
 
