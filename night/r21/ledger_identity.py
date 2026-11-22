@@ -8,7 +8,7 @@ from fractions import Fraction
 from auditenv.generator import generate
 from auditenv.jury import SCENARIOS
 
-CHECKS = ("journal", "ar_running", "ar_close", "unapplied_running", "fx", "trial")
+CHECKS = ("journal", "ar_running", "ar_close", "unapplied_running", "refund_2900", "fx", "trial")
 
 
 def amount(row):
@@ -17,6 +17,10 @@ def amount(row):
 
 def row_ids(rows):
     return ",".join(row["row_id"] for row in rows) or "(no ledger rows)"
+
+
+def unallocated(payment):
+    return payment["amount_minor"] - sum(ref["amount_minor"] for ref in payment["invoice_refs"] or [])
 
 
 def audit(tables, manifest, policy):
@@ -62,6 +66,12 @@ def audit(tables, manifest, policy):
     for key, rows in journals.items():
         if key[1]:
             payment_journals[key[1]].extend(rows)
+    receipts = defaultdict(list)
+    for payment in tables["payments"]:
+        if payment["amount_minor"] > 0 and unallocated(payment) > 0:
+            for entity in {row["entity_id"] for row in payment_journals[payment["payment_id"]]}:
+                key = (entity, payment["currency"], unallocated(payment))
+                receipts[key].append(datetime.fromisoformat(payment["timestamp"]))
     period = policy["period"]
     checked_fx_ids = set()
     for pay in tables["payments"]:
@@ -77,10 +87,17 @@ def audit(tables, manifest, policy):
             applied[invoice_id] += cash_applied
             expected_ar += cash_applied
         cash = convert(pay["amount_minor"], pay["currency"], pay["timestamp"])
-        remainder = convert(pay["amount_minor"] - sum(ref["amount_minor"] for ref in refs),
-                            pay["currency"], pay["timestamp"])
-        expected_fx = expected_ar + remainder - cash
         rows = payment_journals[payment_id]
+        remainder_date = datetime.fromisoformat(pay["timestamp"])
+        if pay["amount_minor"] < 0:
+            entity = next((row["entity_id"] for row in rows if row["account"] == "1000"), None)
+            key = (entity, pay["currency"], -pay["amount_minor"])
+            remainder_date = max((date for date in receipts[key] if date < remainder_date), default=remainder_date)
+        remainder = convert(unallocated(pay), pay["currency"], remainder_date.isoformat())
+        if pay["amount_minor"] < 0:
+            check("refund_2900", sum(amount(row) for row in rows if row["account"] == "2900"),
+                  -remainder, row_ids(rows), f"{payment_id} 2900 rate date={local_date(remainder_date.isoformat())}")
+        expected_fx = expected_ar + remainder - cash
         fx_rows = [row for row in rows if row["account"] == "7900"]
         bank = sum(amount(row) for row in rows if row["account"] == "1000")
         credits = -sum(amount(row) for row in rows if row["account"] == "1200")
@@ -170,8 +187,7 @@ def classify(tables, manifest, policy, violations):
             for row in ordered:
                 doc = payments[row["payment_id"]]
                 currency = doc["currency"]
-                refs = doc["invoice_refs"] or []
-                remainder = doc["amount_minor"] - sum(ref["amount_minor"] for ref in refs)
+                remainder = unallocated(doc)
                 currency_credit[currency] += remainder
                 if -amount(row) != convert(remainder, currency, doc["timestamp"]) or currency_credit[currency] < 0:
                     break
@@ -210,32 +226,41 @@ def classify_clean(lo, hi):
     print("| Config | Difficulty | FX refund (a) | AR rounding (b) | Other (c) | Max (a) base minor | Max (a) % |")
     print("|---|---|---:|---:|---:|---:|---:|")
     total = Counter()
-    other = []
+    details = []
+    by_check = []
     for name in ("D01", "D02", "D03", "D04", "D05"):
         for difficulty in ("default", "hard"):
             counts = Counter()
+            checked, mismatched = Counter(), Counter()
             max_minor, max_percent = 0, Fraction(0)
             for seed in range(lo, hi + 1):
                 episode = generate(seed, {**SCENARIOS[name], "difficulty": difficulty})
                 tables, manifest, policy = (episode[key] for key in ("tables", "manifest", "policy"))
-                _, violations = audit(tables, manifest, policy)
+                checks, violations = audit(tables, manifest, policy)
+                checked.update(checks)
                 for category, residue, refund, violation in classify(tables, manifest, policy, violations):
                     counts[category] += 1
                     if category == "a":
                         max_minor = max(max_minor, residue)
                         max_percent = max(max_percent, Fraction(100 * residue, refund))
-                    elif category == "c":
-                        check, ids, actual, expected, detail, _ = violation
-                        other.append(f"- {name}/{difficulty} seed {seed} {check} ({ids}): "
-                                     f"observed {actual}, expected {expected}; {detail}")
+                    check, ids, actual, expected, detail, _ = violation
+                    mismatched[check] += 1
+                    details.append(f"- {name}/{difficulty} seed {seed} class {category} {check} ({ids}): "
+                                   f"observed {actual}, expected {expected}; {detail}")
             total.update(counts)
             print(f"| {name} | {difficulty} | {counts['a']} | {counts['b']} | {counts['c']} | "
                   f"{max_minor} | {float(max_percent):.6f}% |", flush=True)
+            cells = [f"{checked[k]:,} / {mismatched[k]:,}" for k in CHECKS]
+            by_check.append(f"| {name} | {difficulty} | " + " | ".join(cells) + " |")
+    print("\nChecks executed / mismatches\n")
+    print("| Config | Difficulty | " + " | ".join(CHECKS) + " |")
+    print("|---|---|" + "---:|" * len(CHECKS))
+    print("\n".join(by_check))
     print(f"\nClassified {sum(total.values())} clean violations: (a) {total['a']}, (b) {total['b']}, (c) {total['c']}.")
-    if other:
-        print("\nOther violations:")
-        print("\n".join(other))
-    return bool(other)
+    if details:
+        print("\nViolations:")
+        print("\n".join(details))
+    return bool(total["a"] or total["c"])
 
 
 
