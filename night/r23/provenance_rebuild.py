@@ -320,12 +320,14 @@ class Episode:
         ar = [r for r in relevant if r["account"] == "1200" and r["invoice_id"] == doc["invoice_id"]]
         if ar:
             posted = -net(ar, "1200")
-        elif any(r["account"] == "2900" for r in relevant):
-            # A 2900 witness is sufficient if it proves the full cash went
-            # unapplied. For foreign cash the set needs its payment-date rate.
-            if payment["currency"] != self.base and self.fx_id(payment) not in ids:
+        elif "every ledger row of the payment" in self.policy["findings"]["evidence"]:
+            # Completeness is checked against the public journal's row IDs.
+            # The amount is computed exclusively from the cited records.
+            journal = self.after["pay:" + payment["payment_id"]]
+            if {r["row_id"] for r in relevant} != {r["row_id"] for r in journal}:
                 return None
-            if -net(relevant, "2900") != self.convert(payment["amount_minor"], payment):
+            if net(relevant, "1000") <= 0 or net(relevant, "2900") >= 0 or sum(
+                    r["debit_minor"] - r["credit_minor"] for r in relevant) != 0:
                 return None
             posted = 0
         else:

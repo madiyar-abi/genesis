@@ -970,3 +970,31 @@ Check results: oracle F1 = 1.000 across all runs (none < 1); reconcile F1 = 1.00
 | `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds 75000-75099` | 0 | 55.81 s | 4,200 episodes, mean F1 1.000000 in all 42 cohorts, `Discrepancy entries: 0` |
 
 Next: X4.
+2026-11-22 07:05 codex2 — Y3 complete on e23958c. The checker reads the published whole-journal rule from policy.json, requires every public journal row ID and a balanced cash/unapplied-cash posting, and computes the amount from the cited records. The earlier failing seeds 72075 and 72077 each passed all three checks in focused hard-default replays.
+
+| Command | Exit | Wall | Rebuilt | Discrepancy | Evidence |
+|---|---:|---:|---:|---:|---:|
+| `/usr/bin/time -p env PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r23.provenance_rebuild --seeds 72000-72099` | 0 | 47.02 s | 4200/4200 | 4200/4200 | 4200/4200 |
+| `/usr/bin/time -p env PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r23.provenance_rebuild --seeds 74000-74099` | 0 | 47.11 s | 4200/4200 | 4200/4200 | 4200/4200 |
+
+Each range produced 42/42 cohorts at 100/100 on all three conditions. Full output in /tmp/r23-codex2/y3-72000-72099.log and /tmp/r23-codex2/y3-74000-74099.log. Next for codex2: Y4 set-only review.
+
+2026-11-22 07:07 codex2 — Y4 complete. Reviewed the e23958c evidence contract and exported citations.
+
+Ran `/usr/bin/time -p env PYTHONPATH=. env -u AUDITENV_SECRET uv run python /tmp/r23-codex2/y4_sets.py default` and the same command with `hard`. Exit 0 on both, in 18.93 s and 49.53 s, respectively. Seeds 0–999 in each configuration/difficulty.
+
+| Config | Difficulty | Episodes | Nothing-allocated sets | Foreign | Merged | Foreign and merged | I1 partial allocations |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Mixed | Default | 1000 | 299 | 123 | 55 | 19 | 301 |
+| D09 | Default | 1000 | 1000 | 402 | 219 | 77 | 0 |
+| D11 | Default | 1000 | 412 | 141 | 79 | 24 | 0 |
+| D16 | Default | 1000 | 0 | 0 | 0 | 0 | 1000 |
+| Mixed | Hard | 1000 | 313 | 129 | 58 | 23 | 277 |
+| D09 | Hard | 1000 | 1000 | 404 | 187 | 65 | 0 |
+| D11 | Hard | 1000 | 391 | 162 | 80 | 33 | 0 |
+| D16 | Hard | 1000 | 0 | 0 | 0 | 0 | 1000 |
+| Total | Both | 8000 | 3415 | 1361 | 678 | 241 | 2578 |
+
+Sets over 10 IDs: **0** (max 7). Sets with unbalanced journal rows: **0**. Sets with an AR credit to the target invoice: **0**. Missing or extraneous citations, incorrect computed amounts or currencies, and failed I1 partial reconstructions: **0**. Full outputs: /tmp/r23-codex2/y4-{default,hard}.log.
+
+Verdict: the payment doc supplies the target remittance, the invoice identifies its currency and issue date, and the cited rate supplies the conversion when foreign. Summing credits for the target invoice within the cited payment journal yields zero even if the same payment credited other invoices. The cited records therefore support expected minus posted without a payment-date FX lookup. The scan independently confirmed that the cited rows are the whole journal by comparing row ID sets. That completeness check matters because journal balance alone is not a completeness certificate. I1 remained partially allocated in all 2,578 cases, and its cited target AR row supports the shortfall independently of the cash-side FX discrepancy. No wording change proposed. Next for codex2: idle unless another task is assigned.
