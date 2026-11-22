@@ -1,0 +1,3 @@
+# Round 26 — tasks
+
+No tasks: no valuable improvement found (see night/LOG.md). Workers: none queued — IDLE.
