@@ -41,7 +41,7 @@ episodes only through `judge_adapter.generate_episode`.
   (or each disagreement quoted with the submission and both results, and which reading of the text is right).
 
 ## codex2 (strong)
-- [ ] Y1 (codex2) Clean-room Block 2 "before/after" check, written only from night/CASE_UPDATES.md lines 111–119
+- [x] Y1 (codex2) Clean-room Block 2 "before/after" check, written only from night/CASE_UPDATES.md lines 111–119
   (conditions of a passed episode), README "Jury adapter" (the `grader/provenance.json` paragraph) and
   docs/CONTRACT.md §2 (posting rules) / `public/policy.json`: `night/r23/provenance_rebuild.py`. For each episode:
   (1) rebuild the books before the error by replacing every provenance `changes[].after` journal with its `before`
@@ -57,7 +57,7 @@ episodes only through `judge_adapter.generate_episode`.
   night/LOG.md — accept: LOG table scenario × condition → holds N/M; every failure quoted with seed, difficulty,
   issue and ids; script exits 1 on any failure. If a condition cannot be checked from the documented provenance
   format, say exactly which fact is missing (that is a finding too).
-- [ ] Y2 (codex2) Engineering anchors as a strict jury member (CASE_UPDATES lines 168–175): for each of the five
+- [x] Y2 (codex2) Engineering anchors as a strict jury member (CASE_UPDATES lines 168–175): for each of the five
   criteria give 0/1/2 with evidence (file:line, command + its output). Specifically check: the single README command
   on a fresh clone in /tmp/r23-codex2/clone (no undocumented step); `trajectories.jsonl` at the repo root has
   episode_id, step, action, observation, reward, terminated, truncated on every line and no truth value in any
