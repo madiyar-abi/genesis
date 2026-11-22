@@ -895,3 +895,5 @@ hard mode, seeds 20000-20999: 3000 episodes (1987 dirty, 1013 clean) in 425.5 s
   flag-all reward < 0: 3000/3000
 FUZZ PASSED
 Task G4 complete.
+2026-11-22 06:26 gemini2a — G5 done. Command: env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 10000-11999. Exit code 0, wall time 82.4 s. Output: "6000/6000 episodes valid; episodes with problems: 0". 0 problems found across 6,000 episodes on seeds 10000–11999.
+2026-11-22 06:32 gemini2a — G6 done. Command: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 90000. Exit code 0, wall time 283.3 s. Summary: "config sweep, cases 90000-92999: 3000 random configs (1260 hard) in 283.3 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56. FUZZ PASSED". Max steps: 56. Problems: 0.

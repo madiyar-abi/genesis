@@ -98,9 +98,9 @@ episodes only through `judge_adapter.generate_episode`.
   `--hard` — accept: both summaries + wall times.
 
 ## gemini2a (evidence only, files: night/LOG.md)
-- [ ] G5 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 10000-11999` — accept: last line +
+- [x] G5 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 10000-11999` — accept: last line +
   wall time.
-- [ ] G6 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 90000` — accept:
+- [x] G6 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 90000` — accept:
   summary + wall time + max steps.
 
 ## gemini2b (evidence only, files: night/LOG.md)
