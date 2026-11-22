@@ -1,4 +1,4 @@
-# ROUND 26 — improve (branch night/2026-11-22-r26, freeze 2026-11-22 18:00)
+# ROUND 27 — improve (branch night/2026-11-22-r27, freeze 2026-11-22 18:00)
 
 **Open improvement round** — follow NIGHT.md → "Continuous mode": review, pick
 the highest-value improvements for the jury (SPEC §10), implement, verify, DONE.
