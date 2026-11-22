@@ -40,7 +40,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.ledger_identity --classify --seeds 41000-41299` and
   `--seeds 53000-53299` — files: night/r21/ledger_identity.py, night/LOG.md — accept: per check × config counts; the
   refund class (a) must be 0 in clean configs; any remaining violation quoted with seed and row ids.
-- [ ] X3 (codex1, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds
+- [x] X3 (codex1, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds
   54000-54099` (update the auditor only if it relies on the old refund rule; say so in LOG) — files:
   night/r21/text_auditor.py, night/LOG.md — accept: table + discrepancy count (expected F1 1.000, 0 discrepancies).
 
