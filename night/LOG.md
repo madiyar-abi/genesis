@@ -1096,3 +1096,22 @@ Verdict: the payment doc supplies the target remittance, the invoice identifies 
   oracle F1 1.000 return 1.000. Acceptance triggers checked: no reconcile F1 < 1, no flag_all > −0.5 (random −0.903 also ≤ −0.5).
   Note: all closed runs used the machine grader key ~/.auditenv/grader.key (AUDITENV_SECRET unset), as the adapter banner states.
   Next: no unchecked (rb) tasks left in night/TASKS.md.
+
+2026-11-22 07:09 codex1 — X4 done. Exit 0, real 62.41 s.
+`PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r23.c_matrix --seed 76000 --seed 76001 --seed 76002 --seed 76003 --seed 76004`
+C02 includes missing task text; C19 includes closed submits with 31 findings and a non-object payload.
+
+| Check | Result | Check | Result |
+|---|---|---|---|
+| C01 | pass 10/10 | C11 | pass 10/10 |
+| C02 | pass 10/10 | C12 | pass 10/10 |
+| C03 | pass 10/10 | C13 | pass 10/10 |
+| C04 | pass 10/10 | C14 | pass 10/10 |
+| C05 | pass 10/10 | C15 | pass 10/10 |
+| C06 | pass 10/10 | C16 | pass 10/10 |
+| C07 | pass 10/10 | C17 | pass 10/10 |
+| C08 | pass 10/10 | C18 | pass 10/10 |
+| C09 | pass 10/10 | C19 | pass 10/10 |
+| C10 | pass 10/10 | C20 | pass 10/10 |
+
+Failures: none.

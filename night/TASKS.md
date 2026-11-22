@@ -49,7 +49,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   `findings.evidence`: with nothing allocated cite every ledger row of the payment) — change only that, say so in
   LOG — then `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds 63000-63099` and
   `--seeds 75000-75099` — files: night/r21/text_auditor.py, night/LOG.md — accept: F1 1.000, 0 discrepancies on both.
-- [ ] X4 (codex1, after FIX) Extend `night/r23/c_matrix.py` with the two boundary cases fixed in `5700626`: C02 on a
+- [x] X4 (codex1, after FIX) Extend `night/r23/c_matrix.py` with the two boundary cases fixed in `5700626`: C02 on a
   fixture copy without `public/task.txt` (task must be a non-empty str) and a closed-mode submit with 31 findings /
   non-object findings (policy sees only `{"accepted": true}` or a bounded structure error — never "accepted" for an
   invalid structure; reward 0; grader return -1). Run seeds 76000–76004 × default/hard. Keep LOG short: table +
