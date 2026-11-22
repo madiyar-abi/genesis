@@ -1115,3 +1115,6 @@ C02 includes missing task text; C19 includes closed submits with 31 findings and
 | C10 | pass 10/10 | C20 | pass 10/10 |
 
 Failures: none.
+
+2026-11-22 07:21 lead — L3 merge 2: merged codex1 X4 (c_matrix boundary cases for 5700626: C02 without task.txt, closed submit with 31 / non-object findings; seeds 76000–76004, 20/20 rows pass 10/10). All other worker branches had nothing new. `auditenv.check` exit 0 (568 tests, 56.3 s); `sync_docs --check --json` no drift.
+2026-11-22 07:21 lead — L5 done: PITCH/README/DESIGN tables match the check JSON (sync_docs no drift); REVIEW "Round 23" has the X4 line; HANDOFF already states Round 23. All tasks [x] → night/DONE. Assumption: no further valuable work in this round's scope; the marathon opens the next round from main.

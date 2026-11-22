@@ -182,8 +182,8 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   docs claims (README "For the jury", "Jury adapter", "Honest limitations", DESIGN §9–10) against the code. Fix
   every confirmed defect test-first — files: as found, REVIEW.md — accept: REVIEW.md "Round 23" with evidence;
   `auditenv.check` exit 0.
-- [ ] L3 (lead) Merge worker branches, review, fix what the clean-room checkers find (test-first) — accept: check
+- [x] L3 (lead) Merge worker branches, review, fix what the clean-room checkers find (test-first) — accept: check
   exit 0 after each merge.
 - [x] L4 (lead) `docs/DEMO.md` re-verified against a fresh demo run — accept: every number matches.
-- [ ] L5 (lead) `docs/PITCH.md` re-verified against check/analyze/fuzz output; REVIEW "Round 23", HANDOFF, night/DONE —
+- [x] L5 (lead) `docs/PITCH.md` re-verified against check/analyze/fuzz output; REVIEW "Round 23", HANDOFF, night/DONE —
   accept: `sync_docs --check` no drift, check exit 0.

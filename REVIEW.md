@@ -586,6 +586,9 @@ evidence tasks (night/TASKS.md, night/LOG.md).
   hard task text names spacing (re-typing turns `REF-1` into `REF 1`).
 - Docs claims audit: nine stale prose numbers after round 22 fixed (`f7fae58`: naive FPs, seed-sweep counts, miner
   precisions, CHECKS counts, a test path).
+- After the fixes: `c_matrix.py` extended with both boundary cases of `5700626` (C02 on a copy without `task.txt`;
+  closed submit with 31 findings / non-object findings → bounded `invalid_findings`, grader return −1), seeds
+  76000–76004: 20/20 rows pass 10/10. Final `auditenv.check` exit 0 (568 tests, 56.3 s), `sync_docs --check` no drift.
 - Decisions: `explanation` stays optional (CONTRACT §5; no published row tests its absence, and requiring it could
   turn an organiser policy's correct finding into a structural −1); `limit: null` stays `bad_params`; the I2 cutoff
   amount includes the wrong-rate part that fx_error also measures (documented scenario).
