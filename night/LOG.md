@@ -899,3 +899,24 @@ Task G4 complete.
 2026-11-22 06:32 gemini2a — G6 done. Command: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 90000. Exit code 0, wall time 283.3 s. Summary: "config sweep, cases 90000-92999: 3000 random configs (1260 hard) in 283.3 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56. FUZZ PASSED". Max steps: 56. Problems: 0.
 2026-11-22 06:25 gemini2b — G7 done: re-exported dev (configs/dev.json, 10 episodes, 0s), train (configs/train.json, 10 episodes, 0s), hard (configs/eval_hard.json, 20 episodes, 1s) into /tmp/r23-gemini2b/<split>; diff -r against committed episodes/<split> returned exit code 0 for all three splits. Next: G8.
 2026-11-22 06:36 gemini2b — G8 done: `uv run python scripts/golden.py --check` exit 0 ("All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json.", 1s); `uv run python scripts/mutate_reward.py` exit 0 ("22/22 mutants killed.", 401s); `uv run python scripts/shortcut_miner.py --seeds 6000-6999 --report-only` exit 0 ("Shortcut miner: default mode, 1000 seeds x random_mix/heavy = 2000 episodes (62.7 s). Flagged values: 18.", duplicate 2 aff/2 ev P=0.998/0.979, payment_alloc 9 aff/2 ev max P=1.000, fx_error 3 aff/0 ev max P=0.694; 18 flagged on seeds 6000-6999 vs 16 in DESIGN §10 due to acct2900 amount_digits=10 P=1.000 with 30/30 support and acct2900 position_decile=9 P=0.536 for fx_error, all reflecting the documented last-day / 2900 / duplicate mechanisms); `uv run python scripts/shortcut_miner.py --seeds 6000-6999 --report-only --hard` exit 0 ("Shortcut miner: hard mode, 1000 seeds x random_mix/heavy = 2000 episodes (124.4 s). Flagged values: 11.", payment_alloc 8 aff/1 ev max P=0.833, fx_error 2 aff/0 ev max P=0.704, duplicate 0 aff/0 ev max P=0.380; all 11 match DESIGN §10). All assigned tasks complete.
+2026-11-22 06:26 gemini3a — G9 done: four jury modules (tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired) executed under three hash seeds (PYTHONHASHSEED=0, 1, 12345).
+- H=0: exit 0, wall 3.85s, summary: "Ran 73 tests in 3.749s\n\nOK"
+- H=1: exit 0, wall 4.05s, summary: "Ran 73 tests in 3.947s\n\nOK"
+- H=12345: exit 0, wall 3.79s, summary: "Ran 73 tests in 3.690s\n\nOK"
+All 73 tests passed cleanly across all three hash seeds.
+2026-11-22 06:26 gemini3a — G10 done: attack search and sensitivity analysis executed.
+1. `env -u AUDITENV_SECRET uv run python -m auditenv.attack`: exit 0, wall 0.77s.
+   Summary: "=== HANDOFF R1 Automated Attack Search: PASSED ===\nSeeds evaluated: 20 (clean: 5, dirty: 15)\nTotal mutations tested: 11000\nTotal violations detected: 0\nElapsed time: 0.702 s"
+2. `uv run python scripts/sensitivity.py`: exit 0, wall 3.92s.
+   Summary: dev (10 episodes) & hard (20 episodes) mean returns across step costs (0.001, 0.002, 0.005) and tolerances (0, 1, 100).
+   Comparison with docs/DESIGN.md §6 table:
+   - dev oracle: cost 1.000/1.000/1.000, tol 1.000/1.000/1.000 (matches 1.000 across all)
+   - dev reconcile: cost 0.9782 (0.978) / 0.9564 (0.956) / 0.8910 (0.891), tol 0.9564 (0.956) across all (exact match)
+   - dev naive_reconcile: cost -0.4645 (-0.465) / -0.4776 (-0.478) / -0.5169 (-0.517), tol -0.4776 (-0.478) across all (exact match)
+   - dev random: cost -0.8034 (-0.803) / -0.8068 (-0.807) / -0.8170 (-0.817), tol -0.8068 (-0.807) across all (exact match)
+   - dev flag_all: cost -1.000 / -1.000 / -1.000, tol -1.000 across all (exact match)
+   - hard oracle: cost 1.000/1.000/1.000, tol 1.000 across all (exact match)
+   - hard reconcile_hard: cost 0.9580 (0.958) / 0.9160 (0.916) / 0.7900 (0.790), tol 0.9160 (0.916) across all (exact match)
+   - hard reconcile: cost 0.3286 (0.329) / 0.2930 (0.293) / 0.1862 (0.186), tol 0.2930 (0.293) across all (exact match)
+   - hard naive_reconcile: cost -0.6833 (-0.683) / -0.7038 (-0.704) / -0.7651 (-0.765), tol -0.7038 (-0.704) across all (exact match)
+   Differences called out: 0 differences found; all values match docs/DESIGN.md §6 exactly.
