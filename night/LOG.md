@@ -1,6 +1,10 @@
 2026-11-22 05:00 lead — Round 22 started (open improvement round, freeze 18:00). Read NIGHT/HANDOFF/REVIEW/CASE_UPDATES/r20–r21 archive. Baseline check at 774570d: exit 0, 50.6 s. Decision: fix the round-21 refund FX artefact at the root (refund Dr 2900 at the rate of the receipt it returns, difference to 7900). Reason: every jury clean episode D01–D05 is generated with ensure_distractors and so contains a refund; a foreign one leaves the customer's 2900 below zero in base currency, which a jury "accounting equalities" check on clean books can fail (up to 5 × 1.25 points). Round 21 deferred it only for time; ~13 h remain and the change follows the round-20 re-export path. Rounding residue on AR (a few minor units) stays documented. Wrote TASKS.md: codex1 clean-room D-matrix + ledger_identity/text_auditor after FIX; codex2 clean-room paired transform + policy_text/chronology update + rule-ambiguity review; rb jury_run/scenarios; gemini sweeps gated on the FIX commit.
 2026-11-22 05:12 lead — L1 FIX done. Regression first: tests.test_generator...test_refund_clears_the_unapplied_cash_it_returns (D03 config, seeds 0–39 × default/hard: each customer's 2900 balance in base currency never below 0, >10 foreign refunds, some with 7900) failed on the old code (e.g. -29596), passes now. Rule (CONTRACT §2, policy.json ledger.payment): a refund debits 2900 at the payment-date rate of the receipt it returns = the same customer's (ledger entity_id) latest earlier payment in that currency whose amount − Σ invoice_refs equals the refunded amount (refund-date rate if none); cash at the refund-date rate; difference 7900. generator.State.refunded_receipt + verify.Books.refunded_receipt implement it independently; old generator now fails verify --seeds 0-199 (266/600), new passes 600/600. RNG stream preserved: the realised-FX row takes the cash row's tie (no random draw) and the expense filler target excludes those rows — compared with the old generator on 660 episodes (15 seeds × default/hard/heavy/D01–D20 both difficulties): invoices, payments, fx, truth types/ids/amounts and every non-2900/7900 ledger row identical; only row ids after an inserted 7900 row renumber. Snapshot counts updated (+57/+68 payment rows on 100 heavy seeds = the new 7900 rows; seed-7 hardening row ids R390/R445 → R391/R446). Re-exported episodes, trajectories, golden (80). check exit 0 (51.4 s), sync_docs no drift (no measured number changed), fuzz 0-999 3000 eps + hard 0-199 600 eps PASSED. night/r21/ledger_identity --classify on 41000–41299: refund class (a) 0 (was 920), rounding (b) 415 unchanged, 1985 "other" = all its old-rule fx check on the new refund 7900 rows (codex1 X2 updates the checker). DESIGN §10/README/PITCH limitation text: refund artefact removed, rounding residue stays. DESIGN worked-example row ids re-checked on the new exports: unchanged.
 
+2026-11-22 05:13 gemini1b — G3 stress test on seeds 12000-12299:
+Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 12000-12299` -> exit 0, wall time 7.37 s. Summary: `reconcile on 1200 default episodes (seeds 12000-12299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 33, truncated 0 (7.3 s)`
+Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 12000-12299` -> exit 0, wall time 20.48 s. Summary: `reconcile_hard on 1200 hard episodes (seeds 12000-12299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 57, truncated 0 (20.5 s)`
+Task G3 complete.
 2026-11-22 05:07 codex1 — X1 on 8cf7071. Ran `/usr/bin/time -p env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix > /tmp/r22-codex1/final.log 2> /tmp/r22-codex1/final.stderr` (exit 0, real 76.13 s). `8000 episodes; 0 failed per-episode checks`. The default private grader key is retained under /tmp/r22-codex1/key for local reproduction. The six clean checks apply to each of D01–D05, whose config repeats. Refunds match an earlier same-entity, same-currency unapplied receipt of the refunded amount and the ledger rule published by this pre-fix revision.
 
 | Scenario | Requirement (episodes out of 400) |
@@ -414,3 +418,21 @@ Proposed exact replacement for the refund portion of CONTRACT §2 and policy.jso
 
 2026-11-22 05:18 gemini1a — G1: ran `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 16000-16999` (exit 0, wall time 60.72 s: default mode, seeds 16000-16999: 3000 episodes (1986 dirty, 1014 clean), 0 problems, FUZZ PASSED) and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 16000-16999 --hard` (exit 0, wall time 242.27 s: hard mode, seeds 16000-16999: 3000 episodes (1991 dirty, 1009 clean), 0 problems, FUZZ PASSED). 0 problems found across 6,000 episodes. Next: G2.
 2026-11-22 05:22 gemini1a — G2: ran `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 78000` (exit 0, wall time 155.10 s: config sweep, cases 78000-80999: 3000 random configs (1176 hard) in 155.0 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 56, FUZZ PASSED). 0 problems found across 3,000 configs; max steps 56. All assigned tasks (G1, G2) complete.
+
+2026-11-22 05:20 gemini1b — G4 fuzz sweep on seeds 17000-17999 (default + hard):
+Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 17000-17999` -> exit 0, wall time 79.27 s.
+Summary:
+default mode, seeds 17000-17999: 3000 episodes (1989 dirty, 1011 clean) in 79.2 s
+  episodes with a problem (exception / verifier / oracle): 0
+  random explorer reward > 0: 252/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+  flag-all reward < 0: 3000/3000
+FUZZ PASSED
+
+Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 17000-17999 --hard` -> exit 0, wall time 287.16 s.
+Summary:
+hard mode, seeds 17000-17999: 3000 episodes (1991 dirty, 1009 clean) in 287.1 s
+  episodes with a problem (exception / verifier / oracle): 0
+  random explorer reward > 0: 237/3000 episodes, of them on dirty books: 0 (on clean books submitting nothing is the correct answer)
+  flag-all reward < 0: 3000/3000
+FUZZ PASSED
+Task G4 complete.
