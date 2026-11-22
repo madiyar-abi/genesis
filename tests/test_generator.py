@@ -121,6 +121,36 @@ class GeneratorTest(unittest.TestCase):
         self.assertGreater(foreign, 10)
         self.assertGreater(with_fx, 0)
 
+    def test_nothing_allocated_evidence_closes_the_payment_journal(self):
+        # With nothing allocated the set cited only the 2900 row: the missing AR credit could not be read from the
+        # set (round 23, night/r23/provenance_rebuild.py: D09 default seed 72000, PAY-453849; merged receipts
+        # also allocate to other invoices). Every row of the payment's journal is in the set now, so the set
+        # alone shows the journal balances without an AR credit for the invoice.
+        from auditenv.jury import SCENARIOS
+        checked = 0
+        for seed in range(30):
+            for config in (SCENARIOS["D09"], {**SCENARIOS["D09"], "difficulty": "hard"}, {}):
+                ep = generate(seed, config, key="")
+                rows = defaultdict(list)
+                for r in ep["tables"]["ledger"]:
+                    if r["payment_id"]:
+                        rows[r["payment_id"]].append(r)
+                payments = {p["payment_id"]: p for p in ep["tables"]["payments"]}
+                for issue in ep["truth"]["issues"]:
+                    if issue["type"] != "payment_allocation":
+                        continue
+                    pid = next(i for i in issue["affected_ids"] if i in payments)
+                    inv = next(i for i in issue["affected_ids"] if i != pid)
+                    journal = rows[pid]
+                    if any(r["account"] == "1200" and r["invoice_id"] == inv for r in journal):
+                        continue  # partial: the AR credit actually posted is in the set
+                    checked += 1
+                    with self.subTest(seed=seed, config=config, payment=pid):
+                        for evidence in issue["evidence_sets"]:
+                            self.assertLessEqual({r["row_id"] for r in journal}, set(evidence))
+                            self.assertLessEqual(len(evidence), 10)
+        self.assertGreater(checked, 20)
+
     def test_fully_paid_invoice_closes_its_receivable(self):
         # Each cash application used to be converted and rounded on its own, so an invoice paid in foreign parts
         # kept a minor unit in 1200 (18 % of clean D02 episodes, default and hard, seeds 0-299). The application that

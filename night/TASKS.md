@@ -19,8 +19,14 @@ import `auditenv/verify.py`, `auditenv/inject.py`, `auditenv/matcher.py`, `audit
 or the tests; they may import `judge_adapter`, `auditenv.jury` (for `SCENARIOS`) and `auditenv.money`, and generate
 episodes only through `judge_adapter.generate_episode`.
 
+**FIX COMMIT `e23958c`** (lead, `generator: nothing-allocated evidence cites the payment's whole journal…`): with
+nothing allocated, a payment_allocation evidence set now holds every ledger row of the payment (cash, 2900, other AR
+credits, 7900) instead of only the 2900 row; policy.json evidence/duplicate wording and the hard task text changed;
+episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head that contains it
+(`git fetch && git merge origin/night/2026-11-22-r23` first; `git log --oneline | grep e23958c`).
+
 ## codex1 (strong)
-- [ ] X1 (codex1) Clean-room Block 1 run, written only from night/CASE_UPDATES.md lines 31–98 (adapter interface,
+- [x] X1 (codex1) Clean-room Block 1 run, written only from night/CASE_UPDATES.md lines 31–98 (adapter interface,
   boundary rules, fixtures C/E/L/U, C01–C20) and README "Jury adapter": `night/r23/c_matrix.py`. Build fixtures with
   `judge_adapter.generate_episode` (C = clean config, E = one declared error, L = a table with ≥ 101 rows, U = an id
   chosen after reading the fixture's public files), then drive `judge_adapter.make_env()` from a *separate policy
@@ -29,7 +35,7 @@ episodes only through `judge_adapter.generate_episode`.
   over-60-s scenario — use the documented clock injection or a policy that sleeps; say which). Run on fixture seeds
   70000–70004 × default and hard. — files: night/r23/c_matrix.py, night/LOG.md — accept: LOG table C01–C20 → pass N/10;
   every fail quoted (stimulus → observed) with a one-command reproduction; script exits 1 on any fail.
-- [ ] X2 (codex1) Clean-room matcher differential, written only from night/CASE_UPDATES.md lines 120–211 (Block 3,
+- [x] X2 (codex1) Clean-room matcher differential, written only from night/CASE_UPDATES.md lines 120–211 (Block 3,
   "Точные соглашения matcher", M01–M12): `night/r23/matcher_diff.py` with your own implementation (structure limits
   first, sets, exact ids/currency, τ from `policy.json` `findings.tolerance_minor`, maximum-cardinality matching with
   the published tie rule, the reward formula). For 40 generated episodes (seeds 71000–71019 × default/hard, plus
@@ -39,6 +45,16 @@ episodes only through `judge_adapter.generate_episode`.
   and compare tp/fp/fn/precision/recall/f1/return with `judge_adapter.score_episode` (abs diff ≤ 1e-9; null fields
   on invalid). — files: night/r23/matcher_diff.py, night/LOG.md — accept: LOG: submissions compared, disagreements 0
   (or each disagreement quoted with the submission and both results, and which reading of the text is right).
+- [ ] X3 (codex1, after FIX) Update `night/r21/text_auditor.py` to the new published evidence rule (policy.json
+  `findings.evidence`: with nothing allocated cite every ledger row of the payment) — change only that, say so in
+  LOG — then `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds 63000-63099` and
+  `--seeds 75000-75099` — files: night/r21/text_auditor.py, night/LOG.md — accept: F1 1.000, 0 discrepancies on both.
+- [ ] X4 (codex1, after FIX) Extend `night/r23/c_matrix.py` with the two boundary cases fixed in `5700626`: C02 on a
+  fixture copy without `public/task.txt` (task must be a non-empty str) and a closed-mode submit with 31 findings /
+  non-object findings (policy sees only `{"accepted": true}` or a bounded structure error — never "accepted" for an
+  invalid structure; reward 0; grader return -1). Run seeds 76000–76004 × default/hard. Keep LOG short: table +
+  failures only (no full payload dumps; put long output in /tmp/r23-codex1/). — files: night/r23/c_matrix.py,
+  night/LOG.md — accept: all rows pass 10/10, script exit 0.
 
 ## codex2 (strong)
 - [x] Y1 (codex2) Clean-room Block 2 "before/after" check, written only from night/CASE_UPDATES.md lines 111–119
@@ -66,15 +82,25 @@ episodes only through `judge_adapter.generate_episode`.
   generator_version, uv.lock, Python pin) suffice to regenerate `episodes/` byte for byte; the measured failure
   analysis names a failure, its cause and a re-check. — files: night/LOG.md (scripts under /tmp/r23-codex2/) —
   accept: LOG table criterion → score → evidence; anything below 2 with the exact fix proposed (text or command).
+- [ ] Y3 (codex2, after FIX) Re-run `night/r23/provenance_rebuild.py` on seeds 72000–72099 and 74000–74099 (all
+  scenarios, both difficulties). Do not loosen the evidence check; if it needs the new published rule text, read it
+  from policy.json. — files: night/r23/provenance_rebuild.py, night/LOG.md — accept: evidence N/N in every row
+  (expected 4,200/4,200 per range); any failure quoted with seed/issue/ids.
+- [ ] Y4 (codex2, after FIX) Strict review of the FIX COMMIT diff: can a reader of the new set alone (two docs, the
+  payment's journal rows, the invoice-date rate) derive expected − posted for every nothing-allocated issue, incl.
+  merged receipts, foreign payments and I1 cases? Count on seeds 0–999 × default/hard/D09/D11: sets > 10 ids
+  (expected 0), sets whose rows do not balance (expected 0), sets with an AR credit to the invoice (expected 0).
+  — files: night/LOG.md (script under /tmp/r23-codex2/) — accept: three counts + verdict; any wording fix as exact
+  replacement text.
 
 ## rb (medium)
-- [ ] Z1 (rb) Re-run the existing independent checkers on unseen seeds:
+- [x] Z1 (rb) Re-run the existing independent checkers on unseen seeds:
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.ledger_identity --classify --seeds 62000-62299`,
-  `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds 63000-63099`,
+  (text_auditor moved to codex1 X3 — it needs the new evidence rule first)
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix --seeds 65000-65199` — files: night/LOG.md
   — accept: exit codes, summary lines verbatim; clean violations 0, F1 1.000 with 0 discrepancies, 0 failed checks;
   anything else quoted with seed/config/ids.
-- [ ] Z2 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 64000-64199`,
+- [x] Z2 (rb) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 64000-64199`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 64000-64299`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom --seeds 66000-66009` — files:
   night/LOG.md — accept: as Z1 (0 unexpected failures, 0 unexplained clean violations, all pairs equal).
@@ -83,55 +109,75 @@ episodes only through `judge_adapter.generate_episode`.
   `uv run` / `make` / `env` (skip docker, network and anything needing a key you don't have; say which you skipped)
   from the clone root. — files: night/LOG.md — accept: LOG table command → exit code → wall time; every non-zero exit
   quoted with its last 10 lines.
+- [ ] Z4 (rb, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py`,
+  `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs`,
+  `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy`,
+  `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 37000` — files: night/LOG.md — accept: exit
+  codes + summaries; reconcile F1 < 1 or flag_all > −0.5 called out.
 
 ## gemini1a (evidence only, files: night/LOG.md)
-- [ ] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 19000-19999` and the same with
+- [x] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 19000-19999` and the same with
   `--hard` — accept: both summary lines + wall times; any problem line verbatim.
-- [ ] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 87000` — accept:
+- [x] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 87000` — accept:
   summary + wall time + max steps.
+- [ ] G14 (gemini1a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 21000-21999` and the
+  same with `--hard` — accept: both summaries + wall times.
 
 ## gemini1b (evidence only, files: night/LOG.md)
-- [ ] G3 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 14000-14299` and
+- [x] G3 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 14000-14299` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 14000-14299` —
   accept: per command the summary line + wall time.
-- [ ] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999` and the same with
+- [x] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999` and the same with
   `--hard` — accept: both summaries + wall times.
+- [ ] G15 (gemini1b, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds
+  15000-15299`, the same with `--hard --stress reconcile_hard`, and `env -u AUDITENV_SECRET uv run python -m
+  auditenv.fuzz --configs 3000 --start 93000` — accept: summaries + wall times + max steps.
 
 ## gemini2a (evidence only, files: night/LOG.md)
-- [ ] G5 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 10000-11999` — accept: last line +
+- [x] G5 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 10000-11999` — accept: last line +
   wall time.
-- [ ] G6 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 90000` — accept:
+- [x] G6 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 90000` — accept:
   summary + wall time + max steps.
+- [ ] G16 (gemini2a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 12000-13999` —
+  accept: last line + wall time.
 
 ## gemini2b (evidence only, files: night/LOG.md)
-- [ ] G7 (gemini2b) Re-export into scratch dirs and diff against the committed exports: for each split
+- [x] G7 (gemini2b) Re-export into scratch dirs and diff against the committed exports: for each split
   (dev → configs/dev.json, train → configs/train.json, hard → configs/eval_hard.json)
   `env -u AUDITENV_SECRET uv run python -m auditenv.export --config <cfg> --out /tmp/r23-gemini2b/<split>` then
   `diff -r episodes/<split> /tmp/r23-gemini2b/<split>` — accept: per split the diff exit code (expected 0).
-- [ ] G8 (gemini2b) `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py`,
+- [x] G8 (gemini2b) `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py`,
   `uv run python scripts/shortcut_miner.py --seeds 6000-6999 --report-only` and the same with `--hard` — accept:
   summary lines + exit codes; any miner value with precision > 0.5 that is NOT in docs/DESIGN.md §10 called out.
+- [ ] G17 (gemini2b, after FIX) Repeat G7 (re-export diff, all three splits) and G8 (golden, mutate_reward, miner
+  seeds 7000–7999 default and `--hard`) on the FIX head — accept: as G7/G8.
 
 ## gemini3a (evidence only, files: night/LOG.md)
-- [ ] G9 (gemini3a) Four jury modules under three hash seeds: for H in 0 1 12345:
+- [x] G9 (gemini3a) Four jury modules under three hash seeds: for H in 0 1 12345:
   `PYTHONHASHSEED=$H env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward
   tests.test_judge_scenarios tests.test_judge_paired` — accept: per run `Ran N tests` + result.
-- [ ] G10 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
+- [x] G10 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
   — accept: summaries + exit codes; sensitivity values compared with the docs/DESIGN.md §6 table, differences called out.
+- [ ] G18 (gemini3a, after FIX) Four jury modules once, `env -u AUDITENV_SECRET uv run python -m auditenv.attack`,
+  `uv run python scripts/sensitivity.py` (compare with docs/DESIGN.md §6: naive dev −0.516/−0.529/−0.569, naive hard
+  −0.704/−0.725/−0.786) — accept: summaries + exit codes, differences called out.
 
 ## gemini3b (evidence only, files: night/LOG.md)
-- [ ] G11 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
+- [x] G11 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
   accept: per split the `N/N episodes valid` line.
-- [ ] G12 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, final reward/score lines quoted;
+- [x] G12 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, final reward/score lines quoted;
   compare with the numbers in docs/DEMO.md and call out any difference.
-- [ ] G13 (gemini3b) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 34000` and the same for
+- [x] G13 (gemini3b) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 34000` and the same for
   35000, 36000 — accept: per run the policy table; call out oracle F1 < 1, reconcile F1 < 1, or random/flag_all
   return > -0.5.
+- [ ] G19 (gemini3b, after FIX) G11 + G12 again, then `env -u AUDITENV_SECRET uv run python -m auditenv.check --json
+  /tmp/r23-gemini3b/c.json` and `uv run python scripts/sync_docs.py --check --json /tmp/r23-gemini3b/c.json` —
+  accept: N/N per split, demo numbers equal docs/DEMO.md, check exit 0, no drift.
 
 ## lead
 - [x] L1 (lead) Baseline: `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r23-lead-check.json` and
   `scripts/sync_docs.py --check` — accept: exit 0, no drift.
-- [ ] L2 (lead) Red-team passes (subagents, read-only first): (a) judge_adapter + env against CASE_UPDATES Block 1/3
+- [x] L2 (lead) Red-team passes (subagents, read-only first): (a) judge_adapter + env against CASE_UPDATES Block 1/3
   boundary rules; (b) data: contradictory/unresolvable public data and evidence sufficiency on D01–D20; (c) jury-facing
   docs claims (README "For the jury", "Jury adapter", "Honest limitations", DESIGN §9–10) against the code. Fix
   every confirmed defect test-first — files: as found, REVIEW.md — accept: REVIEW.md "Round 23" with evidence;
