@@ -205,43 +205,26 @@ Design note: docs/DESIGN.md · Contract: docs/CONTRACT.md · Check map: docs/CHE
       it only via the `DEEPSEEK_API_KEY` env var.
 - [ ] Decide whether `night/case.pdf` (organizers' PDF) stays in the public repo.
 
-## Operations — the autonomous marathon (read before touching anything)
-Handoff from the setup session, 20 November 2026 ~09:00. **The work runs by itself; don't restart it
-unless something is broken.**
+## Operations — the autonomous marathon (handoff, 22 Nov ~10:20)
+**State:** the marathon was told to stop (`.night-logs/STOP`) after round 29; rounds 3–28 are merged
+(PRs up to #58). Rounds 27 found nothing valuable left: `auditenv.check` passes, every organizer check
+block in `night/CASE_UPDATES.md` has its own checker, all HANDOFF ideas done except H1/E5 (deferred on
+purpose). **Remaining work is human: the submission (see the organizer note at the top).**
 
-**What runs** (on the repo owner's Mac, Mac on the charger, lid open; `caffeinate` keeps it awake):
-- `scripts/marathon.sh "2026-11-22 18:00"` in `../genesis` (main checkout): round after round —
-  branch `night/<date>-r<N>` from `origin/main` → agents → `night/DONE` → merge `main` + `auditenv.check`
-  → PR → CI green → merge → next round. Failed merge/check/CI → fix round (max 3). A round with no
-  product change → 2 h pause. Freeze 2026-11-22 18:00: after that nothing new is started or merged.
-- **Lead** (`night.sh --role lead`, main checkout), slots in order, the first non-rate-limited is used
-  and the lead returns to an earlier slot as soon as its limit resets (reset times parsed from the
-  messages): Claude → Codex `~/.codex-acc2` Astra/Sol → Codex `~/.codex-acc1` Astra/Sol → Gemini 3.8
-  Flash on 3 Google accounts (machine-local, `.night-logs/lead-extra-slots`, git-ignored).
-- **Workers**, each in its own worktree: `gemini1..3` (`../genesis-gemini1..3`, Gemini 3.8 Flash, one
-  Google account each), `deepseek` (`../genesis-deepseek`; idle until `DEEPSEEK_API_KEY` is set —
-  it logs an error every 5 min, harmless).
-
-**Watch:** `tail -f .night-logs/marathon.out .night-logs/lead.out` · PRs: `gh pr list --state all`.
-Health: `pgrep -fl "marathon.sh|night.sh --role"` → 1 marathon + 1 lead + 4 workers;
-`lsof -a -p <pid> -d cwd` must show each worker in its own `genesis-<name>` folder.
-
-**Stop:** after the current round: `touch .night-logs/STOP`. At once: `pkill -f scripts/marathon.sh;
-pkill -f "night.sh --role"`, then `git status` in `../genesis` (commit or drop leftovers).
-**Restart:** `cd ../genesis && git checkout main && git pull && nohup scripts/marathon.sh "2026-11-22 18:00"
->> .night-logs/marathon.out 2>&1 &` (round number continues from `.night-logs/marathon-round`).
-
-**Teammates:** work on a branch → PR into `main` as usual; each round merges `main` before its PR.
-Don't edit `night/TASKS.md`, `night/LOG.md`, `night/ROUND.md` or the "Round N" sections below — the
-agents own them. Interactive Claude sessions on the owner's account share the lead's Claude quota.
-
-**Gotchas learned the hard way:** `night.sh` works in the git worktree of the *current directory*
-(cd there first). Antigravity has two weekly pools per account (Gemini — large; Claude/GPT — tiny):
-run agy on Gemini Flash only; agy ignores `--model` on a resumed conversation (sessions are per
-model). Codex reports a model switch as `type:"error"` — only a missing `turn.completed` is a failure.
-
-**After the freeze (18:00, 22 Nov):** confirm the last marathon PR is merged, run
-`uv run python -m auditenv.check` on a fresh `main`, then the submission checklist above.
+**If you restart it** (only for a real defect): `cd ../genesis && rm -f .night-logs/STOP && git checkout main
+&& git pull && nohup scripts/marathon.sh "2026-11-22 18:00" >> .night-logs/marathon.out 2>&1 &`.
+It resumes an unfinished `night/*-rN` branch if the checkout is on one. Freeze 18:00: nothing new after that.
+- Lead slots (first free wins, returns to earlier slots after their reset): Claude (2 accounts) →
+  Codex acc1/acc2 GPT-6.2 Astra→Sol → Gemini Flash (machine-local `.night-logs/lead-extra-slots`).
+- 9 parallel workers, each in `../genesis-<name>`: `gemini1a..3b` (2 Gemini Flash chats per Google
+  account, mechanical tasks), `codex1/2` (Sol, hard tasks), `rb` (ReformBoss qwen4-max → deepseek-v4.1-flash).
+- Secrets: `~/.config/genesis/secrets.env` (chmod 600, outside the repo). A machine-local pre-commit hook
+  blocks secret-like strings in every worktree. The ReformBoss key is still in git history (`b8249ac`,
+  readable via PR #16) — revoke it if the ReformBoss balance drains.
+- Watch: `tail -f .night-logs/marathon.out .night-logs/lead.out`; health: `pgrep -fl "marathon.sh|night.sh --role"`.
+- Gotchas: `night.sh` works in the git worktree of the current directory; agy keeps one conversation per
+  model and must run on Gemini Flash (the Claude/GPT pool is tiny); Codex reports a model switch as
+  `type:"error"` — only a missing `turn.completed` is a failure; CI runs only on `main` pushes and PRs.
 
 ## Round 16 complete · 20 November 2026
 
