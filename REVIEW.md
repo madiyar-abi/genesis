@@ -512,3 +512,35 @@ evidence tasks (night/TASKS.md, night/LOG.md).
   needs, `AUDITENV_SECRET` unset for published numbers, shortest review path, `JuryPolicy` location, tuple shapes,
   period_cutoff wording, opt-in jury keys, per-difficulty foreign-document count, timing, chart input); codex2
   re-ran every touched command on a fresh clone (Y4): all exit 0 except Docker (not installed).
+
+## Round 22
+
+- Start `774570d`: `auditenv.check` passed 563 tests and all gates in 50.6 s.
+- Data defects fixed (clean books, jury Block 2 D01–D05 — every such episode has a split payment and a refund):
+  1. *Refund FX.* A foreign refund debited 2900 at the refund-date rate after its receipt credited it at the
+     receipt-date rate, so the customer's unapplied cash ended below zero in base currency (round 21's balance
+     re-derivation: 920 rows on 300 clean seeds, up to 7.3 % of the refund). Now the refund debits 2900 at the rate of
+     the receipt it returns (the latest earlier booked payment with the same ledger `entity_id`, currency and
+     remainder equal to the refund) and the cash difference goes to 7900 (realised FX).
+  2. *Settlement rounding.* Each cash application was converted and rounded on its own, so a foreign invoice paid in
+     parts kept ±1 minor unit in 1200 (54/300 default and 60/300 hard D02 episodes). The ref that completes an invoice
+     now credits `convert(total) − Σ convert(earlier refs)`; the difference goes to 7900. The allocation injector never
+     picks such a last part, so truth amounts and evidence rules are as published.
+  3. *Merged overpayments.* codex2's public-data audit of rule 1 (20,007 refunds, seeds 0–999 × 12 configs, 0
+     ambiguous) found 28 refunds in default/hard (none in D01–D05) whose receipt carried two merged overpayments, so
+     the rule fell back to the refund-date rate. The merge now keeps one overpayment per receipt: 0 fallbacks.
+  Rules in CONTRACT §2 and `policy.json` `ledger.payment`; `verify.py` and `policies/reconcile.py` re-derive them
+  independently (the old generator fails the new verifier on 142–266 of 600 episodes). The changes add no random
+  draw, so every other record is unchanged: compared with the round-21 generator on 660 episodes, invoices,
+  payments, FX rates and non-payment ledger rows are identical; 23 episodes differ in truth (the injector skipping a
+  split's last part, the un-merged overpayments). Regressions:
+  `tests.test_generator.GeneratorTest.test_refund_clears_the_unapplied_cash_it_returns` and
+  `...test_fully_paid_invoice_closes_its_receivable`, each failing before its fix. Measured numbers: only naive
+  reconcile moved (dev F1 0.286 → 0.288, hard 0.186 → 0.185); demo, worked examples, reconcile, oracle unchanged.
+- Independent checkers (written from the published texts only): clean-room D01–D20 matrix (codex1,
+  `night/r22/d_matrix.py`, 8,000 episodes, every "what must differ" requirement holds, 0 failures); clean-room paired
+  transform (codex2, `night/r22/paired_cleanroom.py`, D01–D20 × 20 episodes, combined shuffle + rename, 0 score
+  differences, no ids inside free text); `ledger_identity --classify` after the fixes: refund (a) 0, rounding (b) 0.
+- Evidence sweeps on unseen seeds (workers): verify 6000–7999, fuzz 16000–17999 default and hard, config sweeps
+  78000–83999, stress 12000–12299, policy text 56000–56199, chronology 56000–56299, text auditor 54000–54099, jury_run
+  28000–31000, re-export diff, golden, mutants, miner, attack, jury modules ×3: 0 problems.
