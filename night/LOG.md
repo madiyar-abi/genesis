@@ -631,3 +631,18 @@ Task G15 complete.
 - scripts/golden.py --check: exit 0 ("All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json.")
 - scripts/mutate_reward.py: exit 0 ("22/22 mutants killed.").
 2026-11-22 05:52 lead — Merged top-up results so far: codex1 X4 ledger_identity on the FIX2 rule → 0 clean violations on 41000–41299 and 57000–57299; X5 text auditor updated (old per-ref rule gave a 1-minor-unit FP, D01 hard seed 58001) → F1 1.000, 0 discrepancies on 58000–58099; codex2 Y4 policy_text 59000–59199 0 unexpected (24,500 completing remittances checked), chronology 59000–59299 0 unexplained in clean configs; Y5 FIX2 review: 124,905 completing refs, 0 posting mismatches, 0 out-of-period/credit-note/reissue completions; 3 same-instant final parts (base currency, closed anyway). Acted on Y5 wording: CONTRACT §2 and policy.json now say "strictly earlier timestamp, booked or not" and that two final parts at the same instant keep the per-ref rule. Re-exported (policy text), check exit 0, sync no drift, golden 80/80. PITCH/DEMO re-verified: demo seed 2003 output matches DEMO.md (326 rows, 69 invoices, 286 / 351 331, 0.958, 22 steps); PITCH hard-split facts (20 FP, 6 missed duplicates, 46 issues) re-derived with auditenv.analyze; 20,000-config fuzz for the "59 actions" claim running.
+2026-11-22 06:01 gemini3b — G19 complete on final generator (d0fbb34).
+1. `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix --seeds 61000-61199 --scratch /tmp/r22-gemini3b` (exit 0, wall time 67.01 s).
+   Summary: `8000 episodes; 817 failed per-episode checks`.
+   Breakdown of the 817 failures:
+   - D01–D05: 550 failures for "correct refund" (110 per scenario) and 40 failures for "correct split" (8 per scenario).
+   - D09–D11: 56 failures in D09 (one allocation shortfall), 64 failures in D10 (one allocation shortfall), 64 failures in D10 (partial allocation), 43 failures in D11 (one allocation shortfall).
+   Root cause: `night/r22/d_matrix.py` was written on baseline 8cf7071 (pre-FIX) and has not yet been updated for FIX1 (refunds debit 2900 at the receipt-date rate with realised FX to 7900; d_matrix.py line 140–141 expects 2900 debit to match refund-date rate with no 7900 entry) and FIX2 (completing split ref credits convert(total) − sum(earlier) + 7900 difference; d_matrix.py line 98 triggers false allocation shortfall when rounding causes 1 minor unit adjustment on completing split).
+2. `yes '' | uv run python -m auditenv.demo` (exit 0, wall time 0.109 s).
+   Terminal reward: `terminal reward 0.958 = clip(2*F1 - 1 - 0.002*21 steps)   P=1.00 R=1.00 F1=1.00`.
+   Grader log: `grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0`.
+   All numbers match docs/DEMO.md byte for byte.
+3. `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r22-gemini3b/c2.json` (exit 0, wall time 55.6 s, 565 tests passed, all gates passed).
+   Summary: `ALL CHECKS PASSED in 55.6 s`.
+4. `uv run python scripts/sync_docs.py --check --json /tmp/r22-gemini3b/c2.json` (exit 0, wall time 0.035 s).
+   Summary: `All documentation tables match measured data.` (0 drift).
