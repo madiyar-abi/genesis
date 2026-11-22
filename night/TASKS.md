@@ -54,7 +54,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   re-mapped), score with `score_episode`. D01–D20 × seeds 55000–55009 × both difficulties. — files:
   night/r22/paired_cleanroom.py, night/LOG.md — accept: table scenario → original score, copy score, equal?; list
   every place an id occurs in free text (or "none found" with the fields searched); any score difference quoted.
-- [ ] Y2 (codex2, after FIX) Update `night/r20/policy_text.py` and `night/r20/chronology.py` to the new refund rule
+- [x] Y2 (codex2, after FIX) Update `night/r20/policy_text.py` and `night/r20/chronology.py` to the new refund rule
   only where they test the old one, then run `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py
   --seeds 56000-56199` and `... night/r20/chronology.py --seeds 56000-56299` — files: night/r20/policy_text.py,
   night/r20/chronology.py, night/LOG.md — accept: exit codes, final lines verbatim, 0 unexpected failures and 0

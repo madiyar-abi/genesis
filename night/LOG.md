@@ -66,3 +66,33 @@ A smoke check exercised embedded replacements, a longer ID sharing a prefix, and
   B=28000: random_explorer P/R/F1 0/0/0 return -0.903 steps 33.0 max 33 time 0.023 s max 0.024 s; reconcile 1.000/1.000/1.000 return 0.960 steps 21.1 max 24 time 0.023 s max 0.025 s; flag_all 0/0/0 return -1.000 steps 3.6 max 4 time 0.020 s max 0.022 s; oracle 1.000/1.000/1.000 return 1.000 steps 1.0 time 0.003 s max 0.004 s.
   B=29000: random_explorer 0/0/0 return -0.903 steps 33.0 max 33 time 0.022 s max 0.023 s; reconcile 1.000/1.000/1.000 return 0.960 steps 21.0 max 24 time 0.022 s max 0.023 s; flag_all 0/0/0 return -1.000 steps 3.6 max 4 time 0.020 s max 0.023 s; oracle 1.000/1.000/1.000 return 1.000 steps 1.0 time 0.003 s max 0.004 s.
   No call-outs: oracle F1 = 1.000 and reconcile F1 = 1.000 in both runs; random return -0.903 and flag_all -1.000, both ≤ -0.5. Next: Z2/Z3 are gated on the FIX commit (`generator: realised FX on refunds`), not yet on origin/night/2026-11-22-r22 — will re-check after fetch.
+
+2026-11-22 05:20 codex2 — Y2 complete after a8538c7. The policy audit now selects the latest earlier receipt from public payment docs and ledger cash-row entity_id, checks the refund's receipt-date 2900 debit or refund-date fallback, and checks its balancing 7900 posting. The separate cash-date check is unchanged. chronology.py already checks the cash row at the payment's own date and orders balances in source currency, so no change was needed.
+
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 56000-56199` → exit 0 in 130.32 s. `Audited 8400 episodes across 42 configurations; 33185851 checks, 0 unexpected failures.`
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 56000-56299` → exit 0 in 171.27 s. Summary and all dirty-scenario exceptions verbatim below.
+- `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0 in 115.76 s, 564 tests. `ALL CHECKS PASSED in 115.6 s`.
+
+```text
+episodes checked: 12600 (seeds 56000-56299, 42 configs)
+unexplained violations: 17 (0 in clean configs)
+  hard/hard seed=56084 f_ar_before_booking ids=['PAY-630849', 'SI-2026-560478', 'R3132'] ar credit 2026-06-01T12:47:00+00:00 booking 2026-06-03T14:56:00+00:00
+  hard/hard seed=56190 f_ar_before_booking ids=['RCPT0160344', 'SI-2026-839100', 'R4510'] ar credit 2026-09-01T14:04:00+03:00 booking 2026-09-03T10:31:00+03:00
+  hard/hard seed=56253 f_ar_before_booking ids=['BNK-388929', 'SI-2025-175976', 'L04256'] ar credit 2025-03-02T14:44:00+05:30 booking 2025-03-03T14:34:00+05:30
+  D14/default seed=56058 f_ar_before_booking ids=['BNK-526508', 'F0218797', 'R1775'] ar credit 2026-04-01T00:07:00+01:00 booking 2026-04-03T13:28:00+01:00
+  D14/default seed=56060 f_ar_before_booking ids=['BNK-494520', 'F0443443', 'GL-004830'] ar credit 2026-06-01T13:14:00-05:00 booking 2026-06-02T10:33:00-05:00
+  D14/default seed=56128 f_ar_before_booking ids=['PAY-279453', 'F0874503', 'R4350'] ar credit 2025-04-03T13:32:00+01:00 booking 2025-04-04T21:45:00+01:00
+  D14/hard seed=56018 f_ar_before_booking ids=['RCPT0641841', 'F0873471', 'GL-004990'] ar credit 2026-06-02T10:42:00+00:00 booking 2026-06-03T13:45:00+00:00
+  D14/hard seed=56023 f_ar_before_booking ids=['RCPT0592601', 'SI-2025-347712', 'L03747'] ar credit 2025-03-01T00:43:00+01:00 booking 2025-03-04T21:59:00+01:00
+  D14/hard seed=56114 f_ar_before_booking ids=['BNK-507723', '2604-864602', 'GL-003765'] ar credit 2026-04-01T11:05:00+03:00 booking 2026-04-02T12:50:00+03:00
+  D14/hard seed=56230 f_ar_before_booking ids=['BNK-526067', '2608-861501', 'L03041'] ar credit 2026-08-01T14:52:00+09:00 booking 2026-08-03T11:18:00+09:00
+  D15/default seed=56058 f_ar_before_booking ids=['BNK-526508', 'F0218797', 'R1775'] ar credit 2026-04-01T00:07:00+01:00 booking 2026-04-03T13:28:00+01:00
+  D15/default seed=56060 f_ar_before_booking ids=['BNK-494520', 'F0443443', 'GL-004830'] ar credit 2026-06-01T13:14:00-05:00 booking 2026-06-02T10:33:00-05:00
+  D15/default seed=56128 f_ar_before_booking ids=['PAY-279453', 'F0874503', 'R4350'] ar credit 2025-04-03T13:32:00+01:00 booking 2025-04-04T21:45:00+01:00
+  D15/hard seed=56018 f_ar_before_booking ids=['RCPT0641841', 'F0873471', 'GL-004990'] ar credit 2026-06-02T10:42:00+00:00 booking 2026-06-03T13:45:00+00:00
+  D15/hard seed=56023 f_ar_before_booking ids=['RCPT0592601', 'SI-2025-347712', 'L03747'] ar credit 2025-03-01T00:43:00+01:00 booking 2025-03-04T21:59:00+01:00
+  D15/hard seed=56114 f_ar_before_booking ids=['BNK-507723', '2604-864602', 'GL-003765'] ar credit 2026-04-01T11:05:00+03:00 booking 2026-04-02T12:50:00+03:00
+  D15/hard seed=56230 f_ar_before_booking ids=['BNK-526067', '2608-861501', 'L03041'] ar credit 2026-08-01T14:52:00+09:00 booking 2026-08-03T11:18:00+09:00
+```
+
+Next: Y3 public-data ambiguity audit.
