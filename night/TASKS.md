@@ -138,7 +138,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   wall time.
 - [x] G6 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 90000` — accept:
   summary + wall time + max steps.
-- [ ] G16 (gemini2a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 12000-13999` —
+- [x] G16 (gemini2a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 12000-13999` —
   accept: last line + wall time.
 
 ## gemini2b (evidence only, files: night/LOG.md)
