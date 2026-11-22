@@ -920,3 +920,29 @@ All 73 tests passed cleanly across all three hash seeds.
    - hard reconcile: cost 0.3286 (0.329) / 0.2930 (0.293) / 0.1862 (0.186), tol 0.2930 (0.293) across all (exact match)
    - hard naive_reconcile: cost -0.6833 (-0.683) / -0.7038 (-0.704) / -0.7651 (-0.765), tol -0.7038 (-0.704) across all (exact match)
    Differences called out: 0 differences found; all values match docs/DESIGN.md §6 exactly.
+2026-11-22 06:25 gemini3b — G11 done: verified all directories under episodes/ with env -u AUDITENV_SECRET uv run python -m auditenv.verify --dir episodes/<split>. dev: 10/10 episodes valid; episodes with problems: 0 (0.14s); hard: 20/20 episodes valid; episodes with problems: 0 (0.43s); train: 10/10 episodes valid; episodes with problems: 0 (0.15s). Exit code 0 across all splits. Next: G12.
+2026-11-22 06:25 gemini3b — G12 done: `yes '' | env -u AUDITENV_SECRET uv run python -m auditenv.demo` exit code 0. Quoted final reward/score lines:
+Section 2: `terminal reward 0.958 = clip(2*F1 - 1 - 0.002*21 steps)   P=1.00 R=1.00 F1=1.00`
+Section 4: oracle 1.000, reconcile 0.958, silence -1.000, guessed ids -1.000, repeated 0.333, flag-everything -1.000, random -1.000; clean company silence 1.000, guessed -1.000, reconcile 0.958.
+Section 5: `policy side: 22 steps, rewards seen = [0.0], final info = {}`; `grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0`.
+Compared with docs/DEMO.md: all numbers match exactly (PAY-136430 amounts 286 and 351331 minor units, 21 inspection steps, return 0.958, TP 4 FP 0 FN 0, repeated oracle 0.333, silence -1.000 / 1.000). 0 differences. Next: G13.
+2026-11-22 06:26 gemini3b — G13 done: executed env -u AUDITENV_SECRET uv run python -m auditenv.jury_run for seed-base 34000, 35000, 36000. All exited 0.
+Seed-base 34000 (2.53 s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.806    33.0    33    0.036   0.041
+reconcile         1.000  1.000  1.000    0.960    20.9    24    0.037   0.042
+flag_all          0.000  0.000  0.000   -1.000     3.5     4    0.033   0.039
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.008
+Seed-base 35000 (2.52 s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -0.806    33.0    33    0.036   0.042
+reconcile         1.000  1.000  1.000    0.961    20.6    26    0.037   0.040
+flag_all          0.000  0.000  0.000   -1.000     3.6     4    0.033   0.039
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.005   0.008
+Seed-base 36000 (2.59 s):
+policy                P      R     F1   return   steps   max   time s   max s
+random_explorer   0.000  0.000  0.000   -1.000    33.0    33    0.038   0.042
+reconcile         1.000  1.000  1.000    0.960    21.1    25    0.038   0.042
+flag_all          0.000  0.000  0.000   -1.000     3.6     4    0.033   0.037
+oracle            1.000  1.000  1.000    1.000     1.0     1    0.006   0.008
+Check results: oracle F1 = 1.000 across all runs (none < 1); reconcile F1 = 1.000 across all runs (none < 1); random_explorer / flag_all returns all <= -0.806 (none > -0.5). 0 anomalies found.
