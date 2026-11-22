@@ -387,7 +387,9 @@ to explore.
   receipt it returns and the part that completes an invoice credits the rest of its booked amount; the cash
   difference is realised FX (7900) — CONTRACT §2, `policy.json` `ledger.payment`; a merged receipt never carries two
   overpayments, so every refund finds its receipt (0 refund-date fallbacks on seeds 0–999, default and hard; codex2's
-  public-data audit found 0 ambiguous receipts on 12 000 episodes). The allocation injector never
+  public-data audit found 0 ambiguous receipts on 12 000 episodes). Two final parts of one invoice paid at the same
+  instant keep the per-ref rule, so a foreign pair could still leave a minor unit (3 same-instant pairs, all in base
+  currency, on 42 000 episodes; codex2's review found 0 posting mismatches on 124 905 completing refs). The allocation injector never
   picks such a last part, so "expected AR credit for the ref" stays the ref converted on its own. Regressions:
   `tests.test_generator.GeneratorTest.test_refund_clears_the_unapplied_cash_it_returns` and
   `...test_fully_paid_invoice_closes_its_receivable`.
