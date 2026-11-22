@@ -1028,3 +1028,71 @@ Verdict: the payment doc supplies the target remittance, the invoice identifies 
 - G12 repeat: `yes '' | env -u AUDITENV_SECRET uv run python -m auditenv.demo` exit 0. Numbers match docs/DEMO.md exactly (326 ledger rows, 69 invoices, PAY-136430 amounts 286 and 351331 minor units, 21 inspection steps, terminal 0.958, grader TP 4 FP 0 FN 0, table comparisons exact, closed run return 0.958).
 - `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r23-gemini3b/c.json`: ALL CHECKS PASSED in 64.9 s (568 unit tests, 200/200 verifier, 50/50 hard verifier, 20/20 paired, 20/20 hard paired, jury flow pass).
 - `uv run python scripts/sync_docs.py --check --json /tmp/r23-gemini3b/c.json`: exit 0, "All documentation tables match measured data." (no drift).
+2026-11-22 07:02 rb — Z3 done. Fresh-clone README walk. Clone: `git clone --branch night/2026-11-22-r23 /Users/caliskan/Projects/genesis /tmp/r23-rb/clone` → commit 6a60fbf (lead tip; README/code unchanged by later lead commits). Every README command starting with `uv run` / `make` / `env` run from the clone root via /tmp/r23-rb/walk.py (logs /tmp/r23-rb/cmdNN.log). AUDITENV_SECRET unset. All 38 commands exit 0; no undocumented step was needed.
+  | # | command (README line) | exit | wall s |
+  | 01 | uv run python -m auditenv.check (30) | 0 | 76.4 |
+  | 02 | uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired (129/348) | 0 | 2.8 |
+  | 03 | uv run python -m auditenv.jury_run (346) | 0 | 1.9 |
+  | 04 | uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/dev_reconcile.jsonl (194) | 0 | 0.1 |
+  | 05 | uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval (195) | 0 | 0.1 |
+  | 06 | uv run python -m auditenv.export --config configs/train_hard.json --out /tmp/train_hard (207) | 0 | 0.2 |
+  | 07 | uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out trajectories.jsonl (210) | 0 | 0.4 |
+  | 08 | for p in random naive_reconcile reconcile; do ...run --config configs/train.json --out trajectories/train_$p.jsonl; done (220-222) | 0 | 0.4 |
+  | 09 | for p in random naive_reconcile reconcile reconcile_hard; do ...run --config configs/train_hard.json --out trajectories/train_hard_$p.jsonl; done (223-225) | 0 | 0.9 |
+  | 10 | uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl (367) | 0 | 0.1 |
+  | 11 | uv run python -c "from auditenv.check import run_remote; assert run_remote()" (383/393) | 0 | 0.1 |
+  | 12 | uv run python -m unittest discover -s tests -t . (391) | 0 | 63.4 |
+  | 13 | uv run python -m unittest tests.test_env (392) | 0 | 0.3 |
+  | 14 | uv run python -m auditenv.verify --seeds 0-199 (394) | 0 | 7.0 |
+  | 15 | uv run python -m auditenv.verify --dir episodes/train (395) | 0 | 0.2 |
+  | 16 | uv run python -m auditenv.verify --dir episodes/dev (396) | 0 | 0.2 |
+  | 17 | uv run python -m auditenv.verify --dir episodes/hard (397) | 0 | 0.5 |
+  | 18 | uv run python -m auditenv.attack (398) | 0 | 0.6 |
+  | 19 | uv run python -m tests.test_fuzz (399) | 0 | 1.3 |
+  | 20 | uv run python -m auditenv.check --json /tmp/auditenv-metrics.json (400) | 0 | 77.6 |
+  | 21 | uv run python scripts/sync_docs.py --check --json /tmp/auditenv-metrics.json (401) | 0 | 0.1 |
+  | 22 | uv run python -m auditenv.fuzz --seeds 0-999 (402) | 0 | 62.8 |
+  | 23 | uv run python -m auditenv.fuzz --configs 3000 (403) | 0 | 95.5 |
+  | 24 | uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299 (404) | 0 | 8.3 |
+  | 25 | uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json (405) | 0 | 0.1 |
+  | 26 | uv run python -m auditenv.demo (406) | 0 | 0.2 |
+  | 27 | uv run python -m auditenv.export --config configs/dev.json --out episodes/dev (407) | 0 | 0.1 |
+  | 28 | uv run python -m auditenv.export --config configs/train.json --out episodes/train (408) | 0 | 0.1 |
+  | 29 | uv run python -m auditenv.export --config configs/eval_hard.json --out episodes/hard (409) | 0 | 0.3 |
+  | 30 | uv run python scripts/mutate_reward.py (410) | 0 | 161.7 |
+  | 31 | uv run python scripts/sensitivity.py (411) | 0 | 2.2 |
+  | 32 | uv run python scripts/shortcut_miner.py --report-only (412) | 0 | 18.4 |
+  | 33 | uv run python scripts/golden.py --check (413) | 0 | 0.5 |
+  | 34 | uv run python scripts/bench.py (414) | 0 | 11.5 |
+  | 35 | uv run python scripts/chart.py --json /tmp/auditenv-metrics.json (415) | 0 | 0.0 |
+  | 36 | uv run python -m auditenv.analyze --config configs/dev.json --seeds 2000 (420, inline placeholders FILE/N) | 0 | 0.0 |
+  | 37 | make check (416) | 0 | 56.8 |
+  | 38 | make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart (417) | 0 | 0.0 |
+  Key summaries verbatim: 01/20/37 "ALL CHECKS PASSED in 76.2 s / 77.5 s / 56.7 s"; 02 "Ran 74 tests ... OK"; 12 "Ran 568 tests in 63.318s ... OK"; 14 "600/600 episodes valid; episodes with problems: 0"; 15/16 "10/10 episodes valid", 17 "20/20 episodes valid"; 18 "Total mutations tested: 11000 / Total violations detected: 0"; 19 "Python 3.11.14, 20319 episode actions, 20524 total step calls in 1.180 s"; 21 "All documentation tables match measured data."; 22 "default mode, seeds 0-999: 3000 episodes (1986 dirty, 1014 clean) in 62.7 s ... episodes with a problem: 0 ... FUZZ PASSED"; 23 "config sweep, cases 0-2999: 3000 random configs (1186 hard) in 95.4 s; problems ...: 0; max steps 56 / FUZZ PASSED"; 24 "reconcile on 1200 default episodes ...: imperfect 0, max steps 33, truncated 0 (8.2 s)"; 26 "grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0"; 30 "22/22 mutants killed."; 31 "Ranking unchanged across all settings: oracle > reconcile_hard > reconcile > naive_reconcile > random > flag_all."; 32 "Flagged values: 16" (matches DESIGN §10 count); 33 "All 80 golden hashes match"; 03 jury_run table matches README (reconcile F1 1.000 return 0.959, random/flag_all -1.000, oracle 1.000).
+  Byte-identity: after 07-09 (trajectories.jsonl + trajectories/) and 27-29 (episodes/ re-export) and 35 (docs/baselines.svg), `git status --porcelain` in the clone shows only the untracked fixtures hidden.json/grader.jsonl — every regenerated committed file is byte for byte identical.
+  Skipped (with reason): docker build/run commands and `uv run python -m auditenv.jury_run --policy-image genesis-policy` (line 61) — Docker not installed on this machine (README says CI exercises the container path); `git clone https://github.com/...` — network, replaced by the local clone per task; line 38 `env -u AUDITENV_SECRET uv run python -m ...` is a template, not a command (AUDITENV_SECRET unset anyway); README python snippets `env = AuditEnv()` / `env = ja.make_env()` are code, not shell commands.
+  Assumptions: (a) cmd10 hidden.json created by copying configs/dev.json (README documents the format; no hidden list ships); stdin fed `{"cmd":"reset"}` then `{"cmd":"close"}`; server exited 0 and printed the documented grader-key reminder on stderr. First harness attempt used `timeout` which macOS lacks (exit 127, harness bug, not a README failure); re-run with a Python-level 120 s timeout passed. (b) cmd26 demo pauses fed with `yes ''`. (c) cmd36 placeholders FILE=configs/dev.json, N=2000. No product code touched. Next: no (rb) tasks left.
+- 2026-11-22 07:05 rb: Z4 done (after FIX; head 0b12461 contains e23958c and 5700626, verified with `git merge-base --is-ancestor`).
+  `git fetch && git merge origin/night/2026-11-22-r23` → Already up to date. All four commands run from the repo root;
+  full outputs in /tmp/r23-rb/z4_*.out. No product code touched.
+  | command | exit | wall s |
+  |---|---|---|
+  | PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py | 0 | 6 |
+  | PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs | 0 | 12 |
+  | PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy | 0 | 2 |
+  | env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 37000 | 0 | 1 |
+  Summaries verbatim:
+  scenarios_adapter: "Z1: 20 scenarios x 2 difficulties x 5 seeds (32000-32004) x 2 policies = 400 closed runs through judge_adapter, 5.3 s total";
+  every reconcile/reconcile_hard row F1 mean 1.000 / min 1.000, every flag_all row return −1.000; max steps 50 (D06 hard), max episode 0.016 s.
+  The script prints 24 informational notes "mean return 0.914–0.960 < README mean 0.959 (F1 min 1.000; README value is a 20-scenario mean,
+  per-scenario return varies with inspection cost 0.002/step)" — the script's own explanation, not a failure: per-scenario step counts differ
+  from the 20-scenario average; no F1 < 1 anywhere. JSON written by the script to its built-in path /tmp/r20-rb/z1.json.
+  extreme_configs: "Outcomes: {'valid': 300, 'rejected': 72, 'failure': 0}. Total: 372." — all 300 valid configs reconcile F1=1.0
+  (300/300 lines), empty F1=0.0 on dirty and 1.0 on clean; 72 rejected are the >12-issue configs (expected rejection).
+  jury_copy: all 10 rewrite variants (CSV columns shuffled, CRLF, CSV/JSON/JSONL BOM, no final newline, pretty/compact JSON,
+  JSONL keys reversed, combined) → Accepted 10 / Rejected 0 / Scores equal 10 each; "Semantically equivalent rewrite discrepancies: 0".
+  jury_run --seed-base 37000 (seeds 37001-37020, closed mode, policies in their own process):
+  random_explorer F1 0.000 return −0.903; reconcile P/R/F1 1.000 return 0.960 steps 20.9 max 24; flag_all F1 0.000 return −1.000;
+  oracle F1 1.000 return 1.000. Acceptance triggers checked: no reconcile F1 < 1, no flag_all > −0.5 (random −0.903 also ≤ −0.5).
+  Note: all closed runs used the machine grader key ~/.auditenv/grader.key (AUDITENV_SECRET unset), as the adapter banner states.
+  Next: no unchecked (rb) tasks left in night/TASKS.md.

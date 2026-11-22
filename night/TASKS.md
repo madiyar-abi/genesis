@@ -104,12 +104,12 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 64000-64299`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom --seeds 66000-66009` — files:
   night/LOG.md — accept: as Z1 (0 unexpected failures, 0 unexplained clean violations, all pairs equal).
-- [ ] Z3 (rb) Fresh-clone README walk: `git clone` this repo's branch into /tmp/r23-rb/clone (use
+- [x] Z3 (rb) Fresh-clone README walk: `git clone` this repo's branch into /tmp/r23-rb/clone (use
   `git clone --branch night/2026-11-22-r23 <local repo path>`), then run every command in README.md that starts with
   `uv run` / `make` / `env` (skip docker, network and anything needing a key you don't have; say which you skipped)
   from the clone root. — files: night/LOG.md — accept: LOG table command → exit code → wall time; every non-zero exit
   quoted with its last 10 lines.
-- [ ] Z4 (rb, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py`,
+- [x] Z4 (rb, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy`,
   `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 37000` — files: night/LOG.md — accept: exit
