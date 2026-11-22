@@ -109,7 +109,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   `uv run` / `make` / `env` (skip docker, network and anything needing a key you don't have; say which you skipped)
   from the clone root. — files: night/LOG.md — accept: LOG table command → exit code → wall time; every non-zero exit
   quoted with its last 10 lines.
-- [ ] Z4 (rb, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py`,
+- [x] Z4 (rb, after FIX) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy`,
   `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 37000` — files: night/LOG.md — accept: exit

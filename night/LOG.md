@@ -1005,3 +1005,27 @@ Check results: oracle F1 = 1.000 across all runs (none < 1); reconcile F1 = 1.00
   Byte-identity: after 07-09 (trajectories.jsonl + trajectories/) and 27-29 (episodes/ re-export) and 35 (docs/baselines.svg), `git status --porcelain` in the clone shows only the untracked fixtures hidden.json/grader.jsonl — every regenerated committed file is byte for byte identical.
   Skipped (with reason): docker build/run commands and `uv run python -m auditenv.jury_run --policy-image genesis-policy` (line 61) — Docker not installed on this machine (README says CI exercises the container path); `git clone https://github.com/...` — network, replaced by the local clone per task; line 38 `env -u AUDITENV_SECRET uv run python -m ...` is a template, not a command (AUDITENV_SECRET unset anyway); README python snippets `env = AuditEnv()` / `env = ja.make_env()` are code, not shell commands.
   Assumptions: (a) cmd10 hidden.json created by copying configs/dev.json (README documents the format; no hidden list ships); stdin fed `{"cmd":"reset"}` then `{"cmd":"close"}`; server exited 0 and printed the documented grader-key reminder on stderr. First harness attempt used `timeout` which macOS lacks (exit 127, harness bug, not a README failure); re-run with a Python-level 120 s timeout passed. (b) cmd26 demo pauses fed with `yes ''`. (c) cmd36 placeholders FILE=configs/dev.json, N=2000. No product code touched. Next: no (rb) tasks left.
+- 2026-11-22 07:05 rb: Z4 done (after FIX; head 0b12461 contains e23958c and 5700626, verified with `git merge-base --is-ancestor`).
+  `git fetch && git merge origin/night/2026-11-22-r23` → Already up to date. All four commands run from the repo root;
+  full outputs in /tmp/r23-rb/z4_*.out. No product code touched.
+  | command | exit | wall s |
+  |---|---|---|
+  | PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py | 0 | 6 |
+  | PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs | 0 | 12 |
+  | PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy | 0 | 2 |
+  | env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 37000 | 0 | 1 |
+  Summaries verbatim:
+  scenarios_adapter: "Z1: 20 scenarios x 2 difficulties x 5 seeds (32000-32004) x 2 policies = 400 closed runs through judge_adapter, 5.3 s total";
+  every reconcile/reconcile_hard row F1 mean 1.000 / min 1.000, every flag_all row return −1.000; max steps 50 (D06 hard), max episode 0.016 s.
+  The script prints 24 informational notes "mean return 0.914–0.960 < README mean 0.959 (F1 min 1.000; README value is a 20-scenario mean,
+  per-scenario return varies with inspection cost 0.002/step)" — the script's own explanation, not a failure: per-scenario step counts differ
+  from the 20-scenario average; no F1 < 1 anywhere. JSON written by the script to its built-in path /tmp/r20-rb/z1.json.
+  extreme_configs: "Outcomes: {'valid': 300, 'rejected': 72, 'failure': 0}. Total: 372." — all 300 valid configs reconcile F1=1.0
+  (300/300 lines), empty F1=0.0 on dirty and 1.0 on clean; 72 rejected are the >12-issue configs (expected rejection).
+  jury_copy: all 10 rewrite variants (CSV columns shuffled, CRLF, CSV/JSON/JSONL BOM, no final newline, pretty/compact JSON,
+  JSONL keys reversed, combined) → Accepted 10 / Rejected 0 / Scores equal 10 each; "Semantically equivalent rewrite discrepancies: 0".
+  jury_run --seed-base 37000 (seeds 37001-37020, closed mode, policies in their own process):
+  random_explorer F1 0.000 return −0.903; reconcile P/R/F1 1.000 return 0.960 steps 20.9 max 24; flag_all F1 0.000 return −1.000;
+  oracle F1 1.000 return 1.000. Acceptance triggers checked: no reconcile F1 < 1, no flag_all > −0.5 (random −0.903 also ≤ −0.5).
+  Note: all closed runs used the machine grader key ~/.auditenv/grader.key (AUDITENV_SECRET unset), as the adapter banner states.
+  Next: no unchecked (rb) tasks left in night/TASKS.md.
