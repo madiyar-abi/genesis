@@ -158,7 +158,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   tests.test_judge_scenarios tests.test_judge_paired` — accept: per run `Ran N tests` + result.
 - [x] G10 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
   — accept: summaries + exit codes; sensitivity values compared with the docs/DESIGN.md §6 table, differences called out.
-- [ ] G18 (gemini3a, after FIX) Four jury modules once, `env -u AUDITENV_SECRET uv run python -m auditenv.attack`,
+- [x] G18 (gemini3a, after FIX) Four jury modules once, `env -u AUDITENV_SECRET uv run python -m auditenv.attack`,
   `uv run python scripts/sensitivity.py` (compare with docs/DESIGN.md §6: naive dev −0.516/−0.529/−0.569, naive hard
   −0.704/−0.725/−0.786) — accept: summaries + exit codes, differences called out.
 
