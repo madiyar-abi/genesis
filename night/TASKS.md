@@ -162,7 +162,7 @@ invoice-date rate; the cash difference goes to 7900. The allocation injector nev
   `... -m night.r21.extreme_configs`, `... -m night.r21.jury_copy`, `env -u AUDITENV_SECRET uv run python -m
   auditenv.jury_run --seed-base <B>` for B in 32000, 33000 — files: night/LOG.md — accept: exit codes + summaries;
   call-outs as in Z1/Z2.
-- [ ] G14 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 18000-18999` and the same with
+- [x] G14 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 18000-18999` and the same with
   `--hard` — files: night/LOG.md — accept: both summaries + wall times.
 - [x] G15 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 13000-13299` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 13000-13299` — files:

@@ -662,3 +662,4 @@ Embedded IDs: none found
 Discrepancies: 0
 
 The `--seeds 60009-60000` input exited 2 with `paired_cleanroom.py: error: reversed seed range '60009-60000'`. `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0 in 86.68 s, 565 tests. `ALL CHECKS PASSED in 86.6 s`.
+2026-11-22 05:50 gemini1a — G14: ran `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 18000-18999` (exit 0, wall time 128.00 s: default mode, seeds 18000-18999: 3000 episodes (1986 dirty, 1014 clean) in 127.9 s; problems: 0; FUZZ PASSED) and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 18000-18999 --hard` (exit 0, wall time 298.81 s: hard mode, seeds 18000-18999: 3000 episodes (1989 dirty, 1011 clean) in 298.8 s; problems: 0; FUZZ PASSED). 0 problems found across 6,000 episodes on final generator. Task G14 complete.
