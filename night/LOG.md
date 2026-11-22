@@ -694,3 +694,4 @@ repo root; full logs in /tmp/r22-rb/z4_*.log.
 Assumption: "final generator" = current origin/night/2026-11-22-r22 HEAD at merge time (58bd488); scenarios_adapter
 uses its built-in seed base 32000–32004 (no flag needed). No product code touched; only night/TASKS.md (Z4 [x])
 and this log.
+2026-11-22 06:02 gemini2a — G16 done. Ran verify: env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 8000-9999 (exit 0, wall 48.0 s, "6000/6000 episodes valid; episodes with problems: 0"). Ran fuzz: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 84000 (exit 0, wall 94.1 s, "config sweep, cases 84000-86999: 3000 random configs (1150 hard) in 94.0 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 57. FUZZ PASSED").
