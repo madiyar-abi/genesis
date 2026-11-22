@@ -96,3 +96,31 @@ unexplained violations: 17 (0 in clean configs)
 ```
 
 Next: Y3 public-data ambiguity audit.
+
+2026-11-22 05:22 codex2 — Y3 complete. Reviewed the a8538c7 diff. Verdict: the published rule yields a unique 2900 debit and 7900 posting in the audited books. CONTRACT §§1–2 together identify the customer, company-local FX dates, currency exponents, and rounding. The public policy supplies the same conversion and ordering rules across its ledger, FX and rounding fields, but should make the ledger join explicit. The verifier limits candidates to booked payments. An unbooked payment has no public ledger customer, so the wording should explicitly exclude it. The exact identity can tie at the same instant in a constructed case, but the company-local FX date and converted amount cannot differ.
+
+`PYTHONPATH=. env -u AUDITENV_SECRET uv run python /tmp/r22-codex2/refund_ambiguity.py` → exit 0 in 43.28 s, seeds 0–999. For each posted refund, grouped public journals by payment_id, indexed receipt remainders by public entity_id, currency and source amount, and compared independently rounded signed totals for 1000, 2900 and 7900. D01–D05 share a config within each difficulty, so the table counts scenario executions. The 28 fallbacks followed the published rule.
+
+| Config | refunds | foreign | fallback | multiple earlier candidates | tied latest receipts | ambiguous debit | unidentified refund customer | unknown-earlier | posting mismatch |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| default | 1508 | 606 | 18 | 0 | 0 | 0 | 0 | 0 | 0 |
+| hard | 1429 | 581 | 10 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D01/default | 1683 | 696 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D01/hard | 1731 | 706 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D02/default | 1683 | 696 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D02/hard | 1731 | 706 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D03/default | 1683 | 696 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D03/hard | 1731 | 706 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D04/default | 1683 | 696 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D04/hard | 1731 | 706 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D05/default | 1683 | 696 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D05/hard | 1731 | 706 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Total | 20007 | 8197 | 28 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+Checked 12000 episodes; 0 tied identities, 0 ambiguous posting amounts, 0 posting mismatches.
+
+Synthetic: two earlier EUR 100.00 remainders at USD/EUR 1.10 and 1.20 select the latest; with refund-date rate 1.30 the debit is USD 120.00 and realised FX debit is USD 10.00. Two receipts at identical instants can tie for identity, and share the same company date and rate.
+
+Proposed exact replacement for the refund portion of CONTRACT §2 and policy.json ledger.payment:
+
+> For a refund (negative amount_minor), use its absolute amount in the payment currency. Join each payment to its booked ledger rows by payment_id. The eligible receipts are earlier positive payments with the same non-null ledger entity_id and payment currency whose amount_minor minus the sum of invoice_refs amount_minor equals the refunded amount. Treat null invoice_refs as an empty list. Compare payment timestamps as instants and use the latest eligible receipt. Receipts tied at the latest instant use the same FX date. If no receipt qualifies, use the refund timestamp instead. Debit 2900 using that company-local date's rate and credit 1000 using the refund's company-local date's rate. Convert both amounts to base minor units separately with ROUND_HALF_UP using the published currency exponents. Post the difference to 7900, debiting it when the cash credit is larger and crediting it when the 2900 debit is larger. Omit the 7900 row when the difference is zero.

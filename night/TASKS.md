@@ -59,7 +59,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   --seeds 56000-56199` and `... night/r20/chronology.py --seeds 56000-56299` — files: night/r20/policy_text.py,
   night/r20/chronology.py, night/LOG.md — accept: exit codes, final lines verbatim, 0 unexpected failures and 0
   unexplained violations in clean configs; say which checks you changed and why.
-- [ ] Y3 (codex2, after FIX) Read the FIX COMMIT diff as a strict reviewer: does policy.json / docs/CONTRACT.md §2
+- [x] Y3 (codex2, after FIX) Read the FIX COMMIT diff as a strict reviewer: does policy.json / docs/CONTRACT.md §2
   state the new rule so that an auditor can derive the 2900 and 7900 amounts of every refund from public data alone
   (which receipt, which rate, rounding)? Try to construct a public-data case where the rule is ambiguous (two
   candidate receipts) and check with seeds 0–999 × default/hard/D01–D05 whether it ever happens. — files:
