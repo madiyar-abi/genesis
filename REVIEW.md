@@ -592,3 +592,10 @@ evidence tasks (night/TASKS.md, night/LOG.md).
 - Decisions: `explanation` stays optional (CONTRACT §5; no published row tests its absence, and requiring it could
   turn an organiser policy's correct finding into a structural −1); `limit: null` stays `bad_params`; the I2 cutoff
   amount includes the wrong-rate part that fx_error also measures (documented scenario).
+
+## Round 24
+
+- Start `3e27abc` (code identical to `main` 1e30a64): `auditenv.check` exit 0, 568 tests and all gates, 56.0 s;
+  `sync_docs --check` no drift.
+- No valuable improvement found. Every jury block already has an independent clean-room checker with 0 problems on
+  unseen seeds (r20–r23); the only open ideas (H1, E5) stay deferred — freeze day, generator risk. No change.
