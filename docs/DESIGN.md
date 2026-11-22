@@ -50,7 +50,8 @@ before injection (236–434 after it on seeds 0–199; hard target 900–1 400);
   date that differs from their accounting date.
 - **Postings** (also in `policy.json`): invoice `Dr 1200 / Cr 4000` at the issue-date rate;
   payment `Dr 1000` at the payment-date rate, `Cr 1200` per remittance line at that invoice's
-  rate, remainder to `2900 Unapplied cash`, FX difference to `7900`; refunds `Dr 2900 / Cr 1000`;
+  rate (the line that completes a split credits the rest of the booked amount, so the receivable closes), remainder to `2900 Unapplied cash`, FX difference to `7900`; refunds `Dr 2900` at the rate of the
+  receipt they return `/ Cr 1000` at the refund-date rate, the difference to `7900` (realised FX);
   expenses `Dr 6xxx / Cr 1000`. Every journal balances.
 
 ## 3. Errors (closed `truth.json`)
@@ -157,7 +158,7 @@ played once, then re-graded offline with the real matcher and the step cost / am
 |---|---|---|---|---|---|---|
 | oracle · dev | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | reconcile · dev | 0.978 | 0.956 | 0.891 | 0.956 | 0.956 | 0.956 |
-| naive_reconcile · dev | −0.467 | −0.480 | −0.519 | −0.480 | −0.480 | −0.480 |
+| naive_reconcile · dev | −0.465 | −0.478 | −0.517 | −0.478 | −0.478 | −0.478 |
 | random · dev | −0.803 | −0.807 | −0.817 | −0.807 | −0.807 | −0.807 |
 | flag_all · dev | −1.000 | −1.000 | −1.000 | −1.000 | −1.000 | −1.000 |
 | reconcile_hard · hard | 0.958 | 0.916 | 0.790 | 0.916 | 0.916 | 0.916 |
@@ -230,8 +231,8 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 | policy | seeds | P | R | F1 | return | steps | time s | exp. return* |
 |---|---|---|---|---|---|---|---|---|
 | random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.005 | −0.807 |
-| naive reconciliation | 2000–2009 | 0.177 | 0.733 | 0.286 | −0.480 | 17.5 | 0.006 | −0.516 |
-| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.956 | 22.8 | 0.007 | 0.956 |
+| naive reconciliation | 2000–2009 | 0.179 | 0.733 | 0.288 | −0.478 | 17.5 | 0.007 | −0.512 |
+| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.956 | 22.8 | 0.006 | 0.956 |
 | flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.004 | −1.000 |
 | oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.003 | 1.000 |
 
@@ -293,8 +294,8 @@ and checks that every credit note is in the period and after its booking.
 | policy | P | R | F1 | return | steps | exp. return* |
 |---|---|---|---|---|---|---|
 | random explorer (seeded) | 0.000 | 0.000 | 0.000 | −0.806 | 33.1 | −0.806 |
-| naive reconciliation | 0.108 | 0.652 | 0.186 | −0.704 | 33.1 | −0.746 |
-| reconciliation (default rules) | 0.667 | 0.870 | 0.755 | 0.293 | 43.0 | 0.075 |
+| naive reconciliation | 0.108 | 0.652 | 0.185 | −0.704 | 33.1 | −0.749 |
+| reconciliation (default rules) | 0.667 | 0.870 | 0.755 | 0.293 | 43.0 | 0.081 |
 | reconciliation + hard rules (`reconcile_hard`) | 1.000 | 1.000 | 1.000 | 0.916 | 43.0 | 0.916 |
 | flag-everything attack | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | −1.000 |
 | oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 1.000 |
@@ -378,16 +379,20 @@ to explore.
   paid one. A lookalike pair whose earlier invoice is already paid is a duplicate with precision 0.995 (recall
   432/830, 1 000 hard seeds; Round 17 probe) without reading the ledger; the credit-note rows in the ledger separate all pairs.
 - Expense journals carry no ids (the schema has no journal id); checks group them by timestamp.
-- No realised FX on refunds or rounding plug on receivables. Every posting follows the published per-document rule
-  (CONTRACT §2: a refund is `Dr 2900 / Cr 1000` at the refund-date rate; each cash application is converted and
-  rounded on its own at the invoice-date rate), so a full foreign-currency refund can leave a customer's 2900
-  balance in base currency below zero, and two or more applications can leave an invoice's 1200 balance a few minor
-  units off. In the document currency the customer's credit returns exactly to 0 (`night/r20/chronology.py`). An
-  independent balance re-derivation (`night/r21/ledger_identity.py --classify`, clean D01–D05 config, seeds
-  41000–41299) counts 104 such refund rows (largest 500 336 base minor units, 1.9 % of the refund) and 33 rounding
-  rows in default mode, 80 (largest 7.3 % of the refund) and 50 in hard mode, and nothing else. No issue type or
-  truth record depends on these balances; booking the difference to 7900 would change the posting rule, the policy
-  text and every exported episode, so it is reported here instead.
+- Settlement residues (fixed in Round 22). Converting and rounding every document on its own left two artefacts in
+  clean books, found by an independent balance re-derivation (`night/r21/ledger_identity.py --classify`, clean
+  D01–D05 config, seeds 41000–41299): a foreign refund debited 2900 at the refund-date rate, so the customer's
+  unapplied cash ended below zero in base currency (920 rows, up to 7.3 % of the refund), and a foreign invoice paid
+  in parts kept a minor unit in 1200 (415 rows; 18 % of D02 episodes). Now a refund debits 2900 at the rate of the
+  receipt it returns and the part that completes an invoice credits the rest of its booked amount; the cash
+  difference is realised FX (7900) — CONTRACT §2, `policy.json` `ledger.payment`; a merged receipt never carries two
+  overpayments, so every refund finds its receipt (0 refund-date fallbacks on seeds 0–999, default and hard; codex2's
+  public-data audit found 0 ambiguous receipts on 12 000 episodes). Two final parts of one invoice paid at the same
+  instant keep the per-ref rule, so a foreign pair could still leave a minor unit (3 same-instant pairs, all in base
+  currency, on 42 000 episodes; codex2's review found 0 posting mismatches on 124 905 completing refs). The allocation injector never
+  picks such a last part, so "expected AR credit for the ref" stays the ref converted on its own. Regressions:
+  `tests.test_generator.GeneratorTest.test_refund_clears_the_unapplied_cash_it_returns` and
+  `...test_fully_paid_invoice_closes_its_receivable`.
 - A wrong conversion is always the published rate of another date (the document's local or UTC date, nearby days,
   the bank's date); a rate value that appears on no date, or a wrong currency pair, is not modelled.
 - The verifier does not bound the total settled on one invoice across payments: an extra future payment of 5×

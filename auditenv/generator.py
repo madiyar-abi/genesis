@@ -147,6 +147,7 @@ class State:
         self.issues: list[dict] = []
         self.injections: list[dict] = []
         self._k = 0
+        self.settlement_rows = 0  # 7900 rows added (or removed, negative) by the settlement rules
         self._used: set[str] = set()
         self._styles = {
             "invoice": rng.randrange(4), "payment": rng.randrange(3), "doc": rng.randrange(3),
@@ -273,10 +274,11 @@ class State:
         return pay
 
     # ---------- ledger ----------
-    def row(self, dt: datetime, account: str, signed: int, entity=None, invoice=None, payment=None) -> dict:
+    def row(self, dt: datetime, account: str, signed: int, entity=None, invoice=None, payment=None,
+            tie: float | None = None) -> dict:
         """signed > 0 -> debit, < 0 -> credit."""
         self._k += 1
-        return {"_k": self._k, "_dt": dt, "_tie": self.rng.random(), "timestamp": iso(dt.astimezone(self.tz)),
+        return {"_k": self._k, "_dt": dt, "_tie": self.rng.random() if tie is None else tie, "timestamp": iso(dt.astimezone(self.tz)),
                 "account": account, "debit_minor": max(signed, 0), "credit_minor": max(-signed, 0),
                 "currency": self.base, "entity_id": entity, "invoice_id": invoice, "payment_id": payment}
 
@@ -308,16 +310,62 @@ class State:
         jid = "pay:" + pid
         self.journals[jid] = rows
         self.rebalance(jid)
+        self.settle(pay)
         return jid
 
-    def rebalance(self, jid: str) -> None:
+    def settle(self, pay: dict) -> None:
+        """Settlement rules (Round 22, policy.json ledger.payment): a refund returns its receipt's carrying amount
+        from 2900 and the ref that completes an invoice credits the rest of its booked receivable; the cash
+        difference is realised FX (7900). Applied on top of the per-document posting, without a random draw, so
+        the rest of the episode is unchanged; idempotent (build_history settles again once every payment exists)."""
+        jid = "pay:" + pay["payment_id"]
+        rows = self.journals[jid]
+        rest = pay["amount_minor"] - sum(r["amount_minor"] for r in pay["invoice_refs"] or [])
+        n = len(rows)
+        for r in rows:
+            if r["account"] == "1200":
+                inv = self.invoice(r["invoice_id"])
+                ref = next(x for x in pay["invoice_refs"] if x["invoice_id"] == inv["invoice_id"])
+                if self.completes(pay, inv):
+                    r["credit_minor"] = self.conv(inv["total_minor"], pay["currency"], inv["_cdate"]) - sum(
+                        self.conv(a, pay["currency"], inv["_cdate"]) for a in self.earlier_refs(pay, inv))
+                else:
+                    r["credit_minor"] = self.conv(ref["amount_minor"], pay["currency"], inv["_cdate"])
+            elif r["account"] == "2900" and rest < 0:
+                receipt = self.refunded_receipt(pay)
+                r["debit_minor"] = self.conv(-rest, pay["currency"], (receipt or pay)["_cdate"])
+        self.rebalance(jid, tie=rows[0]["_tie"])
+        self.settlement_rows += len(self.journals[jid]) - n
+
+    def earlier_refs(self, pay: dict, inv: dict) -> list[int]:
+        return [ref["amount_minor"] for p in self.payments if p["_dt"] < pay["_dt"]
+                for ref in p["invoice_refs"] or [] if ref["invoice_id"] == inv["invoice_id"]]
+
+    def completes(self, pay: dict, inv: dict) -> bool:
+        """Does `pay`'s ref, with the refs of earlier payments, add up to the invoice total (a split's last part)?"""
+        earlier = self.earlier_refs(pay, inv)
+        mine = sum(ref["amount_minor"] for ref in pay["invoice_refs"] or [] if ref["invoice_id"] == inv["invoice_id"])
+        return bool(earlier) and mine > 0 and sum(earlier) + mine == inv["total_minor"]
+
+    def refunded_receipt(self, refund: dict) -> dict | None:
+        """The receipt a refund returns (policy.json ledger.payment): the same customer's latest earlier payment in
+        the same currency whose unallocated remainder equals the refunded amount."""
+        ent, cands = self.entity_of_payment[refund["payment_id"]], []
+        for p in self.payments:
+            rest = p["amount_minor"] - sum(r["amount_minor"] for r in p["invoice_refs"] or [])
+            if (p["_dt"] < refund["_dt"] and p["currency"] == refund["currency"] and rest == -refund["amount_minor"]
+                    and self.entity_of_payment[p["payment_id"]] == ent):
+                cands.append(p)
+        return max(cands, key=lambda p: p["_dt"], default=None)
+
+    def rebalance(self, jid: str, tie: float | None = None) -> None:
         """Set the 7900 FX gain/loss row so the journal balances (removed if zero)."""
         rows = [r for r in self.journals[jid] if r["account"] != "7900"]
         old = next((r for r in self.journals[jid] if r["account"] == "7900"), None)
         diff = sum(r["debit_minor"] - r["credit_minor"] for r in rows)
         if diff:
             r0 = rows[0]
-            fx = self.row(r0["_dt"], "7900", -diff, r0["entity_id"], None, r0["payment_id"])
+            fx = self.row(r0["_dt"], "7900", -diff, r0["entity_id"], None, r0["payment_id"], tie)
             if old is not None:
                 fx["_k"], fx["_tie"] = old["_k"], old["_tie"]
             rows.append(fx)
@@ -391,6 +439,8 @@ def build_history(st: State) -> None:
                 st.book_invoice(inv)
 
     _build_payments(st, distractors)
+    for pay in st.payments:  # merged receipts are created out of date order: settle once every payment exists
+        st.settle(pay)
     _post_before_payment(st)
     if st.hard:
         _build_reissues(st)
@@ -469,6 +519,8 @@ def _build_payments(st: State, distractors: bool) -> None:
                     break  # remaining plans are in date order
                 if (j not in used and q[3] and len(q[3]) == 1 and q[4] == p[4] and q[1] == p[1]
                         and (not preserve_overpayments or q[2] == q[3][0][1])
+                        # one overpayment per receipt: each refund then returns one receipt's whole remainder
+                        and (p[2] == sum(a for _, a in p[3]) or q[2] == q[3][0][1])
                         and q[3][0][0] is not p[3][0][0] and (q[0] - p[0]).days <= 10):
                     used.add(j)
                     p = (q[0], p[1], p[2] + q[2], p[3] + q[3], p[4])
@@ -551,7 +603,7 @@ def _build_expenses(st: State) -> None:
     add(st.ps + timedelta(days=14), "6200", rng.uniform(20000, 80000))
     add(st.pe, "6200", rng.uniform(20000, 80000))
     target = rng.randint(900, 1400) if st.hard else rng.randint(230, 420)
-    while len(st.ledger_rows()) < target:
+    while len(st.ledger_rows()) - st.settlement_rows < target:  # settlement FX rows do not displace an expense
         account = rng.choice(("6300", "6300", "6400", "6400", "6400"))
         usd = rng.uniform(20, 900) if account == "6300" else rng.uniform(1, 60)
         add(st.ps + timedelta(days=rng.randrange(st.ndays)), account, usd)
@@ -655,8 +707,14 @@ def policy_for(st: State) -> dict:
             "accounts": ACCOUNTS,
             "invoice": "Dr 1200 / Cr 4000 at the invoice issue-date rate, only for invoices issued in the period",
             "payment": "Dr 1000 at the payment-date rate; Cr 1200 per invoice_ref at that invoice's issue-date "
-                       "rate; remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; "
-                       "difference to 7900; negative amount = refund (Dr 2900 / Cr 1000)",
+                       "rate (the ref that completes the invoice, i.e. adds up to its total_minor with the refs of "
+                       "payments with a strictly earlier timestamp, credits the rest: convert(total_minor) - sum of the "
+                       "converted earlier refs); "
+                       "remainder (or all, if invoice_refs is null) Cr 2900 at the payment-date rate; "
+                       "difference to 7900; negative amount = refund: Dr 2900 at the payment-date rate of the receipt it "
+                       "returns (the same customer's latest earlier payment in that currency whose amount - sum of "
+                       "invoice_refs equals the refunded amount; the refund-date rate if there is none), Cr 1000 at "
+                       "the refund-date rate, difference to 7900",
             "expense": "Dr 6xxx / Cr 1000",
             **({"credit_note": "a cancelled invoice is reversed in full: Dr 4000 / Cr 1200 with the same "
                                "invoice_id and no payment_id; a re-issued replacement is booked as a new invoice"}

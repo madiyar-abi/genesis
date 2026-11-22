@@ -172,9 +172,25 @@ def audit(ep, config, check, observe):
                      tuple(invoices[iid]["doc_id"] for iid in (original, duplicate))
                      + tuple(booked[iid]["row_id"] for iid in (original, duplicate)))
 
+    receipt_times = defaultdict(list)
+    application_times = defaultdict(list)
+    for receipt in tables["payments"]:
+        time = datetime.fromisoformat(receipt["timestamp"])
+        refs = receipt["invoice_refs"] or []
+        for ref in refs:
+            application_times[ref["invoice_id"]].append((time, ref["amount_minor"]))
+        remainder = receipt["amount_minor"] - sum(ref["amount_minor"] for ref in refs)
+        if remainder <= 0:
+            continue
+        for row in payment_rows[receipt["payment_id"]]:
+            if row["account"] == "1000":
+                key = (row["entity_id"], receipt["currency"], remainder)
+                receipt_times[key].append(time)
+
     paid = Counter()
     for pay in tables["payments"]:
         pid, amount = pay["payment_id"], pay["amount_minor"]
+        payment_time = datetime.fromisoformat(pay["timestamp"])
         refs = pay["invoice_refs"] or []
         rows = payment_rows[pid]
         cur, date = pay["currency"], day(pay["timestamp"])
@@ -218,7 +234,13 @@ def audit(ep, config, check, observe):
                 continue
             paid[iid] += 1
             observe("partial_remittances", ref["amount_minor"] < i["total_minor"])
-            expected_ar, inv_fx = convert(ref["amount_minor"], i["currency"], day(i["issued_at"]))
+            invoice_date = day(i["issued_at"])
+            expected_ar, inv_fx = convert(ref["amount_minor"], i["currency"], invoice_date)
+            prior_amounts = [amount for time, amount in application_times[iid] if time < payment_time]
+            if expected_ar is not None and prior_amounts and sum(prior_amounts) + ref["amount_minor"] == i["total_minor"]:
+                total_ar, _ = convert(i["total_minor"], i["currency"], invoice_date)
+                expected_ar = total_ar - sum(convert(amount, i["currency"], invoice_date)[0] for amount in prior_amounts)
+                observe("completing_remittances")
             actual_ar = -totals["1200", iid]
             if expected_ar is None:
                 continue
@@ -233,6 +255,19 @@ def audit(ep, config, check, observe):
                          (pay["doc_id"], i["doc_id"], candidates[0]["row_id"] if candidates else None)
                          + ((inv_fx,) if inv_fx else ()))
         rest = amount - sum(r["amount_minor"] for r in refs)
+        if amount < 0:
+            observe("refunds")
+            candidates = receipt_times[cash[0]["entity_id"], cur, -amount]
+            receipt_time = max((time for time in candidates if time < payment_time), default=payment_time)
+            expected_debit, _ = convert(-amount, cur, day(receipt_time.isoformat()))
+            required = Counter({("1000", None): actual, ("2900", None): expected_debit})
+            if expected_debit is not None and actual + expected_debit:
+                required["7900", None] = -(actual + expected_debit)
+            check("refund", actual < 0 and expected_debit is not None and posting(rows) == required,
+                  pid, *(r["row_id"] for r in rows), expected_debit, dict(totals))
+            if totals["7900", None]:
+                observe("fx_balance_adjustments")
+            continue
         expected_rest, _ = convert(rest, cur, date)
         actual_rest = -totals["2900", None]
         if shortfalls == 0:
@@ -240,11 +275,7 @@ def audit(ep, config, check, observe):
                   *(r["row_id"] for r in unapplied), actual_rest, expected_rest)
         elif missing_source_minor or actual_rest != expected_rest:
             observe("allocation_remainder_departures")
-        if amount < 0:
-            observe("refunds")
-            check("refund", set(totals) == {("1000", None), ("2900", None)} and actual < 0
-                  and actual_rest == expected_rest, pid, *(r["row_id"] for r in rows))
-        elif not refs:
+        if not refs:
             observe("receipts_without_remittance")
         if totals["7900", None]:
             observe("fx_balance_adjustments")

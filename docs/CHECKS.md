@@ -63,6 +63,7 @@ The jury connects through `judge_adapter.py` (README "Jury adapter").
 | M11 | When findings fit both issues, deterministic tie-breaking sorts by issue code points | `tests/test_judge_reward.py::OpenExamples::test_m11_both_fit_both_tie_break` |
 | M12 | Two identical correct findings match one issue, yielding TP=1, FP=1, FN=0 | `tests/test_judge_reward.py::OpenExamples::test_m12_two_identical_correct` |
 | D01–D20 | 20 documented scenarios generate verifiable episodes with declared truth and sufficient evidence | `tests/test_judge_scenarios.py::JudgeScenariosTest::test_every_episode_verifies_and_has_the_declared_truth` |
+| D02, D03 | Clean books close exactly: a fully paid split invoice leaves 0 in 1200, a refund returns its receipt's 2900 credit (realised FX to 7900) | `tests/test_generator.py::GeneratorTest::test_fully_paid_invoice_closes_its_receivable`, `tests/test_generator.py::GeneratorTest::test_refund_clears_the_unapplied_cash_it_returns` |
 | P01–P20 | 20 paired episodes preserve exact replay, oracle invariance under permutation and relabelling | `tests/test_judge_paired.py::JudgePairedTest::test_pairs` |
 
 ```bash

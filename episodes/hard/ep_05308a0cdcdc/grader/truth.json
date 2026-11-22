@@ -12,7 +12,7 @@
           "2026-08-19:USD:EUR",
           "DOC0685766",
           "DOC0948716",
-          "R1968"
+          "R1969"
         ]
       ],
       "expected_amount_minor": 764856,
@@ -29,7 +29,7 @@
         [
           "2026-08-31:USD:EUR",
           "DOC0948716",
-          "R1966"
+          "R1967"
         ]
       ],
       "expected_amount_minor": 9720,

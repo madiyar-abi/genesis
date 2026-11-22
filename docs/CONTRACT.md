@@ -49,11 +49,16 @@ If you need something not described here, choose the simplest option and log it.
   rows carry invoice_id + entity_id and payment_id null. Both rows share one booking instant.
   An in-period invoice may be posted later in the period than its issue instant.
 - Payment received (inside the period): `Dr 1000 convert(amount, rate(payment date))`;
-  per ref `Cr 1200 convert(ref.amount, rate(invoice issue date))` with invoice_id;
+  per ref `Cr 1200 convert(ref.amount, rate(invoice issue date))` with invoice_id — except the ref that completes
+  the invoice (with the refs of payments with a strictly earlier timestamp, booked or not, it adds up to
+  `total_minor`): it credits the rest, `convert(total_minor) − Σ convert(earlier refs)`, each at the invoice-date
+  rate, so a fully paid invoice's receivable closes exactly (two final parts at the same instant keep the per-ref rule);
   remainder (amount − Σrefs, or all of it if refs are null) `Cr 2900` at the payment-date
-  rate; any difference `7900`. A refund (negative amount) is `Dr 2900 / Cr 1000` at the payment-date
-  rate. Every journal (rows sharing payment_id, or an invoice's
-  rows with payment_id null) balances: Σdebit == Σcredit.
+  rate; any difference `7900`. A refund (negative amount) is `Dr 2900 / Cr 1000`: the 2900 debit is
+  converted at the payment-date rate of the receipt it returns (the latest earlier booked payment in that currency
+  whose ledger rows carry the refund's `entity_id` and whose `amount_minor − Σ invoice_refs` equals the refunded
+  amount; the refund-date rate if there is none — the generator always books that receipt), the cash credit at the refund-date rate, any difference `7900` (realised FX).
+  Every journal (rows sharing payment_id, or an invoice's rows with payment_id null) balances: Σdebit == Σcredit.
 - Expenses: `Dr 6xxx / Cr 1000`, no invoice/payment ids.
 - Hard mode only (`difficulty: "hard"`): a cancelled invoice is reversed in full by a credit note,
   `Dr 4000 / Cr 1200` with the same invoice_id, payment_id null, inside the period and after the

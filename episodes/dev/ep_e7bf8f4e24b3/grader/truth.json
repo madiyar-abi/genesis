@@ -9,11 +9,11 @@
       "evidence_sets": [
         [
           "020b50ce",
-          "GL-000633"
+          "GL-002206"
         ],
         [
           "020b50ce",
-          "GL-000632"
+          "GL-002205"
         ]
       ],
       "expected_amount_minor": 1031778666,
@@ -30,12 +30,12 @@
         [
           "2026-03-21:CHF:KZT",
           "4d157645",
-          "GL-000544"
+          "GL-002116"
         ],
         [
           "2026-03-21:CHF:KZT",
           "4d157645",
-          "GL-000543"
+          "GL-002115"
         ]
       ],
       "expected_amount_minor": 646023,
@@ -52,12 +52,12 @@
         [
           "1ced2015",
           "2026-03-27:CHF:KZT",
-          "GL-000577"
+          "GL-002149"
         ],
         [
           "1ced2015",
           "2026-03-27:CHF:KZT",
-          "GL-000578"
+          "GL-002150"
         ]
       ],
       "expected_amount_minor": 1357492,
@@ -67,37 +67,37 @@
     },
     {
       "affected_ids": [
-        "INV-198981",
-        "RCPT0978245"
+        "INV-807732",
+        "RCPT0481935"
       ],
       "currency": "KZT",
       "evidence_sets": [
         [
-          "2026-02-28:GBP:KZT",
-          "GL-000429",
-          "bf623cbe",
-          "c9aeab00"
+          "2026-03-16:GBP:KZT",
+          "5bf51f9c",
+          "89776dd2",
+          "GL-002097"
         ]
       ],
-      "expected_amount_minor": 249162612,
+      "expected_amount_minor": 20155156,
       "issue_id": "ISS-4",
       "scenario": "single",
       "type": "payment_allocation"
     },
     {
       "affected_ids": [
-        "INV-488937",
-        "RCPT0963841"
+        "INV-683815",
+        "RCPT0880456"
       ],
       "currency": "KZT",
       "evidence_sets": [
         [
-          "GL-000551",
-          "a70b33ae",
-          "a7c93435"
+          "6e6cbd71",
+          "GL-002140",
+          "c28e192a"
         ]
       ],
-      "expected_amount_minor": 37339287,
+      "expected_amount_minor": 225522016,
       "issue_id": "ISS-5",
       "scenario": "single",
       "type": "payment_allocation"

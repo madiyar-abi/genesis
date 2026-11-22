@@ -118,10 +118,10 @@ class LedgerAccountsTest(unittest.TestCase):
             for k, v in counts.items():
                 aggregated_counts[k] += v
 
-        self.assertEqual(aggregated_counts["total"], 34784)
-        self.assertEqual(aggregated_counts["check_a"], 34784)
+        self.assertEqual(aggregated_counts["total"], 34841)
+        self.assertEqual(aggregated_counts["check_a"], 34841)
         self.assertEqual(aggregated_counts["check_b"], 8874)
-        self.assertEqual(aggregated_counts["check_c"], 7000)
+        self.assertEqual(aggregated_counts["check_c"], 7057)
         self.assertEqual(aggregated_counts["check_d"], 18910)
         self.assertEqual(aggregated_counts["check_d_debit"], 9455)
         self.assertEqual(aggregated_counts["check_d_credit"], 9455)
@@ -145,13 +145,13 @@ class LedgerAccountsTest(unittest.TestCase):
             for k, v in counts.items():
                 aggregated_counts[k] += v
 
-        self.assertEqual(aggregated_counts["total"], 116381)
-        self.assertEqual(aggregated_counts["check_a"], 116381)
-        self.assertEqual(aggregated_counts["check_b"], 9886)
-        self.assertEqual(aggregated_counts["check_c"], 7121)
-        self.assertEqual(aggregated_counts["check_d"], 99374)
-        self.assertEqual(aggregated_counts["check_d_debit"], 49687)
-        self.assertEqual(aggregated_counts["check_d_credit"], 49687)
+        self.assertEqual(aggregated_counts["total"], 116391)
+        self.assertEqual(aggregated_counts["check_a"], 116391)
+        self.assertEqual(aggregated_counts["check_b"], 9882)
+        self.assertEqual(aggregated_counts["check_c"], 7197)
+        self.assertEqual(aggregated_counts["check_d"], 99312)
+        self.assertEqual(aggregated_counts["check_d_debit"], 49656)
+        self.assertEqual(aggregated_counts["check_d_credit"], 49656)
 
     def test_clean_seed_0_expense_row_account_9999_detected(self):
         """Tampering an expense row to account '9999' on clean seed 0 is reported by the checker."""

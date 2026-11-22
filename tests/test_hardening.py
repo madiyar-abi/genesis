@@ -205,7 +205,7 @@ class DuplicateEvidenceTest(unittest.TestCase):
             orig_row = next(r["row_id"] for r in ev_rows if r["invoice_id"] == orig_inv["invoice_id"])
             copy_row = next(r["row_id"] for r in ev_rows if r["invoice_id"] == dup_inv["invoice_id"])
             if difficulty == "default":  # the original seed-7 gap from REVIEW.md
-                self.assertEqual((orig_row, copy_row), ("R390", "R445"))
+                self.assertEqual((orig_row, copy_row), ("R391", "R446"))
 
             # Incomplete submission (the "before" pattern: 2 docs + copy row only)
             incomplete_sub = {

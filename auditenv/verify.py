@@ -6,7 +6,7 @@ reuse generator internals. For each episode it checks:
 2. pre-injection books (provenance changes reverted): every journal balances and the books
    follow the bookkeeping policy exactly -> zero discrepancies; in both books every account is in the
    published chart and allowed for its journal type, entities match the invoices, and unreferenced
-   payment remainders sit in 2900 at the payment-date rate;
+   payment remainders sit in 2900 at the payment-date rate (a refund at its receipt's rate);
 3. post-injection books: every journal still balances, and the set of discrepancies recomputed
    from the records equals the truth (type, affected_ids, amount) — nothing undeclared, nothing
    unsupported;
@@ -77,6 +77,33 @@ class Books:
         if cur == self.base:
             return amount
         return convert(amount, cur, self.base, self.fx[(self.cdate(ts).isoformat(), cur, self.base)])
+
+    def refunded_receipt(self, pid: str, js: dict) -> dict | None:
+        """CONTRACT §2: a refund returns the same customer's (ledger entity_id) latest earlier payment in its
+        currency whose unallocated remainder (amount - sum of invoice_refs) equals the refunded amount."""
+        def customer(p):
+            return next((r["entity_id"] for r in js.get("pay:" + p, ())), None)
+        refund, best = self.payments[pid], None
+        for p in self.payments.values():
+            rest = p["amount_minor"] - sum(r["amount_minor"] for r in p["invoice_refs"] or [])
+            if (rest == -refund["amount_minor"] and p["currency"] == refund["currency"]
+                    and js.get("pay:" + p["payment_id"]) and datetime_key(p["timestamp"]) < datetime_key(refund["timestamp"])
+                    and customer(p["payment_id"]) == customer(pid)
+                    and (best is None or datetime_key(p["timestamp"]) > datetime_key(best["timestamp"]))):
+                best = p
+        return best
+
+    def settling_credit(self, pay: dict, inv: dict, amount: int) -> int:
+        """CONTRACT §2: the expected AR credit of `pay`'s ref to `inv` — the ref converted at the invoice-date rate,
+        or, when it and the refs of earlier payments add up to the invoice total, the rest of the converted total."""
+        def conv(a):
+            return self.conv(a, pay["currency"], inv["issued_at"])
+        earlier = [r["amount_minor"] for p in self.payments.values()
+                   if datetime_key(p["timestamp"]) < datetime_key(pay["timestamp"])
+                   for r in p["invoice_refs"] or [] if r["invoice_id"] == inv["invoice_id"]]
+        if earlier and sum(earlier) + amount == inv["total_minor"]:
+            return conv(inv["total_minor"]) - sum(conv(a) for a in earlier)
+        return conv(amount)
 
     def allocated(self, credit: int, ref: int, cur: str, ts: str) -> set[int]:
         """Reference amounts a (0 <= a < ref, document currency) whose conversion at `ts` is the AR credit."""
@@ -253,7 +280,7 @@ class Books:
                 inv = self.invoices.get(ref["invoice_id"])
                 if inv is None:  # reported by ref_problems
                     continue
-                expected = self.conv(ref["amount_minor"], pay["currency"], inv["issued_at"])
+                expected = self.settling_credit(pay, inv, ref["amount_minor"])
                 credit = sum(r["credit_minor"] - r["debit_minor"] for r in rows
                              if r["account"] == "1200" and r["invoice_id"] == inv["invoice_id"])
                 if credit < expected:
@@ -269,7 +296,8 @@ class Books:
             # the unreferenced remainder is Cr 2900 at the payment-date rate; an allocation shortfall adds the
             # unallocated part of that reference, also at the payment-date rate (CONTRACT §2)
             rest = pay["amount_minor"] - sum(r["amount_minor"] for r in refs)
-            rest = self.conv(rest, pay["currency"], pay["timestamp"])
+            receipt = self.refunded_receipt(pid, js) if rest < 0 else None  # a refund: at the receipt's rate
+            rest = self.conv(rest, pay["currency"], (receipt or pay)["timestamp"])
             unapplied = sum(r["credit_minor"] - r["debit_minor"] for r in rows if r["account"] == "2900")
             if unapplied - rest not in extras:
                 problems.append(f"payment {pid}: incorrect unapplied cash for {'' if refs else 'un'}referenced payment")

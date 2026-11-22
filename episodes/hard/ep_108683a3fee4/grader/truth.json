@@ -9,11 +9,11 @@
       "evidence_sets": [
         [
           "D-07f508",
-          "GL-004660"
+          "GL-004661"
         ],
         [
           "D-07f508",
-          "GL-004661"
+          "GL-004662"
         ]
       ],
       "expected_amount_minor": 391800,
@@ -29,11 +29,11 @@
       "evidence_sets": [
         [
           "D-0a2ba9",
-          "GL-004606"
+          "GL-004607"
         ],
         [
           "D-0a2ba9",
-          "GL-004607"
+          "GL-004608"
         ]
       ],
       "expected_amount_minor": 1586706,
@@ -51,7 +51,7 @@
         [
           "D-03786d",
           "D-0e7f2e",
-          "GL-004574"
+          "GL-004575"
         ]
       ],
       "expected_amount_minor": 2075000,
@@ -69,7 +69,7 @@
         [
           "D-084422",
           "D-0e3b0c",
-          "GL-004293"
+          "GL-004294"
         ]
       ],
       "expected_amount_minor": 57604,

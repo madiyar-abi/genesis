@@ -82,6 +82,73 @@ class GeneratorTest(unittest.TestCase):
                     credits[key] += payment["amount_minor"] - allocated
                     self.assertGreaterEqual(credits[key], 0, payment["payment_id"])
 
+    def test_refund_clears_the_unapplied_cash_it_returns(self):
+        # A foreign refund used to debit 2900 at the refund-date rate, after its receipt credited 2900 at the
+        # receipt-date rate, so clean books left the customer's unapplied cash below zero in base currency
+        # (round 21, night/r21/ledger_identity.py: D01 seed 41006, E0342). It is the receipt's carrying amount now;
+        # the cash difference is realised FX (7900).
+        # Default seeds 255 and 284 used to merge two overpayments into one receipt, so no refund matched it.
+        from auditenv.jury import SCENARIOS
+        cases = [(s, {**SCENARIOS["D03"], "difficulty": d}) for s in range(40) for d in ("default", "hard")]
+        foreign = with_fx = 0
+        for seed, config in cases + [(255, {}), (284, {})]:
+            difficulty = config.get("difficulty", "default")
+            ep = generate(seed, config, key="")
+            base, tables = ep["manifest"]["base_currency"], ep["tables"]
+            rows = defaultdict(list)
+            for r in tables["ledger"]:
+                if r["payment_id"]:
+                    rows[r["payment_id"]].append(r)
+            balance = defaultdict(int)
+            for pay in sorted(tables["payments"], key=lambda p: datetime.fromisoformat(p["timestamp"])):
+                entity = rows[pay["payment_id"]][0]["entity_id"]
+                for r in rows[pay["payment_id"]]:
+                    if r["account"] == "2900":
+                        balance[entity] += r["credit_minor"] - r["debit_minor"]
+                with self.subTest(seed=seed, difficulty=difficulty, payment=pay["payment_id"]):
+                    self.assertGreaterEqual(balance[entity], 0)
+                if pay["amount_minor"] < 0:  # the receipt it returns exists (CONTRACT §2), no refund-date fallback
+                    receipts = [p for p in tables["payments"] if p["payment_id"] in rows
+                                and rows[p["payment_id"]][0]["entity_id"] == entity and p["currency"] == pay["currency"]
+                                and p["amount_minor"] - sum(r["amount_minor"] for r in p["invoice_refs"] or [])
+                                == -pay["amount_minor"]
+                                and datetime.fromisoformat(p["timestamp"]) < datetime.fromisoformat(pay["timestamp"])]
+                    with self.subTest(seed=seed, difficulty=difficulty, refund=pay["payment_id"]):
+                        self.assertTrue(receipts)
+                if pay["amount_minor"] < 0 and pay["currency"] != base:
+                    foreign += 1
+                    with_fx += any(r["account"] == "7900" for r in rows[pay["payment_id"]])
+        self.assertGreater(foreign, 10)
+        self.assertGreater(with_fx, 0)
+
+    def test_fully_paid_invoice_closes_its_receivable(self):
+        # Each cash application used to be converted and rounded on its own, so an invoice paid in foreign parts
+        # kept a minor unit in 1200 (18 % of clean D02 episodes, default and hard, seeds 0-299). The application that
+        # completes the invoice now credits the rest of the booked amount; the cash difference is realised FX.
+        from auditenv.jury import SCENARIOS
+        closed = 0
+        for seed in range(40):
+            for difficulty in ("default", "hard"):
+                tables = generate(seed, {**SCENARIOS["D02"], "difficulty": difficulty}, key="")["tables"]
+                paid, parts = defaultdict(int), defaultdict(int)
+                for p in tables["payments"]:
+                    for ref in p["invoice_refs"] or []:
+                        paid[ref["invoice_id"]] += ref["amount_minor"]
+                        parts[ref["invoice_id"]] += 1
+                ar, booked = defaultdict(int), set()
+                for r in tables["ledger"]:
+                    if r["account"] == "1200" and r["invoice_id"]:
+                        ar[r["invoice_id"]] += r["debit_minor"] - r["credit_minor"]
+                        if not r["payment_id"]:
+                            booked.add(r["invoice_id"])
+                for inv in tables["invoices"]:
+                    i = inv["invoice_id"]
+                    if i in booked and parts[i] >= 2 and paid[i] == inv["total_minor"]:
+                        closed += 1
+                        with self.subTest(seed=seed, difficulty=difficulty, invoice=i):
+                            self.assertEqual(ar[i], 0)
+        self.assertGreater(closed, 40)
+
     def test_cash_is_applied_after_the_invoice_is_posted(self):
         # A posting lag used to let a receipt settle a receivable that the ledger had not booked yet
         # (D01 default seed 30010: RCPT0548981 credits 1200 for 2608-742998 a day before its booking).
