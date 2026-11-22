@@ -795,6 +795,8 @@ def _verify_directory(root: Path) -> int:
         try:
             ep = load_episode(root / name)
             problems = verify_episode(ep)
+            if not (root / name / "public" / "task.txt").is_file():  # loading falls back to the published task
+                problems.append("public/task.txt is missing")
             if indexed:
                 record = by_id[name]
                 provenance = ep["provenance"]
