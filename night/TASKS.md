@@ -112,7 +112,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   `uv run python scripts/sensitivity.py` — accept: summaries + exit codes.
 
 ## gemini3b (evidence only, files: night/LOG.md)
-- [ ] G11 (gemini3b, after FIX) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under
+- [x] G11 (gemini3b, after FIX) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under
   episodes/ — accept: per split the `N/N episodes valid` line.
 - [ ] G12 (gemini3b, after FIX) `yes '' | uv run python -m auditenv.demo` — accept: exit code, final reward/score lines
   quoted; compare with the numbers in docs/DEMO.md and call out any difference.
