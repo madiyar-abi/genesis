@@ -29,7 +29,7 @@ episodes only through `judge_adapter.generate_episode`.
   over-60-s scenario — use the documented clock injection or a policy that sleeps; say which). Run on fixture seeds
   70000–70004 × default and hard. — files: night/r23/c_matrix.py, night/LOG.md — accept: LOG table C01–C20 → pass N/10;
   every fail quoted (stimulus → observed) with a one-command reproduction; script exits 1 on any fail.
-- [ ] X2 (codex1) Clean-room matcher differential, written only from night/CASE_UPDATES.md lines 120–211 (Block 3,
+- [x] X2 (codex1) Clean-room matcher differential, written only from night/CASE_UPDATES.md lines 120–211 (Block 3,
   "Точные соглашения matcher", M01–M12): `night/r23/matcher_diff.py` with your own implementation (structure limits
   first, sets, exact ids/currency, τ from `policy.json` `findings.tolerance_minor`, maximum-cardinality matching with
   the published tie rule, the reward formula). For 40 generated episodes (seeds 71000–71019 × default/hard, plus
