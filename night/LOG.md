@@ -6,3 +6,19 @@
 - H=1: exit 0, wall 4.05s, summary: "Ran 73 tests in 3.947s\n\nOK"
 - H=12345: exit 0, wall 3.79s, summary: "Ran 73 tests in 3.690s\n\nOK"
 All 73 tests passed cleanly across all three hash seeds.
+2026-11-22 06:26 gemini3a — G10 done: attack search and sensitivity analysis executed.
+1. `env -u AUDITENV_SECRET uv run python -m auditenv.attack`: exit 0, wall 0.77s.
+   Summary: "=== HANDOFF R1 Automated Attack Search: PASSED ===\nSeeds evaluated: 20 (clean: 5, dirty: 15)\nTotal mutations tested: 11000\nTotal violations detected: 0\nElapsed time: 0.702 s"
+2. `uv run python scripts/sensitivity.py`: exit 0, wall 3.92s.
+   Summary: dev (10 episodes) & hard (20 episodes) mean returns across step costs (0.001, 0.002, 0.005) and tolerances (0, 1, 100).
+   Comparison with docs/DESIGN.md §6 table:
+   - dev oracle: cost 1.000/1.000/1.000, tol 1.000/1.000/1.000 (matches 1.000 across all)
+   - dev reconcile: cost 0.9782 (0.978) / 0.9564 (0.956) / 0.8910 (0.891), tol 0.9564 (0.956) across all (exact match)
+   - dev naive_reconcile: cost -0.4645 (-0.465) / -0.4776 (-0.478) / -0.5169 (-0.517), tol -0.4776 (-0.478) across all (exact match)
+   - dev random: cost -0.8034 (-0.803) / -0.8068 (-0.807) / -0.8170 (-0.817), tol -0.8068 (-0.807) across all (exact match)
+   - dev flag_all: cost -1.000 / -1.000 / -1.000, tol -1.000 across all (exact match)
+   - hard oracle: cost 1.000/1.000/1.000, tol 1.000 across all (exact match)
+   - hard reconcile_hard: cost 0.9580 (0.958) / 0.9160 (0.916) / 0.7900 (0.790), tol 0.9160 (0.916) across all (exact match)
+   - hard reconcile: cost 0.3286 (0.329) / 0.2930 (0.293) / 0.1862 (0.186), tol 0.2930 (0.293) across all (exact match)
+   - hard naive_reconcile: cost -0.6833 (-0.683) / -0.7038 (-0.704) / -0.7651 (-0.765), tol -0.7038 (-0.704) across all (exact match)
+   Differences called out: 0 differences found; all values match docs/DESIGN.md §6 exactly.
