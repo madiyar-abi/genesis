@@ -59,7 +59,7 @@ before injection (236–434 after it on seeds 0–199; hard target 900–1 400);
 | type | causal change | expected amount (base currency) | evidence (any one full set) |
 |---|---|---|---|
 | `duplicate_invoice` | a second invoice document with identical entity, currency and line items, issued strictly later, booked again | AR debit of the later copy | both invoice docs + one positive booking row for each invoice (AR debit or revenue credit) |
-| `payment_allocation` | remittance says the payment covers an invoice, the ledger credits only part (or none) of it to AR; the rest lands in 2900 | expected AR credit − posted AR credit | payment doc + invoice doc + payment’s AR credit for that invoice (2900 row when the credit is missing) + invoice-date FX rate if foreign |
+| `payment_allocation` | remittance says the payment covers an invoice, the ledger credits only part (or none) of it to AR; the rest lands in 2900 | expected AR credit − posted AR credit | payment doc + invoice doc + payment’s AR credit for that invoice (when the credit is missing: every row of the payment’s journal) + invoice-date FX rate if foreign |
 | `fx_error` | invoice or payment converted at the rate of a wrong date (the document's own local/UTC date, or 1, 2, 3, 5, 7 days later or 1, 2, 3, 5 days earlier); difference ≥ 10 minor units | abs(posted − correct) | doc + AR/revenue row (invoice) or cash row (payment) + the correct-date FX rate |
 | `period_cutoff` | invoice issued in the next period (backdated to the period end) or in the previous period, booked in this period | AR debit posted | invoice doc + AR (or revenue) row |
 
@@ -84,7 +84,7 @@ already-affected document (I1/I2 put two issues on one document on purpose), and
 | type | episode (seed) | what the records show | truth amount |
 |---|---|---|---|
 | `duplicate_invoice` | `ep_14eca11ac929` (2003), base USD, tz +05:00 | `INV-441644` (issued 09-26 08:49) and `INV-588950` (09-26 16:00, company time): same customer `CUST52061`, GBP 6 787.00, identical line items; original AR debit `R4132`, later copy AR debit `R4153` = 6 787.00 × 1.22534 | 831 638 (the later copy's AR debit) |
-| `payment_allocation` | `ep_14eca11ac929` (2003) | `PAY-779598` remits USD 8 371.00 for `INV-336399`; the ledger credits nothing to its AR, `R4163` puts the money in 2900. Base-currency payment, so expected AR credit = the remitted amount | 837 100 |
+| `payment_allocation` | `ep_14eca11ac929` (2003) | `PAY-779598` remits USD 8 371.00 for `INV-336399`; the ledger credits nothing to its AR: its whole journal is `R4164` (Dr 1000) and `R4163` (Cr 2900), both in the evidence set. Base-currency payment, so expected AR credit = the remitted amount | 837 100 |
 | `fx_error` | `ep_7f8a101fa36a` (2005), base KZT | `F0926539` is USD 14 007.00 issued 09-12; AR row `R944` = 698 834 443, correct = 14 007.00 × 494.388 (rate `2026-09-12:USD:KZT`) = 692 489 272 | 6 345 171 |
 | `period_cutoff` | `ep_d671645ebdd1` (2002), period 2026-03 | `INV-142472` is issued 2026-04-04 (next period) but its AR row `GL-000311` is dated 03-29 | 638 435 000 (the AR debit posted) |
 | `I1` | `ep_d671645ebdd1` (2002), base KZT | `PAY-827484` (EUR 9 610.00, 03-31 23:38 bank time) pays `INV-589644` in full; AR credit `GL-000333` = 218 992 539 instead of 9 610.00 × 509.208 = 489 348 888 → allocation 270 356 349; the cash row `GL-000332` = 486 321 738 instead of 9 610.00 × 504.218 (03-31) = 484 553 498 → fx 1 768 240 | two issues |
