@@ -86,7 +86,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   scenarios, both difficulties). Do not loosen the evidence check; if it needs the new published rule text, read it
   from policy.json. — files: night/r23/provenance_rebuild.py, night/LOG.md — accept: evidence N/N in every row
   (expected 4,200/4,200 per range); any failure quoted with seed/issue/ids.
-- [ ] Y4 (codex2, after FIX) Strict review of the FIX COMMIT diff: can a reader of the new set alone (two docs, the
+- [x] Y4 (codex2, after FIX) Strict review of the FIX COMMIT diff: can a reader of the new set alone (two docs, the
   payment's journal rows, the invoice-date rate) derive expected − posted for every nothing-allocated issue, incl.
   merged receipts, foreign payments and I1 cases? Count on seeds 0–999 × default/hard/D09/D11: sets > 10 ids
   (expected 0), sets whose rows do not balance (expected 0), sets with an AR credit to the invoice (expected 0).
