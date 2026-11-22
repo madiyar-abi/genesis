@@ -344,3 +344,61 @@ Classified violation records below are quoted for D01. D02–D05 repeat every li
 | D19 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
 | D20 | default | 100 | 1.000000 | 1.000000 | 1.000000 |
 | D20 | hard | 100 | 1.000000 | 1.000000 | 1.000000 |
+
+2026-11-22 05:20 codex2 — Y2 complete after a8538c7. The policy audit now selects the latest earlier receipt from public payment docs and ledger cash-row entity_id, checks the refund's receipt-date 2900 debit or refund-date fallback, and checks its balancing 7900 posting. The separate cash-date check is unchanged. chronology.py already checks the cash row at the payment's own date and orders balances in source currency, so no change was needed.
+
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/policy_text.py --seeds 56000-56199` → exit 0 in 130.32 s. `Audited 8400 episodes across 42 configurations; 33185851 checks, 0 unexpected failures.`
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 56000-56299` → exit 0 in 171.27 s. Summary and all dirty-scenario exceptions verbatim below.
+- `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0 in 115.76 s, 564 tests. `ALL CHECKS PASSED in 115.6 s`.
+
+```text
+episodes checked: 12600 (seeds 56000-56299, 42 configs)
+unexplained violations: 17 (0 in clean configs)
+  hard/hard seed=56084 f_ar_before_booking ids=['PAY-630849', 'SI-2026-560478', 'R3132'] ar credit 2026-06-01T12:47:00+00:00 booking 2026-06-03T14:56:00+00:00
+  hard/hard seed=56190 f_ar_before_booking ids=['RCPT0160344', 'SI-2026-839100', 'R4510'] ar credit 2026-09-01T14:04:00+03:00 booking 2026-09-03T10:31:00+03:00
+  hard/hard seed=56253 f_ar_before_booking ids=['BNK-388929', 'SI-2025-175976', 'L04256'] ar credit 2025-03-02T14:44:00+05:30 booking 2025-03-03T14:34:00+05:30
+  D14/default seed=56058 f_ar_before_booking ids=['BNK-526508', 'F0218797', 'R1775'] ar credit 2026-04-01T00:07:00+01:00 booking 2026-04-03T13:28:00+01:00
+  D14/default seed=56060 f_ar_before_booking ids=['BNK-494520', 'F0443443', 'GL-004830'] ar credit 2026-06-01T13:14:00-05:00 booking 2026-06-02T10:33:00-05:00
+  D14/default seed=56128 f_ar_before_booking ids=['PAY-279453', 'F0874503', 'R4350'] ar credit 2025-04-03T13:32:00+01:00 booking 2025-04-04T21:45:00+01:00
+  D14/hard seed=56018 f_ar_before_booking ids=['RCPT0641841', 'F0873471', 'GL-004990'] ar credit 2026-06-02T10:42:00+00:00 booking 2026-06-03T13:45:00+00:00
+  D14/hard seed=56023 f_ar_before_booking ids=['RCPT0592601', 'SI-2025-347712', 'L03747'] ar credit 2025-03-01T00:43:00+01:00 booking 2025-03-04T21:59:00+01:00
+  D14/hard seed=56114 f_ar_before_booking ids=['BNK-507723', '2604-864602', 'GL-003765'] ar credit 2026-04-01T11:05:00+03:00 booking 2026-04-02T12:50:00+03:00
+  D14/hard seed=56230 f_ar_before_booking ids=['BNK-526067', '2608-861501', 'L03041'] ar credit 2026-08-01T14:52:00+09:00 booking 2026-08-03T11:18:00+09:00
+  D15/default seed=56058 f_ar_before_booking ids=['BNK-526508', 'F0218797', 'R1775'] ar credit 2026-04-01T00:07:00+01:00 booking 2026-04-03T13:28:00+01:00
+  D15/default seed=56060 f_ar_before_booking ids=['BNK-494520', 'F0443443', 'GL-004830'] ar credit 2026-06-01T13:14:00-05:00 booking 2026-06-02T10:33:00-05:00
+  D15/default seed=56128 f_ar_before_booking ids=['PAY-279453', 'F0874503', 'R4350'] ar credit 2025-04-03T13:32:00+01:00 booking 2025-04-04T21:45:00+01:00
+  D15/hard seed=56018 f_ar_before_booking ids=['RCPT0641841', 'F0873471', 'GL-004990'] ar credit 2026-06-02T10:42:00+00:00 booking 2026-06-03T13:45:00+00:00
+  D15/hard seed=56023 f_ar_before_booking ids=['RCPT0592601', 'SI-2025-347712', 'L03747'] ar credit 2025-03-01T00:43:00+01:00 booking 2025-03-04T21:59:00+01:00
+  D15/hard seed=56114 f_ar_before_booking ids=['BNK-507723', '2604-864602', 'GL-003765'] ar credit 2026-04-01T11:05:00+03:00 booking 2026-04-02T12:50:00+03:00
+  D15/hard seed=56230 f_ar_before_booking ids=['BNK-526067', '2608-861501', 'L03041'] ar credit 2026-08-01T14:52:00+09:00 booking 2026-08-03T11:18:00+09:00
+```
+
+Next: Y3 public-data ambiguity audit.
+
+2026-11-22 05:22 codex2 — Y3 complete. Reviewed the a8538c7 diff. Verdict: the published rule yields a unique 2900 debit and 7900 posting in the audited books. CONTRACT §§1–2 together identify the customer, company-local FX dates, currency exponents, and rounding. The public policy supplies the same conversion and ordering rules across its ledger, FX and rounding fields, but should make the ledger join explicit. The verifier limits candidates to booked payments. An unbooked payment has no public ledger customer, so the wording should explicitly exclude it. The exact identity can tie at the same instant in a constructed case, but the company-local FX date and converted amount cannot differ.
+
+`PYTHONPATH=. env -u AUDITENV_SECRET uv run python /tmp/r22-codex2/refund_ambiguity.py` → exit 0 in 43.28 s, seeds 0–999. For each posted refund, grouped public journals by payment_id, indexed receipt remainders by public entity_id, currency and source amount, and compared independently rounded signed totals for 1000, 2900 and 7900. D01–D05 share a config within each difficulty, so the table counts scenario executions. The 28 fallbacks followed the published rule.
+
+| Config | refunds | foreign | fallback | multiple earlier candidates | tied latest receipts | ambiguous debit | unidentified refund customer | unknown-earlier | posting mismatch |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| default | 1508 | 606 | 18 | 0 | 0 | 0 | 0 | 0 | 0 |
+| hard | 1429 | 581 | 10 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D01/default | 1683 | 696 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D01/hard | 1731 | 706 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D02/default | 1683 | 696 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D02/hard | 1731 | 706 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D03/default | 1683 | 696 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D03/hard | 1731 | 706 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D04/default | 1683 | 696 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D04/hard | 1731 | 706 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D05/default | 1683 | 696 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| D05/hard | 1731 | 706 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Total | 20007 | 8197 | 28 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+Checked 12000 episodes; 0 tied identities, 0 ambiguous posting amounts, 0 posting mismatches.
+
+Synthetic: two earlier EUR 100.00 remainders at USD/EUR 1.10 and 1.20 select the latest; with refund-date rate 1.30 the debit is USD 120.00 and realised FX debit is USD 10.00. Two receipts at identical instants can tie for identity, and share the same company date and rate.
+
+Proposed exact replacement for the refund portion of CONTRACT §2 and policy.json ledger.payment:
+
+> For a refund (negative amount_minor), use its absolute amount in the payment currency. Join each payment to its booked ledger rows by payment_id. The eligible receipts are earlier positive payments with the same non-null ledger entity_id and payment currency whose amount_minor minus the sum of invoice_refs amount_minor equals the refunded amount. Treat null invoice_refs as an empty list. Compare payment timestamps as instants and use the latest eligible receipt. Receipts tied at the latest instant use the same FX date. If no receipt qualifies, use the refund timestamp instead. Debit 2900 using that company-local date's rate and credit 1000 using the refund's company-local date's rate. Convert both amounts to base minor units separately with ROUND_HALF_UP using the published currency exponents. Post the difference to 7900, debiting it when the cash credit is larger and crediting it when the 2900 debit is larger. Omit the 7900 row when the difference is zero.
