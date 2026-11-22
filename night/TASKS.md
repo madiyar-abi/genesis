@@ -23,7 +23,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
 `judge_adapter` and `auditenv.money`, never truth/provenance, `verify.py`, `inject.py` or `auditenv/policies/`.
 
 ## codex1 (strong)
-- [ ] X1 (codex1) Clean-room Block 2 matrix check, written only from night/CASE_UPDATES.md lines 100–115 (the D01–D20
+- [x] X1 (codex1) Clean-room Block 2 matrix check, written only from night/CASE_UPDATES.md lines 100–115 (the D01–D20
   table, column "Что должно различаться") and README "Jury adapter": `night/r22/d_matrix.py`. For each scenario,
   generate seeds 50000–50199 × both difficulties via `judge_adapter.generate_episode(seed, auditenv.jury.SCENARIOS[D],
   dir)` and check from public data + the episode's truth count only (truth file may be read *only* for the number and
