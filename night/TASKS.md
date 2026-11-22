@@ -45,7 +45,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
   and compare tp/fp/fn/precision/recall/f1/return with `judge_adapter.score_episode` (abs diff ≤ 1e-9; null fields
   on invalid). — files: night/r23/matcher_diff.py, night/LOG.md — accept: LOG: submissions compared, disagreements 0
   (or each disagreement quoted with the submission and both results, and which reading of the text is right).
-- [ ] X3 (codex1, after FIX) Update `night/r21/text_auditor.py` to the new published evidence rule (policy.json
+- [x] X3 (codex1, after FIX) Update `night/r21/text_auditor.py` to the new published evidence rule (policy.json
   `findings.evidence`: with nothing allocated cite every ledger row of the payment) — change only that, say so in
   LOG — then `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds 63000-63099` and
   `--seeds 75000-75099` — files: night/r21/text_auditor.py, night/LOG.md — accept: F1 1.000, 0 discrepancies on both.
