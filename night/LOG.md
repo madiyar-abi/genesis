@@ -710,3 +710,13 @@ and this log.
    Summary: `ALL CHECKS PASSED in 55.6 s`.
 4. `uv run python scripts/sync_docs.py --check --json /tmp/r22-gemini3b/c2.json` (exit 0, wall time 0.035 s).
    Summary: `All documentation tables match measured data.` (0 drift).
+
+2026-11-22 06:10 codex1 — X6 at 1fc2371 (final settlement rules). The matrix now derives each completing AR credit from the booked invoice total and strictly earlier payment refs. Clean splits check the receipt journal's cash, AR, unapplied cash and realised FX. A refund selects the latest matching earlier booked receipt for its entity, currency and amount, then checks the 2900 debit at that receipt's rate, the 1000 credit at the refund date and their difference on 7900. The grader key and episode exports stay under /tmp/r22-codex1.
+
+The G19 flags came from stale matrix expectations. The previous checker at 1fc2371, copied to /tmp/r22-codex1/d_matrix_before_x6.py, also reproduced them on the codex1 key. `/usr/bin/time -p env -u AUDITENV_SECRET PYTHONPATH=. uv run python /tmp/r22-codex1/d_matrix_before_x6.py --seeds 61000-61004 > /tmp/r22-codex1/x6-before.log 2>&1` (exit 0, real 1.93 s): `200 episodes; 29 failed per-episode checks`. Example false flags were D01/default seed 61000 refund BNK-004796 and D09/default seed 61000 payment PAY-330657 / invoice F0730767 (167188 correctly credited, old expectation 167189). The updated matrix exits 1 when it flags a check.
+
+`/usr/bin/time -p env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix --seeds 61000-61199 > /tmp/r22-codex1/x6-61000-61199.log 2>&1` (exit 0, real 76.26 s). `8000 episodes; 0 failed per-episode checks`
+
+`/usr/bin/time -p env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix --seeds 50000-50199 > /tmp/r22-codex1/x6-50000-50199.log 2>&1` (exit 0, real 75.96 s). `8000 episodes; 0 failed per-episode checks`
+
+`/usr/bin/time -p env -u AUDITENV_SECRET uv run python -m auditenv.check > /tmp/r22-codex1/x6-check.log 2>&1` (exit 0, real 65.50 s). `ALL CHECKS PASSED in 65.4 s`

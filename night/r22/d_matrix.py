@@ -61,6 +61,10 @@ class PublicBooks:
                 self.payment_rows[row["payment_id"]].append(row)
             elif row["invoice_id"]:
                 self.invoice_rows[row["invoice_id"]].append(row)
+        self.payment_times = {
+            payment_id: datetime.fromisoformat(payment["timestamp"])
+            for payment_id, payment in self.payments.items()
+        }
         self.allocations = defaultdict(list)
         for payment_id, payment in self.payments.items():
             for ref in payment["invoice_refs"] or []:
@@ -88,65 +92,89 @@ class PublicBooks:
     def invoice_amount(self, invoice, amount):
         return self.convert(amount, invoice["currency"], self.day(invoice["issued_at"]))
 
+    def expected_credit(self, invoice_id, payment_id, amount):
+        invoice = self.invoices[invoice_id]
+        paid_at = self.payment_times[payment_id]
+        earlier = [value for earlier_id, value in self.allocations[invoice_id]
+                   if self.payment_times[earlier_id] < paid_at]
+        total = invoice["total_minor"]
+        if earlier and sum(earlier) + amount == total:
+            return self.invoice_amount(invoice, total) - sum(self.invoice_amount(invoice, value) for value in earlier)
+        return self.invoice_amount(invoice, amount)
+
+    @staticmethod
+    def unallocated(payment):
+        return payment["amount_minor"] - sum(ref["amount_minor"] for ref in payment["invoice_refs"] or [])
+
+    def matches_postings(self, rows, expected):
+        actual = Counter()
+        for row in rows:
+            actual[row["account"]] += int(row["debit_minor"]) - int(row["credit_minor"])
+        return actual == Counter(expected)
+
     def allocation_differences(self):
         for invoice_id, refs in self.allocations.items():
-            invoice = self.invoices[invoice_id]
             for payment_id, amount in refs:
                 rows = [row for row in self.payment_rows[payment_id] if row["invoice_id"] == invoice_id]
-                expected = self.invoice_amount(invoice, amount)
+                expected = self.expected_credit(invoice_id, payment_id, amount)
                 actual = self.posting(rows, "1200", "credit")
                 if 0 <= actual < expected:
                     yield payment_id, invoice_id, actual, expected
 
+    def correct_receipt(self, payment_id):
+        payment = self.payments[payment_id]
+        rows = self.payment_rows[payment_id]
+        currency = payment["currency"]
+        day = self.day(payment["timestamp"])
+        cash = self.convert(payment["amount_minor"], currency, day)
+        remainder = self.convert(self.unallocated(payment), currency, day)
+        ar = 0
+        for ref in payment["invoice_refs"] or []:
+            invoice_id = ref["invoice_id"]
+            expected = self.expected_credit(invoice_id, payment_id, ref["amount_minor"])
+            invoice_rows = [row for row in rows if row["invoice_id"] == invoice_id]
+            if self.posting(invoice_rows, "1200", "credit") != expected:
+                return False
+            ar += expected
+        return self.matches_postings(rows, {"1000": cash, "1200": -ar, "2900": -remainder,
+                                            "7900": ar + remainder - cash})
+
     def split_payments(self):
         for invoice_id, refs in self.allocations.items():
             invoice = self.invoices[invoice_id]
-            if len(refs) < 2 or sum(amount for _, amount in refs) != invoice["total_minor"]:
+            payment_ids = {payment_id for payment_id, _ in refs}
+            if len(payment_ids) < 2 or sum(amount for _, amount in refs) != invoice["total_minor"]:
                 continue
-            if all(
-                amount > 0 and self.payments[payment_id]["currency"] == invoice["currency"]
-                and self.posting(
-                    [row for row in self.payment_rows[payment_id] if row["invoice_id"] == invoice_id],
-                    "1200", "credit",
-                ) == self.invoice_amount(invoice, amount)
-                and self.posting(self.payment_rows[payment_id], "1000", "debit") == self.convert(
-                    self.payments[payment_id]["amount_minor"], invoice["currency"],
-                    self.day(self.payments[payment_id]["timestamp"]),
-                )
-                for payment_id, amount in refs
-            ):
-                yield invoice_id, tuple(payment_id for payment_id, _ in refs)
+            if all(amount > 0 and self.payments[payment_id]["currency"] == invoice["currency"]
+                   and self.correct_receipt(payment_id) for payment_id, amount in refs):
+                yield invoice_id, tuple(sorted(payment_ids))
 
     def refunds(self):
         receipts = defaultdict(list)
         for payment_id, payment in self.payments.items():
-            remainder = payment["amount_minor"] - sum(
-                ref["amount_minor"] for ref in payment["invoice_refs"] or []
-            )
-            rows = self.payment_rows[payment_id]
-            if remainder > 0 and self.posting(rows, "2900", "credit") == self.convert(
-                remainder, payment["currency"], self.day(payment["timestamp"])
-            ):
-                for entity in {row["entity_id"] for row in rows if row["account"] == "2900"}:
+            remainder = self.unallocated(payment)
+            if remainder > 0:
+                for entity in {row["entity_id"] for row in self.payment_rows[payment_id]}:
                     receipts[entity, payment["currency"], remainder].append(payment_id)
         for payment_id, payment in self.payments.items():
             amount = -payment["amount_minor"]
             if amount <= 0 or payment["invoice_refs"] is not None:
                 continue
             rows = self.payment_rows[payment_id]
-            day = self.day(payment["timestamp"])
             currency = payment["currency"]
-            converted = self.convert(amount, currency, day)
-            if (converted != self.posting(rows, "1000", "credit")
-                    or converted != self.posting(rows, "2900", "debit")
-                    or sum(int(row["debit_minor"]) - int(row["credit_minor"]) for row in rows)):
-                continue
+            cash = self.convert(amount, currency, self.day(payment["timestamp"]))
             for entity in {row["entity_id"] for row in rows if row["account"] == "2900"}:
-                for receipt_id in receipts[entity, currency, amount]:
-                    if datetime.fromisoformat(self.payments[receipt_id]["timestamp"]) < datetime.fromisoformat(
-                        payment["timestamp"]
-                    ):
-                        yield payment_id, receipt_id
+                earlier = (receipt_id for receipt_id in receipts[entity, currency, amount]
+                           if self.payment_times[receipt_id] < self.payment_times[payment_id])
+                receipt_id = max(earlier, key=self.payment_times.__getitem__, default=None)
+                if receipt_id is None:
+                    continue
+                receipt_day = self.day(self.payments[receipt_id]["timestamp"])
+                debit = self.convert(amount, currency, receipt_day)
+                if self.correct_receipt(receipt_id) and self.matches_postings(
+                    rows, {"1000": -cash, "2900": debit, "7900": cash - debit}
+                ):
+                    yield payment_id, receipt_id
 
     def invoice_pairs(self):
         groups = defaultdict(list)
@@ -350,7 +378,8 @@ def main():
     allocation_modes = set().union(*(variants[d]["allocation mode"] for d in ("D09", "D10", "D11")))
     print(f"D09–D11 observed allocation modes: {', '.join(sorted(allocation_modes))}")
     print(f"{len(counts) * total} episodes; {failures} failed per-episode checks")
+    return bool(failures)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

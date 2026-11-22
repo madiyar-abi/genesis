@@ -182,7 +182,7 @@ invoice-date rate; the cash difference goes to 7900. The allocation injector nev
   /tmp/r22-gemini3b/c2.json` — files: night/LOG.md — accept: exit codes + summary lines; d_matrix 0 failed checks.
 
 ## Top-up 2 (06:05)
-- [ ] X6 (codex1) Update `night/r22/d_matrix.py` to the final posting rules (CONTRACT §2: FIX1 refund 2900 at the
+- [x] X6 (codex1) Update `night/r22/d_matrix.py` to the final posting rules (CONTRACT §2: FIX1 refund 2900 at the
   receipt's rate + 7900; FIX2 completing ref credits convert(total) − Σ convert(strictly earlier refs) + 7900) — the
   817 failures gemini3b found on seeds 61000–61199 (G19, LOG 06:01) are its old-rule expectations ("correct refund",
   "correct split", "one allocation shortfall" in D09–D11). Re-run `--seeds 61000-61199` and `--seeds 50000-50199` —
