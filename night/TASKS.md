@@ -77,9 +77,9 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   commands for B in 30000, 31000 — files: night/LOG.md — accept: as Z1 + jury_copy summary.
 
 ## gemini1a (evidence only, files: night/LOG.md)
-- [ ] G1 (gemini1a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 16000-16999` and the
+- [x] G1 (gemini1a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 16000-16999` and the
   same with `--hard` — accept: both summaries + wall times; any problem line verbatim.
-- [ ] G2 (gemini1a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 78000`
+- [x] G2 (gemini1a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 78000`
   — accept: summary + wall time + max steps.
 
 ## gemini1b (evidence only, files: night/LOG.md)
