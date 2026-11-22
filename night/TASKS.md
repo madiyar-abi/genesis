@@ -131,8 +131,8 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
 - [ ] L2 (lead) Merge worker branches, review, fix real defects; REVIEW.md "Round 22", DESIGN §10 / README limitation
   text updated (refund artefact removed, rounding residue stays), sync_docs, HANDOFF — accept: sync_docs --check no
   drift.
-- [ ] D (lead) `docs/DEMO.md` re-verified against the actual demo output — accept: every number reproduced.
-- [ ] P (lead) `docs/PITCH.md` re-verified against the current check output — accept: every number matches.
+- [x] D (lead) `docs/DEMO.md` re-verified against the actual demo output — accept: every number reproduced.
+- [x] P (lead) `docs/PITCH.md` re-verified against the current check output — accept: every number matches.
 
 ## Top-up 1 (05:40) — final generator = `d0fbb34` or later (FIX1 refunds + FIX2 completing payment closes the
 receivable + FIX3 one overpayment per merged receipt). Rules as above; no gate, start now.
@@ -180,3 +180,11 @@ invoice-date rate; the cash difference goes to 7900. The allocation injector nev
   seeds 61000–61199), `yes '' | uv run python -m auditenv.demo`, then `env -u AUDITENV_SECRET uv run python -m
   auditenv.check --json /tmp/r22-gemini3b/c2.json` and `uv run python scripts/sync_docs.py --check --json
   /tmp/r22-gemini3b/c2.json` — files: night/LOG.md — accept: exit codes + summary lines; d_matrix 0 failed checks.
+
+## Top-up 2 (06:05)
+- [ ] X6 (codex1) Update `night/r22/d_matrix.py` to the final posting rules (CONTRACT §2: FIX1 refund 2900 at the
+  receipt's rate + 7900; FIX2 completing ref credits convert(total) − Σ convert(strictly earlier refs) + 7900) — the
+  817 failures gemini3b found on seeds 61000–61199 (G19, LOG 06:01) are its old-rule expectations ("correct refund",
+  "correct split", "one allocation shortfall" in D09–D11). Re-run `--seeds 61000-61199` and `--seeds 50000-50199` —
+  files: night/r22/d_matrix.py, night/LOG.md — accept: 0 failed per-episode checks on both ranges; if any remain,
+  quote seed/ids and say whether it is a checker or a generator defect.
