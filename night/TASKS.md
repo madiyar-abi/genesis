@@ -108,7 +108,7 @@ episodes only through `judge_adapter.generate_episode`.
   (dev → configs/dev.json, train → configs/train.json, hard → configs/eval_hard.json)
   `env -u AUDITENV_SECRET uv run python -m auditenv.export --config <cfg> --out /tmp/r23-gemini2b/<split>` then
   `diff -r episodes/<split> /tmp/r23-gemini2b/<split>` — accept: per split the diff exit code (expected 0).
-- [ ] G8 (gemini2b) `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py`,
+- [x] G8 (gemini2b) `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py`,
   `uv run python scripts/shortcut_miner.py --seeds 6000-6999 --report-only` and the same with `--hard` — accept:
   summary lines + exit codes; any miner value with precision > 0.5 that is NOT in docs/DESIGN.md §10 called out.
 
