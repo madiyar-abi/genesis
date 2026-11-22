@@ -4,7 +4,7 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
-**Round 26 complete (22 November, branch `night/2026-11-22-r26`): no change.** Baseline `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, 56.0 s; no doc drift. Code identical to rounds 24–25. **Next: humans** — the submission checklist under "Deadline & submission".
+**Round 27 complete (22 November, branch `night/2026-11-22-r27`): no change.** Baseline `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, 56.2 s; no doc drift. Code identical to rounds 24–26. **Next: humans** — the submission checklist under "Deadline & submission".
 
 **Round 25 complete (22 November, branch `night/2026-11-22-r25`): no change.** Baseline `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, 56.6 s; no doc drift. Code identical to round 24; nothing safe with jury value left on freeze day. **Next: humans** — the submission checklist under "Deadline & submission".
 
