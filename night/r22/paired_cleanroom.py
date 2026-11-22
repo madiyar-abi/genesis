@@ -1,5 +1,6 @@
 """Replay the organizer's Block 4 matrix and a combined transform on every pair."""
 
+import argparse
 import csv
 import json
 import random
@@ -15,7 +16,7 @@ from auditenv.export import export_episode
 from auditenv.generator import generate
 from auditenv.jury import SCENARIOS
 from auditenv.policy_worker import JuryPolicy
-from auditenv.run import make_policy
+from auditenv.run import make_policy, parse_seeds
 
 SCRATCH = Path("/tmp/r22-codex2")
 TABLES = ("ledger.csv", "invoices.jsonl", "payments.jsonl", "fx.csv")
@@ -256,6 +257,13 @@ def compare_episode(original, copies, policy_name, rng, variants, scanned, embed
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--seeds", default="55000-55009", help="seed list or inclusive ranges")
+    try:
+        seeds = parse_seeds(parser.parse_args().seeds)
+    except ValueError as exc:
+        parser.error(str(exc))
+    pairs_per_scenario = 2 * len(seeds)
     SCRATCH.mkdir(exist_ok=True)
     failures = []
     scanned, embedded = set(), Counter()
@@ -271,7 +279,7 @@ def main():
         means = [[], [], [], [], [], []]
         equal = Counter()
         for difficulty, policy in (("default", "reconcile"), ("hard", "reconcile_hard")):
-            for seed in range(55000, 55010):
+            for seed in seeds:
                 with tempfile.TemporaryDirectory(dir=SCRATCH) as tmp:
                     original = Path(tmp) / "original"
                     try:
@@ -296,8 +304,8 @@ def main():
                         failures.append(f"{scenario} {difficulty} seed {seed}: {type(exc).__name__}: {exc}")
         values = [f"{mean(series):.4f}" if series else "—" for series in means]
         a, b, c, d, e, f = values
-        print(f"| {scenario} | {a} / {b} | {c} / {d} | {e} → {f} | {equal['combined']}/20 | "
-              f"{equal[matrix]}/20 |", flush=True)
+        print(f"| {scenario} | {a} / {b} | {c} / {d} | {e} → {f} | {equal['combined']}/{pairs_per_scenario} | "
+              f"{equal[matrix]}/{pairs_per_scenario} |", flush=True)
     print("Free-text locations searched:", ", ".join(sorted(scanned)))
     print("Embedded IDs:", dict(sorted((path, count) for path, count in embedded.items() if count)) or "none found")
     for failure in failures:

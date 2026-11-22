@@ -631,3 +631,34 @@ Task G15 complete.
 - scripts/golden.py --check: exit 0 ("All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json.")
 - scripts/mutate_reward.py: exit 0 ("22/22 mutants killed.").
 2026-11-22 05:52 lead — Merged top-up results so far: codex1 X4 ledger_identity on the FIX2 rule → 0 clean violations on 41000–41299 and 57000–57299; X5 text auditor updated (old per-ref rule gave a 1-minor-unit FP, D01 hard seed 58001) → F1 1.000, 0 discrepancies on 58000–58099; codex2 Y4 policy_text 59000–59199 0 unexpected (24,500 completing remittances checked), chronology 59000–59299 0 unexplained in clean configs; Y5 FIX2 review: 124,905 completing refs, 0 posting mismatches, 0 out-of-period/credit-note/reissue completions; 3 same-instant final parts (base currency, closed anyway). Acted on Y5 wording: CONTRACT §2 and policy.json now say "strictly earlier timestamp, booked or not" and that two final parts at the same instant keep the per-ref rule. Re-exported (policy text), check exit 0, sync no drift, golden 80/80. PITCH/DEMO re-verified: demo seed 2003 output matches DEMO.md (326 rows, 69 invoices, 286 / 351 331, 0.958, 22 steps); PITCH hard-split facts (20 FP, 6 missed duplicates, 46 issues) re-derived with auditenv.analyze; 20,000-config fuzz for the "59 actions" claim running.
+
+2026-11-22 05:51 codex2 — Y6 complete on final generator d0fbb34. Added `--seeds` with the original 55000–55009 range as the default. `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom --seeds 60000-60009` → exit 0 in 75.99 s. Both the official matrix and the combined shuffle-and-rename pass agreed for all 400 original/copy pairs. Oracle and reconcile/reconcile_hard F1 were 1.0000 throughout.
+
+| Scenario | Reconcile original F1 / return | Combined copy F1 / return | Oracle original → copy | Combined equal | Matrix equal |
+|---|---:|---:|---:|---:|---:|
+| D01 | 1.0000 / 0.9397 | 1.0000 / 0.9397 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D02 | 1.0000 / 0.9397 | 1.0000 / 0.9397 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D03 | 1.0000 / 0.9397 | 1.0000 / 0.9397 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D04 | 1.0000 / 0.9397 | 1.0000 / 0.9397 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D05 | 1.0000 / 0.9397 | 1.0000 / 0.9397 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D06 | 1.0000 / 0.9365 | 1.0000 / 0.9365 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D07 | 1.0000 / 0.9365 | 1.0000 / 0.9365 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D08 | 1.0000 / 0.9365 | 1.0000 / 0.9365 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D09 | 1.0000 / 0.9410 | 1.0000 / 0.9410 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D10 | 1.0000 / 0.9395 | 1.0000 / 0.9395 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D11 | 1.0000 / 0.9405 | 1.0000 / 0.9405 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D12 | 1.0000 / 0.9398 | 1.0000 / 0.9398 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D13 | 1.0000 / 0.9398 | 1.0000 / 0.9398 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D14 | 1.0000 / 0.9411 | 1.0000 / 0.9411 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D15 | 1.0000 / 0.9411 | 1.0000 / 0.9411 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D16 | 1.0000 / 0.9410 | 1.0000 / 0.9410 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D17 | 1.0000 / 0.9410 | 1.0000 / 0.9410 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D18 | 1.0000 / 0.9410 | 1.0000 / 0.9410 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D19 | 1.0000 / 0.9388 | 1.0000 / 0.9388 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D20 | 1.0000 / 0.9388 | 1.0000 / 0.9388 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+
+Free-text locations searched: fx.csv.date, fx.csv.rate, fx.csv.source_currency, fx.csv.target_currency, invoices.jsonl.currency, invoices.jsonl.due_at, invoices.jsonl.issued_at, invoices.jsonl.line_items[].description, ledger.csv.account, ledger.csv.credit_minor, ledger.csv.currency, ledger.csv.debit_minor, ledger.csv.timestamp, manifest.json.base_currency, manifest.json.generator_version, manifest.json.period_end, manifest.json.period_start, manifest.json.rounding, manifest.json.schema_version, manifest.json.timezone, payments.jsonl.currency, payments.jsonl.timestamp, policy.json.base_currency, policy.json.findings.affected_ids.duplicate_invoice, policy.json.findings.affected_ids.fx_error, policy.json.findings.affected_ids.payment_allocation, policy.json.findings.affected_ids.period_cutoff, policy.json.findings.amount, policy.json.findings.evidence, policy.json.findings.tolerance, policy.json.fx.conversion, policy.json.fx.direction, policy.json.fx.rate_date, policy.json.ledger.accounts.1000, policy.json.ledger.accounts.1200, policy.json.ledger.accounts.2900, policy.json.ledger.accounts.4000, policy.json.ledger.accounts.6100, policy.json.ledger.accounts.6200, policy.json.ledger.accounts.6300, policy.json.ledger.accounts.6400, policy.json.ledger.accounts.7900, policy.json.ledger.credit_note, policy.json.ledger.currency, policy.json.ledger.expense, policy.json.ledger.invoice, policy.json.ledger.payment, policy.json.period.end, policy.json.period.rule, policy.json.period.start, policy.json.rounding, policy.json.timezone, task.txt
+Embedded IDs: none found
+Discrepancies: 0
+
+The `--seeds 60009-60000` input exited 2 with `paired_cleanroom.py: error: reversed seed range '60009-60000'`. `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0 in 86.68 s, 565 tests. `ALL CHECKS PASSED in 86.6 s`.
