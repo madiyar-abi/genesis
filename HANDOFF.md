@@ -4,6 +4,8 @@
 > Read this first after `git pull`. Keep it short and true.
 > Updated after every finished task (by the night agent or by you).
 
+**Round 26 complete (22 November, branch `night/2026-11-22-r26`): no change.** Baseline `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, 56.0 s; no doc drift. Code identical to rounds 24–25. **Next: humans** — the submission checklist under "Deadline & submission".
+
 **Round 25 complete (22 November, branch `night/2026-11-22-r25`): no change.** Baseline `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, 56.6 s; no doc drift. Code identical to round 24; nothing safe with jury value left on freeze day. **Next: humans** — the submission checklist under "Deadline & submission".
 
 **Round 24 complete (22 November, branch `night/2026-11-22-r24`): no change.** Baseline `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0, 568 tests, 56.0 s; no doc drift. No improvement with jury value was left that is safe on freeze day (H1/E5 stay deferred), so this round changed no code, data or docs. **Next: humans** — the submission checklist under "Deadline & submission" (revoke the DeepSeek key, make the repo public, record the video from `docs/DEMO.md`, share the Drive folder "Anyone with the link").
