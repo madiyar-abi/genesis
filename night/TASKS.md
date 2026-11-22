@@ -129,7 +129,7 @@ episodes only through `judge_adapter.generate_episode`.
   return > -0.5.
 
 ## lead
-- [ ] L1 (lead) Baseline: `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r23-lead-check.json` and
+- [x] L1 (lead) Baseline: `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r23-lead-check.json` and
   `scripts/sync_docs.py --check` — accept: exit 0, no drift.
 - [ ] L2 (lead) Red-team passes (subagents, read-only first): (a) judge_adapter + env against CASE_UPDATES Block 1/3
   boundary rules; (b) data: contradictory/unresolvable public data and evidence sufficiency on D01–D20; (c) jury-facing
