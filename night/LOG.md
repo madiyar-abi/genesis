@@ -961,3 +961,47 @@ Check results: oracle F1 = 1.000 across all runs (none < 1); reconcile F1 = 1.00
   (2) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/chronology.py --seeds 64000-64299` → exit 0, real 77.76 s. "episodes checked: 12600 (seeds 64000-64299, 42 configs)". Totals verbatim: "totals: a_pay_before_inv=0, a_ref_unknown=0, a_due_before_issue=0, b_cn_before_booking=0, b_cn_orphan=0, b_cn_not_full=0, b_reissue_before_orig=0, c_neg_credit=0, d_ledger_out_period=0, d_cutoff_item=3083, e_fx_missing=0, f_inv_booked_before_issue=2635, f_pay_posted_before_doc=0, f_ar_before_booking=20, f_inv_not_booked=0, f_pay_not_posted=0, f_overallocated=0, f_pay_entity=0, f_fx_posted=5087, c_tie=0". "unexplained violations: 20 (0 in clean configs)" — all 20 rows are f_ar_before_booking in configs that inject period_cutoff (default/default 2, hard/hard 4, D14/default 4, D14/hard 3, D15/default 4, D15/hard 3; seed 64062 hard has two payment rows for the same invoice → 19 distinct invoices). Verified each with a scratch script (/tmp/r23-rb/z2_verify_hits.py, public data only, generate(seed,cfg) + issued_at in policy timezone): all 19 invoices have issued_local < period_start (e.g. default seed=64027 SI-2025-389245 issued 2025-03-28, period starts 2025-04-01; D14/hard seed=64104 INV-906806 issued 2025-08-30, period starts 2025-09-01) → the known round-20 explanation (prior-period invoice itself, r20-LOG 02:44; same pattern as r21 21 hits / r22 24 hits). "19 hits checked; 0 NOT prior-period invoices", exit 0. Full 20 lines quoted in /tmp/r23-rb/z2_chronology.out. No new defect; no product code touched.
   (3) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom --seeds 66000-66009` → exit 0, real 55.58 s. All 20 scenario rows: reconcile original F1 1.0000 = combined-copy F1 1.0000 (returns equal per row, 0.9345–0.9410), oracle 1.0000 → 1.0000, "Combined equal 20/20", "Matrix equal 20/20". Summary verbatim: "Embedded IDs: none found" / "Discrepancies: 0".
   Acceptance met: 0 unexpected failures, 0 unexplained clean violations, all pairs equal. Assumption: the 20 non-clean f_ar_before_booking rows are the documented period_cutoff artefact, verified per-invoice above rather than assumed. Next: Z3.
+2026-11-22 07:02 rb — Z3 done. Fresh-clone README walk. Clone: `git clone --branch night/2026-11-22-r23 /Users/caliskan/Projects/genesis /tmp/r23-rb/clone` → commit 6a60fbf (lead tip; README/code unchanged by later lead commits). Every README command starting with `uv run` / `make` / `env` run from the clone root via /tmp/r23-rb/walk.py (logs /tmp/r23-rb/cmdNN.log). AUDITENV_SECRET unset. All 38 commands exit 0; no undocumented step was needed.
+  | # | command (README line) | exit | wall s |
+  | 01 | uv run python -m auditenv.check (30) | 0 | 76.4 |
+  | 02 | uv run python -m unittest tests.test_judge_contract tests.test_judge_reward tests.test_judge_scenarios tests.test_judge_paired (129/348) | 0 | 2.8 |
+  | 03 | uv run python -m auditenv.jury_run (346) | 0 | 1.9 |
+  | 04 | uv run python -m auditenv.run --policy reconcile --config configs/dev.json --out /tmp/dev_reconcile.jsonl (194) | 0 | 0.1 |
+  | 05 | uv run python -m auditenv.run --policy random --seeds 2000-2009 --mode eval (195) | 0 | 0.1 |
+  | 06 | uv run python -m auditenv.export --config configs/train_hard.json --out /tmp/train_hard (207) | 0 | 0.2 |
+  | 07 | uv run python -m auditenv.run --policy reconcile_hard --config configs/train.json --config configs/train_hard.json --out trajectories.jsonl (210) | 0 | 0.4 |
+  | 08 | for p in random naive_reconcile reconcile; do ...run --config configs/train.json --out trajectories/train_$p.jsonl; done (220-222) | 0 | 0.4 |
+  | 09 | for p in random naive_reconcile reconcile reconcile_hard; do ...run --config configs/train_hard.json --out trajectories/train_hard_$p.jsonl; done (223-225) | 0 | 0.9 |
+  | 10 | uv run python -m auditenv.server --episodes hidden.json --grader-log grader.jsonl (367) | 0 | 0.1 |
+  | 11 | uv run python -c "from auditenv.check import run_remote; assert run_remote()" (383/393) | 0 | 0.1 |
+  | 12 | uv run python -m unittest discover -s tests -t . (391) | 0 | 63.4 |
+  | 13 | uv run python -m unittest tests.test_env (392) | 0 | 0.3 |
+  | 14 | uv run python -m auditenv.verify --seeds 0-199 (394) | 0 | 7.0 |
+  | 15 | uv run python -m auditenv.verify --dir episodes/train (395) | 0 | 0.2 |
+  | 16 | uv run python -m auditenv.verify --dir episodes/dev (396) | 0 | 0.2 |
+  | 17 | uv run python -m auditenv.verify --dir episodes/hard (397) | 0 | 0.5 |
+  | 18 | uv run python -m auditenv.attack (398) | 0 | 0.6 |
+  | 19 | uv run python -m tests.test_fuzz (399) | 0 | 1.3 |
+  | 20 | uv run python -m auditenv.check --json /tmp/auditenv-metrics.json (400) | 0 | 77.6 |
+  | 21 | uv run python scripts/sync_docs.py --check --json /tmp/auditenv-metrics.json (401) | 0 | 0.1 |
+  | 22 | uv run python -m auditenv.fuzz --seeds 0-999 (402) | 0 | 62.8 |
+  | 23 | uv run python -m auditenv.fuzz --configs 3000 (403) | 0 | 95.5 |
+  | 24 | uv run python -m auditenv.fuzz --stress reconcile --seeds 0-299 (404) | 0 | 8.3 |
+  | 25 | uv run python -m auditenv.analyze --policy naive_reconcile --config configs/dev.json (405) | 0 | 0.1 |
+  | 26 | uv run python -m auditenv.demo (406) | 0 | 0.2 |
+  | 27 | uv run python -m auditenv.export --config configs/dev.json --out episodes/dev (407) | 0 | 0.1 |
+  | 28 | uv run python -m auditenv.export --config configs/train.json --out episodes/train (408) | 0 | 0.1 |
+  | 29 | uv run python -m auditenv.export --config configs/eval_hard.json --out episodes/hard (409) | 0 | 0.3 |
+  | 30 | uv run python scripts/mutate_reward.py (410) | 0 | 161.7 |
+  | 31 | uv run python scripts/sensitivity.py (411) | 0 | 2.2 |
+  | 32 | uv run python scripts/shortcut_miner.py --report-only (412) | 0 | 18.4 |
+  | 33 | uv run python scripts/golden.py --check (413) | 0 | 0.5 |
+  | 34 | uv run python scripts/bench.py (414) | 0 | 11.5 |
+  | 35 | uv run python scripts/chart.py --json /tmp/auditenv-metrics.json (415) | 0 | 0.0 |
+  | 36 | uv run python -m auditenv.analyze --config configs/dev.json --seeds 2000 (420, inline placeholders FILE/N) | 0 | 0.0 |
+  | 37 | make check (416) | 0 | 56.8 |
+  | 38 | make -n check test verify fuzz stress attack golden mutate miner bench sensitivity chart (417) | 0 | 0.0 |
+  Key summaries verbatim: 01/20/37 "ALL CHECKS PASSED in 76.2 s / 77.5 s / 56.7 s"; 02 "Ran 74 tests ... OK"; 12 "Ran 568 tests in 63.318s ... OK"; 14 "600/600 episodes valid; episodes with problems: 0"; 15/16 "10/10 episodes valid", 17 "20/20 episodes valid"; 18 "Total mutations tested: 11000 / Total violations detected: 0"; 19 "Python 3.11.14, 20319 episode actions, 20524 total step calls in 1.180 s"; 21 "All documentation tables match measured data."; 22 "default mode, seeds 0-999: 3000 episodes (1986 dirty, 1014 clean) in 62.7 s ... episodes with a problem: 0 ... FUZZ PASSED"; 23 "config sweep, cases 0-2999: 3000 random configs (1186 hard) in 95.4 s; problems ...: 0; max steps 56 / FUZZ PASSED"; 24 "reconcile on 1200 default episodes ...: imperfect 0, max steps 33, truncated 0 (8.2 s)"; 26 "grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0"; 30 "22/22 mutants killed."; 31 "Ranking unchanged across all settings: oracle > reconcile_hard > reconcile > naive_reconcile > random > flag_all."; 32 "Flagged values: 16" (matches DESIGN §10 count); 33 "All 80 golden hashes match"; 03 jury_run table matches README (reconcile F1 1.000 return 0.959, random/flag_all -1.000, oracle 1.000).
+  Byte-identity: after 07-09 (trajectories.jsonl + trajectories/) and 27-29 (episodes/ re-export) and 35 (docs/baselines.svg), `git status --porcelain` in the clone shows only the untracked fixtures hidden.json/grader.jsonl — every regenerated committed file is byte for byte identical.
+  Skipped (with reason): docker build/run commands and `uv run python -m auditenv.jury_run --policy-image genesis-policy` (line 61) — Docker not installed on this machine (README says CI exercises the container path); `git clone https://github.com/...` — network, replaced by the local clone per task; line 38 `env -u AUDITENV_SECRET uv run python -m ...` is a template, not a command (AUDITENV_SECRET unset anyway); README python snippets `env = AuditEnv()` / `env = ja.make_env()` are code, not shell commands.
+  Assumptions: (a) cmd10 hidden.json created by copying configs/dev.json (README documents the format; no hidden list ships); stdin fed `{"cmd":"reset"}` then `{"cmd":"close"}`; server exited 0 and printed the documented grader-key reminder on stderr. First harness attempt used `timeout` which macOS lacks (exit 127, harness bug, not a README failure); re-run with a Python-level 120 s timeout passed. (b) cmd26 demo pauses fed with `yes ''`. (c) cmd36 placeholders FILE=configs/dev.json, N=2000. No product code touched. Next: no (rb) tasks left.
