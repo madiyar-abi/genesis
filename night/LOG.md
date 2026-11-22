@@ -664,3 +664,33 @@ Discrepancies: 0
 The `--seeds 60009-60000` input exited 2 with `paired_cleanroom.py: error: reversed seed range '60009-60000'`. `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0 in 86.68 s, 565 tests. `ALL CHECKS PASSED in 86.6 s`.
 2026-11-22 05:50 gemini1a — G14: ran `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 18000-18999` (exit 0, wall time 128.00 s: default mode, seeds 18000-18999: 3000 episodes (1986 dirty, 1014 clean) in 127.9 s; problems: 0; FUZZ PASSED) and `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 18000-18999 --hard` (exit 0, wall time 298.81 s: hard mode, seeds 18000-18999: 3000 episodes (1989 dirty, 1011 clean) in 298.8 s; problems: 0; FUZZ PASSED). 0 problems found across 6,000 episodes on final generator. Task G14 complete.
 2026-11-22 05:55 gemini3a — G18 done: Jury modules twice, attack search, sensitivity comparison on final generator (d0fbb34). (1) Four jury modules twice: Run 1 Ran 73 tests in 2.357s, OK (wall 2.429s, exit 0); Run 2 Ran 73 tests in 2.465s, OK (wall 2.529s, exit 0). (2) env -u AUDITENV_SECRET uv run python -m auditenv.attack (exit 0, wall 0.417s): "=== HANDOFF R1 Automated Attack Search: PASSED ===", 20 seeds (5 clean, 15 dirty), 11,000 mutations, 0 violations. (3) uv run python scripts/sensitivity.py (exit 0, wall 2.172s): default parameters reproduced every env reward; dev & hard rankings invariant under step costs (0.001, 0.002, 0.005) and tolerances (0, 1, 100). Comparison with docs/DESIGN.md §6 "Sensitivity" table: all values match byte-for-byte at 3 decimal places (dev: oracle 1.000, reconcile 0.978/0.956/0.891, naive_reconcile -0.465/-0.478/-0.517, random -0.803/-0.807/-0.817, flag_all -1.000; hard: oracle 1.000, reconcile_hard 0.958/0.916/0.790, reconcile 0.329/0.293/0.186, naive_reconcile -0.683/-0.704/-0.765); 0 differences called out.
+2026-11-22 05:59 rb — Z4 done: re-checks on the final generator (HEAD 58bd488, includes FIX a8538c7, FIX2 and the
+Y5 completing-ref wording f713586/58bd488). Merged origin/night/2026-11-22-r22 (fast-forward). All commands from
+repo root; full logs in /tmp/r22-rb/z4_*.log.
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py` — exit 0, 4 s wall.
+  Summary: "Z1: 20 scenarios x 2 difficulties x 5 seeds (32000-32004) x 2 policies = 400 closed runs through
+  judge_adapter, 4.3 s total". FLAGS (0): none. Every scenario×difficulty row: reconcile/reconcile_hard mean F1
+  1.000, min F1 1.000; flag_all mean return −1.000 everywhere (never > 0, never > −0.5). Max steps 50 (D06–D08
+  hard), max episode time 0.013 s.
+  Call-out (Z2 criterion, same as Z2 on FIX): 23 NOTES where per-scenario mean return is below the README
+  20-scenario mean 0.959 — hard rows 0.914–0.922 and default D06–D08 0.956. Adapter's own note explains it:
+  "README value is a 20-scenario mean, per-scenario return varies with inspection cost 0.002/step"; F1 is 1.000
+  in all of them, so this is expected per-scenario variance, not a regression.
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.extreme_configs` — exit 0, 11 s wall.
+  Summary: "Outcomes: {'valid': 300, 'rejected': 72, 'failure': 0}. Total: 372." All 72 rejections are the
+  expected "ValueError: at most 12 issues per episode" guard. All 300 valid configs: exact issue counts,
+  reconcile F1=1.0 (0 valid rows with F1 != 1.0).
+- `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.jury_copy` — exit 0, 1 s wall.
+  10 rewrite variants (CSV columns shuffled, CRLF, CSV/JSON/JSONL BOM, no final newline, pretty/compact JSON,
+  JSONL keys reversed, combined) × 10 reference episodes: Accepted 10, Rejected 0, Scores equal 10 each.
+  Summary: "Semantically equivalent rewrite discrepancies: 0".
+- `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 32000` — exit 0, 2 s wall.
+  Seeds 32001–32020: random_explorer F1 0.000 return −1.000; reconcile F1 1.000 return 0.960 (max 25 steps);
+  flag_all F1 0.000 return −1.000; oracle F1 1.000 return 1.000. No Z1 call-outs (oracle/reconcile F1 = 1,
+  random/flag_all return ≤ −0.5).
+- `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 33000` — exit 0, 2 s wall.
+  Seeds 33001–33020: identical policy table (reconcile 1.000/0.960, max 24 steps; oracle 1.000/1.000;
+  random_explorer and flag_all −1.000). No Z1 call-outs.
+Assumption: "final generator" = current origin/night/2026-11-22-r22 HEAD at merge time (58bd488); scenarios_adapter
+uses its built-in seed base 32000–32004 (no flag needed). No product code touched; only night/TASKS.md (Z4 [x])
+and this log.

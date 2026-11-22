@@ -158,7 +158,7 @@ invoice-date rate; the cash difference goes to 7900. The allocation injector nev
 - [x] Y6 (codex2) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom` on seeds
   60000–60009 (add a `--seeds` flag if missing) — files: night/r22/paired_cleanroom.py, night/LOG.md — accept: table,
   0 discrepancies.
-- [ ] Z4 (rb) On the final generator: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py`,
+- [x] Z4 (rb) On the final generator: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py`,
   `... -m night.r21.extreme_configs`, `... -m night.r21.jury_copy`, `env -u AUDITENV_SECRET uv run python -m
   auditenv.jury_run --seed-base <B>` for B in 32000, 33000 — files: night/LOG.md — accept: exit codes + summaries;
   call-outs as in Z1/Z2.
