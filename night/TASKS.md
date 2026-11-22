@@ -113,7 +113,7 @@ episodes only through `judge_adapter.generate_episode`.
   summary lines + exit codes; any miner value with precision > 0.5 that is NOT in docs/DESIGN.md §10 called out.
 
 ## gemini3a (evidence only, files: night/LOG.md)
-- [ ] G9 (gemini3a) Four jury modules under three hash seeds: for H in 0 1 12345:
+- [x] G9 (gemini3a) Four jury modules under three hash seeds: for H in 0 1 12345:
   `PYTHONHASHSEED=$H env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward
   tests.test_judge_scenarios tests.test_judge_paired` — accept: per run `Ran N tests` + result.
 - [ ] G10 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
