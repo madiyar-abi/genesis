@@ -133,3 +133,50 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   drift.
 - [ ] D (lead) `docs/DEMO.md` re-verified against the actual demo output — accept: every number reproduced.
 - [ ] P (lead) `docs/PITCH.md` re-verified against the current check output — accept: every number matches.
+
+## Top-up 1 (05:40) — final generator = `d0fbb34` or later (FIX1 refunds + FIX2 completing payment closes the
+receivable + FIX3 one overpayment per merged receipt). Rules as above; no gate, start now.
+FIX2 rule (CONTRACT §2, policy.json `ledger.payment`): the ref that completes an invoice — with the refs of earlier
+payments (by timestamp) it adds up to `total_minor` — credits `convert(total_minor) − Σ convert(earlier refs)` at the
+invoice-date rate; the cash difference goes to 7900. The allocation injector never picks such a last part.
+- [ ] X4 (codex1) Update `night/r21/ledger_identity.py` to the FIX2 rule (keep class (b) as the detector of the old
+  per-application residue) and run `--classify --seeds 41000-41299` and `--seeds 57000-57299` — files:
+  night/r21/ledger_identity.py, night/LOG.md — accept: clean configs (a) 0, (b) 0, (c) 0; anything else quoted with
+  seed and row ids.
+- [ ] X5 (codex1) Update `night/r21/text_auditor.py` to the FIX2 rule only if it needs it (a per-ref expected credit
+  now gives ±1 false payment_allocation findings on completing parts), run `--seeds 58000-58099` — files:
+  night/r21/text_auditor.py, night/LOG.md — accept: table, F1 1.000, 0 discrepancies; say whether you changed it.
+- [ ] Y4 (codex2) Update `night/r20/policy_text.py` to the FIX2 rule where it checks AR credits, run `--seeds
+  59000-59199`; run `night/r20/chronology.py --seeds 59000-59299` — files: night/r20/policy_text.py,
+  night/r20/chronology.py, night/LOG.md — accept: 0 unexpected failures; 0 unexplained violations in clean configs.
+- [ ] Y5 (codex2) Review the FIX2 commit (`7efcfb7`) as a strict reviewer, like Y3: can an auditor derive every
+  completing ref's AR credit from public data alone? Hunt for ambiguous cases on seeds 0–999 × default/hard/D01–D20:
+  two payments at the same instant referencing one invoice, a completing ref in an out-of-period payment, prior-period
+  invoices (no AR debit in the ledger), hard-mode credit notes/re-issues, duplicate copies, over-payment refs (ref =
+  total). Script under /tmp/r22-codex2/ — files: night/LOG.md — accept: counts per case; any ambiguity or posting
+  mismatch quoted with seed/ids; exact replacement wording if the text is unclear.
+- [ ] Y6 (codex2) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom` on seeds
+  60000–60009 (add a `--seeds` flag if missing) — files: night/r22/paired_cleanroom.py, night/LOG.md — accept: table,
+  0 discrepancies.
+- [ ] Z4 (rb) On the final generator: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py`,
+  `... -m night.r21.extreme_configs`, `... -m night.r21.jury_copy`, `env -u AUDITENV_SECRET uv run python -m
+  auditenv.jury_run --seed-base <B>` for B in 32000, 33000 — files: night/LOG.md — accept: exit codes + summaries;
+  call-outs as in Z1/Z2.
+- [ ] G14 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 18000-18999` and the same with
+  `--hard` — files: night/LOG.md — accept: both summaries + wall times.
+- [ ] G15 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 13000-13299` and
+  `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 13000-13299` — files:
+  night/LOG.md — accept: per command the summary line + wall time.
+- [ ] G16 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 8000-9999` and
+  `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 84000` — files: night/LOG.md — accept:
+  last lines + wall times.
+- [ ] G17 (gemini2b) Re-export diff (as G7, scratch dir /tmp/r22-gemini2b/final/<split>), then
+  `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py` — files: night/LOG.md — accept:
+  diff exit codes 0, golden 80/80, mutants 22/22.
+- [ ] G18 (gemini3a) Four jury modules twice (as G9), `env -u AUDITENV_SECRET uv run python -m auditenv.attack`,
+  `uv run python scripts/sensitivity.py` — files: night/LOG.md — accept: `Ran N tests` + OK per run; summaries; compare
+  sensitivity tables with docs/DESIGN.md "Sensitivity" table and call out any difference.
+- [ ] G19 (gemini3b) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix` (if it has a seed flag,
+  seeds 61000–61199), `yes '' | uv run python -m auditenv.demo`, then `env -u AUDITENV_SECRET uv run python -m
+  auditenv.check --json /tmp/r22-gemini3b/c2.json` and `uv run python scripts/sync_docs.py --check --json
+  /tmp/r22-gemini3b/c2.json` — files: night/LOG.md — accept: exit codes + summary lines; d_matrix 0 failed checks.
