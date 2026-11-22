@@ -170,7 +170,7 @@ invoice-date rate; the cash difference goes to 7900. The allocation injector nev
 - [ ] G16 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 8000-9999` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 84000` — files: night/LOG.md — accept:
   last lines + wall times.
-- [ ] G17 (gemini2b) Re-export diff (as G7, scratch dir /tmp/r22-gemini2b/final/<split>), then
+- [x] G17 (gemini2b) Re-export diff (as G7, scratch dir /tmp/r22-gemini2b/final/<split>), then
   `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py` — files: night/LOG.md — accept:
   diff exit codes 0, golden 80/80, mutants 22/22.
 - [ ] G18 (gemini3a) Four jury modules twice (as G9), `env -u AUDITENV_SECRET uv run python -m auditenv.attack`,
