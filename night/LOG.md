@@ -451,3 +451,37 @@ Task G4 complete.
 All miner values with precision > 0.5 match the known surface cues documented in docs/DESIGN.md §10 (duplicate counts, period-end acct2900/acct7900 rows, acct2900 amount counts for payment allocation and fx error). Zero undocumented miner values.
 2026-11-22 05:16 gemini3b — G13: ran env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r22-gemini3b/c.json (exit 0, wall time 79.2 s; 564 unit tests, all gates passed) then uv run python scripts/sync_docs.py --check --json /tmp/r22-gemini3b/c.json (exit 0, wall time 0.065 s). Drift lines verbatim: "All documentation tables match measured data." (zero drift).
 2026-11-22 05:39 lead — Merged all 9 worker branches (21 tasks done, all evidence green on FIX1: verify 6000–7999 6000/6000, fuzz 16000–17999 default+hard, config sweeps 78000–83999, stress 12000–12299, re-export diff 0, golden/mutants/miner, jury modules ×3, attack 0, demo, check+sync; codex1 X1 D-matrix 8000 eps 0 failures, X2 ledger_identity updated to the refund rule → (a) 0, X3 text auditor 54000–54099; codex2 Y1 clean-room paired 0 discrepancies / no ids in free text, Y2 policy_text 56000–56199 0 unexpected + chronology 0 unexplained in clean configs, Y3 refund-rule ambiguity 0 on 12000 eps; rb jury_run 28000–31000, scenarios, extreme configs, jury_copy). Acted on Y3: 28 refunds in default/hard (none in D01–D05) fell back to the refund-date rate because two overpayments of one customer merged into one receipt (default seeds 255, 284). FIX3: never merge two overpayments (no random draw added; 2 more of 660 compared episodes change) → 0 fallbacks on seeds 0–999 default and hard; regression extended (fails 4× without the fix). CONTRACT wording made explicit (booked receipt, ledger entity_id) per Y3. Heavy-hard snapshot counts updated; naive reconcile hard F1 0.186 → 0.185 (sync_docs). check exit 0 (55.8 s), sync no drift, golden 80/80, fuzz 0-999 + hard 0-199 PASSED, verify 600/600, attack 0. DESIGN worked examples re-checked.
+
+2026-11-22 05:45 codex1 — X4 at c8cfe6f (generator d0fbb34). The ledger audit indexes earlier public payment refs by invoice and timestamp. A ref that completes an invoice credits the invoice-date conversion of its total less the sum of earlier converted refs. The old independent-rounding residue detector, class (b), remains in place.
+
+`PYTHONPATH=. /usr/bin/time -p env -u AUDITENV_SECRET uv run python -m night.r21.ledger_identity --classify --seeds 41000-41299 > /tmp/r22-codex1/x4-41000-41299.log 2>&1` (exit 0, real 40.72 s). `Classified 0 clean violations: (a) 0, (b) 0, (c) 0.`
+
+| Config | Difficulty | journal | ar_running | ar_close | unapplied_running | refund_2900 | fx | trial |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| D01 | default | 45,672 / 0 | 19,152 / 0 | 15,463 / 0 | 1,582 / 0 | 500 / 0 | 8,029 / 0 | 300 / 0 |
+| D01 | hard | 167,997 / 0 | 21,081 / 0 | 16,515 / 0 | 1,507 / 0 | 474 / 0 | 8,041 / 0 | 300 / 0 |
+| D02 | default | 45,672 / 0 | 19,152 / 0 | 15,463 / 0 | 1,582 / 0 | 500 / 0 | 8,029 / 0 | 300 / 0 |
+| D02 | hard | 167,997 / 0 | 21,081 / 0 | 16,515 / 0 | 1,507 / 0 | 474 / 0 | 8,041 / 0 | 300 / 0 |
+| D03 | default | 45,672 / 0 | 19,152 / 0 | 15,463 / 0 | 1,582 / 0 | 500 / 0 | 8,029 / 0 | 300 / 0 |
+| D03 | hard | 167,997 / 0 | 21,081 / 0 | 16,515 / 0 | 1,507 / 0 | 474 / 0 | 8,041 / 0 | 300 / 0 |
+| D04 | default | 45,672 / 0 | 19,152 / 0 | 15,463 / 0 | 1,582 / 0 | 500 / 0 | 8,029 / 0 | 300 / 0 |
+| D04 | hard | 167,997 / 0 | 21,081 / 0 | 16,515 / 0 | 1,507 / 0 | 474 / 0 | 8,041 / 0 | 300 / 0 |
+| D05 | default | 45,672 / 0 | 19,152 / 0 | 15,463 / 0 | 1,582 / 0 | 500 / 0 | 8,029 / 0 | 300 / 0 |
+| D05 | hard | 167,997 / 0 | 21,081 / 0 | 16,515 / 0 | 1,507 / 0 | 474 / 0 | 8,041 / 0 | 300 / 0 |
+
+`PYTHONPATH=. /usr/bin/time -p env -u AUDITENV_SECRET uv run python -m night.r21.ledger_identity --classify --seeds 57000-57299 > /tmp/r22-codex1/x4-57000-57299.log 2>&1` (exit 0, real 41.48 s). `Classified 0 clean violations: (a) 0, (b) 0, (c) 0.`
+
+| Config | Difficulty | journal | ar_running | ar_close | unapplied_running | refund_2900 | fx | trial |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| D01 | default | 46,690 / 0 | 19,123 / 0 | 15,457 / 0 | 1,516 / 0 | 456 / 0 | 7,958 / 0 | 300 / 0 |
+| D01 | hard | 170,701 / 0 | 20,706 / 0 | 16,362 / 0 | 1,607 / 0 | 504 / 0 | 7,938 / 0 | 300 / 0 |
+| D02 | default | 46,690 / 0 | 19,123 / 0 | 15,457 / 0 | 1,516 / 0 | 456 / 0 | 7,958 / 0 | 300 / 0 |
+| D02 | hard | 170,701 / 0 | 20,706 / 0 | 16,362 / 0 | 1,607 / 0 | 504 / 0 | 7,938 / 0 | 300 / 0 |
+| D03 | default | 46,690 / 0 | 19,123 / 0 | 15,457 / 0 | 1,516 / 0 | 456 / 0 | 7,958 / 0 | 300 / 0 |
+| D03 | hard | 170,701 / 0 | 20,706 / 0 | 16,362 / 0 | 1,607 / 0 | 504 / 0 | 7,938 / 0 | 300 / 0 |
+| D04 | default | 46,690 / 0 | 19,123 / 0 | 15,457 / 0 | 1,516 / 0 | 456 / 0 | 7,958 / 0 | 300 / 0 |
+| D04 | hard | 170,701 / 0 | 20,706 / 0 | 16,362 / 0 | 1,607 / 0 | 504 / 0 | 7,938 / 0 | 300 / 0 |
+| D05 | default | 46,690 / 0 | 19,123 / 0 | 15,457 / 0 | 1,516 / 0 | 456 / 0 | 7,958 / 0 | 300 / 0 |
+| D05 | hard | 170,701 / 0 | 20,706 / 0 | 16,362 / 0 | 1,607 / 0 | 504 / 0 | 7,938 / 0 | 300 / 0 |
+
+`PYTHONPATH=. /usr/bin/time -p env -u AUDITENV_SECRET uv run python -m auditenv.check > /tmp/r22-codex1/x4-check.log 2>&1` (exit 0, real 120.18 s). `ALL CHECKS PASSED in 120.1 s` Next: X5.

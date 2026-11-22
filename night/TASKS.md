@@ -139,7 +139,7 @@ receivable + FIX3 one overpayment per merged receipt). Rules as above; no gate, 
 FIX2 rule (CONTRACT §2, policy.json `ledger.payment`): the ref that completes an invoice — with the refs of earlier
 payments (by timestamp) it adds up to `total_minor` — credits `convert(total_minor) − Σ convert(earlier refs)` at the
 invoice-date rate; the cash difference goes to 7900. The allocation injector never picks such a last part.
-- [ ] X4 (codex1) Update `night/r21/ledger_identity.py` to the FIX2 rule (keep class (b) as the detector of the old
+- [x] X4 (codex1) Update `night/r21/ledger_identity.py` to the FIX2 rule (keep class (b) as the detector of the old
   per-application residue) and run `--classify --seeds 41000-41299` and `--seeds 57000-57299` — files:
   night/r21/ledger_identity.py, night/LOG.md — accept: clean configs (a) 0, (b) 0, (c) 0; anything else quoted with
   seed and row ids.

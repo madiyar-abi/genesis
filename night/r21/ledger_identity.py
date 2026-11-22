@@ -67,11 +67,15 @@ def audit(tables, manifest, policy):
         if key[1]:
             payment_journals[key[1]].extend(rows)
     receipts = defaultdict(list)
+    ref_history = defaultdict(list)
     for payment in tables["payments"]:
+        timestamp = datetime.fromisoformat(payment["timestamp"])
+        for ref in payment["invoice_refs"] or []:
+            ref_history[ref["invoice_id"]].append((timestamp, ref["amount_minor"]))
         if payment["amount_minor"] > 0 and unallocated(payment) > 0:
             for entity in {row["entity_id"] for row in payment_journals[payment["payment_id"]]}:
                 key = (entity, payment["currency"], unallocated(payment))
-                receipts[key].append(datetime.fromisoformat(payment["timestamp"]))
+                receipts[key].append(timestamp)
     period = policy["period"]
     checked_fx_ids = set()
     for pay in tables["payments"]:
@@ -79,16 +83,25 @@ def audit(tables, manifest, policy):
         if not period["start"] <= local_date(pay["timestamp"]) <= period["end"]:
             continue
         refs = pay["invoice_refs"] or []
+        timestamp = datetime.fromisoformat(pay["timestamp"])
         expected_ar = 0
         for ref in refs:
             invoice_id = ref["invoice_id"]
             invoice = invoices[invoice_id]
-            cash_applied = convert(ref["amount_minor"], invoice["currency"], invoice["issued_at"])
+            currency, issued = invoice["currency"], invoice["issued_at"]
+            earlier = [value for paid_at, value in ref_history[invoice_id] if paid_at < timestamp]
+            value = ref["amount_minor"]
+            if earlier and sum(earlier) + value == invoice["total_minor"]:
+                cash_applied = convert(invoice["total_minor"], currency, issued) - sum(
+                    convert(prior, currency, issued) for prior in earlier
+                )
+            else:
+                cash_applied = convert(value, currency, issued)
             applied[invoice_id] += cash_applied
             expected_ar += cash_applied
         cash = convert(pay["amount_minor"], pay["currency"], pay["timestamp"])
         rows = payment_journals[payment_id]
-        remainder_date = datetime.fromisoformat(pay["timestamp"])
+        remainder_date = timestamp
         if pay["amount_minor"] < 0:
             entity = next((row["entity_id"] for row in rows if row["account"] == "1000"), None)
             key = (entity, pay["currency"], -pay["amount_minor"])
