@@ -104,7 +104,7 @@ episodes only through `judge_adapter.generate_episode`.
   summary + wall time + max steps.
 
 ## gemini2b (evidence only, files: night/LOG.md)
-- [ ] G7 (gemini2b) Re-export into scratch dirs and diff against the committed exports: for each split
+- [x] G7 (gemini2b) Re-export into scratch dirs and diff against the committed exports: for each split
   (dev → configs/dev.json, train → configs/train.json, hard → configs/eval_hard.json)
   `env -u AUDITENV_SECRET uv run python -m auditenv.export --config <cfg> --out /tmp/r23-gemini2b/<split>` then
   `diff -r episodes/<split> /tmp/r23-gemini2b/<split>` — accept: per split the diff exit code (expected 0).
