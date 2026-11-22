@@ -140,10 +140,10 @@ class PublicBooks:
                 credits = [row for row in rows if row["account"] == "1200" and
                            row["invoice_id"] == invoice_id and row["credit_minor"]]
                 posted = sum(row["credit_minor"] for row in credits)
-                evidence_rows = credits or [row for row in rows if row["account"] == "2900"]
-                if evidence_rows:
+                if credits or any(row["account"] == "2900" for row in rows):
+                    evidence_rows = credits[:1] if credits else rows
                     report("payment_allocation", [invoice_id, payment_id], expected - posted,
-                           [payment["doc_id"], invoice["doc_id"], evidence_rows[0]["row_id"]] + fx)
+                           [payment["doc_id"], invoice["doc_id"]] + [row["row_id"] for row in evidence_rows] + fx)
         return {"episode_id": self.episode_id, "findings": findings}
 
 

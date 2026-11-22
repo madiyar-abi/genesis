@@ -123,7 +123,7 @@ the episode with −1. Code: `auditenv/matcher.py`, `metrics.py`.
 |---|---|---|---|---|---|
 | oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 |
 | reconcile (policy-aware rules) | 1.000 | 1.000 | 1.000 | 0.956 | 22.8 |
-| naive reconcile | 0.179 | 0.733 | 0.288 | −0.478 | 17.5 |
+| naive reconcile | 0.163 | 0.667 | 0.261 | −0.529 | 17.5 |
 | random explorer | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 |
 | flag-everything | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 |
 
@@ -290,7 +290,7 @@ print(ja.score_episode(out, {"episode_id": info["episode_id"], "findings": []}, 
 | `get_record` | `table`, `id` (row_id, invoice_id, payment_id or fx_id) | the record |
 | `get_document` | `doc_id` | the invoice or payment document |
 | `calculator` | `expression` (`+ - * / ( )` and decimals) | a decimal string, e.g. `"0.3"` for `0.1+0.2` |
-| `submit` | `findings` (the findings.json object, §5 of the case) | `{"accepted": true}` with no correctness signal; it ends the episode |
+| `submit` | `findings` (the findings.json object, §5 of the case) | `{"accepted": true}` with no correctness signal, or the bounded structure error `invalid_findings` (limits, types, missing fields; return −1); either way it ends the episode |
 
 Errors are `{"code", "message"}` with no paths, seeds or truth, and every one costs a step: `unknown_action` (also a
 malformed envelope), `bad_params`, `unknown_table`, `not_found`, `calc_error`, `time_limit`, and in train mode

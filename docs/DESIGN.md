@@ -59,7 +59,7 @@ before injection (236–434 after it on seeds 0–199; hard target 900–1 400);
 | type | causal change | expected amount (base currency) | evidence (any one full set) |
 |---|---|---|---|
 | `duplicate_invoice` | a second invoice document with identical entity, currency and line items, issued strictly later, booked again | AR debit of the later copy | both invoice docs + one positive booking row for each invoice (AR debit or revenue credit) |
-| `payment_allocation` | remittance says the payment covers an invoice, the ledger credits only part (or none) of it to AR; the rest lands in 2900 | expected AR credit − posted AR credit | payment doc + invoice doc + payment’s AR credit for that invoice (2900 row when the credit is missing) + invoice-date FX rate if foreign |
+| `payment_allocation` | remittance says the payment covers an invoice, the ledger credits only part (or none) of it to AR; the rest lands in 2900 | expected AR credit − posted AR credit | payment doc + invoice doc + payment’s AR credit for that invoice (when the credit is missing: every row of the payment’s journal) + invoice-date FX rate if foreign |
 | `fx_error` | invoice or payment converted at the rate of a wrong date (the document's own local/UTC date, or 1, 2, 3, 5, 7 days later or 1, 2, 3, 5 days earlier); difference ≥ 10 minor units | abs(posted − correct) | doc + AR/revenue row (invoice) or cash row (payment) + the correct-date FX rate |
 | `period_cutoff` | invoice issued in the next period (backdated to the period end) or in the previous period, booked in this period | AR debit posted | invoice doc + AR (or revenue) row |
 
@@ -84,7 +84,7 @@ already-affected document (I1/I2 put two issues on one document on purpose), and
 | type | episode (seed) | what the records show | truth amount |
 |---|---|---|---|
 | `duplicate_invoice` | `ep_14eca11ac929` (2003), base USD, tz +05:00 | `INV-441644` (issued 09-26 08:49) and `INV-588950` (09-26 16:00, company time): same customer `CUST52061`, GBP 6 787.00, identical line items; original AR debit `R4132`, later copy AR debit `R4153` = 6 787.00 × 1.22534 | 831 638 (the later copy's AR debit) |
-| `payment_allocation` | `ep_14eca11ac929` (2003) | `PAY-779598` remits USD 8 371.00 for `INV-336399`; the ledger credits nothing to its AR, `R4163` puts the money in 2900. Base-currency payment, so expected AR credit = the remitted amount | 837 100 |
+| `payment_allocation` | `ep_14eca11ac929` (2003) | `PAY-779598` remits USD 8 371.00 for `INV-336399`; the ledger credits nothing to its AR: its whole journal is `R4164` (Dr 1000) and `R4163` (Cr 2900), both in the evidence set. Base-currency payment, so expected AR credit = the remitted amount | 837 100 |
 | `fx_error` | `ep_7f8a101fa36a` (2005), base KZT | `F0926539` is USD 14 007.00 issued 09-12; AR row `R944` = 698 834 443, correct = 14 007.00 × 494.388 (rate `2026-09-12:USD:KZT`) = 692 489 272 | 6 345 171 |
 | `period_cutoff` | `ep_d671645ebdd1` (2002), period 2026-03 | `INV-142472` is issued 2026-04-04 (next period) but its AR row `GL-000311` is dated 03-29 | 638 435 000 (the AR debit posted) |
 | `I1` | `ep_d671645ebdd1` (2002), base KZT | `PAY-827484` (EUR 9 610.00, 03-31 23:38 bank time) pays `INV-589644` in full; AR credit `GL-000333` = 218 992 539 instead of 9 610.00 × 509.208 = 489 348 888 → allocation 270 356 349; the cash row `GL-000332` = 486 321 738 instead of 9 610.00 × 504.218 (03-31) = 484 553 498 → fx 1 768 240 | two issues |
@@ -158,12 +158,12 @@ played once, then re-graded offline with the real matcher and the step cost / am
 |---|---|---|---|---|---|---|
 | oracle · dev | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | reconcile · dev | 0.978 | 0.956 | 0.891 | 0.956 | 0.956 | 0.956 |
-| naive_reconcile · dev | −0.465 | −0.478 | −0.517 | −0.478 | −0.478 | −0.478 |
+| naive_reconcile · dev | −0.516 | −0.529 | −0.569 | −0.529 | −0.529 | −0.529 |
 | random · dev | −0.803 | −0.807 | −0.817 | −0.807 | −0.807 | −0.807 |
 | flag_all · dev | −1.000 | −1.000 | −1.000 | −1.000 | −1.000 | −1.000 |
 | reconcile_hard · hard | 0.958 | 0.916 | 0.790 | 0.916 | 0.916 | 0.916 |
 | reconcile · hard | 0.329 | 0.293 | 0.186 | 0.293 | 0.293 | 0.293 |
-| naive_reconcile · hard | −0.683 | −0.704 | −0.765 | −0.704 | −0.704 | −0.704 |
+| naive_reconcile · hard | −0.704 | −0.725 | −0.786 | −0.725 | −0.725 | −0.725 |
 
 The ranking (oracle > reconcile(_hard) > … > random > flag_all) is identical under all five settings on both
 splits: the step cost only spreads the middle, and tolerance never changes a mean (the rule policies compute
@@ -196,12 +196,14 @@ Independent of the generator, from the public tables and closed files only:
    the declared amount is recomputed from the records of each set alone (sufficiency).
 
 Decision for `payment_allocation` with **nothing allocated** (the AR credit row was removed): the set is the
-payment document, the invoice document, the payment's 2900 unapplied-cash row (and the invoice-date FX rate
-for foreign currency). The amount is the referenced amount × the invoice-date rate, reproduced from the two
-documents and the rate; the 2900 row shows where the money went (linked by `payment_id`, and for a
-base-currency payment it must carry at least the whole referenced amount). The missing AR credit itself is
-an absence no record id can cite — an auditor proves it by listing the ledger, and the verifier proves it in
-step 3 by recomputing every discrepancy from the full ledger. We keep the set minimal instead of padding it.
+payment document, the invoice document, **every ledger row of the payment** (cash, 2900 unapplied cash, any AR
+credits to other invoices of a merged receipt, 7900) and the invoice-date FX rate for foreign currency. The amount
+is the referenced amount × the invoice-date rate, reproduced from the two documents and the rate; the rows show
+that the payment's journal balances without an AR credit for the invoice, so the absence is read from the set
+itself (at most 8 ids: payment journals have at most 5 rows). Until round 23 the set held only the 2900 row and
+the absence had to be proven from the full ledger; a clean-room rebuild from provenance
+(`night/r23/provenance_rebuild.py`) showed that a reader of the set alone cannot tell a merged receipt's other
+allocations or the cash amount from it (198 of 4,200 episodes, D09/D11 and the default mix).
 
 A jury-style review (separate agent, before submission) found and we fixed: seed recovery from a
 plain-hash `episode_id` (now HMAC + grader key in the RNG); a crash/overrun on non-string `table`
@@ -230,11 +232,11 @@ the same ISO-week label → an undeclared duplicate in clean books); it is fixed
 
 | policy | seeds | P | R | F1 | return | steps | time s | exp. return* |
 |---|---|---|---|---|---|---|---|---|
-| random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.005 | −0.807 |
-| naive reconciliation | 2000–2009 | 0.179 | 0.733 | 0.288 | −0.478 | 17.5 | 0.007 | −0.512 |
-| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.956 | 22.8 | 0.006 | 0.956 |
+| random explorer (seeded) | 2000–2009 | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 | 0.006 | −0.807 |
+| naive reconciliation | 2000–2009 | 0.163 | 0.667 | 0.261 | −0.529 | 17.5 | 0.007 | −0.560 |
+| reconciliation (policy-aware) | 2000–2009 | 1.000 | 1.000 | 1.000 | 0.956 | 22.8 | 0.007 | 0.956 |
 | flag-everything attack | 2000–2009 | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | 0.004 | −1.000 |
-| oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.003 | 1.000 |
+| oracle (grader-side) | 2000–2009 | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 0.004 | 1.000 |
 
 Dev split = `configs/dev.json` (10 episodes: 2 clean, 2 interacting, 6 mixed; 30 truth issues).
 P/R/F1 micro-averaged over episodes; return, steps (incl. submit), time = means per episode. Timing is a snapshot of the measurement host. CI compares deterministic cells and checks that times are finite and nonnegative.
@@ -249,9 +251,9 @@ episodes (300 seeds × random mix / clean / 12 issues / 12 issues with 100 invoi
 episodes**, max 33 steps, no truncation — every truth issue can be found from the records within the budget.
 
 **Seed sweep** (`uv run python -m auditenv.fuzz --seeds 0-999`; generate → verifier → oracle, random
-explorer and flag-everything through the env, 3 configs per seed): 3 000 episodes (1 987 dirty, 1 013
+explorer and flag-everything through the env, 3 configs per seed): 3 000 episodes (1 986 dirty, 1 014
 clean) — 0 exceptions, 0 verifier problems, oracle > 0.9 on every dirty and 1.0 on every clean episode (the
-sweep's gate); the random explorer scores > 0 on 246 episodes, all clean books where it submitted nothing (the correct answer), never on
+sweep's gate); the random explorer scores > 0 on 247 episodes, all clean books where it submitted nothing (the correct answer), never on
 dirty books; flag-everything is negative on 3 000/3 000. Hard mode, seeds 0–199: 600 episodes, 0 problems,
 random > 0 only on 47 clean episodes, flag-everything negative on 600/600. CI runs both sweeps.
 
@@ -259,14 +261,14 @@ random > 0 only on 47 clean episodes, flag-everything negative on 600/600. CI ru
 
 | | duplicate | allocation | fx | cutoff | I1 | I2 | FP |
 |---|---|---|---|---|---|---|---|
-| naive reconciliation, recall | 7/7 | 2/8 | 6/8 | 7/7 | 0/2 | 2/2 | 102 |
+| naive reconciliation, recall | 7/7 | 0/8 | 6/8 | 7/7 | 0/2 | 2/2 | 103 |
 | reconciliation, recall | 7/7 | 8/8 | 8/8 | 7/7 | 2/2 | 2/2 | 0 |
 
-Where the naive rules fail (102 FPs: 27 allocation, 30 duplicate, 27 fx, 18 cutoff; 22 of them
+Where the naive rules fail (103 FPs: 28 allocation, 30 duplicate, 27 fx, 18 cutoff; 22 of them
 on the 2 clean companies):
 - *allocation*: every 2900 credit is flagged → overpayments and refunds become false accusations;
   the truth amount is the AR shortfall, not the 2900 credit, and the evidence needs the invoice
-  document → allocation recall 2/8, I1 recall 0/2;
+  document (and, with nothing allocated, every row of the payment's journal) → allocation recall 0/8, I1 recall 0/2;
 - *duplicate*: same entity + amount ignores line items → weekly retainers are flagged;
 - *fx / cutoff*: the date written in the timestamp is used instead of the company-timezone date →
   midnight documents get the wrong rate or the wrong period.
@@ -294,7 +296,7 @@ and checks that every credit note is in the period and after its booking.
 | policy | P | R | F1 | return | steps | exp. return* |
 |---|---|---|---|---|---|---|
 | random explorer (seeded) | 0.000 | 0.000 | 0.000 | −0.806 | 33.1 | −0.806 |
-| naive reconciliation | 0.108 | 0.652 | 0.185 | −0.704 | 33.1 | −0.749 |
+| naive reconciliation | 0.101 | 0.609 | 0.173 | −0.725 | 33.1 | −0.789 |
 | reconciliation (default rules) | 0.667 | 0.870 | 0.755 | 0.293 | 43.0 | 0.081 |
 | reconciliation + hard rules (`reconcile_hard`) | 1.000 | 1.000 | 1.000 | 0.916 | 43.0 | 0.916 |
 | flag-everything attack | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 | −1.000 |
@@ -340,7 +342,7 @@ to explore.
 | clean books, any finding | F1 = 0, reward < 0 | `test_reward_attacks` |
 | invalid submission (structure, limits, wrong episode_id) | episode ends, reward −1, bounded error message | `test_env`, `test_jury.ContractTests` |
 | the 100th action is not a submit / an action (even a submit) arrives after 60 s | `truncated`, empty answer graded | `test_env`, `test_jury` |
-| the 100th action is the submit | it is a submit (`terminated`) | `test_env.test_submit_on_last_step_is_submit` |
+| the 100th action is the submit | it is a submit (`terminated`) | `test_env.TerminationTests.test_submit_on_last_step_is_submit` |
 | action after the end, resubmission | `episode_over`, nothing changes, the first grade stays | `test_jury` |
 | malformed actions (None, lists, nested dicts, huge strings, unicode digits in cursors) | bounded error, step consumed, never an exception | `test_fuzz` (20 319 episode actions) |
 | cursor exactly at the end / past the end | empty page / `bad_params` | `test_jury` |
@@ -360,13 +362,13 @@ to explore.
   queue into public generation; the public splits are regenerable from their seeds.
 - Shortcut miner (`uv run python scripts/shortcut_miner.py [--hard]`, 1 000 seeds): single observable
   features that predict truth records with precision > 0.5 (16 flagged in default mode, 11 in hard mode).
-  Fixed: re-typed descriptions marked hard-mode duplicate copies (1.000 → 0.458 on 1 000 seeds: invoices and
+  Fixed: re-typed descriptions marked hard-mode duplicate copies (1.000 → 0.454 on 1 000 seeds: invoices and
   re-issues are now keyed in by hand too). Left, measured: in default mode "same entity,
   currency and total exactly twice" finds duplicates (0.996) — it is the duplicate definition, but default mode
   has no near-miss decoys (hard mode has: 0.356); I1 payments are always on the last day, so a 2900/7900 row on
   the last day hints at fx_error (0.70) and a large 2900 amount at payment_allocation (0.75–0.77);
-  a 2900 row whose amount occurs in four or more ledger rows points at payment_allocation too (0.964, 214 of
-  222 rows). Each hint names
+  a 2900 row whose amount occurs in four or more ledger rows points at payment_allocation too (0.949, 240 of
+  253 rows; hard mode 0.835). Each hint names
   a record, not the claimed amount — scoring still needs the reconciliation.
 - Cutoff of a next-period invoice is booked *before* its issue instant; a policy can learn that
   direction-of-lag cue, but it is exactly the audit rule (document date outside the period).

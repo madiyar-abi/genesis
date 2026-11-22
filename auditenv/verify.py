@@ -571,11 +571,16 @@ def _sufficient(books: Books, iss: dict, s: list, rows: dict, docs: dict) -> lis
                       and row["payment_id"] == pay["payment_id"] and row["invoice_id"] == inv["invoice_id"]
                       and row["debit_minor"] == 0 and row["credit_minor"] > 0
                       and expected - row["credit_minor"] == exp)
-            else:  # 2900 row: nothing was allocated, the whole ref went to unapplied cash -> amount = expected
-                # (the missing AR credit is an absence no id can show; step 3 proves it from the whole ledger).
+            else:  # 2900 row: nothing was allocated, the whole ref went to unapplied cash -> amount = expected.
+                # The set holds the payment's whole journal, which balances without an AR credit for the invoice.
                 # A base-currency payment needs no rate: the unapplied credit must cover the whole ref.
+                journal = [r for r in rows.values() if r["payment_id"] == pay["payment_id"]]
+                closed = (all(r["row_id"] in s for r in journal)
+                          and sum(r["debit_minor"] - r["credit_minor"] for r in journal) == 0
+                          and not any(r["account"] == "1200" and r["invoice_id"] == inv["invoice_id"] for r in journal))
                 covers = pay["currency"] != books.base or row["credit_minor"] >= ref["amount_minor"]
-                ok = row["account"] == "2900" and row["payment_id"] == pay["payment_id"] and exp == expected and covers
+                ok = (row["account"] == "2900" and row["payment_id"] == pay["payment_id"] and exp == expected
+                      and covers and closed)
         return [] if ok else [f"evidence set {s} does not reproduce the amount"]
     except (KeyError, StopIteration, ValueError, IndexError):
         return [f"evidence set {s} is missing a record needed to reproduce the amount"]
@@ -795,6 +800,8 @@ def _verify_directory(root: Path) -> int:
         try:
             ep = load_episode(root / name)
             problems = verify_episode(ep)
+            if not (root / name / "public" / "task.txt").is_file():  # loading falls back to the published task
+                problems.append("public/task.txt is missing")
             if indexed:
                 record = by_id[name]
                 provenance = ep["provenance"]

@@ -76,13 +76,13 @@ Truth issue: `{issue_id, type, scenario, affected_ids, expected_amount_minor, cu
 
 | type | affected_ids | amount | evidence (any one full set) |
 |---|---|---|---|
-| `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the later-issued copy | both invoice doc_ids + the original's and later copy's AR (or revenue) row_ids |
-| `payment_allocation` | [invoice_id, payment_id] | `convert(ref.amount, rate(inv date))` − AR credit actually posted | payment doc_id + invoice doc_id + the AR credit row_id of that invoice in the payment (if nothing was allocated to it: the 2900 row_id) + the invoice-date fx_id if foreign |
+| `duplicate_invoice` | [original_invoice_id, duplicate_invoice_id] | ledger AR debit of the later-issued copy (by `issued_at`, whatever the posting order) | both invoice doc_ids + the original's and later copy's AR (or revenue) row_ids |
+| `payment_allocation` | [invoice_id, payment_id] | `convert(ref.amount, rate(inv date))` − AR credit actually posted | payment doc_id + invoice doc_id + the AR credit row_id of that invoice in the payment (if nothing was allocated to it: every row_id of the payment's journal — cash, 2900, any other AR credits and 7900) + the invoice-date fx_id if foreign |
 | `fx_error` | [invoice_id] or [payment_id] | abs(posted − correct) of the AR (resp. cash) row | doc_id + that row_id (invoice: AR or revenue row) + the fx_id of the correct date |
 | `period_cutoff` | [invoice_id] | AR debit posted for an invoice dated outside the period | invoice doc_id + AR (or revenue) row_id |
 
 "Same line items" = equal as a multiset of `(description, quantity, unit_price_minor, amount_minor)`
-with descriptions compared lower-case, letters and digits only (order, case and punctuation ignored).
+with descriptions compared lower-case, letters and digits only (order, case, spacing and punctuation ignored).
 Default-mode copies are exact. Each hard-mode copy has a 50% chance of being re-typed.
 
 Every evidence set is sufficient on its own: `auditenv/verify.py` recomputes the amount from the
@@ -147,8 +147,9 @@ Errors (unknown action/table/id, bad params — including parameters not listed 
 `schemas/action.schema.json`; a `submit` with such parameters still ends the episode, as an invalid
 submission) consume a step; codes:
 `unknown_action, bad_params, unknown_table, not_found, calc_error`, plus
-`time_limit` (the action arrived after `time_limit_s` → it is not executed, even a submit; truncated) and `invalid_findings` (train mode only; in eval
-the policy just sees `{"submitted": true}`).
+`time_limit` (the action arrived after `time_limit_s` → it is not executed, even a submit; truncated) and `invalid_findings` (a submit
+whose structure breaks §5 — a structure check only, it never depends on the truth; the episode still ends with reward −1 in the
+grader log; in eval a valid submit just sees `{"submitted": true}`, with no correctness signal).
 A non-submit action at the configured `max_steps` (default 100) truncates the episode and grades empty findings. After termination or truncation, every action returns the error `episode_over` without consuming a step: the final step counter and the outcome are preserved.
 Reward is 0.0 on every non-terminal step. Terminal reward is returned to the policy
 only in `mode="train"`; in `"eval"` it is 0.0 and the result goes to the grader log only.
