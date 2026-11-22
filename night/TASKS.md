@@ -155,7 +155,7 @@ invoice-date rate; the cash difference goes to 7900. The allocation injector nev
   invoices (no AR debit in the ledger), hard-mode credit notes/re-issues, duplicate copies, over-payment refs (ref =
   total). Script under /tmp/r22-codex2/ — files: night/LOG.md — accept: counts per case; any ambiguity or posting
   mismatch quoted with seed/ids; exact replacement wording if the text is unclear.
-- [ ] Y6 (codex2) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom` on seeds
+- [x] Y6 (codex2) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom` on seeds
   60000–60009 (add a `--seeds` flag if missing) — files: night/r22/paired_cleanroom.py, night/LOG.md — accept: table,
   0 discrepancies.
 - [ ] Z4 (rb) On the final generator: `PYTHONPATH=. env -u AUDITENV_SECRET uv run python night/r20/scenarios_adapter.py`,

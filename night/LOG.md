@@ -527,3 +527,34 @@ Synthetic prior invoice: nominal 152, earlier out-of-period ref 101 converting t
 Proposed exact replacement for the completing-reference clause in CONTRACT §2 and policy.json ledger.payment:
 
 > For each invoice_ref on an in-period payment, group public references by exact invoice_id. Earlier references are those on any payment whose timestamp is strictly earlier as an instant, including out-of-period payments. Use the invoice's company-local issue-date rate and round each conversion to base minor units with ROUND_HALF_UP. If there is at least one earlier reference and its source amount plus those of the other earlier references and the current reference equals the invoice total_minor, credit 1200 with convert(total_minor) minus the sum of the separately converted earlier references. Use the invoice document total even if no original debit appears in the public ledger. Otherwise credit the converted current reference. References on payments at the same instant do not count as earlier than one another. A final installment split across simultaneous payments can leave a rounding difference. The journal's balancing difference goes to 7900.
+
+2026-11-22 05:51 codex2 — Y6 complete on final generator d0fbb34. Added `--seeds` with the original 55000–55009 range as the default. `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.paired_cleanroom --seeds 60000-60009` → exit 0 in 75.99 s. Both the official matrix and the combined shuffle-and-rename pass agreed for all 400 original/copy pairs. Oracle and reconcile/reconcile_hard F1 were 1.0000 throughout.
+
+| Scenario | Reconcile original F1 / return | Combined copy F1 / return | Oracle original → copy | Combined equal | Matrix equal |
+|---|---:|---:|---:|---:|---:|
+| D01 | 1.0000 / 0.9397 | 1.0000 / 0.9397 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D02 | 1.0000 / 0.9397 | 1.0000 / 0.9397 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D03 | 1.0000 / 0.9397 | 1.0000 / 0.9397 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D04 | 1.0000 / 0.9397 | 1.0000 / 0.9397 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D05 | 1.0000 / 0.9397 | 1.0000 / 0.9397 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D06 | 1.0000 / 0.9365 | 1.0000 / 0.9365 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D07 | 1.0000 / 0.9365 | 1.0000 / 0.9365 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D08 | 1.0000 / 0.9365 | 1.0000 / 0.9365 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D09 | 1.0000 / 0.9410 | 1.0000 / 0.9410 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D10 | 1.0000 / 0.9395 | 1.0000 / 0.9395 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D11 | 1.0000 / 0.9405 | 1.0000 / 0.9405 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D12 | 1.0000 / 0.9398 | 1.0000 / 0.9398 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D13 | 1.0000 / 0.9398 | 1.0000 / 0.9398 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D14 | 1.0000 / 0.9411 | 1.0000 / 0.9411 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D15 | 1.0000 / 0.9411 | 1.0000 / 0.9411 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D16 | 1.0000 / 0.9410 | 1.0000 / 0.9410 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D17 | 1.0000 / 0.9410 | 1.0000 / 0.9410 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D18 | 1.0000 / 0.9410 | 1.0000 / 0.9410 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D19 | 1.0000 / 0.9388 | 1.0000 / 0.9388 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+| D20 | 1.0000 / 0.9388 | 1.0000 / 0.9388 | 1.0000 → 1.0000 | 20/20 | 20/20 |
+
+Free-text locations searched: fx.csv.date, fx.csv.rate, fx.csv.source_currency, fx.csv.target_currency, invoices.jsonl.currency, invoices.jsonl.due_at, invoices.jsonl.issued_at, invoices.jsonl.line_items[].description, ledger.csv.account, ledger.csv.credit_minor, ledger.csv.currency, ledger.csv.debit_minor, ledger.csv.timestamp, manifest.json.base_currency, manifest.json.generator_version, manifest.json.period_end, manifest.json.period_start, manifest.json.rounding, manifest.json.schema_version, manifest.json.timezone, payments.jsonl.currency, payments.jsonl.timestamp, policy.json.base_currency, policy.json.findings.affected_ids.duplicate_invoice, policy.json.findings.affected_ids.fx_error, policy.json.findings.affected_ids.payment_allocation, policy.json.findings.affected_ids.period_cutoff, policy.json.findings.amount, policy.json.findings.evidence, policy.json.findings.tolerance, policy.json.fx.conversion, policy.json.fx.direction, policy.json.fx.rate_date, policy.json.ledger.accounts.1000, policy.json.ledger.accounts.1200, policy.json.ledger.accounts.2900, policy.json.ledger.accounts.4000, policy.json.ledger.accounts.6100, policy.json.ledger.accounts.6200, policy.json.ledger.accounts.6300, policy.json.ledger.accounts.6400, policy.json.ledger.accounts.7900, policy.json.ledger.credit_note, policy.json.ledger.currency, policy.json.ledger.expense, policy.json.ledger.invoice, policy.json.ledger.payment, policy.json.period.end, policy.json.period.rule, policy.json.period.start, policy.json.rounding, policy.json.timezone, task.txt
+Embedded IDs: none found
+Discrepancies: 0
+
+The `--seeds 60009-60000` input exited 2 with `paired_cleanroom.py: error: reversed seed range '60009-60000'`. `env -u AUDITENV_SECRET uv run python -m auditenv.check` → exit 0 in 86.68 s, 565 tests. `ALL CHECKS PASSED in 86.6 s`.
