@@ -202,7 +202,7 @@ is the referenced amount × the invoice-date rate, reproduced from the two docum
 that the payment's journal balances without an AR credit for the invoice, so the absence is read from the set
 itself (at most 8 ids: payment journals have at most 5 rows). Until round 23 the set held only the 2900 row and
 the absence had to be proven from the full ledger; a clean-room rebuild from provenance
-(`night/r23/provenance_rebuild.py`) showed that a reader of the set alone cannot tell a merged receipt's other
+(a development checker) showed that a reader of the set alone cannot tell a merged receipt's other
 allocations or the cash amount from it (198 of 4,200 episodes, D09/D11 and the default mix).
 
 A jury-style review (separate agent, before submission) found and we fixed: seed recovery from a
@@ -382,7 +382,7 @@ to explore.
   432/830, 1 000 hard seeds; Round 17 probe) without reading the ledger; the credit-note rows in the ledger separate all pairs.
 - Expense journals carry no ids (the schema has no journal id); checks group them by timestamp.
 - Settlement residues (fixed in Round 22). Converting and rounding every document on its own left two artefacts in
-  clean books, found by an independent balance re-derivation (`night/r21/ledger_identity.py --classify`, clean
+  clean books, found by an independent balance re-derivation (a development checker, clean
   D01–D05 config, seeds 41000–41299): a foreign refund debited 2900 at the refund-date rate, so the customer's
   unapplied cash ended below zero in base currency (920 rows, up to 7.3 % of the refund), and a foreign invoice paid
   in parts kept a minor unit in 1200 (415 rows; 18 % of D02 episodes). Now a refund debits 2900 at the rate of the

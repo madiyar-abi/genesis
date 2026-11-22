@@ -4,7 +4,6 @@ Package: `auditenv/` (Python 3.11, **stdlib only**, tests with `unittest`).
 Run tests: `uv run python -m unittest discover -s tests -t .`
 Single test module: `uv run python -m unittest tests.test_calculator`
 
-Every module below is owned by the task in `night/TASKS.md` that lists it.
 If you need something not described here, choose the simplest option and log it.
 
 ## 1. Money, currencies, FX

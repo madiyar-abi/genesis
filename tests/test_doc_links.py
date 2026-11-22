@@ -1,4 +1,4 @@
-"""Every relative markdown link in README.md, HANDOFF.md and docs/*.md must resolve.
+"""Every relative markdown link in README.md and docs/*.md must resolve.
 
 The jury navigates the repo through these documents; a link to a renamed or
 deleted file is a dead end. This test extracts every inline `[text](path)`
@@ -22,8 +22,8 @@ EXTERNAL_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 
 
 def doc_paths():
-    """README.md, HANDOFF.md plus every docs/*.md, in stable order."""
-    return [REPO_ROOT / "README.md", REPO_ROOT / "HANDOFF.md"] + sorted((REPO_ROOT / "docs").glob("*.md"))
+    """README.md plus every docs/*.md, in stable order."""
+    return [REPO_ROOT / "README.md"] + sorted((REPO_ROOT / "docs").glob("*.md"))
 
 
 def extract_links(text):

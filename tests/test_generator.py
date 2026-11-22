@@ -85,7 +85,7 @@ class GeneratorTest(unittest.TestCase):
     def test_refund_clears_the_unapplied_cash_it_returns(self):
         # A foreign refund used to debit 2900 at the refund-date rate, after its receipt credited 2900 at the
         # receipt-date rate, so clean books left the customer's unapplied cash below zero in base currency
-        # (round 21, night/r21/ledger_identity.py: D01 seed 41006, E0342). It is the receipt's carrying amount now;
+        # (round 21, balance re-derivation checker: D01 seed 41006, E0342). It is the receipt's carrying amount now;
         # the cash difference is realised FX (7900).
         # Default seeds 255 and 284 used to merge two overpayments into one receipt, so no refund matched it.
         from auditenv.jury import SCENARIOS
@@ -123,7 +123,7 @@ class GeneratorTest(unittest.TestCase):
 
     def test_nothing_allocated_evidence_closes_the_payment_journal(self):
         # With nothing allocated the set cited only the 2900 row: the missing AR credit could not be read from the
-        # set (round 23, night/r23/provenance_rebuild.py: D09 default seed 72000, PAY-453849; merged receipts
+        # set (round 23, provenance rebuild checker: D09 default seed 72000, PAY-453849; merged receipts
         # also allocate to other invoices). Every row of the payment's journal is in the set now, so the set
         # alone shows the journal balances without an AR credit for the invoice.
         from auditenv.jury import SCENARIOS

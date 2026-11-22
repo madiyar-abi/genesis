@@ -445,8 +445,6 @@ To compare variants of the same seed, list each configuration as a separate epis
 | `trajectories/` | training trajectories (JSONL) of reconcile, naive reconcile and random on the train split, and the same three plus reconcile_hard on the hard train split (`train_hard_*`) |
 | `tests/` | Unit tests; `tests/test_jury.py` maps the jury checklist to tests |
 | `docs/` | contract, design note, demo script, pitch outline, `CHECKS.md` (jury criteria → test → command → result) |
-| `REVIEW.md` | jury-style review log: every defect found, its reproduction and fix |
-| `HANDOFF.md`, `NIGHT.md`, `night/`, `scripts/night.sh`, `scripts/marathon.sh`, `scripts/deepseek_worker.py` | the team's development tooling (handoff notes, autonomous agent runs); not used by the check, which needs no network or paid API |
 
 ## Honest limitations
 
@@ -472,5 +470,5 @@ MIT — see [`LICENSE`](LICENSE). All companies, people and amounts are syntheti
 
 ## Contributing
 
-Read [`HANDOFF.md`](HANDOFF.md) first. Branch, small commits, PR into `main`.
+Branch, small commits, PR into `main`.
 AI agent rules: [`CLAUDE.md`](CLAUDE.md).
