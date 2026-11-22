@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import judge_adapter
+from auditenv.generator import TASK_HARD, TASK_TEXT
 from auditenv.verify import main
 
 
@@ -187,10 +188,21 @@ class ExportLoaderRedTeam(unittest.TestCase):
         fx.write_text(" \t\n" + fx.read_text(encoding="utf-8") + "  \t\n", encoding="utf-8")
         again, _ = judge_adapter.make_env().reset(0, {**RESET, "episode_dir": self.episode})
         self.assertEqual(again, first)
-        self.assertEqual(first["task"], "")
+        self.assertEqual(first["task"], TASK_TEXT)  # C02: the case's file list has no task.txt; the task stays
         self.assertEqual(first["policy"], {"findings": {"tolerance_minor": 1}})
         answer = {"episode_id": first["manifest"]["episode_id"], "findings": []}
         self.assertGreater(judge_adapter.score_episode(self.episode, answer, 0)["fn"], 0)
+
+    def test_missing_task_text_falls_back_to_the_published_task(self):
+        """C02 needs a task in the first observation; the case's file list has no task.txt (hard keeps its rule)."""
+        for split, expected in (("dev", TASK_TEXT), ("hard", TASK_TEXT + TASK_HARD)):
+            with self.subTest(split=split):
+                episode = self.episode.parent / f"no-task-{split}"
+                shutil.copytree(sorted((EXAMPLE.parent / split).glob("ep_*"))[0], episode)
+                self.assertEqual((episode / "public/task.txt").read_text(encoding="utf-8"), expected)
+                (episode / "public/task.txt").unlink()
+                first, _ = judge_adapter.make_env().reset(0, {**RESET, "episode_dir": str(episode)})
+                self.assertEqual(first["task"], expected)
 
     def test_grading_accepts_finite_positive_decimal_spellings(self):
         for rate in (" +1.25 ", ".125", "1.25e-1", "1000000000"):
