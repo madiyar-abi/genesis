@@ -149,7 +149,7 @@ episodes/trajectories/golden re-exported. Tasks marked *after FIX* run on a head
 - [x] G8 (gemini2b) `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py`,
   `uv run python scripts/shortcut_miner.py --seeds 6000-6999 --report-only` and the same with `--hard` — accept:
   summary lines + exit codes; any miner value with precision > 0.5 that is NOT in docs/DESIGN.md §10 called out.
-- [ ] G17 (gemini2b, after FIX) Repeat G7 (re-export diff, all three splits) and G8 (golden, mutate_reward, miner
+- [x] G17 (gemini2b, after FIX) Repeat G7 (re-export diff, all three splits) and G8 (golden, mutate_reward, miner
   seeds 7000–7999 default and `--hard`) on the FIX head — accept: as G7/G8.
 
 ## gemini3a (evidence only, files: night/LOG.md)
