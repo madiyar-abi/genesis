@@ -96,11 +96,11 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   — accept: summary + wall time + max steps.
 
 ## gemini2b (evidence only, files: night/LOG.md)
-- [ ] G7 (gemini2b, after FIX) Re-export into scratch dirs and diff against the committed exports: for each split
+- [x] G7 (gemini2b, after FIX) Re-export into scratch dirs and diff against the committed exports: for each split
   (dev → configs/dev.json, train → configs/train.json, hard → configs/eval_hard.json)
   `env -u AUDITENV_SECRET uv run python -m auditenv.export --config <cfg> --out /tmp/r22-gemini2b/<split>` then
   `diff -r episodes/<split> /tmp/r22-gemini2b/<split>` — accept: per split the diff exit code (expected 0).
-- [ ] G8 (gemini2b, after FIX) `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py`,
+- [x] G8 (gemini2b, after FIX) `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py`,
   `uv run python scripts/shortcut_miner.py --seeds 5000-5999 --report-only` and the same with `--hard` — accept:
   summary lines + exit codes; any miner value with precision > 0.5 that is NOT in docs/DESIGN.md §10 called out.
 
