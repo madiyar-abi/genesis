@@ -20,7 +20,7 @@ or the tests; they may import `judge_adapter`, `auditenv.jury` (for `SCENARIOS`)
 episodes only through `judge_adapter.generate_episode`.
 
 ## codex1 (strong)
-- [ ] X1 (codex1) Clean-room Block 1 run, written only from night/CASE_UPDATES.md lines 31–98 (adapter interface,
+- [x] X1 (codex1) Clean-room Block 1 run, written only from night/CASE_UPDATES.md lines 31–98 (adapter interface,
   boundary rules, fixtures C/E/L/U, C01–C20) and README "Jury adapter": `night/r23/c_matrix.py`. Build fixtures with
   `judge_adapter.generate_episode` (C = clean config, E = one declared error, L = a table with ≥ 101 rows, U = an id
   chosen after reading the fixture's public files), then drive `judge_adapter.make_env()` from a *separate policy
@@ -29,7 +29,7 @@ episodes only through `judge_adapter.generate_episode`.
   over-60-s scenario — use the documented clock injection or a policy that sleeps; say which). Run on fixture seeds
   70000–70004 × default and hard. — files: night/r23/c_matrix.py, night/LOG.md — accept: LOG table C01–C20 → pass N/10;
   every fail quoted (stimulus → observed) with a one-command reproduction; script exits 1 on any fail.
-- [ ] X2 (codex1) Clean-room matcher differential, written only from night/CASE_UPDATES.md lines 120–211 (Block 3,
+- [x] X2 (codex1) Clean-room matcher differential, written only from night/CASE_UPDATES.md lines 120–211 (Block 3,
   "Точные соглашения matcher", M01–M12): `night/r23/matcher_diff.py` with your own implementation (structure limits
   first, sets, exact ids/currency, τ from `policy.json` `findings.tolerance_minor`, maximum-cardinality matching with
   the published tie rule, the reward formula). For 40 generated episodes (seeds 71000–71019 × default/hard, plus
@@ -41,7 +41,7 @@ episodes only through `judge_adapter.generate_episode`.
   (or each disagreement quoted with the submission and both results, and which reading of the text is right).
 
 ## codex2 (strong)
-- [ ] Y1 (codex2) Clean-room Block 2 "before/after" check, written only from night/CASE_UPDATES.md lines 111–119
+- [x] Y1 (codex2) Clean-room Block 2 "before/after" check, written only from night/CASE_UPDATES.md lines 111–119
   (conditions of a passed episode), README "Jury adapter" (the `grader/provenance.json` paragraph) and
   docs/CONTRACT.md §2 (posting rules) / `public/policy.json`: `night/r23/provenance_rebuild.py`. For each episode:
   (1) rebuild the books before the error by replacing every provenance `changes[].after` journal with its `before`
@@ -57,7 +57,7 @@ episodes only through `judge_adapter.generate_episode`.
   night/LOG.md — accept: LOG table scenario × condition → holds N/M; every failure quoted with seed, difficulty,
   issue and ids; script exits 1 on any failure. If a condition cannot be checked from the documented provenance
   format, say exactly which fact is missing (that is a finding too).
-- [ ] Y2 (codex2) Engineering anchors as a strict jury member (CASE_UPDATES lines 168–175): for each of the five
+- [x] Y2 (codex2) Engineering anchors as a strict jury member (CASE_UPDATES lines 168–175): for each of the five
   criteria give 0/1/2 with evidence (file:line, command + its output). Specifically check: the single README command
   on a fresh clone in /tmp/r23-codex2/clone (no undocumented step); `trajectories.jsonl` at the repo root has
   episode_id, step, action, observation, reward, terminated, truncated on every line and no truth value in any
@@ -85,46 +85,46 @@ episodes only through `judge_adapter.generate_episode`.
   quoted with its last 10 lines.
 
 ## gemini1a (evidence only, files: night/LOG.md)
-- [ ] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 19000-19999` and the same with
+- [x] G1 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 19000-19999` and the same with
   `--hard` — accept: both summary lines + wall times; any problem line verbatim.
 - [ ] G2 (gemini1a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 87000` — accept:
   summary + wall time + max steps.
 
 ## gemini1b (evidence only, files: night/LOG.md)
-- [ ] G3 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 14000-14299` and
+- [x] G3 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 14000-14299` and
   `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 14000-14299` —
   accept: per command the summary line + wall time.
-- [ ] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999` and the same with
+- [x] G4 (gemini1b) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --seeds 20000-20999` and the same with
   `--hard` — accept: both summaries + wall times.
 
 ## gemini2a (evidence only, files: night/LOG.md)
-- [ ] G5 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 10000-11999` — accept: last line +
+- [x] G5 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 10000-11999` — accept: last line +
   wall time.
-- [ ] G6 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 90000` — accept:
+- [x] G6 (gemini2a) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 90000` — accept:
   summary + wall time + max steps.
 
 ## gemini2b (evidence only, files: night/LOG.md)
-- [ ] G7 (gemini2b) Re-export into scratch dirs and diff against the committed exports: for each split
+- [x] G7 (gemini2b) Re-export into scratch dirs and diff against the committed exports: for each split
   (dev → configs/dev.json, train → configs/train.json, hard → configs/eval_hard.json)
   `env -u AUDITENV_SECRET uv run python -m auditenv.export --config <cfg> --out /tmp/r23-gemini2b/<split>` then
   `diff -r episodes/<split> /tmp/r23-gemini2b/<split>` — accept: per split the diff exit code (expected 0).
-- [ ] G8 (gemini2b) `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py`,
+- [x] G8 (gemini2b) `uv run python scripts/golden.py --check`, `uv run python scripts/mutate_reward.py`,
   `uv run python scripts/shortcut_miner.py --seeds 6000-6999 --report-only` and the same with `--hard` — accept:
   summary lines + exit codes; any miner value with precision > 0.5 that is NOT in docs/DESIGN.md §10 called out.
 
 ## gemini3a (evidence only, files: night/LOG.md)
-- [ ] G9 (gemini3a) Four jury modules under three hash seeds: for H in 0 1 12345:
+- [x] G9 (gemini3a) Four jury modules under three hash seeds: for H in 0 1 12345:
   `PYTHONHASHSEED=$H env -u AUDITENV_SECRET uv run python -m unittest tests.test_judge_contract tests.test_judge_reward
   tests.test_judge_scenarios tests.test_judge_paired` — accept: per run `Ran N tests` + result.
-- [ ] G10 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
+- [x] G10 (gemini3a) `env -u AUDITENV_SECRET uv run python -m auditenv.attack` and `uv run python scripts/sensitivity.py`
   — accept: summaries + exit codes; sensitivity values compared with the docs/DESIGN.md §6 table, differences called out.
 
 ## gemini3b (evidence only, files: night/LOG.md)
-- [ ] G11 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
+- [x] G11 (gemini3b) `uv run python -m auditenv.verify --dir episodes/<split>` for every directory under episodes/ —
   accept: per split the `N/N episodes valid` line.
-- [ ] G12 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, final reward/score lines quoted;
+- [x] G12 (gemini3b) `yes '' | uv run python -m auditenv.demo` — accept: exit code, final reward/score lines quoted;
   compare with the numbers in docs/DEMO.md and call out any difference.
-- [ ] G13 (gemini3b) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 34000` and the same for
+- [x] G13 (gemini3b) `env -u AUDITENV_SECRET uv run python -m auditenv.jury_run --seed-base 34000` and the same for
   35000, 36000 — accept: per run the policy table; call out oracle F1 < 1, reconcile F1 < 1, or random/flag_all
   return > -0.5.
 

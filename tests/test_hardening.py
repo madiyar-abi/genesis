@@ -119,8 +119,10 @@ class AllocationEvidenceTest(unittest.TestCase):
                     seen_partial += 1
                     self.assertEqual(accounts, {"1200"}, (seed, iss["issue_id"]))
                 else:
-                    seen_full += 1
-                    self.assertEqual(accounts, {"2900"}, (seed, iss["issue_id"]))
+                    seen_full += 1  # nothing allocated: the payment's whole journal (round 23), no AR credit to it
+                    self.assertLessEqual({"1000", "2900"}, accounts, (seed, iss["issue_id"]))
+                    self.assertFalse(any(rows[i]["account"] == "1200" and rows[i]["invoice_id"] == inv_id
+                                         for s in iss["evidence_sets"] for i in s if i in rows))
             self.assertEqual(verify_episode(ep), [], seed)
         self.assertGreater(seen_partial, 10)
         self.assertGreater(seen_full, 10)

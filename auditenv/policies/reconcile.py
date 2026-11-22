@@ -230,7 +230,9 @@ def reconcile_findings(manifest: dict, tables: dict, hard: bool = False) -> list
                 ev = [pay["doc_id"], ref_inv["doc_id"]]
                 if pay["currency"] != base:
                     ev.append(f"{d_inv.isoformat()}:{pay['currency']}:{base}")
-                if unapp_rows:
+                if not ar_credits:  # nothing allocated: the whole journal shows the AR credit is absent
+                    ev += [r["row_id"] for r in ledger_by_pay[pay_id]]
+                elif unapp_rows:
                     ev.append(unapp_rows[0]["row_id"])
                 for r in ar_credits:
                     ev.append(r["row_id"])

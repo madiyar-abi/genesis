@@ -123,7 +123,7 @@ the episode with −1. Code: `auditenv/matcher.py`, `metrics.py`.
 |---|---|---|---|---|---|
 | oracle (grader-side) | 1.000 | 1.000 | 1.000 | 1.000 | 1.0 |
 | reconcile (policy-aware rules) | 1.000 | 1.000 | 1.000 | 0.956 | 22.8 |
-| naive reconcile | 0.179 | 0.733 | 0.288 | −0.478 | 17.5 |
+| naive reconcile | 0.163 | 0.667 | 0.261 | −0.529 | 17.5 |
 | random explorer | 0.000 | 0.000 | 0.000 | −0.807 | 31.0 |
 | flag-everything | 0.000 | 0.000 | 0.000 | −1.000 | 3.8 |
 

@@ -46,7 +46,7 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 |---|---|---|---|---|---|
 | oracle (grader-side) | dev | 1.000 | 1.000 | 1.000 | 1.000 |
 | reconcile (policy-aware) | dev | 1.000 | 1.000 | 1.000 | 0.956 |
-| naive reconcile | dev | 0.179 | 0.733 | 0.288 | −0.478 |
+| naive reconcile | dev | 0.163 | 0.667 | 0.261 | −0.529 |
 | random explorer | dev | 0.000 | 0.000 | 0.000 | −0.807 |
 | flag-everything | dev | 0.000 | 0.000 | 0.000 | −1.000 |
 | reconcile_hard | hard | 1.000 | 1.000 | 1.000 | 0.916 |
