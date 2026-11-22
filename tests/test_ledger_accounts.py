@@ -145,10 +145,10 @@ class LedgerAccountsTest(unittest.TestCase):
             for k, v in counts.items():
                 aggregated_counts[k] += v
 
-        self.assertEqual(aggregated_counts["total"], 116449)
-        self.assertEqual(aggregated_counts["check_a"], 116449)
+        self.assertEqual(aggregated_counts["total"], 116450)
+        self.assertEqual(aggregated_counts["check_a"], 116450)
         self.assertEqual(aggregated_counts["check_b"], 9886)
-        self.assertEqual(aggregated_counts["check_c"], 7189)
+        self.assertEqual(aggregated_counts["check_c"], 7190)
         self.assertEqual(aggregated_counts["check_d"], 99374)
         self.assertEqual(aggregated_counts["check_d_debit"], 49687)
         self.assertEqual(aggregated_counts["check_d_credit"], 49687)

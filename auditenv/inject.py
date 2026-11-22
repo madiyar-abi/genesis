@@ -153,7 +153,13 @@ def payment_allocation(st, pay=None, partial=None, scenario="single") -> bool:
                     cands.append((p, ref))
         if not cands:
             return False
-        pay, ref = rng.choice(cands)
+        i = cands.index(rng.choice(cands))
+        # never the last part of a split: its AR credit is the rest of the booked amount (CONTRACT §2), so the
+        # "expected AR credit for the ref" stays the ref converted on its own. The next candidate keeps the draw.
+        ok = [c for c in cands[i:] + cands[:i] if not st.completes(c[0], st.invoice(c[1]["invoice_id"]))]
+        if not ok:
+            return False
+        pay, ref = ok[0]
     else:
         ref = pay["invoice_refs"][0]
     if partial is None:

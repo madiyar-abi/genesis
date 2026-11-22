@@ -10,7 +10,7 @@ Implements:
 from __future__ import annotations
 
 import collections
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from ..money import convert, local_date, parse_offset
@@ -213,6 +213,13 @@ def reconcile_findings(manifest: dict, tables: dict, hard: bool = False) -> list
             ref_inv = inv_by_id[ref_inv_id]
             d_inv = local_date(ref_inv["issued_at"], tz)
             expected_credit = to_base(ref_amount, pay["currency"], d_inv)
+            # the last part of a split credits the rest of the booked amount (policy.json ledger.payment)
+            t_pay = datetime.fromisoformat(pay["timestamp"])
+            earlier = [r["amount_minor"] for p in payments if datetime.fromisoformat(p["timestamp"]) < t_pay
+                       for r in p.get("invoice_refs") or [] if r["invoice_id"] == ref_inv_id]
+            if earlier and sum(earlier) + ref_amount == ref_inv["total_minor"]:
+                expected_credit = to_base(ref_inv["total_minor"], pay["currency"], d_inv) - sum(
+                    to_base(a, pay["currency"], d_inv) for a in earlier)
 
             ar_credits = [r for r in ledger_by_pay[pay_id]
                           if r["account"] == "1200" and r.get("invoice_id") == ref_inv_id and r["credit_minor"] > 0]

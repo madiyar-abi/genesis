@@ -46,7 +46,7 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 |---|---|---|---|---|---|
 | oracle (grader-side) | dev | 1.000 | 1.000 | 1.000 | 1.000 |
 | reconcile (policy-aware) | dev | 1.000 | 1.000 | 1.000 | 0.956 |
-| naive reconcile | dev | 0.177 | 0.733 | 0.286 | −0.480 |
+| naive reconcile | dev | 0.179 | 0.733 | 0.288 | −0.478 |
 | random explorer | dev | 0.000 | 0.000 | 0.000 | −0.807 |
 | flag-everything | dev | 0.000 | 0.000 | 0.000 | −1.000 |
 | reconcile_hard | hard | 1.000 | 1.000 | 1.000 | 0.916 |
@@ -66,7 +66,6 @@ Show `docs/baselines.svg` on the slide. The table gives micro-averaged precision
 
 - The simulator covers synthetic receivables and uses fixed UTC offsets. Its benchmark measures performance on the generated cases.
 - Across 1,000 seeds per difficulty, when exactly two invoices shared a customer, currency and total, the fraction of flagged invoices affected by a duplicate was 0.996 on default and 0.356 on hard. Hard companies include legitimate lookalikes.
-- Receivables carry no rounding plug: an invoice settled by two or more foreign payments can keep a few minor units in its receivable (each application is rounded on its own).
 - The reported baselines are scripted. A next experiment would compare a learned policy with these baselines on held-out companies under the same investigation budget.
 
 ## 10. Team

@@ -170,45 +170,45 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "KZT",
-              "debit_minor": 76192596,
+              "debit_minor": 562752615,
               "entity_id": "E8907",
               "invoice_id": null,
-              "payment_id": "PAY-759265",
-              "row_id": "GL-001442",
-              "timestamp": "2026-12-17T11:23:00+05:30"
+              "payment_id": "PAY-327142",
+              "row_id": "GL-001484",
+              "timestamp": "2026-12-18T15:32:00+05:30"
             },
             {
               "account": "1200",
-              "credit_minor": 47012895,
+              "credit_minor": 352509370,
               "currency": "KZT",
               "debit_minor": 0,
               "entity_id": "E8907",
-              "invoice_id": "2612-203668",
-              "payment_id": "PAY-759265",
-              "row_id": "GL-001443",
-              "timestamp": "2026-12-17T11:23:00+05:30"
+              "invoice_id": "2612-336921",
+              "payment_id": "PAY-327142",
+              "row_id": "GL-001482",
+              "timestamp": "2026-12-18T15:32:00+05:30"
             },
             {
               "account": "2900",
-              "credit_minor": 28662220,
+              "credit_minor": 211696520,
               "currency": "KZT",
               "debit_minor": 0,
               "entity_id": "E8907",
               "invoice_id": null,
-              "payment_id": "PAY-759265",
-              "row_id": "GL-001444",
-              "timestamp": "2026-12-17T11:23:00+05:30"
+              "payment_id": "PAY-327142",
+              "row_id": "GL-001483",
+              "timestamp": "2026-12-18T15:32:00+05:30"
             },
             {
               "account": "7900",
-              "credit_minor": 517481,
+              "credit_minor": 0,
               "currency": "KZT",
-              "debit_minor": 0,
+              "debit_minor": 1453275,
               "entity_id": "E8907",
               "invoice_id": null,
-              "payment_id": "PAY-759265",
-              "row_id": "GL-001441",
-              "timestamp": "2026-12-17T11:23:00+05:30"
+              "payment_id": "PAY-327142",
+              "row_id": "GL-001485",
+              "timestamp": "2026-12-18T15:32:00+05:30"
             }
           ],
           "before": [
@@ -216,40 +216,40 @@
               "account": "1000",
               "credit_minor": 0,
               "currency": "KZT",
-              "debit_minor": 76192596,
+              "debit_minor": 562752615,
               "entity_id": "E8907",
               "invoice_id": null,
-              "payment_id": "PAY-759265",
-              "row_id": "GL-001442",
-              "timestamp": "2026-12-17T11:23:00+05:30"
+              "payment_id": "PAY-327142",
+              "row_id": "GL-001484",
+              "timestamp": "2026-12-18T15:32:00+05:30"
             },
             {
               "account": "1200",
-              "credit_minor": 75363058,
+              "credit_minor": 565082255,
               "currency": "KZT",
               "debit_minor": 0,
               "entity_id": "E8907",
-              "invoice_id": "2612-203668",
-              "payment_id": "PAY-759265",
-              "row_id": "GL-001443",
-              "timestamp": "2026-12-17T11:23:00+05:30"
+              "invoice_id": "2612-336921",
+              "payment_id": "PAY-327142",
+              "row_id": "GL-001482",
+              "timestamp": "2026-12-18T15:32:00+05:30"
             },
             {
               "account": "7900",
-              "credit_minor": 829538,
+              "credit_minor": 0,
               "currency": "KZT",
-              "debit_minor": 0,
+              "debit_minor": 2329640,
               "entity_id": "E8907",
               "invoice_id": null,
-              "payment_id": "PAY-759265",
-              "row_id": "GL-001441",
-              "timestamp": "2026-12-17T11:23:00+05:30"
+              "payment_id": "PAY-327142",
+              "row_id": "GL-001485",
+              "timestamp": "2026-12-18T15:32:00+05:30"
             }
           ],
-          "journal": "pay:PAY-759265"
+          "journal": "pay:PAY-327142"
         }
       ],
-      "description": "payment PAY-759265 allocated partially to 2612-203668; the rest went to unapplied cash",
+      "description": "payment PAY-327142 allocated partially to 2612-336921; the rest went to unapplied cash",
       "documents_added": [],
       "issue_id": "ISS-4",
       "scenario": "single",
