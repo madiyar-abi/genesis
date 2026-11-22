@@ -623,3 +623,10 @@ Proposed exact replacement for the completing-reference clause in CONTRACT §2 a
 Command 1: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --stress reconcile --seeds 13000-13299` -> exit 0, wall time 8.70 s. Summary: `reconcile on 1200 default episodes (seeds 13000-13299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 32, truncated 0 (8.7 s)`
 Command 2: `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --hard --stress reconcile_hard --seeds 13000-13299` -> exit 0, wall time 21.51 s. Summary: `reconcile_hard on 1200 hard episodes (seeds 13000-13299 x random_mix, clean, 12_issues, 12_issues_100_invoices): imperfect 0, max steps 59, truncated 0 (21.5 s)`
 Task G15 complete.
+2026-11-22 05:48 gemini2b — G17 complete (final generator d0fbb34+).
+- Re-exported all three splits into scratch dirs /tmp/r22-gemini2b/final/{dev,train,hard} via auditenv.export and diffed against committed episodes:
+  - diff dev exit: 0
+  - diff train exit: 0
+  - diff hard exit: 0
+- scripts/golden.py --check: exit 0 ("All 80 golden hashes match /Users/caliskan/Projects/genesis-gemini2b/tests/golden_hashes.json.")
+- scripts/mutate_reward.py: exit 0 ("22/22 mutants killed.").
