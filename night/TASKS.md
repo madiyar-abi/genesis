@@ -90,7 +90,7 @@ Audit scripts read only public data: they may import `auditenv.generator` (to ge
   with `--hard` — accept: both summaries + wall times.
 
 ## gemini2a (evidence only, files: night/LOG.md)
-- [ ] G5 (gemini2a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 6000-7999` — accept:
+- [x] G5 (gemini2a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 6000-7999` — accept:
   last line + wall time.
 - [ ] G6 (gemini2a, after FIX) `env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 81000`
   — accept: summary + wall time + max steps.
