@@ -970,3 +970,22 @@ Check results: oracle F1 = 1.000 across all runs (none < 1); reconcile F1 = 1.00
 | `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds 75000-75099` | 0 | 55.81 s | 4,200 episodes, mean F1 1.000000 in all 42 cohorts, `Discrepancy entries: 0` |
 
 Next: X4.
+
+2026-11-22 07:09 codex1 — X4 done. Exit 0, real 62.41 s.
+`PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r23.c_matrix --seed 76000 --seed 76001 --seed 76002 --seed 76003 --seed 76004`
+C02 includes missing task text; C19 includes closed submits with 31 findings and a non-object payload.
+
+| Check | Result | Check | Result |
+|---|---|---|---|
+| C01 | pass 10/10 | C11 | pass 10/10 |
+| C02 | pass 10/10 | C12 | pass 10/10 |
+| C03 | pass 10/10 | C13 | pass 10/10 |
+| C04 | pass 10/10 | C14 | pass 10/10 |
+| C05 | pass 10/10 | C15 | pass 10/10 |
+| C06 | pass 10/10 | C16 | pass 10/10 |
+| C07 | pass 10/10 | C17 | pass 10/10 |
+| C08 | pass 10/10 | C18 | pass 10/10 |
+| C09 | pass 10/10 | C19 | pass 10/10 |
+| C10 | pass 10/10 | C20 | pass 10/10 |
+
+Failures: none.

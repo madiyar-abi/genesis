@@ -40,8 +40,8 @@ for line in sys.stdin:
     args = request["args"]
     if args.get("cursor") == "$next":
         args["cursor"] = previous[0]["result"]["next_cursor"]
-    if request["name"] == "submit" and "episode_id" not in args["findings"]:
-        args["findings"]["episode_id"] = episode_id
+    if request["name"] == "submit" and isinstance(args["findings"], dict):
+        args["findings"].setdefault("episode_id", episode_id)
     print(json.dumps(request, allow_nan=False), flush=True)
 """
 
@@ -111,13 +111,24 @@ def canonical(table, record):
     return record
 
 
+def bounded_error(error, code):
+    return (
+        isinstance(error, dict) and set(error) == {"code", "message"}
+        and error["code"] == code and isinstance(error["message"], str)
+        and 0 < len(error["message"]) <= 512
+        and not any(secret in error["message"].lower() for secret in ("truth", "provenance", "seed", "/"))
+    )
+
+
 class Session:
-    def __init__(self, child, fixture, seed, mode):
+    def __init__(self, child, fixture, seed, mode, *, episode_path=None):
         self.child = child
         self.fixture = fixture
         self.env = judge.make_env()
         self.mode = mode
-        self.first = self.env.reset(seed, {"mode": mode, "episode_dir": str(fixture.path), "team_config": {}})
+        self.first = self.env.reset(
+            seed, {"mode": mode, "episode_dir": str(episode_path or fixture.path), "team_config": {}}
+        )
         require(isinstance(self.first, (list, tuple)) and len(self.first) == 2, "reset pair", self.first)
         self.send({"response": self.first, "reset": True})
         self.steps = 0
@@ -151,14 +162,9 @@ class Session:
 
     def error(self, code, name, **args):
         obs, _, terminated, truncated, _ = self.step(name, **args)
-        error = obs["error"]
         require(
             obs["result"] is None and not terminated and not truncated
-            and obs["remaining_steps"] == 100 - self.steps
-            and isinstance(error, dict) and set(error) == {"code", "message"}
-            and error["code"] == code and isinstance(error["message"], str)
-            and 0 < len(error["message"]) <= 512
-            and not any(secret in error["message"].lower() for secret in ("truth", "provenance", "seed", "/")),
+            and obs["remaining_steps"] == 100 - self.steps and bounded_error(obs["error"], code),
             (name, args, code), obs,
         )
 
@@ -223,12 +229,34 @@ class Session:
                 "late submission", (obs, reward, terminated, truncated, info))
 
 
-def reset_payload(session):
+def reset_payload(session, *, fallback=False):
     obs, info = session.first
     f = session.fixture
-    require(obs == {"task": f.task.rstrip("\n"), "manifest": f.manifest, "policy": f.policy, "remaining_steps": 100},
+    task = f.task.rstrip("\n")
+    if fallback:
+        task = obs.get("task")
+        require(isinstance(task, str) and bool(task.strip()), "closed reset without public/task.txt", task)
+    require(obs == {"task": task, "manifest": f.manifest, "policy": f.policy, "remaining_steps": 100},
             "reset public payload", {key: obs.get(key) for key in obs if key not in ("task", "policy")})
     require(info == {"episode_id": f.episode_id, "mode": "closed", "max_steps": 100}, "reset info", info)
+
+
+def invalid_closed_submissions(child, fixture, seed):
+    # These findings are structurally valid individually. The first payload exceeds only the list limit.
+    finding = {
+        "type": "duplicate_invoice", "affected_ids": [fixture.unknown], "claimed_amount_minor": 1,
+        "currency": fixture.manifest["base_currency"], "evidence_ids": [next(iter(fixture.docs))],
+        "explanation": "Structurally valid test finding",
+    }
+    too_many = {"episode_id": fixture.episode_id, "findings": [finding] * 31}
+    invalid_score = dict.fromkeys(("tp", "fp", "fn", "precision", "recall", "f1")) | {"return": -1}
+    for label, payload in (("31 findings", too_many), ("non-object findings", [])):
+        session = Session(child, fixture, seed, "closed")
+        obs, _, terminated, truncated, _ = session.step("submit", findings=payload)
+        require(terminated and not truncated and obs["result"] is None and obs["remaining_steps"] == 99
+                and bounded_error(obs["error"], "invalid_findings"), label, obs)
+        score = judge.score_episode(str(fixture.path), payload, 0)
+        require(score == invalid_score, (label, "private grading"), score)
 
 
 def run_case(n, child, fixtures, seed):
@@ -240,6 +268,11 @@ def run_case(n, child, fixtures, seed):
         s.page()
     elif n == 2:
         reset_payload(s)
+        with tempfile.TemporaryDirectory(dir=fixture.path.parent) as temp:
+            copy = Path(temp) / "without-task"
+            shutil.copytree(fixture.path, copy)
+            (copy / "public" / "task.txt").unlink()
+            reset_payload(Session(child, fixture, seed, "closed", episode_path=copy), fallback=True)
     elif n == 3:
         manifest = s.first[0]["manifest"]
         fields = {"schema_version", "episode_id", "base_currency", "period_start", "period_end",
@@ -309,6 +342,7 @@ def run_case(n, child, fixtures, seed):
         expected = {"tp": 1, "fp": 0, "fn": 0, "precision": 1, "recall": 1, "f1": 1, "return": 0.994}
         observed = fixture.score(oracle, 3)
         require(observed == expected, ("private grading", expected), observed)
+        invalid_closed_submissions(child, fixture, seed)
     elif n == 20:
         for f in (clean, error):
             s = Session(child, f, seed, "closed")
