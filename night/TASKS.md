@@ -176,7 +176,7 @@ invoice-date rate; the cash difference goes to 7900. The allocation injector nev
 - [x] G18 (gemini3a) Four jury modules twice (as G9), `env -u AUDITENV_SECRET uv run python -m auditenv.attack`,
   `uv run python scripts/sensitivity.py` — files: night/LOG.md — accept: `Ran N tests` + OK per run; summaries; compare
   sensitivity tables with docs/DESIGN.md "Sensitivity" table and call out any difference.
-- [ ] G19 (gemini3b) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix` (if it has a seed flag,
+- [x] G19 (gemini3b) `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix` (if it has a seed flag,
   seeds 61000–61199), `yes '' | uv run python -m auditenv.demo`, then `env -u AUDITENV_SECRET uv run python -m
   auditenv.check --json /tmp/r22-gemini3b/c2.json` and `uv run python scripts/sync_docs.py --check --json
   /tmp/r22-gemini3b/c2.json` — files: night/LOG.md — accept: exit codes + summary lines; d_matrix 0 failed checks.

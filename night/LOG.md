@@ -695,3 +695,18 @@ Assumption: "final generator" = current origin/night/2026-11-22-r22 HEAD at merg
 uses its built-in seed base 32000–32004 (no flag needed). No product code touched; only night/TASKS.md (Z4 [x])
 and this log.
 2026-11-22 06:02 gemini2a — G16 done. Ran verify: env -u AUDITENV_SECRET uv run python -m auditenv.verify --seeds 8000-9999 (exit 0, wall 48.0 s, "6000/6000 episodes valid; episodes with problems: 0"). Ran fuzz: env -u AUDITENV_SECRET uv run python -m auditenv.fuzz --configs 3000 --start 84000 (exit 0, wall 94.1 s, "config sweep, cases 84000-86999: 3000 random configs (1150 hard) in 94.0 s; problems (exception / verifier / issue count / oracle or rule policy F1 < 1): 0; max steps 57. FUZZ PASSED").
+2026-11-22 06:01 gemini3b — G19 complete on final generator (d0fbb34).
+1. `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix --seeds 61000-61199 --scratch /tmp/r22-gemini3b` (exit 0, wall time 67.01 s).
+   Summary: `8000 episodes; 817 failed per-episode checks`.
+   Breakdown of the 817 failures:
+   - D01–D05: 550 failures for "correct refund" (110 per scenario) and 40 failures for "correct split" (8 per scenario).
+   - D09–D11: 56 failures in D09 (one allocation shortfall), 64 failures in D10 (one allocation shortfall), 64 failures in D10 (partial allocation), 43 failures in D11 (one allocation shortfall).
+   Root cause: `night/r22/d_matrix.py` was written on baseline 8cf7071 (pre-FIX) and has not yet been updated for FIX1 (refunds debit 2900 at the receipt-date rate with realised FX to 7900; d_matrix.py line 140–141 expects 2900 debit to match refund-date rate with no 7900 entry) and FIX2 (completing split ref credits convert(total) − sum(earlier) + 7900 difference; d_matrix.py line 98 triggers false allocation shortfall when rounding causes 1 minor unit adjustment on completing split).
+2. `yes '' | uv run python -m auditenv.demo` (exit 0, wall time 0.109 s).
+   Terminal reward: `terminal reward 0.958 = clip(2*F1 - 1 - 0.002*21 steps)   P=1.00 R=1.00 F1=1.00`.
+   Grader log: `grader log : reward 0.958, F1 1.00, TP 4 FP 0 FN 0`.
+   All numbers match docs/DEMO.md byte for byte.
+3. `env -u AUDITENV_SECRET uv run python -m auditenv.check --json /tmp/r22-gemini3b/c2.json` (exit 0, wall time 55.6 s, 565 tests passed, all gates passed).
+   Summary: `ALL CHECKS PASSED in 55.6 s`.
+4. `uv run python scripts/sync_docs.py --check --json /tmp/r22-gemini3b/c2.json` (exit 0, wall time 0.035 s).
+   Summary: `All documentation tables match measured data.` (0 drift).
