@@ -196,6 +196,19 @@ class JudgeContractTest(unittest.TestCase):
         self.assertEqual(len(env.grader_log), 1)
         self.assertEqual(env.grader_log[-1], final)
 
+    def test_invalid_submit_gets_a_bounded_structure_error_not_accepted(self):
+        """CASE_UPDATES: submit returns only {"accepted": true} or a bounded structure error, never correctness."""
+        too_many = dict(oracle_findings(self.e))
+        too_many["findings"] = too_many["findings"] * 31
+        for findings in (too_many, "not an object"):
+            env, _, _ = self.open(self.e_dir)
+            obs, reward, terminated, truncated, info = env.step(act("submit", findings=findings))
+            self.assertEqual((reward, terminated, truncated, info), (0.0, True, False, {}))
+            self.assertIsNone(obs["result"])
+            self.assertEqual(obs["error"]["code"], "invalid_findings")
+            self.assertEqual((env.grader_log[-1]["valid"], env.grader_log[-1]["reward"]), (False, -1.0))
+            self.assertFalse(set(keys(obs)) & FORBIDDEN_KEYS)
+
     def test_c16_submit_as_action_100(self):
         env, _, _ = self.open(self.e_dir)
         for _ in range(99):
