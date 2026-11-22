@@ -599,3 +599,9 @@ evidence tasks (night/TASKS.md, night/LOG.md).
   `sync_docs --check` no drift.
 - No valuable improvement found. Every jury block already has an independent clean-room checker with 0 problems on
   unseen seeds (r20–r23); the only open ideas (H1, E5) stay deferred — freeze day, generator risk. No change.
+
+## Round 25
+
+- Start `da8b250` (code identical to round 24 and `main` 83bdd68): `auditenv.check` exit 0, all gates, 56.6 s;
+  `sync_docs --check` no drift.
+- No valuable improvement found (same inputs and reasoning as round 24). No change.
