@@ -555,3 +555,37 @@ evidence tasks (night/TASKS.md, night/LOG.md).
   13000–13299, `fuzz --configs 20000` (8,037 hard, max 59 steps, as PITCH says); scenarios through `judge_adapter`,
   extreme configs, jury copies, jury_run 32000/33000; re-export diff 0, golden 80/80, mutants 22/22, attack 0,
   sensitivity table equal to DESIGN; demo equal to DEMO.md. All green.
+
+## Round 23
+
+- Start `8699d51`: `auditenv.check` passed 565 tests and all gates in 55.7 s; no doc drift.
+- New independent checkers, each written only from the published texts (CASE_UPDATES, README, CONTRACT, policy.json):
+  clean-room C01–C20 with the policy in a separate sandboxed process (codex1, `night/r23/c_matrix.py`: 20/20 rows
+  pass on 10 fixtures), clean-room matcher differential (codex1, `night/r23/matcher_diff.py`: 110,000 submissions,
+  disagreements only on a finding without `explanation`, see decisions) and a Block 2 rebuild of the books before the
+  error from `grader/provenance.json` (codex2, `night/r23/provenance_rebuild.py`).
+- Data defect (evidence sufficiency, jury Block 2 condition "по нему можно проверить вывод"): with nothing allocated,
+  the `payment_allocation` set held the payment and invoice documents, the 2900 row and the rate. A reader of the set
+  alone could not see that no AR credit went to the invoice: a merged receipt also credits other invoices and the
+  cash row was not in the set (provenance rebuild: evidence 4,002/4,200; D09 44/100, D11 71–79/100, default mix
+  79–85/100). Fix `e23958c`: the set holds every row of the payment's journal (cash, 2900, other AR credits, 7900;
+  at most 7 ids measured, journals have at most 5 rows); `verify._sufficient` requires the closed journal (the old
+  exports fail it: 4/10 dev, 4/10 train, 5/20 hard); `reconcile` cites it; policy.json, CONTRACT §3 and DESIGN §7
+  state it. Regression `tests.test_generator.GeneratorTest.test_nothing_allocated_evidence_closes_the_payment_journal`
+  (67 failing subtests before). Only naive reconcile moved (it cites the 2900 row alone: dev F1 0.288 → 0.261).
+- Contract text mismatches (red-team, both low severity, fixed `5700626`): a closed-mode submit with an invalid
+  structure (31 findings, non-object) was answered `{"accepted": true}` while the grader logged −1; CASE_UPDATES allows
+  only `{"accepted": true}` or a bounded structure error, so eval now returns `invalid_findings` (structure only, never
+  truth). A copy without `task.txt` (the case's file list has none) gave `task: ""` (C02); the loader now falls back
+  to the published task text (hard suffix when the policy publishes credit notes) and `verify --dir` still requires
+  the file. Regressions in `tests/test_judge_contract.py` and `tests/test_load_redteam.py`.
+- Data red-team (10,000 episodes, seeds 73000–73249 × D01–D20 × both difficulties, own text-only auditor: 10,000/10,000
+  equal to truth): two wording ambiguities fixed in the published texts — the duplicate amount is the AR debit of the
+  later-issued copy "by issued_at, whatever the posting order" (the copy is booked before the original's lagged
+  posting in 17 % of duplicate episodes; bookings were not moved, a fixed offset would be a new shortcut cue), and the
+  hard task text names spacing (re-typing turns `REF-1` into `REF 1`).
+- Docs claims audit: nine stale prose numbers after round 22 fixed (`f7fae58`: naive FPs, seed-sweep counts, miner
+  precisions, CHECKS counts, a test path).
+- Decisions: `explanation` stays optional (CONTRACT §5; no published row tests its absence, and requiring it could
+  turn an organiser policy's correct finding into a structural −1); `limit: null` stays `bad_params`; the I2 cutoff
+  amount includes the wrong-rate part that fx_error also measures (documented scenario).
