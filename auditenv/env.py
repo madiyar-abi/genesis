@@ -146,10 +146,10 @@ class AuditEnv:
                     if self._cfg["mode"] == "train":
                         reward, info = res["reward"], public_summary(res)
                         result = {"submitted": True, "accepted": res["valid"]}
-                        if not res["valid"]:
-                            error = {"code": "invalid_findings", "message": res["error"]}
                     else:
                         result = {"submitted": True}
+                    if not res["valid"]:  # structure only (no truth); eval says so too, never correctness
+                        error = {"code": "invalid_findings", "message": res["error"]}
                 else:
                     result = self._tool(kind, action)
             except ToolError as e:
