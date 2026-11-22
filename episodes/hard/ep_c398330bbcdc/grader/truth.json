@@ -82,19 +82,19 @@
     },
     {
       "affected_ids": [
-        "2612-203668",
-        "PAY-759265"
+        "2612-336921",
+        "PAY-327142"
       ],
       "currency": "KZT",
       "evidence_sets": [
         [
-          "2026-12-10:CHF:KZT",
-          "DOC0077171",
-          "DOC0696549",
-          "GL-001443"
+          "2026-12-03:CHF:KZT",
+          "DOC0037995",
+          "DOC0846956",
+          "GL-001482"
         ]
       ],
-      "expected_amount_minor": 28350163,
+      "expected_amount_minor": 212572885,
       "issue_id": "ISS-4",
       "scenario": "single",
       "type": "payment_allocation"
