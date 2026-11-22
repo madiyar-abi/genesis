@@ -68,7 +68,7 @@ episodes only through `judge_adapter.generate_episode`.
   accept: LOG table criterion → score → evidence; anything below 2 with the exact fix proposed (text or command).
 
 ## rb (medium)
-- [ ] Z1 (rb) Re-run the existing independent checkers on unseen seeds:
+- [x] Z1 (rb) Re-run the existing independent checkers on unseen seeds:
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.ledger_identity --classify --seeds 62000-62299`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r21.text_auditor --seeds 63000-63099`,
   `PYTHONPATH=. env -u AUDITENV_SECRET uv run python -m night.r22.d_matrix --seeds 65000-65199` — files: night/LOG.md
